@@ -4,8 +4,9 @@ import Navbar from "./components/layout/NavBar.tsx";
 import Rental from "./pages/Rental.tsx";
 import Listed from "./pages/Listed.tsx";
 import Auto from "./pages/auto.tsx";
-import Profile from "./pages/profile.tsx";
 import Notifications from "./pages/Notifications.tsx";
+import ProfilePage from "./pages/profile.tsx";
+import MyProfile from "./pages/profile/MyProfile.tsx";
 
 const App: React.FC = () => {
   return (
@@ -16,7 +17,8 @@ const App: React.FC = () => {
         <Route path="/rental" element={<Rental />} />
         <Route path="/listed" element={<Listed />} />
         <Route path="/auto" element={<Auto />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/my-profile" element={<MyProfile />} />
         <Route path="/notifications" element={<Notifications />} />
       </Routes>
     </div>

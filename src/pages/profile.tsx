@@ -1,12 +1,12 @@
 import React from "react";
-import ProfileForm from "./ProfilePage.tsx";
+import ProfileSidebar from "./profile/ProfilePage.tsx";
 
-const Profile: React.FC = () => {
+const ProfilePage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      <ProfileForm />
+    <div className="min-h-screen bg-[#f8fafc] flex justify-center items-start p-6">
+      <ProfileSidebar />
     </div>
   );
 };
 
-export default Profile;
+export default ProfilePage;
