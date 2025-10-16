@@ -72,7 +72,7 @@ const CalendarPage: React.FC = () => {
       <div className="mt-8 flex justify-end">
         <button
           onClick={handleConfirm}
-          className="bg-gradient-to-r from-blue-700 to-blue-400 text-white px-6 py-2 rounded-md font-medium hover:opacity-90"
+          className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-all"
         >
           Confirm
         </button>
