@@ -7,6 +7,8 @@ import Auto from "./pages/auto.tsx";
 import Notifications from "./pages/Notifications.tsx";
 import ProfilePage from "./pages/profile.tsx";
 import MyProfile from "./pages/profile/MyProfile.tsx";
+import Feedback from "./pages/Feedback.tsx";
+import CalendarPage from "./pages/CalenderPage.tsx";
 
 const App: React.FC = () => {
   return (
@@ -20,6 +22,8 @@ const App: React.FC = () => {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/my-profile" element={<MyProfile />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/calendar" element={<CalendarPage />} />
       </Routes>
     </div>
   );
