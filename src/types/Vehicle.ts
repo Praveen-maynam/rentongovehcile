@@ -9,5 +9,5 @@ export interface Vehicle {
   rating: number;
   available?: boolean;
   image: string;
-  type?: "car" | "auto"; // ✅ new optional type
+  type?: "car" | "auto";
 }

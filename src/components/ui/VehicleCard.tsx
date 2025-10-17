@@ -8,6 +8,7 @@ interface VehicleCardProps {
   onStatusChange?: (status: string, vehicle: Vehicle) => void;
   onEdit?: (vehicle: Vehicle) => void;
   onDelete?: (vehicle: Vehicle) => void;
+  onBook?: (vehicle: Vehicle) => void; // ✅ new
 }
 
 const VehicleCard: React.FC<VehicleCardProps> = ({
@@ -16,12 +17,15 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
   onStatusChange,
   onEdit,
   onDelete,
+  onBook,
 }) => {
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   return (
-    <div className="relative flex flex-col sm:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 mb-4 hover:shadow-lg transition">
-      {/* Image + Details */}
+    <div
+      onClick={() => onBook && onBook(vehicle)}
+      className="relative flex flex-col sm:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 mb-4 hover:shadow-lg transition cursor-pointer"
+    >
       <div className="flex items-start gap-4 w-full sm:w-auto">
         <img
           src={vehicle.image}
@@ -50,7 +54,6 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
         </div>
       </div>
 
-      {/* Actions */}
       {showActions && (
         <div className="flex flex-col items-end w-full sm:w-auto mt-3 sm:mt-0">
           <div className="flex items-center gap-2">
@@ -70,7 +73,10 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
             <div className="relative">
               <button
                 className="p-2 rounded hover:bg-gray-100"
-                onClick={() => setMenuOpen((prev) => !prev)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen((prev) => !prev);
+                }}
               >
                 <MoreVertical className="w-5 h-5 text-gray-600" />
               </button>
@@ -78,13 +84,19 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
               {menuOpen && (
                 <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-lg border border-gray-100 z-10">
                   <button
-                    onClick={() => onEdit?.(vehicle)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit?.(vehicle);
+                    }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => onDelete?.(vehicle)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete?.(vehicle);
+                    }}
                     className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
                     Delete

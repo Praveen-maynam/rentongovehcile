@@ -3,64 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import VehicleCard from "../components/ui/VehicleCard";
 import DateTimePicker from "../components/ui/DateTimePicker";
-import AutoCarousel from "../components/AutoCarousel";
 import FilterCard from "../components/ui/FilterCard";
-import { Vehicle } from "../types/Vehicle";
-
-const vehicles: Vehicle[] = [
-  {
-    id: "1",
-    name: "Hyundai Verna",
-    price: 250,
-    seats: 5,
-    transmission: "Automatic",
-    fuel: "Petrol",
-    rating: 4.2,
-    image: "/verna.jpg",
-    type: "car",
-    location: "Bangalore",
-    available: true,
-  },
-  {
-    id: "2",
-    name: "Maruti Swift",
-    price: 180,
-    seats: 5,
-    transmission: "Manual",
-    fuel: "Petrol",
-    rating: 4.0,
-    image: "/swift.jpg",
-    type: "car",
-    location: "Bangalore",
-    available: true,
-  },
-  {
-    id: "3",
-    name: "Bajaj RE",
-    price: 150,
-    seats: 3,
-    transmission: "Manual",
-    fuel: "CNG",
-    rating: 4.0,
-    image: "/auto1.jpg",
-    type: "auto",
-    location: "Bangalore",
-    available: true,
-  },
-  {
-    id: "4",
-    name: "Piaggio Ape",
-    price: 160,
-    seats: 3,
-    transmission: "Manual",
-    fuel: "Diesel",
-    rating: 4.3,
-    image: "/auto2.jpg",
-    type: "auto",
-    location: "Bangalore",
-    available: false,
-  },
-];
+import { vehicles } from "./data/Vehicle";
 
 const Rental: React.FC = () => {
   const navigate = useNavigate();
@@ -73,13 +17,13 @@ const Rental: React.FC = () => {
   const filteredCars = cars.filter(
     (v) =>
       v.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      v.location.toLowerCase().includes(searchText.toLowerCase())
+      v.location?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const filteredAutos = autos.filter(
     (v) =>
       v.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      v.location.toLowerCase().includes(searchText.toLowerCase())
+      v.location?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
@@ -92,7 +36,6 @@ const Rental: React.FC = () => {
           className="w-full h-full object-cover rounded-b-3xl shadow-md"
         />
         <div className="absolute inset-0 flex flex-col justify-center text-white bg-black/40 rounded-b-3xl px-4">
-          {/* Top Arrows */}
           <div className="flex justify-between items-start mt-4">
             <button
               onClick={() => navigate(-1)}
@@ -100,7 +43,6 @@ const Rental: React.FC = () => {
             >
               <ArrowLeft className="w-5 h-5 text-black" />
             </button>
-
             <button
               onClick={() => alert("Forward clicked")}
               className="bg-white rounded-full p-2 w-10 h-10 flex items-center justify-center"
@@ -108,8 +50,6 @@ const Rental: React.FC = () => {
               <ArrowRight className="w-5 h-5 text-black" />
             </button>
           </div>
-
-          {/* Title */}
           <h1 className="text-3xl md:text-4xl font-bold tracking-wide mt-6">
             Rent Your Perfect Ride
           </h1>
@@ -127,7 +67,6 @@ const Rental: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Search Box */}
           <div className="flex items-center bg-white border rounded-full px-3 py-1 w-full md:w-60">
             <Search className="w-4 h-4 text-gray-500 mr-2" />
             <input
@@ -139,7 +78,6 @@ const Rental: React.FC = () => {
             />
           </div>
 
-          {/* Filter Button */}
           <button
             onClick={() => setIsFilterOpen(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm"
@@ -149,7 +87,7 @@ const Rental: React.FC = () => {
         </div>
       </div>
 
-      {/* Nearby Cars Section */}
+      {/* Nearby Cars */}
       <div className="px-6 py-4 flex flex-col gap-4">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-semibold">Nearby Cars</h2>
@@ -158,13 +96,19 @@ const Rental: React.FC = () => {
           </button>
         </div>
         {filteredCars.length > 0 ? (
-          filteredCars.map((v) => <VehicleCard key={v.id} vehicle={v} />)
+          filteredCars.map((v) => (
+            <VehicleCard
+              key={v.id}
+              vehicle={v}
+              onBook={(vehicle) => navigate(`/book-now/${vehicle.id}`)}
+            />
+          ))
         ) : (
           <p className="text-gray-500">No cars found.</p>
         )}
       </div>
 
-      {/* Autos Section */}
+      {/* Autos */}
       <div className="px-6 py-4 flex flex-col gap-4">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-semibold">Looking for an Auto?</h2>
@@ -173,20 +117,18 @@ const Rental: React.FC = () => {
           </button>
         </div>
         {filteredAutos.length > 0 ? (
-          <AutoCarousel vehicles={filteredAutos} />
+          filteredAutos.map((v) => (
+            <VehicleCard
+              key={v.id}
+              vehicle={v}
+              onBook={(vehicle) => navigate(`/book-now/${vehicle.id}`)}
+            />
+          ))
         ) : (
           <p className="text-gray-500">No autos found.</p>
         )}
       </div>
 
-      {/* Book Now Button */}
-      <div className="px-6 pb-8">
-        <button className="w-full md:w-60 mx-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-md transition">
-          Book Now
-        </button>
-      </div>
-
-      {/* Filter Modal */}
       {isFilterOpen && <FilterCard onClose={() => setIsFilterOpen(false)} />}
     </div>
   );
