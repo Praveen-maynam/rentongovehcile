@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import carLogo from "../assets/carlogo.png";
 import automaticLogo from "../assets/automatic.png";
 import driverLogo from "../assets/driver.png";
-
 const Notifications: React.FC = () => {
   const navigate = useNavigate();
 
