@@ -2,80 +2,84 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const CalendarPage: React.FC = () => {
+  const navigate = useNavigate();
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [startTime, setStartTime] = useState<string>("06:00");
   const [endTime, setEndTime] = useState<string>("08:00");
-  const navigate = useNavigate();
 
   const handleConfirm = () => {
     navigate("/Notifications");
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 bg-white shadow-md rounded-xl p-6">
-      <h1 className="text-xl font-semibold mb-4">Booking Confirmation</h1>
+    <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-lg sm:max-w-xl md:max-w-2xl bg-white shadow-lg rounded-2xl p-6 sm:p-8 border border-gray-200">
+        <h1 className="text-xl sm:text-2xl font-semibold mb-6 text-center border-b border-gray-300 pb-3">
+          Booking Confirmation
+        </h1>
 
-      <div className="grid grid-cols-2 gap-6">
-        {/* Start Date */}
-        <div>
-          <label className="block text-gray-700 mb-1 font-medium">
-            Start Date
-          </label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
-
-        {/* End Date */}
-        <div>
-          <label className="block text-gray-700 mb-1 font-medium">
-            End Date
-          </label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
-      </div>
-
-      {/* Time Selection */}
-      <div className="mt-6">
-        <h2 className="text-gray-700 font-medium mb-2">Select Time</h2>
-        <div className="flex gap-6">
+        {/* Dates */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
           <div>
-            <label className="block text-gray-600 mb-1">Start Time</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Start Date
+            </label>
             <input
-              type="time"
-              className="border border-gray-300 rounded-md p-2"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
+
           <div>
-            <label className="block text-gray-600 mb-1">End Time</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              End Date
+            </label>
             <input
-              type="time"
-              className="border border-gray-300 rounded-md p-2"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
         </div>
-      </div>
 
-      <div className="mt-8 flex justify-end">
-        <button
-          onClick={handleConfirm}
-          className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-all"
-        >
-          Confirm
-        </button>
+        {/* Time Section */}
+        <div className="mb-6">
+          <h2 className="text-gray-700 font-medium mb-3">Select Time</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-gray-600 mb-1">Start Time</label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-600 mb-1">End Time</label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Confirm Button */}
+        <div className="flex justify-center sm:justify-end mt-6">
+          <button
+            onClick={handleConfirm}
+            className="w-full sm:w-auto bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-base font-semibold px-6 py-3 rounded-lg hover:opacity-90 transition-all"
+          >
+            Confirm
+          </button>
+        </div>
       </div>
     </div>
   );
