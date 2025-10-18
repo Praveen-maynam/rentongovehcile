@@ -9,7 +9,7 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Petrol",
     rating: 4.2,
-    image: "/verna.jpg",
+    image: "/verna.jpg", // place this image in public/verna.jpg
     type: "car",
     location: "Bangalore",
     available: true,
@@ -22,7 +22,7 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Petrol",
     rating: 4.0,
-    image: "/swift.jpg",
+    image: "/swift.jpg", // place this image in public/swift.jpg
     type: "car",
     location: "Bangalore",
     available: true,
@@ -35,7 +35,7 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "CNG",
     rating: 4.0,
-    image: "/auto1.jpg",
+    image: "/auto1.jpg", // place this image in public/auto1.jpg
     type: "auto",
     location: "Bangalore",
     available: true,
@@ -48,7 +48,7 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Diesel",
     rating: 4.3,
-    image: "/auto2.jpg",
+    image: "/auto2.jpg", // place this image in public/auto2.jpg
     type: "auto",
     location: "Bangalore",
     available: false,

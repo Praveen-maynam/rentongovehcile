@@ -39,17 +39,18 @@ const Rental: React.FC = () => {
           <div className="flex justify-between items-start mt-4">
             <button
               onClick={() => navigate(-1)}
-              className="bg-white rounded-full p-2 w-10 h-10 flex items-center justify-center"
+              className="bg-white text-black rounded-full p-2 shadow hover:bg-gray-200 transition"
             >
-              <ArrowLeft className="w-5 h-5 text-black" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => alert("Forward clicked")}
-              className="bg-white rounded-full p-2 w-10 h-10 flex items-center justify-center"
+              className="bg-white text-black rounded-full p-2 shadow hover:bg-gray-200 transition"
             >
-              <ArrowRight className="w-5 h-5 text-black" />
+              <ArrowRight className="w-5 h-5" />
             </button>
           </div>
+
           <h1 className="text-3xl md:text-4xl font-bold tracking-wide mt-6">
             Rent Your Perfect Ride
           </h1>
@@ -57,7 +58,7 @@ const Rental: React.FC = () => {
         </div>
       </div>
 
-      {/* Controls */}
+      {/* Search + Filter */}
       <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h3 className="text-lg font-semibold mb-2 text-gray-800">
@@ -80,7 +81,7 @@ const Rental: React.FC = () => {
 
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm"
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium px-4 py-2 rounded-full shadow hover:opacity-90 transition"
           >
             Filter
           </button>
@@ -100,7 +101,8 @@ const Rental: React.FC = () => {
             <VehicleCard
               key={v.id}
               vehicle={v}
-              onBook={(vehicle) => navigate(`/book-now/${vehicle.id}`)}
+              showActions={false}
+              onBook={() => navigate(`/booknow/${v.id}`)} // ← This makes the image clickable
             />
           ))
         ) : (
@@ -109,7 +111,7 @@ const Rental: React.FC = () => {
       </div>
 
       {/* Autos */}
-      <div className="px-6 py-4 flex flex-col gap-4">
+      <div className="px-6 py-4 flex flex-col gap-4 mb-6">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-semibold">Looking for an Auto?</h2>
           <button className="text-blue-600 hover:underline font-medium">
@@ -121,7 +123,8 @@ const Rental: React.FC = () => {
             <VehicleCard
               key={v.id}
               vehicle={v}
-              onBook={(vehicle) => navigate(`/book-now/${vehicle.id}`)}
+              showActions={false}
+              onBook={() => navigate(`/booknow/${v.id}`)} // ← This too
             />
           ))
         ) : (

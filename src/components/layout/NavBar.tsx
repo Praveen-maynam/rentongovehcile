@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MapPin } from "lucide-react";
-import rentongoLogo from "../../assets/rentongo.png"; // ✅ correct relative path
+import rentongoLogo from "../../assets/rentongo.png";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
