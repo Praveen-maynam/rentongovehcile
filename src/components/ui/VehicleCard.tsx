@@ -1,114 +1,58 @@
 import React from "react";
-import { MoreVertical } from "lucide-react";
 import { Vehicle } from "../../types/Vehicle";
-
+ 
 interface VehicleCardProps {
   vehicle: Vehicle;
   showActions?: boolean;
-  onStatusChange?: (status: string, vehicle: Vehicle) => void;
   onEdit?: (vehicle: Vehicle) => void;
   onDelete?: (vehicle: Vehicle) => void;
   onBook?: (vehicle: Vehicle) => void; // ✅ new
 }
-
+ 
 const VehicleCard: React.FC<VehicleCardProps> = ({
   vehicle,
   showActions = false,
-  onStatusChange,
   onEdit,
   onDelete,
   onBook,
 }) => {
-  const [menuOpen, setMenuOpen] = React.useState(false);
-
   return (
-    <div
-      onClick={() => onBook && onBook(vehicle)}
-      className="relative flex flex-col sm:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 mb-4 hover:shadow-lg transition cursor-pointer"
-    >
-      <div className="flex items-start gap-4 w-full sm:w-auto">
-        <img
-          src={vehicle.image}
-          alt={vehicle.name}
-          className="w-28 h-24 object-cover rounded-lg"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = "/default-vehicle.jpg";
-          }}
-        />
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-lg">{vehicle.name}</h3>
-            <span className="text-gray-600 text-sm">⭐ {vehicle.rating}</span>
-          </div>
-          <p className="font-bold text-blue-600 text-lg mt-1">
-            ₹{vehicle.price}/hr
-          </p>
-          <div className="text-gray-600 text-sm mt-1 leading-5">
-            <p>{vehicle.transmission}</p>
-            <p>{vehicle.seats} Seaters</p>
-            <p>{vehicle.fuel}</p>
-            {vehicle.location && (
-              <p className="text-gray-500">{vehicle.location}</p>
-            )}
-          </div>
-        </div>
+    <div className="bg-white rounded-lg shadow-lg p-4 flex items-center gap-4">
+      {/* Vehicle Image */}
+      <img
+        src={vehicle.image}
+        alt={vehicle.name}
+        className="w-[260px] h-[260px] object-cover rounded-lg" // 260x260 size
+      />
+ 
+      {/* Vehicle Info */}
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold">{vehicle.name}</h3>
+        <p className="text-gray-600 text-sm">{vehicle.location}</p>
+        <p className="text-gray-700 font-medium">₹{vehicle.price} / day</p>
       </div>
-
+ 
+      {/* Actions */}
       {showActions && (
-        <div className="flex flex-col items-end w-full sm:w-auto mt-3 sm:mt-0">
-          <div className="flex items-center gap-2">
-            <select
-              className={`text-sm font-medium px-2 py-1 rounded-lg border ${
-                vehicle.available
-                  ? "bg-green-100 text-green-700 border-green-300"
-                  : "bg-red-100 text-red-700 border-red-300"
-              }`}
-              defaultValue={vehicle.available ? "Available" : "Not Available"}
-              onChange={(e) => onStatusChange?.(e.target.value, vehicle)}
-            >
-              <option value="Available">Available</option>
-              <option value="Not Available">Not Available</option>
-            </select>
-
-            <div className="relative">
-              <button
-                className="p-2 rounded hover:bg-gray-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMenuOpen((prev) => !prev);
-                }}
-              >
-                <MoreVertical className="w-5 h-5 text-gray-600" />
-              </button>
-
-              {menuOpen && (
-                <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-lg border border-gray-100 z-10">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit?.(vehicle);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete?.(vehicle);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="flex flex-col gap-2">
+          <button
+            className="bg-blue-600 text-white px-2 py-1 rounded text-sm"
+            onClick={() => onEdit && onEdit(vehicle)}
+          >
+            Edit
+          </button>
+          <button
+            className="bg-red-600 text-white px-2 py-1 rounded text-sm"
+            onClick={() => onDelete && onDelete(vehicle)}
+          >
+            Delete
+          </button>
         </div>
       )}
     </div>
   );
 };
-
+ 
 export default VehicleCard;
+ 
+ 
