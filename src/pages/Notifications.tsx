@@ -1,8 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import carLogo from "../assets/carlogo.png";
-import automaticLogo from "../assets/automatic.png";
-import driverLogo from "../assets/driver.png";
+
+// Icons (all capitalized to match renamed files)
+import CarLogo from "../assets/icons/CarLogo.png";
+import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
+import DriverLogo from "../assets/icons/DriverLogo.png";
+
 const Notifications: React.FC = () => {
   const navigate = useNavigate();
 
@@ -13,11 +16,15 @@ const Notifications: React.FC = () => {
       {/* Feedback Notification */}
       <div className="bg-white border rounded-xl shadow-sm p-5 mb-5 hover:shadow-md transition-all duration-200">
         <div className="flex items-start gap-4">
-          <img src={carLogo} alt="Car Logo" className="w-12 h-12 rounded-md object-cover" />
+          <img
+            src={CarLogo}
+            alt="Car Logo"
+            className="w-12 h-12 rounded-md object-cover"
+          />
           <div className="flex-1">
             <div className="flex justify-between items-start">
               <p className="text-gray-800 font-medium">
-                Your Ride has been completed. Please give feedback.
+                Your ride has been completed. Please give feedback.
               </p>
               <span className="text-sm text-gray-400">6 min ago</span>
             </div>
@@ -34,7 +41,11 @@ const Notifications: React.FC = () => {
       {/* Booking Notification */}
       <div className="bg-white border rounded-xl shadow-sm p-5 hover:shadow-md transition-all duration-200">
         <div className="flex items-start gap-4">
-          <img src={carLogo} alt="Car Logo" className="w-12 h-12 rounded-md object-cover" />
+          <img
+            src={CarLogo}
+            alt="Car Logo"
+            className="w-12 h-12 rounded-md object-cover"
+          />
           <div className="flex-1">
             <div className="flex justify-between items-start">
               <p className="text-gray-800 font-medium">Your car has been booked?</p>
@@ -44,14 +55,14 @@ const Notifications: React.FC = () => {
             <div className="mt-3 text-gray-600">
               <p className="font-semibold text-gray-800 mb-3">Hyundai Verna</p>
 
-              {/* Vehicle Details Icons - Vertical Layout */}
+              {/* Vehicle Details */}
               <div className="flex flex-col gap-2 text-sm text-gray-700">
                 <div className="flex items-center gap-2">
-                  <img src={automaticLogo} alt="Automatic" className="w-5 h-5" />
+                  <img src={AutomaticLogo} alt="Automatic" className="w-5 h-5" />
                   <span>Automatic</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <img src={driverLogo} alt="Driver" className="w-5 h-5" />
+                  <img src={DriverLogo} alt="Driver" className="w-5 h-5" />
                   <span>5 Seaters</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -60,7 +71,7 @@ const Notifications: React.FC = () => {
               </div>
             </div>
 
-            {/* Buttons with same gradient color */}
+            {/* Buttons */}
             <div className="mt-5 flex gap-3">
               <button
                 onClick={() => navigate("/calendar")}

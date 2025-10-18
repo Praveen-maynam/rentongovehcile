@@ -1,12 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
+/* global body */
 body {
-  @apply bg-white text-gray-900 font-sans;
+  @apply bg-gray-50 text-gray-800 font-sans;
+}
+
+/* small custom */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* Hide scrollbars for carousel */

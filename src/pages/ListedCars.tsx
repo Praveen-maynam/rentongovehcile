@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
-import blackcar from "../assets/blackcar.png";
-import automaticLogo from "../assets/automatic.png";
-import driverLogo from "../assets/driver.png";
-import carlogo from "../assets/carlogo.png";
-import autoLogo from "../assets/auto.png";
-import filterIcon from "../assets/filter.png";
+
+import BlackCar from "../assets/images/BlackCar.png";
+import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
+import DriverLogo from "../assets/icons/DriverLogo.png";
+import CarLogo from "../assets/icons/CarLogo.png";
+import AutoLogo from "../assets/icons/AutoLogo.png";
+import FilterLogo from "../assets/icons/FilterLogo.png";
 
 interface Vehicle {
   name: string;
@@ -30,7 +31,7 @@ const initialCars: Vehicle[] = [
     location: "Kakinada, Gandhi Nagar near Varnika Function Hall",
     rating: "4.2",
     available: false,
-    image: blackcar,
+    image: BlackCar,
   },
   {
     name: "Honda City",
@@ -41,7 +42,7 @@ const initialCars: Vehicle[] = [
     location: "Rajahmundry, near RTC Complex",
     rating: "4.5",
     available: true,
-    image: blackcar,
+    image: BlackCar,
   },
   {
     name: "Tata Nexon",
@@ -52,7 +53,7 @@ const initialCars: Vehicle[] = [
     location: "Kakinada, Jagannaickpur",
     rating: "4.3",
     available: true,
-    image: blackcar,
+    image: BlackCar,
   },
   {
     name: "Maruti Swift",
@@ -63,7 +64,7 @@ const initialCars: Vehicle[] = [
     location: "Vijayawada, Benz Circle",
     rating: "4.1",
     available: true,
-    image: blackcar,
+    image: BlackCar,
   },
 ];
 
@@ -81,7 +82,7 @@ const ListedCars: React.FC = () => {
     setCars(newCars);
 
     if (value === "Available") {
-      navigate("/calendar");
+      navigate("/Calendar");
     }
   };
 
@@ -90,7 +91,6 @@ const ListedCars: React.FC = () => {
     setMenuOpenIndex(null);
   };
 
-  // Single delete function
   const handleDeleteVehicle = (vehicle: Vehicle) => {
     const confirmDelete = window.confirm(`Delete ${vehicle.name}?`);
     if (confirmDelete) alert(`${vehicle.name} deleted.`);
@@ -105,7 +105,7 @@ const ListedCars: React.FC = () => {
     car.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const dropdownIcon = selectedList === "cars" ? carlogo : autoLogo;
+  const dropdownIcon = selectedList === "cars" ? CarLogo : AutoLogo;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -117,7 +117,12 @@ const ListedCars: React.FC = () => {
           <select
             className="flex-1 ml-2 border-none outline-none text-sm"
             value={selectedList}
-            onChange={(e) => setSelectedList(e.target.value as "cars" | "autos")}
+            onChange={(e) => {
+              const value = e.target.value as "cars" | "autos";
+              setSelectedList(value);
+              if (value === "autos") navigate("/auto");
+              else navigate("/listed-cars");
+            }}
           >
             <option value="cars">Listed Cars</option>
             <option value="autos">Listed Autos</option>
@@ -139,7 +144,7 @@ const ListedCars: React.FC = () => {
             />
           </div>
           <button className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all">
-            <img src={filterIcon} alt="Filter" className="w-6 h-6" />
+            <img src={FilterLogo} alt="Filter" className="w-6 h-6" />
             Filter
           </button>
         </div>
@@ -147,7 +152,7 @@ const ListedCars: React.FC = () => {
 
       {/* Title */}
       <h2 className="text-5xl font-semibold mb-6">
-        {selectedList === "cars" ? "Listed Car's" : "Listed Auto's"}
+        Listed Car's
       </h2>
 
       {/* Listed Cars */}
@@ -162,7 +167,7 @@ const ListedCars: React.FC = () => {
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-[270px] h-[270px] object-cover object-[85%_50%] m-0 p-0"
+                className="w-[270px] h-[270px] object-cover object-[85%_50%]"
               />
             </div>
 
@@ -181,11 +186,11 @@ const ListedCars: React.FC = () => {
 
               <div className="flex flex-col gap-2 mt-2 text-gray-600 text-sm">
                 <div className="flex items-center gap-2">
-                  <img src={automaticLogo} alt="Transmission" className="w-[25px] h-[25px]" />
+                  <img src={AutomaticLogo} alt="Transmission" className="w-[25px] h-[25px]" />
                   <span>{item.transmission}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <img src={driverLogo} alt="Seats" className="w-[25px] h-[25px]" />
+                  <img src={DriverLogo} alt="Seats" className="w-[25px] h-[25px]" />
                   <span>{item.seats}</span>
                 </div>
                 <div className="flex items-center gap-2">

@@ -30,13 +30,44 @@ const Rental: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
+<<<<<<< HEAD
       {/* Promotional Slides */}
       <div className="px-6 py-4">
         <PromoSlides />
+=======
+      {/* Header */}
+      <div className="relative w-full h-56">
+        <img
+          src="/rental-header.jpg"
+          alt="Rental Header"
+          className="w-full h-full object-cover rounded-b-3xl shadow-md"
+        />
+        <div className="absolute inset-0 flex flex-col justify-center text-white bg-black/40 rounded-b-3xl px-4">
+          <div className="flex justify-between items-start mt-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="bg-white text-black rounded-full p-2 shadow hover:bg-gray-200 transition"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => alert("Forward clicked")}
+              className="bg-white text-black rounded-full p-2 shadow hover:bg-gray-200 transition"
+            >
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          <h1 className="text-3xl md:text-4xl font-bold tracking-wide mt-6">
+            Rent Your Perfect Ride
+          </h1>
+          <p className="mt-2 text-lg">Find cars & autos near you instantly</p>
+        </div>
+>>>>>>> 5143d53b872239f2b8b29a029570844a7fea5f48
       </div>
       
 
-      {/* Controls */}
+      {/* Search + Filter */}
       <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h3 className="text-lg font-semibold mb-2 text-gray-800">
@@ -59,13 +90,14 @@ const Rental: React.FC = () => {
 
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm"
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium px-4 py-2 rounded-full shadow hover:opacity-90 transition"
           >
             Filter
           </button>
         </div>
       </div>
 
+<<<<<<< HEAD
       
 
       {/* Nearby Cars - Carousel */}
@@ -86,6 +118,50 @@ const Rental: React.FC = () => {
           onBook={(vehicle) => navigate(`/book-now/${vehicle.id}`)}
           onViewMore={() => navigate("/auto")}
         />
+=======
+      {/* Nearby Cars */}
+      <div className="px-6 py-4 flex flex-col gap-4">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-semibold">Nearby Cars</h2>
+          <button className="text-blue-600 hover:underline font-medium">
+            View More →
+          </button>
+        </div>
+        {filteredCars.length > 0 ? (
+          filteredCars.map((v) => (
+            <VehicleCard
+              key={v.id}
+              vehicle={v}
+              showActions={false}
+              onBook={() => navigate(`/booknow/${v.id}`)} // ← This makes the image clickable
+            />
+          ))
+        ) : (
+          <p className="text-gray-500">No cars found.</p>
+        )}
+      </div>
+
+      {/* Autos */}
+      <div className="px-6 py-4 flex flex-col gap-4 mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-semibold">Looking for an Auto?</h2>
+          <button className="text-blue-600 hover:underline font-medium">
+            View More →
+          </button>
+        </div>
+        {filteredAutos.length > 0 ? (
+          filteredAutos.map((v) => (
+            <VehicleCard
+              key={v.id}
+              vehicle={v}
+              showActions={false}
+              onBook={() => navigate(`/booknow/${v.id}`)} // ← This too
+            />
+          ))
+        ) : (
+          <p className="text-gray-500">No autos found.</p>
+        )}
+>>>>>>> 5143d53b872239f2b8b29a029570844a7fea5f48
       </div>
 
       {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
