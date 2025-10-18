@@ -103,7 +103,7 @@ const AutoPage: React.FC = () => {
         )}
       </div>
  
-      {isFilterOpen && <FilterCard onClose={() => setIsFilterOpen(false)} />}
+      {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
     </div>
   );
 };

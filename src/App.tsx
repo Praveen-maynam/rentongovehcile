@@ -4,13 +4,14 @@ import Navbar from "./components/layout/NavBar";
 
 // Pages
 import Rental from "./pages/Rental";
+import ChangeLocation from "./pages/ChangeLocation";
 import ListedCars from "./pages/ListedCars";
 import Auto from "./pages/Autos";
 import BookNow from "./pages/BookNow";
 import BookingConfirmation from "pages/BookingConformation";
 import CallOrChat from "./pages/CallOrChat";
 import Notifications from "./pages/Notifications";
-import ProfilePage from "./pages/ProfilePage";
+import ProfilePage from "./features/profile/pages/profile";
 import MyProfile from "./pages/MyProfile";
 import Feedback from "./pages/Feedback";
 import Calendar from "./pages/Calendar";
@@ -37,7 +38,7 @@ const App: React.FC = () => {
         <Route path="/my-profile" element={<MyProfile />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/feedback" element={<Feedback />} />
-
+        <Route path="/change-location" element={<ChangeLocation />} />
         {/* Calendar */}
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/calendar-screen" element={<CalendarScreen />} />
