@@ -2,8 +2,11 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MapPin } from "lucide-react";
 
+
 // ✅ Correct import with exact case
 import RentOnGoLogo from "../../assets/icons/RentOnGoLogo.png";
+
+
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();

@@ -1,5 +1,7 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// Layout
 import Navbar from "./components/layout/NavBar";
 
 // Pages
@@ -7,47 +9,25 @@ import Rental from "./pages/Rental";
 import ListedCars from "./pages/ListedCars";
 import Auto from "./pages/Autos";
 import BookNow from "./pages/BookNow";
-import BookingConfirmation from "pages/BookingConformation";
-import CallOrChat from "./pages/CallOrChat";
-import Notifications from "./pages/Notifications";
+import Confirmation from "pages/Confirmation";
 import ProfilePage from "./pages/ProfilePage";
-import MyProfile from "./pages/MyProfile";
-import Feedback from "./pages/Feedback";
-import Calendar from "./pages/Calendar";
-import CalendarScreen from "./pages/CalendarScreen";
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      {/* Navbar visible on all pages */}
-      <Navbar />
-
-      {/* Main Routes */}
-      <Routes>
-        {/* Home & Rental */}
-        <Route path="/" element={<Rental />} />
-        <Route path="/rental" element={<Rental />} />
-
-        {/* Cars / Autos */}
-        <Route path="/listed" element={<ListedCars />} />
-        <Route path="/auto" element={<Auto />} />
-
-        {/* Profile & User */}
-        <Route path="/profile" element={<ProfilePage />} /> 
-        <Route path="/my-profile" element={<MyProfile />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/feedback" element={<Feedback />} />
-
-        {/* Calendar */}
-        <Route path="/calendar" element={<Calendar />} />
-        <Route path="/calendar-screen" element={<CalendarScreen />} />
-
-        {/* Booking Flow */}
-        <Route path="/book-now/:id" element={<BookNow />} />
-        <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />
-        <Route path="/call-or-chat" element={<CallOrChat />} />
-      </Routes>
-    </div>
+    <Router>
+      <div className="min-h-screen bg-[#f8fafc]">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Rental />} />
+          <Route path="/rental" element={<Rental />} />
+          <Route path="/listed" element={<ListedCars />} />
+          <Route path="/auto" element={<Auto />} />
+          <Route path="/booknow/:id" element={<BookNow />} />
+          <Route path="/booking-confirmation/:id" element={<Confirmation />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 };
 
