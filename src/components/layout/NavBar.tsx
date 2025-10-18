@@ -1,7 +1,9 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MapPin } from "lucide-react";
-import rentongoLogo from "../../assets/rentongo.png"; // ✅ correct relative path
+
+// ✅ Correct import with exact case
+import RentOnGoLogo from "../../assets/icons/RentOnGoLogo.png";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -18,14 +20,14 @@ const Navbar: React.FC = () => {
   return (
     <nav className="w-full bg-white shadow-sm border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-        {/* ✅ Rentongo Logo */}
+        {/* ✅ RentOnGo Logo */}
         <div
           className="flex items-center cursor-pointer"
           onClick={() => navigate("/")}
         >
           <img
-            src={rentongoLogo}
-            alt="Rentongo Logo"
+            src={RentOnGoLogo}
+            alt="RentOnGo Logo"
             className="object-contain w-[214px] h-[64px]"
           />
         </div>
