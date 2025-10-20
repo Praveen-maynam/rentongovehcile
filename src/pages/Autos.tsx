@@ -166,13 +166,13 @@ const AutoPage: React.FC = () => {
           </div>
         ))}
       </div>
-<<<<<<< HEAD
+
  
       {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
-=======
 
-      {isFilterOpen && <FilterCard onClose={() => setIsFilterOpen(false)} />}
->>>>>>> 5143d53b872239f2b8b29a029570844a7fea5f48
+
+      
+
     </div>
   );
 };

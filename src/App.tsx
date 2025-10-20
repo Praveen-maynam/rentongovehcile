@@ -10,9 +10,9 @@ import ChangeLocation from "./pages/ChangeLocation";
 import ListedCars from "./pages/ListedCars";
 import Auto from "./pages/Autos";
 import BookNow from "./pages/BookNow";
-<<<<<<< HEAD
-import BookingConfirmation from "pages/BookingConformation";
-import CallOrChat from "./pages/CallOrChat";
+
+// import BookingConfirmation from "pages/BookingConformation";
+// import CallOrChat from "./pages/CallOrChat";
 import Notifications from "./pages/Notifications";
 import ProfilePage from "./features/profile/pages/profile";
 import MyProfile from "./pages/MyProfile";
@@ -48,31 +48,31 @@ const App: React.FC = () => {
 
         {/* Booking Flow */}
         <Route path="/book-now/:id" element={<BookNow />} />
-        <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />
-        <Route path="/call-or-chat" element={<CallOrChat />} />
+        {/* <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />
+        <Route path="/call-or-chat" element={<CallOrChat />} /> */}
       </Routes>
     </div>
-=======
-import Confirmation from "pages/Confirmation";
-import ProfilePage from "./pages/ProfilePage";
 
-const App: React.FC = () => {
-  return (
-    <Router>
-      <div className="min-h-screen bg-[#f8fafc]">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Rental />} />
-          <Route path="/rental" element={<Rental />} />
-          <Route path="/listed" element={<ListedCars />} />
-          <Route path="/auto" element={<Auto />} />
-          <Route path="/booknow/:id" element={<BookNow />} />
-          <Route path="/booking-confirmation/:id" element={<Confirmation />} />
-          <Route path="/profile" element={<ProfilePage />} />
-        </Routes>
-      </div>
-    </Router>
->>>>>>> 5143d53b872239f2b8b29a029570844a7fea5f48
+// import Confirmation from "pages/Confirmation";
+// import ProfilePage from "./pages/ProfilePage";
+
+// const App: React.FC = () => {
+//   return (
+//     <Router>
+//       <div className="min-h-screen bg-[#f8fafc]">
+//         <Navbar />
+//         <Routes>
+//           <Route path="/" element={<Rental />} />
+//           <Route path="/rental" element={<Rental />} />
+//           <Route path="/listed" element={<ListedCars />} />
+//           <Route path="/auto" element={<Auto />} />
+//           <Route path="/booknow/:id" element={<BookNow />} />
+//           <Route path="/booking-confirmation/:id" element={<Confirmation />} />
+//           <Route path="/profile" element={<ProfilePage />} />
+//         </Routes>
+//       </div>
+//     </Router>
+
   );
 };
 

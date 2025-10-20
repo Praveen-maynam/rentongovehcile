@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 // import React from "react";
 // import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 // import { MapPin } from "lucide-react";
@@ -75,18 +75,15 @@ import React, { useState } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { MapPin, Menu, X } from "lucide-react";
 import { useLocation } from "../../store/location.context";
-import rentongoLogo from "../../assets/rentongo.png";
+
 import SelectVehicleModal from "../../components/ui/selectvehiclemodal"; // adjust path as needed
-=======
-import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin } from "lucide-react";
+
+
 
 
 // ✅ Correct import with exact case
 import RentOnGoLogo from "../../assets/icons/RentOnGoLogo.png";
 
->>>>>>> 5143d53b872239f2b8b29a029570844a7fea5f48
 
 
 const Navbar: React.FC = () => {
@@ -110,29 +107,25 @@ const Navbar: React.FC = () => {
   };
 
   return (
-<<<<<<< HEAD
-    <nav className="w-full bg-white shadow-sm border-b border-gray-100 ">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
-        {/* ✅ Logo */}
-=======
+
+    
+
     <nav className="w-full bg-white shadow-sm border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
         {/* ✅ RentOnGo Logo */}
->>>>>>> 5143d53b872239f2b8b29a029570844a7fea5f48
+
         <div
           className="flex items-center cursor-pointer"
           onClick={() => handleNavigate("/")}
         >
           <img
-<<<<<<< HEAD
-            src={rentongoLogo}
+
+            src={RentOnGoLogo}
             alt="Rentongo Logo"
             className="object-contain w-[180px] sm:w-[214px] h-[48px] sm:h-[64px]"
-=======
-            src={RentOnGoLogo}
-            alt="RentOnGo Logo"
-            className="object-contain w-[214px] h-[64px]"
->>>>>>> 5143d53b872239f2b8b29a029570844a7fea5f48
+
+           
+
           />
         </div>
 
