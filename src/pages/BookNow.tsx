@@ -5,39 +5,63 @@ import { vehicles } from "./data/Vehicle";
 import { Vehicle } from "../types/Vehicle";
 import { Star } from "lucide-react";
 import BookingConfirmationModal from "../components/BookingConfirmationModal";
-
-const dummyReviews = [
-  {
-    name: "Manoj Kumar",
-    rating: 5,
-    location: "Kakinada",
-    comment: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
-  },
-  {
-    name: "Manoj Kumar",
-    rating: 5,
-    location: "Kakinada",
-    comment: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
-  },
-  {
-   name: "Manoj Kumar",
-    rating: 5,
-    location: "Kakinada",
-    comment: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
-  },
-];
+import { useReviewStore } from "../store/review.store";
+import { useNotificationStore } from "../store/notification.store";
+import { useBookingStore } from "../store/booking.store";
 
 const BookNow: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const vehicle: Vehicle | undefined = vehicles.find((v) => v.id === id);
+  const { getReviewsByVehicleId, getAverageRating } = useReviewStore();
+  const { addNotification } = useNotificationStore();
+  const { addBooking } = useBookingStore();
+  
   const [showContactButtons, setShowContactButtons] = React.useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = React.useState(false);
 
+  const vehicleReviews = vehicle ? getReviewsByVehicleId(vehicle.id) : [];
+  const averageRating = vehicle ? getAverageRating(vehicle.id) : 0;
+
   const handleConfirmBooking = () => {
     setShowConfirmationModal(false);
-    // Navigate to success page or show success message
-    navigate("/booking-success");
+    
+    if (vehicle) {
+      const bookingId = Date.now().toString();
+      const currentDate = new Date();
+      const endDate = new Date(currentDate.getTime() + 86400000); // +1 day
+      
+      // Save booking to store
+      addBooking({
+        vehicleId: vehicle.id,
+        vehicleName: vehicle.name,
+        customerName: "Current User",
+        bookingDate: currentDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        bookingTime: currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        startDate: currentDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        startTime: currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        endDate: endDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        endTime: currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        modelNo: vehicle.id.toUpperCase(),
+        status: "Booked",
+        price: vehicle.price.toString(),
+      });
+      
+      // Simulate ride completion after booking
+      setTimeout(() => {
+        addNotification({
+          type: 'ride_completed',
+          title: 'Ride Completed! 🏁',
+          message: `Your ride with ${vehicle.name} has been completed successfully. Please share your experience.`,
+          vehicleId: vehicle.id,
+          vehicleName: vehicle.name,
+          bookingId: bookingId,
+          requiresFeedback: true,
+        });
+      }, 2000);
+    }
+    
+    navigate("/notifications");
   };
 
   if (!vehicle) return <p className="p-8">Vehicle not found!</p>;
@@ -196,29 +220,33 @@ const BookNow: React.FC = () => {
         {/* Customer Reviews */}
         <h4 className="font-semibold text-md mt-4 mb-2">Customer Reviews</h4>
         <div className="space-y-4">
-          {dummyReviews.map((review, idx) => (
-            <div key={idx} className="border p-3 rounded-lg">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-8 h-8 bg-gray-300 rounded-full" />
-                <div>
-                  <div className="flex items-center gap-1 font-bold text-gray-900">
-                    <span>{review.name}</span>
-                    <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={i < review.rating ? "text-yellow-400" : "text-gray-300"}
-                          size={14}
-                        />
-                      ))}
+          {vehicleReviews.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-4">No reviews yet. Be the first to review!</p>
+          ) : (
+            vehicleReviews.map((review, idx) => (
+              <div key={idx} className="border p-3 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-8 h-8 bg-gray-300 rounded-full" />
+                  <div>
+                    <div className="flex items-center gap-1 font-bold text-gray-900">
+                      <span>{review.userName}</span>
+                      <div className="flex gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                            size={14}
+                          />
+                        ))}
+                      </div>
                     </div>
+                    <span className="text-gray-500 text-sm">{review.location}</span>
                   </div>
-                  <span className="text-gray-500 text-sm">{review.location}</span>
                 </div>
+                <p className="text-gray-600 text-sm">{review.comment}</p>
               </div>
-              <p className="text-gray-600 text-sm">{review.comment}</p>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* See More Text */}

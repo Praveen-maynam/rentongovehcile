@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
+import { useBookingStore } from "../store/booking.store";
+import { useVehicleStore } from "../store/vehicle.store";
+import { useListedCarsStore } from "../store/listedCars.store";
+import { useListedAutosStore } from "../store/listedAutos.store";
 
 interface BookingHistory {
   customerName: string;
@@ -22,56 +26,80 @@ const VehicleHistory: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"history" | "description">("history");
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
+  
+  const { getBookingsByVehicleName, updateBooking } = useBookingStore();
+  const { getVehicleByName } = useVehicleStore();
+  const { cars } = useListedCarsStore();
+  const { autos } = useListedAutosStore();
 
-  // Sample vehicle data
-  const vehicle = {
-    name: "Hyundai Verna",
-    price: "250",
-    rating: "4.2",
-    transmission: "Automatic",
-    seats: "5 Seaters",
-    fuel: "Petrol",
-    ac: "AC",
-    image: BlackCar,
-    location: "Kakinada",
-  };
+  // Get vehicle data from stores
+  const vehicle = useMemo(() => {
+    // First check vehicle store
+    const storedVehicle = getVehicleByName(vehicleName || "");
+    if (storedVehicle) {
+      return {
+        name: storedVehicle.name,
+        price: storedVehicle.price,
+        rating: storedVehicle.rating,
+        transmission: storedVehicle.transmission,
+        seats: storedVehicle.seats,
+        fuel: storedVehicle.fuel,
+        ac: storedVehicle.ac ? "AC" : "Non-AC",
+        image: storedVehicle.image,
+        location: `${storedVehicle.location.city}, ${storedVehicle.location.state}`,
+      };
+    }
+    
+    // Check listed cars
+    const car = cars.find(c => c.carName === vehicleName);
+    if (car) {
+      return {
+        name: car.carName,
+        price: car.rentPrice,
+        rating: car.rating?.toString() || "4.0",
+        transmission: car.transmission,
+        seats: `${car.totalKmVehicle || 5} Seaters`,
+        fuel: car.fuel,
+        ac: car.acAvailable ? "AC" : "Non-AC",
+        image: car.photos[0] || BlackCar,
+        location: `${car.city}, ${car.state}`,
+      };
+    }
+    
+    // Check listed autos
+    const auto = autos.find(a => `Auto ${a.vehicleNumber}` === vehicleName);
+    if (auto) {
+      return {
+        name: `Auto ${auto.vehicleNumber}`,
+        price: auto.farePrice,
+        rating: auto.rating.toString(),
+        transmission: "Manual",
+        seats: "3 Seaters",
+        fuel: "CNG",
+        ac: "Non-AC",
+        image: auto.photos[0] || BlackCar,
+        location: auto.ownerName,
+      };
+    }
+    
+    // Default fallback
+    return {
+      name: vehicleName || "Hyundai Verna",
+      price: "250",
+      rating: "4.2",
+      transmission: "Automatic",
+      seats: "5 Seaters",
+      fuel: "Petrol",
+      ac: "AC",
+      image: BlackCar,
+      location: "Kakinada",
+    };
+  }, [vehicleName, getVehicleByName, cars, autos]);
 
-  // Sample booking history data
-  const bookingHistory: BookingHistory[] = [
-    {
-      customerName: "Manoj Kumar",
-      bookingDate: "06/19/2023",
-      bookingTime: "11 AM",
-      startDate: "30/19/2025",
-      startTime: "11 AM",
-      endDate: "31 AM",
-      endTime: "11 AM",
-      modelNo: "1234KJFB98",
-      status: "Booked",
-    },
-    {
-      customerName: "Manoj Kumar",
-      bookingDate: "06/19/2023",
-      bookingTime: "11 AM",
-      startDate: "30/19/2022",
-      startTime: "11 AM",
-      endDate: "31 AM",
-      endTime: "11 AM",
-      modelNo: "CHDJAJGB78",
-      status: "Picked",
-    },
-    {
-      customerName: "Manoj Kumar",
-      bookingDate: "06/19/2023",
-      bookingTime: "11 AM",
-      startDate: "30/19/2022",
-      startTime: "11 AM",
-      endDate: "31 AM",
-      endTime: "11 AM",
-      modelNo: "1234KJFB98",
-      status: "Booked",
-    },
-  ];
+  // Get booking history from store
+  const bookingHistory: BookingHistory[] = useMemo(() => {
+    return getBookingsByVehicleName(vehicleName || "");
+  }, [vehicleName, getBookingsByVehicleName]);
 
   const handleMenuToggle = (index: number) => {
     setMenuOpenIndex(menuOpenIndex === index ? null : index);
@@ -91,12 +119,12 @@ const VehicleHistory: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-50 min-h-screen">
       {/* Vehicle Header */}
-      <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+      <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+        <div className="flex gap-6">
           {/* Vehicle Image */}
-          <div className="w-full lg:w-[270px] h-[200px] overflow-hidden rounded-lg flex-shrink-0">
+          <div className="w-[270px] h-[200px] overflow-hidden rounded-lg flex-shrink-0">
             <img
               src={vehicle.image}
               alt={vehicle.name}
@@ -106,42 +134,42 @@ const VehicleHistory: React.FC = () => {
 
           {/* Vehicle Info */}
           <div className="flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
-              <h1 className="text-2xl sm:text-3xl font-bold">{vehicle.name}</h1>
-              <span className="flex items-center justify-center px-3 py-1 text-gray-700 text-sm bg-yellow-100 rounded w-fit">
+            <div className="flex items-center gap-4 mb-2">
+              <h1 className="text-3xl font-bold">{vehicle.name}</h1>
+              <span className="flex items-center justify-center px-3 py-1 text-gray-700 text-sm bg-yellow-100 rounded">
                 ⭐ {vehicle.rating}
               </span>
             </div>
             
-            <p className="text-xl sm:text-2xl font-bold text-blue-600 mb-4">
+            <p className="text-2xl font-bold text-blue-600 mb-4">
               ₹{vehicle.price}<span className="text-sm font-normal">/hr</span>
             </p>
 
             {/* Vehicle Features */}
-            <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-4 mb-4">
-              <div className="flex flex-col items-center p-2 sm:p-3 border rounded-lg">
-                <img src={AutomaticLogo} alt="Transmission" className="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span className="text-xs sm:text-sm">{vehicle.transmission}</span>
+            <div className="flex gap-4 mb-4">
+              <div className="flex flex-col items-center p-3 border rounded-lg">
+                <img src={AutomaticLogo} alt="Transmission" className="w-6 h-6 mb-1" />
+                <span className="text-sm">{vehicle.transmission}</span>
               </div>
-              <div className="flex flex-col items-center p-2 sm:p-3 border rounded-lg">
-                <img src={DriverLogo} alt="Seats" className="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span className="text-xs sm:text-sm">{vehicle.seats}</span>
+              <div className="flex flex-col items-center p-3 border rounded-lg">
+                <img src={DriverLogo} alt="Seats" className="w-6 h-6 mb-1" />
+                <span className="text-sm">{vehicle.seats}</span>
               </div>
-              <div className="flex flex-col items-center p-2 sm:p-3 border rounded-lg">
-                <span className="text-lg sm:text-xl mb-1">⛽</span>
-                <span className="text-xs sm:text-sm">{vehicle.fuel}</span>
+              <div className="flex flex-col items-center p-3 border rounded-lg">
+                <span className="text-xl mb-1">⛽</span>
+                <span className="text-sm">{vehicle.fuel}</span>
               </div>
-              <div className="flex flex-col items-center p-2 sm:p-3 border rounded-lg">
-                <span className="text-lg sm:text-xl mb-1">❄️</span>
-                <span className="text-xs sm:text-sm">{vehicle.ac}</span>
+              <div className="flex flex-col items-center p-3 border rounded-lg">
+                <span className="text-xl mb-1">❄️</span>
+                <span className="text-sm">{vehicle.ac}</span>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-4 sm:gap-6 border-b overflow-x-auto">
+            <div className="flex gap-6 border-b">
               <button
                 onClick={() => setActiveTab("history")}
-                className={`pb-2 px-1 font-semibold transition-colors whitespace-nowrap text-sm sm:text-base ${
+                className={`pb-2 px-1 font-semibold transition-colors ${
                   activeTab === "history"
                     ? "text-blue-600 border-b-2 border-blue-600"
                     : "text-gray-500 hover:text-gray-700"
@@ -151,7 +179,7 @@ const VehicleHistory: React.FC = () => {
               </button>
               <button
                 onClick={() => setActiveTab("description")}
-                className={`pb-2 px-1 font-semibold transition-colors whitespace-nowrap text-sm sm:text-base ${
+                className={`pb-2 px-1 font-semibold transition-colors ${
                   activeTab === "description"
                     ? "text-blue-600 border-b-2 border-blue-600"
                     : "text-gray-500 hover:text-gray-700"
@@ -172,46 +200,46 @@ const VehicleHistory: React.FC = () => {
           {bookingHistory.map((booking, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl shadow-md p-4 sm:p-6 hover:shadow-lg transition"
+              className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition"
             >
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+              <div className="flex justify-between items-start">
                 {/* Left Side - Booking Details */}
-                <div className="flex-1 space-y-3 w-full">
+                <div className="flex-1 space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                       <span className="text-gray-600 font-semibold">
                         {booking.customerName.charAt(0)}
                       </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-base sm:text-lg truncate">{booking.customerName}</h3>
-                      <p className="text-xs sm:text-sm text-gray-500">
+                    <div>
+                      <h3 className="font-semibold text-lg">{booking.customerName}</h3>
+                      <p className="text-sm text-gray-500">
                         📅 {booking.bookingDate} ⏰ {booking.bookingTime}
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-500">Start Date:</p>
-                      <p className="font-medium text-xs sm:text-sm">📅 {booking.startDate} ⏰ {booking.startTime}</p>
+                      <p className="font-medium">📅 {booking.startDate} ⏰ {booking.startTime}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">End Date:</p>
-                      <p className="font-medium text-xs sm:text-sm">📅 {booking.endDate} ⏰ {booking.endTime}</p>
+                      <p className="font-medium">📅 {booking.endDate} ⏰ {booking.endTime}</p>
                     </div>
                   </div>
 
                   <div>
                     <p className="text-gray-500 text-sm">Model No:</p>
-                    <p className="font-medium text-sm sm:text-base">{booking.modelNo}</p>
+                    <p className="font-medium">{booking.modelNo}</p>
                   </div>
                 </div>
 
                 {/* Right Side - Status and Menu */}
-                <div className="flex flex-row sm:flex-col items-center justify-between sm:justify-start gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="flex items-center gap-3">
                   <span
-                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium border ${getStatusColor(
+                    className={`px-4 py-2 rounded-lg text-sm font-medium border ${getStatusColor(
                       booking.status
                     )}`}
                   >
@@ -227,7 +255,7 @@ const VehicleHistory: React.FC = () => {
                     </button>
 
                     {menuOpenIndex === index && (
-                      <div className="absolute right-0 mt-2 w-36 sm:w-32 bg-white shadow-lg rounded-lg border border-gray-100 z-10">
+                      <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-lg border border-gray-100 z-10">
                         <button
                           onClick={() => {
                             navigate(`/vehicle-details/${vehicleName}/edit/${booking.modelNo}`);
@@ -255,9 +283,9 @@ const VehicleHistory: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
-          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Description</h2>
-          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-2xl font-bold mb-4">Description</h2>
+          <p className="text-gray-600 leading-relaxed">
             Lorem ipsum has been Lorem Ipsum is simply dummy text of the printing and typesetting 
             industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
             when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
@@ -265,9 +293,9 @@ const VehicleHistory: React.FC = () => {
             remaining essentially unchanged.
           </p>
           
-          <div className="mt-4 sm:mt-6">
-            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Location</h3>
-            <p className="text-sm sm:text-base text-gray-600">📍 {vehicle.location}</p>
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-3">Location</h3>
+            <p className="text-gray-600">📍 {vehicle.location}</p>
           </div>
         </div>
       )}

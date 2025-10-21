@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
 
@@ -10,6 +10,7 @@ import DriverLogo from "../assets/icons/DriverLogo.png";
 
 import FilterCard from "../components/ui/FilterCard";
 import { Vehicle } from "../types/Vehicle";
+import { useListedAutosStore } from "../store/listedAutos.store";
 
 // ✅ Autos data
 const autos: Vehicle[] = [
@@ -17,13 +18,31 @@ const autos: Vehicle[] = [
 
 const AutoPage: React.FC = () => {
   const navigate = useNavigate();
-  const [autosList, setAutosList] = useState<Vehicle[]>(autos);
+  const { autos: userListedAutos, deleteAuto } = useListedAutosStore();
   const [searchText, setSearchText] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedList, setSelectedList] = useState<"cars" | "autos">("autos");
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
 
-  const filteredAutos = autosList.filter((v) =>
+  // Combine default autos with user-listed autos
+  const allAutos = useMemo(() => {
+    const userAutosAsVehicles: Vehicle[] = userListedAutos.map((auto) => ({
+      id: auto.id,
+      name: `Auto ${auto.vehicleNumber}`,
+      price: parseFloat(auto.farePrice) || 0,
+      transmission: "Manual",
+      fuel: "CNG",
+      seats: 3,
+      location: auto.ownerName,
+      rating: auto.rating,
+      available: true,
+      image: auto.photos[0] || AutoImage,
+      type: "auto" as const,
+    }));
+    return [...autos, ...userAutosAsVehicles];
+  }, [userListedAutos]);
+
+  const filteredAutos = allAutos.filter((v) =>
     v.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -39,18 +58,25 @@ const AutoPage: React.FC = () => {
   };
 
   const handleStatusChange = (index: number, value: string) => {
-    const newAutos = [...autosList];
-    newAutos[index].available = value === "Available";
-    setAutosList(newAutos);
-
     if (value === "Available") {
       navigate("/Calendar");
     }
   };
 
   const handleEdit = (vehicle: Vehicle) => alert(`Edit clicked for ${vehicle.name}`);
+  
   const handleDelete = (vehicle: Vehicle) => {
-    if (window.confirm(`Delete ${vehicle.name}?`)) alert(`${vehicle.name} deleted.`);
+    if (window.confirm(`Delete ${vehicle.name}?`)) {
+      // Check if this is a user-added auto (IDs from store are timestamps)
+      const isUserAuto = userListedAutos.some((auto) => auto.id === vehicle.id);
+      
+      if (isUserAuto) {
+        deleteAuto(vehicle.id);
+        alert(`${vehicle.name} deleted successfully.`);
+      } else {
+        alert("Cannot delete default autos.");
+      }
+    }
   };
 
   return (

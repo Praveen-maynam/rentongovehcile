@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useListedCarsStore } from "../store/listedCars.store";
 
 const ListCarPage: React.FC = () => {
   const navigate = useNavigate();
+  const { addCar } = useListedCarsStore();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
     carName: "",
     vehicleNumber: "",
@@ -46,8 +49,46 @@ const ListCarPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    alert("Car listed successfully!");
+    
+    // Validate required fields
+    if (!formData.carName || !formData.vehicleNumber || !formData.model || !formData.rentPrice) {
+      alert("Please fill in all required fields");
+      return;
+    }
+    
+    // Convert photos to URLs (in real app, upload to server)
+    const photoUrls = formData.photos.map((file) => URL.createObjectURL(file));
+    
+    // Add car to store
+    addCar({
+      carName: formData.carName,
+      vehicleNumber: formData.vehicleNumber,
+      model: formData.model,
+      fuel: formData.fuel,
+      transmission: formData.transmission,
+      totalKmVehicle: formData.totalKmVehicle,
+      acAvailable: formData.acAvailable,
+      description: formData.description,
+      rentPrice: formData.rentPrice,
+      ownerName: formData.ownerName,
+      contactNumber: formData.contactNumber,
+      drivingLicense: formData.drivingLicense,
+      aadharCard: formData.aadharCard,
+      depositVehicle: formData.depositVehicle,
+      depositMoney: formData.depositMoney,
+      state: formData.state,
+      city: formData.city,
+      pincode: formData.pincode,
+      street: formData.street,
+      doorNumber: formData.doorNumber,
+      photos: photoUrls,
+    });
+    
+    setShowSuccessModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
     navigate("/listed");
   };
 
@@ -465,6 +506,41 @@ const ListCarPage: React.FC = () => {
           </form>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-auto text-center animate-scale-in">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+              <svg
+                className="w-10 h-10 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Posted Successfully
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Your Listed cars will be visible to all users
+            </p>
+            <button
+              onClick={handleModalClose}
+              className="w-full bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-all shadow-md"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -75,7 +75,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { MapPin, Menu, X } from "lucide-react";
 import { useLocation } from "../../store/location.context";
-
+import { useNotificationStore } from "../../store/notification.store";
 import SelectVehicleModal from "../../components/ui/selectvehiclemodal"; // adjust path as needed
 
 
@@ -90,6 +90,7 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const routerLocation = useRouterLocation();
   const { currentCity } = useLocation();
+  const { unreadCount } = useNotificationStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -143,13 +144,18 @@ const Navbar: React.FC = () => {
             <button
               key={item.name}
               onClick={() => handleNavigate(item.path)}
-              className={`relative text-sm font-medium transition-all ${
+              className={`relative text-sm font-medium transition-all flex items-center gap-1 ${
                 routerLocation.pathname === item.path
                   ? "text-blue-600"
                   : "text-gray-700 hover:text-blue-600"
               }`}
             >
               {item.name}
+              {item.name === "Notifications" && unreadCount > 0 && (
+                <span className="bg-red-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
               {routerLocation.pathname === item.path && (
                 <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-blue-600 rounded-full"></span>
               )}
@@ -204,13 +210,18 @@ const Navbar: React.FC = () => {
               <button
                 key={item.name}
                 onClick={() => handleNavigate(item.path)}
-                className={`text-left text-sm font-medium ${
+                className={`text-left text-sm font-medium flex items-center gap-2 ${
                   routerLocation.pathname === item.path
                     ? "text-blue-600"
                     : "text-gray-700 hover:text-blue-600"
                 }`}
               >
                 {item.name}
+                {item.name === "Notifications" && unreadCount > 0 && (
+                  <span className="bg-red-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </button>
             ))}
 

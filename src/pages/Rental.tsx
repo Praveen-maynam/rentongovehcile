@@ -91,8 +91,8 @@ const Rental: React.FC = () => {
         />
 
       {/* Nearby Cars */}
-      <div className="px-6 py-4 flex flex-col gap-4">
-        <div className="flex justify-between items-center mb-2">
+      <div className="px-6 py-4 flex flex-col gap-4gap-4">
+        <div className="flex jusbetweentween items-center mb-2">
           <h2 className="text-xl font-semibold">Nearby Cars</h2>
           <button className="text-blue-600 hover:underline font-medium">
             View More →

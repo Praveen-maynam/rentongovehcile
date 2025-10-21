@@ -1,5 +1,6 @@
 import React from "react";
 import Carousel from "./ui/Carousel";
+import slideImage from "../assets/images/slides.png";
 
 interface PromoSlide {
   id: string;
@@ -8,7 +9,7 @@ interface PromoSlide {
   description: string;
   buttonText: string;
   backgroundImage: string;
-  backgroundColor: string;
+  // backgroundColor: string;
   textColor: string;
   onButtonClick: () => void;
 }
@@ -25,8 +26,8 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
       subtitle: "Luxury at Your Fingertips",
       description: "Experience premium vehicles with comfort and style. Book now and get 20% off your first ride!",
       buttonText: "Book Premium Cars",
-      backgroundImage: "",
-      backgroundColor: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      backgroundImage: slideImage,
+      // backgroundColor: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       textColor: "text-white",
       onButtonClick: () => window.location.href = "/listed",
     },
@@ -36,8 +37,8 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
       subtitle: "Fast & Affordable",
       description: "Need a quick ride around the city? Our autos are perfect for short distances and budget-friendly trips.",
       buttonText: "Find Autos",
-      backgroundImage: "",
-      backgroundColor: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+      backgroundImage: slideImage,
+      // backgroundColor: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
       textColor: "text-white",
       onButtonClick: () => window.location.href = "/auto",
     },
@@ -47,8 +48,8 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
       subtitle: "Always Available",
       description: "Round-the-clock service with instant booking. Your ride is just a tap away, anytime, anywhere.",
       buttonText: "Book Now",
-      backgroundImage: "",
-      backgroundColor: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+      backgroundImage: slideImage,
+      // backgroundColor: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
       textColor: "text-white",
       onButtonClick: () => window.location.href = "/rental",
     },
@@ -58,8 +59,8 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
       subtitle: "Limited Time Deals",
       description: "Get amazing discounts on weekend bookings. Save up to 30% on your next adventure!",
       buttonText: "View Offers",
-      backgroundImage: "",
-      backgroundColor: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+      backgroundImage: slideImage,
+      // backgroundColor: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
       textColor: "text-white",
       onButtonClick: () => alert("Special offers coming soon!"),
     },
@@ -72,21 +73,24 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
         autoplayDelay={4000}
         showDots={true}
         showArrows={true}
-        className="h-64 rounded-xl shadow-lg"
+        className="h-80 rounded-xl shadow-lg"
       >
         {slides.map((slide) => (
           <div
             key={slide.id}
-            className="relative h-64 flex items-center justify-center overflow-hidden rounded-xl"
-            style={{ background: slide.backgroundColor }}
+            className="relative h-80 flex items-center justify-center overflow-hidden rounded-xl"
+            // style={{ background: slide.backgroundColor }}
           >
             {slide.backgroundImage && (
               <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${slide.backgroundImage})` }}
+                className="absolute inset-0 bg-cover bg-center "
+                style={{ 
+                  backgroundImage: `url(${slide.backgroundImage})`,
+                  backgroundBlendMode: 'overlay'
+                }}
               />
             )}
-            <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
             
             <div className="relative z-10 text-center px-8 max-w-2xl">
               <h2 className={`text-3xl md:text-4xl font-bold mb-2 ${slide.textColor}`}>

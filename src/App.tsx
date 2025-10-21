@@ -19,8 +19,14 @@ import BookNow from "./pages/BookNow";
 // import BookingConfirmation from "pages/BookingConformation";
 // import CallOrChat from "./pages/CallOrChat";
 import Notifications from "./pages/Notifications";
+import NotificationPage from "./features/profile/pages/notification";
 import ProfilePage from "./features/profile/pages/profile";
 import MyProfile from "./pages/MyProfile";
+import MyBookings from "./pages/MyBookings";
+import MyListingBookings from "./pages/MyListingBookings";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import AboutUs from "./pages/AboutUs";
+import Help from "./pages/Help";
 import Feedback from "./pages/Feedback";
 import Calendar from "./pages/Calendar";
 import CalendarScreen from "./pages/CalendarScreen";
@@ -49,9 +55,16 @@ const App: React.FC = () => {
         {/* Profile & User */}
         <Route path="/profile" element={<ProfilePage />} /> 
         <Route path="/my-profile" element={<MyProfile />} />
-        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/my-bookings" element={<MyBookings />} />
+        <Route path="/my-listing-bookings" element={<MyListingBookings />} />
+        <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/change-location" element={<ChangeLocation />} />
+        
+        {/* Support & Info */}
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/help" element={<Help />} />
         {/* Calendar */}
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/calendar-screen" element={<CalendarScreen />} />
