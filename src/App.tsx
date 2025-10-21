@@ -9,6 +9,11 @@ import Rental from "./pages/Rental";
 import ChangeLocation from "./pages/ChangeLocation";
 import ListedCars from "./pages/ListedCars";
 import Auto from "./pages/Autos";
+import ListAutoPage from "./pages/ListAutoPage";
+import ListCarPage from "./pages/ListCarPage";
+import VehicleDetailsPage from "./pages/VehicleDetailsPage";
+import VehicleHistory from "./pages/VehicleHistory";
+import EditCarDetails from "./pages/EditCarDetails";
 import BookNow from "./pages/BookNow";
 
 // import BookingConfirmation from "pages/BookingConformation";
@@ -35,6 +40,11 @@ const App: React.FC = () => {
         {/* Cars / Autos */}
         <Route path="/listed" element={<ListedCars />} />
         <Route path="/auto" element={<Auto />} />
+        <Route path="/list-auto" element={<ListAutoPage />} />
+        <Route path="/list-car" element={<ListCarPage />} />
+        <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
+        <Route path="/vehicle-details/:vehicleName" element={<VehicleHistory />} />
+        <Route path="/vehicle-details/:vehicleName/edit/:bookingId" element={<EditCarDetails />} />
 
         {/* Profile & User */}
         <Route path="/profile" element={<ProfilePage />} /> 

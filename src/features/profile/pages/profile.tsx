@@ -148,30 +148,28 @@ const Profile: React.FC = () => {
             // stop clicks from bubbling to backdrop
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            {/* <div className="bg-white rounded-2xl shadow-lg overflow-hidden"> */}
               {/* header with close */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                <h3 id="profile-modal-title" className="text-lg font-semibold text-gray-900">
-                  Edit Profile
-                </h3>
+              {/* <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200"> */}
+                
                 <button
                   aria-label="Close profile modal"
                   className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   onClick={() => setShowProfileModal(false)}
                 >
-                  <X className="w-5 h-5" />
+                  {/* <X className="w-5 h-5" /> */}
                 </button>
-              </div>
+              {/* </div> */}
 
               {/* content: your ProfileCard component */}
-              <div className="p-6">
+              {/* <div className="p-6"> */}
                 {/* If your ProfileCard expects props (like onClose) you can pass them here.
                     The earlier provided ProfileCard implementation used internal state and alert on save.
                     If you want ProfileCard to close modal after save, modify ProfileCard to accept an `onClose` prop
                     and call it from inside the card when save completes. */}
                 <ProfileCard />
-              </div>
-            </div>
+              {/* </div> */}
+            {/* </div> */}
           </div>
         </div>
       )}

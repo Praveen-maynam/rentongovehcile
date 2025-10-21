@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { vehicles } from "./data/Vehicle";
 import { Vehicle } from "../types/Vehicle";
 import { Star } from "lucide-react";
+import BookingConfirmationModal from "../components/BookingConfirmationModal";
 
 const dummyReviews = [
   {
@@ -30,6 +31,14 @@ const BookNow: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const vehicle: Vehicle | undefined = vehicles.find((v) => v.id === id);
+  const [showContactButtons, setShowContactButtons] = React.useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = React.useState(false);
+
+  const handleConfirmBooking = () => {
+    setShowConfirmationModal(false);
+    // Navigate to success page or show success message
+    navigate("/booking-success");
+  };
 
   if (!vehicle) return <p className="p-8">Vehicle not found!</p>;
 
@@ -81,12 +90,71 @@ const BookNow: React.FC = () => {
         </div>
 
         {/* Book Now Button */}
-        <button
-          onClick={() => navigate(`/booking-confirmation/${vehicle.id}`)}
-          className="mt-6 bg-gradient-to-r from-[#141248] to-[#63C8FF] text-white px-6 py-3 rounded-lg"
-        >
-          Book Now
-        </button>
+        {!showContactButtons ? (
+          <button
+            onClick={() => setShowContactButtons(true)}
+            className="mt-6 w-full bg-gradient-to-r from-[#141248] to-[#63C8FF] text-white font-semibold px-6 py-3 rounded-lg hover:opacity-90 transition"
+          >
+            Book Now
+          </button>
+        ) : (
+          <div className="mt-6 space-y-4">
+            {/* Owner Information */}
+            <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
+              <img
+                src="https://ui-avatars.com/api/?name=Manoj+Kumar&background=6B7280&color=fff&size=48"
+                alt="Manoj Kumar"
+                className="w-12 h-12 rounded-full"
+              />
+              <div className="flex-1">
+                <h4 className="font-semibold text-gray-900">Manoj Kumar</h4>
+                <p className="text-sm text-gray-500">Vehicle Owner</p>
+              </div>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+            </div>
+
+            {/* Warning Message */}
+            <div className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
+              <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <p className="text-sm text-orange-700 flex-1">
+                To confirm booking, please call or chat with vehicle owner.
+              </p>
+            </div>
+
+            {/* Chat and Call Buttons */}
+            <div className="flex gap-3">
+              <button className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-50 transition">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Chat
+              </button>
+              <button 
+                onClick={() => setShowConfirmationModal(true)}
+                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition shadow-md"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                Call
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Booking Confirmation Modal */}
+        <BookingConfirmationModal
+          isOpen={showConfirmationModal}
+          onClose={() => setShowConfirmationModal(false)}
+          onConfirm={handleConfirmBooking}
+        />
       </div>
 
       {/* Right Column - Reviews */}

@@ -32,7 +32,7 @@ const ProfileCard: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+    // <div className="flex justify-center items-center h-100 bg-gray-50">
       <div className="bg-white rounded-2xl shadow-md w-[380px] p-6">
         <div className="flex flex-col items-center mb-6">
           <div className="relative">
@@ -112,7 +112,7 @@ const ProfileCard: React.FC = () => {
           </button>
         </div>
       </div>
-    </div>
+    // </div>
   );
 };
 

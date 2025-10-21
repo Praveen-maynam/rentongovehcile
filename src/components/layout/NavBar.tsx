@@ -169,7 +169,11 @@ const Navbar: React.FC = () => {
       onClose={() => setIsModalOpen(false)}
        onSelect={(type) => {
       setIsModalOpen(false);
-      navigate(`/listing/${type}`); // Navigate to selected type page
+      if (type === "auto") {
+        navigate("/list-auto");
+      } else if (type === "car") {
+        navigate("/list-car");
+      }
     }}
     />
 
