@@ -1,30 +1,40 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-
-interface Review {
-  id: string;
-  userName: string;
-  location: string;
-  rating: number;
-  comment: string;
-  avatar: string;
-}
+import { useReviewStore } from "../store/review.store";
+import { vehicles } from "./data/Vehicle";
 
 const VehicleDetailsPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { getReviewsByVehicleId, getAverageRating, getTotalReviewCount, getRatingDistribution } = useReviewStore();
 
-  // Mock vehicle data - in real app, fetch based on id
+  // Get vehicle data from static data
+  const vehicleData = vehicles.find(v => v.id === id);
+  
+  if (!vehicleData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-xl text-gray-600">Vehicle not found</p>
+      </div>
+    );
+  }
+
+  // Get dynamic review data from store
+  const vehicleReviews = getReviewsByVehicleId(id || "1");
+  const averageRating = getAverageRating(id || "1");
+  const totalReviews = getTotalReviewCount(id || "1");
+  const ratingDistribution = getRatingDistribution(id || "1");
+
   const vehicle = {
-    id: id || "1",
-    name: "Hyundai Verna",
-    price: 250,
+    id: vehicleData.id,
+    name: vehicleData.name,
+    price: vehicleData.price,
     priceType: "hr",
-    transmission: "Automatic",
-    seats: 5,
-    fuel: "Petrol",
+    transmission: vehicleData.transmission,
+    seats: vehicleData.seats,
+    fuel: vehicleData.fuel,
     ac: true,
     images: [
       "https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=800",
@@ -33,44 +43,9 @@ const VehicleDetailsPage: React.FC = () => {
       "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800",
     ],
     description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-    rating: 4.2,
-    totalReviews: 200,
+    rating: averageRating,
+    totalReviews: totalReviews,
   };
-
-  const reviews: Review[] = [
-    {
-      id: "1",
-      userName: "Manoj kumar",
-      location: "Kakinada,",
-      rating: 4.5,
-      comment: "Lorem Ipsum is simply dummy text of the printing",
-      avatar: "https://ui-avatars.com/api/?name=Manoj+Kumar&background=0B0E92&color=fff",
-    },
-    {
-      id: "2",
-      userName: "Manoj kumar",
-      location: "Kakinada,",
-      rating: 4.5,
-      comment: "Lorem Ipsum is simply dummy text of the printing",
-      avatar: "https://ui-avatars.com/api/?name=Manoj+Kumar&background=0B0E92&color=fff",
-    },
-    {
-      id: "3",
-      userName: "Manoj kumar",
-      location: "Kakinada,",
-      rating: 4.5,
-      comment: "Lorem Ipsum is simply dummy text of the printing",
-      avatar: "https://ui-avatars.com/api/?name=Manoj+Kumar&background=0B0E92&color=fff",
-    },
-  ];
-
-  const ratingDistribution = [
-    { stars: 5, percentage: 50 },
-    { stars: 4, percentage: 50 },
-    { stars: 3, percentage: 50 },
-    { stars: 2, percentage: 50 },
-    { stars: 1, percentage: 50 },
-  ];
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % vehicle.images.length);
@@ -237,11 +212,11 @@ const VehicleDetailsPage: React.FC = () => {
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-blue-500 rounded-full"
+                          className="h-full bg-blue-500 rounded-full transition-all duration-300"
                           style={{ width: `${item.percentage}%` }}
                         />
                       </div>
-                      <span className="text-sm text-gray-600 w-12 text-right">{item.percentage}%</span>
+                      <span className="text-sm text-gray-600 w-16 text-right">{item.count} ({item.percentage}%)</span>
                     </div>
                   ))}
                 </div>
@@ -251,32 +226,48 @@ const VehicleDetailsPage: React.FC = () => {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-4">Customers Reviews</h3>
                 <div className="space-y-4 max-h-[400px] overflow-y-auto">
-                  {reviews.map((review) => (
-                    <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0">
-                      <div className="flex items-start gap-3">
-                        <img
-                          src={review.avatar}
-                          alt={review.userName}
-                          className="w-10 h-10 rounded-full"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <h4 className="font-semibold text-gray-900">{review.userName}</h4>
-                            <div className="flex">
-                              {renderStars(review.rating)}
+                  {vehicleReviews.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500 text-sm">No reviews yet</p>
+                      <p className="text-gray-400 text-xs mt-1">Be the first to review this vehicle!</p>
+                    </div>
+                  ) : (
+                    vehicleReviews.map((review) => (
+                      <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0">
+                        <div className="flex items-start gap-3">
+                          <img
+                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(review.userName)}&background=0B0E92&color=fff`}
+                            alt={review.userName}
+                            className="w-10 h-10 rounded-full"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <h4 className="font-semibold text-gray-900">{review.userName}</h4>
+                              <div className="flex">
+                                {renderStars(review.rating)}
+                              </div>
                             </div>
+                            <p className="text-xs text-gray-500 mb-2">{review.location}</p>
+                            <p className="text-sm text-gray-600">{review.comment}</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {new Date(review.timestamp).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric' 
+                              })}
+                            </p>
                           </div>
-                          <p className="text-xs text-gray-500 mb-2">{review.location}</p>
-                          <p className="text-sm text-gray-600">{review.comment}</p>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
 
-                <button className="w-full mt-4 text-center text-blue-600 hover:text-blue-700 font-medium text-sm py-2">
-                  See more ⌄
-                </button>
+                {vehicleReviews.length > 3 && (
+                  <button className="w-full mt-4 text-center text-blue-600 hover:text-blue-700 font-medium text-sm py-2">
+                    See all {totalReviews} reviews 
+                  </button>
+                )}
               </div>
             </div>
           </div>

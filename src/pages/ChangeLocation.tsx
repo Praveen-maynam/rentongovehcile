@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, LocateFixed } from "lucide-react";
 import { useLocation } from "../store/location.context";
+import LocationMap from "../components/LocationMap";
 
 interface LocationOption {
   city: string;
@@ -17,6 +18,10 @@ const ChangeLocation: React.FC = () => {
     { country: "India", city: "Kakinada" },
     { country: "India", city: "Hyderabad" },
     { country: "India", city: "Vizag" },
+    { country: "India", city: "Mumbai" },
+    { country: "India", city: "Delhi" },
+    { country: "India", city: "Bangalore" },
+    { country: "India", city: "Chennai" },
   ]);
 
   const handleSave = () => {
@@ -39,13 +44,9 @@ const ChangeLocation: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6">Change Location</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Left: Map placeholder */}
-        <div className="rounded-lg overflow-hidden shadow-md">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Map_placeholder.png"
-            alt="Map"
-            className="w-full h-[400px] object-cover"
-          />
+        {/* Left: Dynamic Interactive Map */}
+        <div className="rounded-lg overflow-hidden shadow-md h-[400px]">
+          <LocationMap city={city} country={country} />
         </div>
 
         {/* Right: Location form */}
@@ -71,6 +72,10 @@ const ChangeLocation: React.FC = () => {
               <option value="Kakinada">Kakinada</option>
               <option value="Hyderabad">Hyderabad</option>
               <option value="Vizag">Vizag</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Bangalore">Bangalore</option>
+              <option value="Chennai">Chennai</option>
             </select>
 
             <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-100">

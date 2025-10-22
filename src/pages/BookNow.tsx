@@ -13,7 +13,7 @@ const BookNow: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const vehicle: Vehicle | undefined = vehicles.find((v) => v.id === id);
-  const { getReviewsByVehicleId, getAverageRating } = useReviewStore();
+  const { getReviewsByVehicleId, getAverageRating, getTotalReviewCount, getRatingDistribution } = useReviewStore();
   const { addNotification } = useNotificationStore();
   const { addBooking } = useBookingStore();
   
@@ -22,6 +22,8 @@ const BookNow: React.FC = () => {
 
   const vehicleReviews = vehicle ? getReviewsByVehicleId(vehicle.id) : [];
   const averageRating = vehicle ? getAverageRating(vehicle.id) : 0;
+  const totalReviews = vehicle ? getTotalReviewCount(vehicle.id) : 0;
+  const ratingDistribution = vehicle ? getRatingDistribution(vehicle.id) : [];
 
   const handleConfirmBooking = () => {
     setShowConfirmationModal(false);
@@ -187,32 +189,33 @@ const BookNow: React.FC = () => {
 
         {/* Average Rating */}
         <div className="flex items-center mt-2 mb-2 justify-between">
-          <span className="text-2xl font-bold">4.2</span>
+          <span className="text-2xl font-bold">{averageRating > 0 ? averageRating : 'N/A'}</span>
           <div className="flex gap-1">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={i < 4 ? "text-yellow-400" : "text-gray-300"}
+                className={i < Math.floor(averageRating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                size={20}
               />
             ))}
           </div>
         </div>
 
         {/* Reviews Count */}
-        <span className="text-gray-500 text-sm">200 reviews</span>
+        <span className="text-gray-500 text-sm">{totalReviews} review{totalReviews !== 1 ? 's' : ''}</span>
 
         {/* Rating Distribution */}
         <div className="mt-4 space-y-1">
-          {[5, 4, 3, 2, 1].map((star) => (
-            <div key={star} className="flex items-center text-sm">
-              <span className="w-6">{star}★</span>
+          {ratingDistribution.map((item) => (
+            <div key={item.stars} className="flex items-center text-sm">
+              <span className="w-6">{item.stars}★</span>
               <div className="flex-1 bg-gray-200 h-2 rounded mx-2">
                 <div
-                  className="bg-yellow-400 h-2 rounded"
-                  style={{ width: `${star * 10}%` }}
+                  className="bg-yellow-400 h-2 rounded transition-all duration-300"
+                  style={{ width: `${item.percentage}%` }}
                 />
               </div>
-              <span className="w-8 text-gray-500">{star * 10}%</span>
+              <span className="w-16 text-gray-500 text-right">{item.count} ({item.percentage}%)</span>
             </div>
           ))}
         </div>
@@ -226,10 +229,12 @@ const BookNow: React.FC = () => {
             vehicleReviews.map((review, idx) => (
               <div key={idx} className="border p-3 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full" />
-                  <div>
-                    <div className="flex items-center gap-1 font-bold text-gray-900">
-                      <span>{review.userName}</span>
+                  <div className="w-8 h-8 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] rounded-full flex items-center justify-center text-white font-bold">
+                    {review.userName.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-gray-900">{review.userName}</span>
                       <div className="flex gap-1">
                         {[...Array(5)].map((_, i) => (
                           <Star
@@ -240,17 +245,31 @@ const BookNow: React.FC = () => {
                         ))}
                       </div>
                     </div>
-                    <span className="text-gray-500 text-sm">{review.location}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 text-xs">{review.location}</span>
+                      <span className="text-gray-400 text-xs">•</span>
+                      <span className="text-gray-400 text-xs">
+                        {new Date(review.timestamp).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric', 
+                          year: 'numeric' 
+                        })}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <p className="text-gray-600 text-sm">{review.comment}</p>
+                <p className="text-gray-600 text-sm mt-2">{review.comment}</p>
               </div>
             ))
           )}
         </div>
 
         {/* See More Text */}
-        <p className="mt-4 text-center text-blue-600 cursor-pointer">See More</p>
+        {vehicleReviews.length > 0 && (
+          <p className="mt-4 text-center text-blue-600 cursor-pointer hover:text-blue-700">
+            See all {totalReviews} review{totalReviews !== 1 ? 's' : ''}
+          </p>
+        )}
       </div>
     </div>
   );

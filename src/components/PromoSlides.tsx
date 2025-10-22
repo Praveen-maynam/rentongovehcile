@@ -93,21 +93,16 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
             <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
             
             <div className="relative z-10 text-center px-8 max-w-2xl">
-              <h2 className={`text-3xl md:text-4xl font-bold mb-2 ${slide.textColor}`}>
-                {slide.title}
-              </h2>
-              <h3 className={`text-xl md:text-2xl font-semibold mb-4 opacity-90 ${slide.textColor}`}>
-                {slide.subtitle}
-              </h3>
-              <p className={`text-sm md:text-base mb-6 opacity-80 ${slide.textColor} max-w-md mx-auto`}>
-                {slide.description}
-              </p>
-              <button
-                onClick={slide.onButtonClick}
-                className="bg-white text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg transform hover:scale-105"
-              >
-                {slide.buttonText}
-              </button>
+              <div>
+                <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${slide.textColor} tracking-wide`}>
+                  RENTONGOVEHICLE – Smart
+                </h1>
+                <h2 className={`text-3xl md:text-4xl font-bold ${slide.textColor} tracking-wide`}>
+                  Car Rentals & Listings
+                </h2>
+                <h6 className={`text-sm  ${slide.textColor} tracking-wide`}>Rent or List Vehicles Effortlessly. Anywhere, Anytime.</h6>
+                <h6 className={`text-sm ${slide.textColor} tracking-wide`}>Car’s Bookings & Listings | Auto Bookings</h6>
+              </div>
             </div>
           </div>
         ))}

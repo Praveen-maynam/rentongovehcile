@@ -2,7 +2,8 @@ import React from "react";
 import Modal from "../../components/ui/modal"; // wrapper component
 // any icons you use
 import ProfileOption from "../../features/profile/components/profileOption";
-import {Wine,Zap} from "lucide-react";
+import Auto  from "../../assets/icons/Auto.png";
+import Car from "../../assets/icons/Car.png";
 
 interface Props {
   isOpen: boolean;
@@ -20,25 +21,27 @@ const selectvehiclemodal: React.FC<Props> = ({ isOpen, onClose, onSelect }) => {
           <h2 className="text-lg font-bold">Select Vehicle</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800">×</button>
         </div>
-        {/* {car vehicle icon} */}
+        {/* Vehicle options */}
         <div className="space-y-4">
+          {/* Car Option */}
           <div
-            className="flex items-center p-4 border rounded cursor-pointer hover:bg-gray-100"
+            className="flex items-center p-4 border rounded cursor-pointer hover:bg-gray-100 transition-colors"
             onClick={() => onSelect("car")}
           >
-            <div className="bg-gradient-to-r from-indigo-500 to-blue-400 text-white p-3 rounded mr-4">
-             <Zap  />
+            <div className="bg-gradient-to-r from-indigo-500 to-blue-400 p-3 rounded mr-4 flex items-center justify-center w-14 h-14">
+              <img src={Car} alt="Car" className="w-8 h-8 object-contain filter brightness-0 invert" />
             </div>
             <span className="text-lg font-medium">Car</span>
             <span className="ml-auto text-gray-400">›</span>
           </div>
-{/* {auto vehicle icon} */}
+
+          {/* Auto Option */}
           <div
-            className="flex items-center p-4 border rounded cursor-pointer hover:bg-gray-100"
+            className="flex items-center p-4 border rounded cursor-pointer hover:bg-gray-100 transition-colors"
             onClick={() => onSelect("auto")}
           >
-            <div className="bg-gradient-to-r from-indigo-500 to-blue-400 text-white p-3 rounded mr-4">
-             <Wine  />
+            <div className="bg-gradient-to-r from-indigo-500 to-blue-400 p-3 rounded mr-4 flex items-center justify-center w-14 h-14">
+              <img src={Auto} alt="Auto" className="w-8 h-8 object-contain filter brightness-0 invert" />
             </div>
             <span className="text-lg font-medium">Auto</span>
             <span className="ml-auto text-gray-400">›</span>
