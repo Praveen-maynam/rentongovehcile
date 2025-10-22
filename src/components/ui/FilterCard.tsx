@@ -69,8 +69,8 @@ const FilterCard: React.FC<FilterCardProps> = ({ onApply }) => {
   };
 
   return (
-    <div className="fixed inset-0   flex justify-end ">
-      <div className="absolute right-6 top-[150px] w-full sm:w-[200px] bg-white shadow-xl rounded-lg p-6 border z-50">
+    <div className="  flex justify-end ">
+      <div className="absolute right-6 top-[550px]  w-full sm:w-[200px] bg-white shadow-xl rounded-lg p-6 border z-50">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Filter</h2>
           <button

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {  Search } from "lucide-react";
 import VehicleCard from "../components/ui/VehicleCard";
+import AutoCard from "../components/ui/AutoCard";
 import DateTimePicker from "../components/ui/DateTimePicker";
 import FilterCard from "../components/ui/FilterCard";
 import PromoSlides from "../components/PromoSlides";
@@ -12,6 +13,8 @@ const Rental: React.FC = () => {
   const navigate = useNavigate();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [showAllCars, setShowAllCars] = useState(false);
+  const [showAllAutos, setShowAllAutos] = useState(false);
 
   const cars = vehicles.filter((v) => v.type === "car");
   const autos = vehicles.filter((v) => v.type === "auto");
@@ -72,72 +75,104 @@ const Rental: React.FC = () => {
       
 
       {/* Nearby Cars - Carousel */}
-      <div className="px-6 py-4">
+      {/* <div className="px-6 py-4">
         <VehicleCarousel
           vehicles={filteredCars}
           title="Nearby Cars"
           onBook={(vehicle) => navigate(`/book-now/${vehicle.id}`)}
           onViewMore={() => navigate("/listed")}
         />
-      </div>
+      </div> */}
 
       {/* Autos - Carousel */}
-      <div className="px-6 py-4">
+      {/* <div className="px-6 py-4">
         <VehicleCarousel
           vehicles={filteredAutos}
           title="Looking for an Auto?"
           onBook={(vehicle) => navigate(`/book-now/${vehicle.id}`)}
           onViewMore={() => navigate("/auto")}
         />
+      </div> */}
 
       {/* Nearby Cars */}
-      <div className="px-6 py-4 flex flex-col gap-4gap-4">
-        <div className="flex jusbetweentween items-center mb-2">
+      <div className="px-6 py-4 flex flex-col gap-4">
+        <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-semibold">Nearby Cars</h2>
-          <button className="text-blue-600 hover:underline font-medium">
-            View More →
-          </button>
+          {filteredCars.length > 4 && !showAllCars && (
+            <button 
+              onClick={() => setShowAllCars(true)}
+              className="text-blue-600 hover:underline font-medium"
+            >
+              View More →
+            </button>
+          )}
         </div>
         {filteredCars.length > 0 ? (
-          filteredCars.map((v) => (
+          (showAllCars ? filteredCars : filteredCars.slice(0, 4)).map((v) => (
             <VehicleCard
               key={v.id}
               vehicle={v}
               showActions={false}
-              onBook={() => navigate(`/booknow/${v.id}`)} // ← This makes the image clickable
+              onBook={() => navigate(`/book-now/${v.id}`)}
             />
           ))
         ) : (
           <p className="text-gray-500">No cars found.</p>
         )}
+        {showAllCars && filteredCars.length > 4 && (
+          <button 
+            onClick={() => setShowAllCars(false)}
+            className="text-blue-600 hover:underline font-medium text-center py-2"
+          >
+            Show Less ↑
+          </button>
+        )}
       </div>
 
       {/* Autos */}
-      <div className="px-6 py-4 flex flex-col gap-4 mb-6">
-        <div className="flex justify-between items-center mb-2">
+      <div className="px-6 py-4 mb-6">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Looking for an Auto?</h2>
-          <button className="text-blue-600 hover:underline font-medium">
-            View More →
-          </button>
+          {filteredAutos.length > 4 && !showAllAutos && (
+            <button 
+              onClick={() => setShowAllAutos(true)}
+              className="text-blue-600 hover:underline font-medium"
+            >
+              View More →
+            </button>
+          )}
         </div>
-        {filteredAutos.length > 0 ? (
-          filteredAutos.map((v) => (
-            <VehicleCard
-              key={v.id}
-              vehicle={v}
-              showActions={false}
-              onBook={() => navigate(`/booknow/${v.id}`)} // ← This too
-            />
-          ))
-        ) : (
-          <p className="text-gray-500">No autos found.</p>
-        )}
 
+        <div className="flex flex-wrap gap-4">
+          {filteredAutos.length > 0 ? (
+            (showAllAutos ? filteredAutos : filteredAutos.slice(0, 4)).map((v, index) => (
+              <AutoCard
+                key={v.id}
+                vehicle={v}
+                showBookButton={index === 0}
+                onBook={() => navigate(`/book-now/${v.id}`)}
+              />
+            ))
+          ) : (
+            <p className="text-gray-500">No autos found.</p>
+          )}
+        </div>
+
+        {showAllAutos && filteredAutos.length > 4 && (
+          <button 
+            onClick={() => setShowAllAutos(false)}
+            className="text-blue-600 hover:underline font-medium text-center py-2 mt-4 w-full"
+          >
+            Show Less ↑
+          </button>
+        )}
       </div>
 
+      {/* Filter Card Modal */}
       {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
-    </div>
     </div>
   );
 };
+
 export default Rental;
+

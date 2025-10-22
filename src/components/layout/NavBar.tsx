@@ -226,7 +226,10 @@ const Navbar: React.FC = () => {
             ))}
 
             <button
-              onClick={() => handleNavigate("/listing")}
+              onClick={() => {
+                setMenuOpen(false);
+                setIsModalOpen(true);
+              }}
               className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-all w-fit"
             >
               Listing +
@@ -234,6 +237,20 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* ✅ Modal for mobile (outside drawer) */}
+      <SelectVehicleModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelect={(type) => {
+          setIsModalOpen(false);
+          if (type === "auto") {
+            navigate("/list-auto");
+          } else if (type === "car") {
+            navigate("/list-car");
+          }
+        }}
+      />
     </nav>
   );
 };

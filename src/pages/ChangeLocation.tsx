@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, LocateFixed } from "lucide-react";
+import { MapPin, LocateFixed, Loader2 } from "lucide-react";
 import { useLocation } from "../store/location.context";
 import LocationMap from "../components/LocationMap";
 
 interface LocationOption {
   city: string;
   country: string;
+  coordinates?: { lat: number; lng: number };
 }
 
 const ChangeLocation: React.FC = () => {
@@ -14,14 +15,15 @@ const ChangeLocation: React.FC = () => {
   const { currentCity, currentCountry, setLocation } = useLocation();
   const [country, setCountry] = useState(currentCountry);
   const [city, setCity] = useState(currentCity);
+  const [isDetecting, setIsDetecting] = useState(false);
   const [locations] = useState<LocationOption[]>([
-    { country: "India", city: "Kakinada" },
-    { country: "India", city: "Hyderabad" },
-    { country: "India", city: "Vizag" },
-    { country: "India", city: "Mumbai" },
-    { country: "India", city: "Delhi" },
-    { country: "India", city: "Bangalore" },
-    { country: "India", city: "Chennai" },
+    { country: "India", city: "Kakinada", coordinates: { lat: 16.9891, lng: 82.2475 } },
+    { country: "India", city: "Hyderabad", coordinates: { lat: 17.3850, lng: 78.4867 } },
+    { country: "India", city: "Vizag", coordinates: { lat: 17.6868, lng: 83.2185 } },
+    { country: "India", city: "Mumbai", coordinates: { lat: 19.0760, lng: 72.8777 } },
+    { country: "India", city: "Delhi", coordinates: { lat: 28.7041, lng: 77.1025 } },
+    { country: "India", city: "Bangalore", coordinates: { lat: 12.9716, lng: 77.5946 } },
+    { country: "India", city: "Chennai", coordinates: { lat: 13.0827, lng: 80.2707 } },
   ]);
 
   const handleSave = () => {
@@ -37,6 +39,48 @@ const ChangeLocation: React.FC = () => {
   const handleLocationSelect = (selectedCity: string, selectedCountry: string) => {
     setCity(selectedCity);
     setCountry(selectedCountry);
+  };
+
+  const handleDetectLocation = () => {
+    setIsDetecting(true);
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          // Find closest location from database
+          let closestLocation = locations[0];
+          let minDistance = Infinity;
+
+          locations.forEach(loc => {
+            if (loc.coordinates) {
+              const distance = Math.sqrt(
+                Math.pow(loc.coordinates.lat - latitude, 2) +
+                Math.pow(loc.coordinates.lng - longitude, 2)
+              );
+              if (distance < minDistance) {
+                minDistance = distance;
+                closestLocation = loc;
+              }
+            }
+          });
+
+          setCountry(closestLocation.country);
+          setCity(closestLocation.city);
+          setIsDetecting(false);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          alert("Unable to detect your location. Please enable location services or select manually.");
+          setIsDetecting(false);
+        },
+        { timeout: 10000, enableHighAccuracy: true }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser");
+      setIsDetecting(false);
+    }
   };
 
   return (
@@ -78,8 +122,17 @@ const ChangeLocation: React.FC = () => {
               <option value="Chennai">Chennai</option>
             </select>
 
-            <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-100">
-              <LocateFixed className="w-5 h-5 text-gray-600" />
+            <button 
+              onClick={handleDetectLocation}
+              disabled={isDetecting}
+              className="p-2 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              title="Detect current location"
+            >
+              {isDetecting ? (
+                <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+              ) : (
+                <LocateFixed className="w-5 h-5 text-gray-600" />
+              )}
             </button>
           </div>
 
