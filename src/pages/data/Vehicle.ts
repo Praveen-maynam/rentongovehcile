@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 66b6a0a (Initial commit)
 import { Vehicle } from "../../types/Vehicle";
 import BlackCar from "../../assets/images/BlackCar.png";
 import AutoImage from "../../assets/images/Auto.png";
@@ -15,7 +18,11 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Petrol",
     rating: 4.2,
+<<<<<<< HEAD
     image: "/verna.jpg",
+=======
+    image: BlackCar,
+>>>>>>> 66b6a0a (Initial commit)
     type: "car",
     location: "Kakinada",
     available: true,
@@ -28,7 +35,11 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Petrol",
     rating: 4.0,
+<<<<<<< HEAD
     image: "/swift.jpg",
+=======
+    image: BlackCar,
+>>>>>>> 66b6a0a (Initial commit)
     type: "car",
     location: "Kakinada",
     available: true,
@@ -41,7 +52,11 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "CNG",
     rating: 4.0,
+<<<<<<< HEAD
     image: "/auto1.jpg",
+=======
+    image:AutoImage,
+>>>>>>> 66b6a0a (Initial commit)
     type: "auto",
     location: "Kakinada",
     available: true,
@@ -54,7 +69,11 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Diesel",
     rating: 4.3,
+<<<<<<< HEAD
     image: "/auto2.jpg",
+=======
+    image: AutoImage,
+>>>>>>> 66b6a0a (Initial commit)
     type: "auto",
     location: "Kakinada",
     available: false,
@@ -67,7 +86,11 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Petrol",
     rating: 4.5,
+<<<<<<< HEAD
     image: "/verna.jpg",
+=======
+    image: BlackCar,
+>>>>>>> 66b6a0a (Initial commit)
     type: "car",
     location: "Bangalore",
     available: true,
@@ -80,7 +103,11 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Diesel",
     rating: 4.7,
+<<<<<<< HEAD
     image: "/swift.jpg",
+=======
+    image: BlackCar,
+>>>>>>> 66b6a0a (Initial commit)
     type: "car",
     location: "Bangalore",
     available: true,
@@ -93,7 +120,11 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Diesel",
     rating: 4.4,
+<<<<<<< HEAD
     image: "/verna.jpg",
+=======
+    image: BlackCar,
+>>>>>>> 66b6a0a (Initial commit)
     type: "car",
     location: "Hyderabad",
     available: true,
@@ -106,7 +137,11 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Petrol",
     rating: 4.3,
+<<<<<<< HEAD
     image: "/swift.jpg",
+=======
+    image: BlackCar,
+>>>>>>> 66b6a0a (Initial commit)
     type: "car",
     location: "Hyderabad",
     available: true,
@@ -164,6 +199,7 @@ export const vehicles: Vehicle[] = [
     type: "auto",
     image: AutoImage,
   },
+<<<<<<< HEAD
   {
     id: "b1",
     name: "Royal Enfield Classic 350",
@@ -219,3 +255,6 @@ export const vehicles: Vehicle[] = [
 ];
 
   
+=======
+];
+>>>>>>> 66b6a0a (Initial commit)
