@@ -1,12 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-export type VehicleType = 'vehicle' | 'car' | 'auto' | "bike"
+
+// ✅ Define allowed vehicle types
+export type VehicleType = 'vehicle' | 'car' | 'auto' | 'bike';
+
+// ✅ Define Booking interface
 export interface Booking {
   id: string;
   vehicleId: string;
-   vehicleType: VehicleType; 
+  vehicleType: VehicleType; // ✅ keep only one type
   vehicleName: string;
-  vehicleType?: 'Cars' | 'Autos' | 'Bikes';
   customerName: string;
   bookingDate: string;
   bookingTime: string;
@@ -21,6 +24,7 @@ export interface Booking {
   createdAt: number;
 }
 
+// ✅ Store interface
 interface BookingStore {
   bookings: Booking[];
   addBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => void;
@@ -32,50 +36,55 @@ interface BookingStore {
   getBookingsByStatus: (status: Booking['status']) => Booking[];
 }
 
-export const useBookingStore = create<BookingStore>()(persist(
-  (set, get) => ({
-    bookings: [],
-    
-    addBooking: (booking) => {
-      const newBooking: Booking = {
-        ...booking,
-        id: Date.now().toString() + Math.random().toString(36),
-        createdAt: Date.now(),
-      };
-      set((state) => ({ bookings: [...state.bookings, newBooking] }));
-    },
-    
-    updateBooking: (id, updates) => {
-      set((state) => ({
-        bookings: state.bookings.map((booking) =>
-          booking.id === id ? { ...booking, ...updates } : booking
-        ),
-      }));
-    },
-    
-    deleteBooking: (id) => {
-      set((state) => ({
-        bookings: state.bookings.filter((booking) => booking.id !== id),
-      }));
-    },
-    
-    getBookingById: (id) => {
-      return get().bookings.find((booking) => booking.id === id);
-    },
-    
-    getBookingsByVehicleId: (vehicleId) => {
-      return get().bookings.filter((booking) => booking.vehicleId === vehicleId);
-    },
-    
-    getBookingsByVehicleName: (vehicleName) => {
-      return get().bookings.filter((booking) => booking.vehicleName === vehicleName);
-    },
-    
-    getBookingsByStatus: (status) => {
-      return get().bookings.filter((booking) => booking.status === status);
-    },
-  }),
-  {
-    name: 'booking-storage',
-  }
-));
+// ✅ Zustand store with persistence
+export const useBookingStore = create<BookingStore>()(
+  persist(
+    (set, get) => ({
+      bookings: [],
+
+      // ➕ Add new booking
+      addBooking: (booking) => {
+        const newBooking: Booking = {
+          ...booking,
+          id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+          createdAt: Date.now(),
+        };
+        set((state) => ({ bookings: [...state.bookings, newBooking] }));
+      },
+
+      // 🔄 Update booking
+      updateBooking: (id, updates) => {
+        set((state) => ({
+          bookings: state.bookings.map((booking) =>
+            booking.id === id ? { ...booking, ...updates } : booking
+          ),
+        }));
+      },
+
+      // ❌ Delete booking
+      deleteBooking: (id) => {
+        set((state) => ({
+          bookings: state.bookings.filter((booking) => booking.id !== id),
+        }));
+      },
+
+      // 🔍 Get booking by ID
+      getBookingById: (id) => get().bookings.find((b) => b.id === id),
+
+      // 🔍 Get bookings by vehicleId
+      getBookingsByVehicleId: (vehicleId) =>
+        get().bookings.filter((b) => b.vehicleId === vehicleId),
+
+      // 🔍 Get bookings by vehicleName
+      getBookingsByVehicleName: (vehicleName) =>
+        get().bookings.filter((b) => b.vehicleName === vehicleName),
+
+      // 🔍 Get bookings by status
+      getBookingsByStatus: (status) =>
+        get().bookings.filter((b) => b.status === status),
+    }),
+    {
+      name: 'booking-storage', // persisted key in localStorage
+    }
+  )
+);

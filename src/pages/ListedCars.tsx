@@ -70,7 +70,7 @@ const initialCars: Vehicle[] = [
     image: BlackCar,
   },
 ];
-
+type VehicleListType = "cars" | "autos" | "bikes";
 const ListedCars: React.FC = () => {
   const navigate = useNavigate();
   const { cars: userListedCars, deleteCar } = useListedCarsStore();

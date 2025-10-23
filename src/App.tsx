@@ -8,10 +8,12 @@ import Navbar from "./components/layout/NavBar";
 import Rental from "./pages/Rental";
 import ChangeLocation from "./pages/ChangeLocation";
 import ListedCars from "./pages/ListedCars";
-import Auto from "./pages/Autos";
+import AutoPage from "pages/Autos";
 import ListAutoPage from "./pages/ListAutoPage";
 import ListCarPage from "./pages/ListCarPage";
 import ListBikePage from "./pages/ListBikePage";
+import BikePage from "pages/Bike";
+
 import VehicleDetailsPage from "./pages/VehicleDetailsPage";
 import VehicleHistory from "./pages/VehicleHistory";
 import EditCarDetails from "./pages/EditCarDetails";
@@ -49,10 +51,12 @@ const App: React.FC = () => {
         <Route path="/listed" element={<ListedCars />} />
        <Route path="/listed" element={<ListedBikes />} />
 
-        <Route path="/auto" element={<Auto />} />
-        <Route path="/list-auto" element={<ListAutoPage />} />
-        <Route path="/list-car" element={<ListCarPage />} />
-          <Route path="/list-bike" element={<ListBikePage />} />
+  <Route path="/listed-autos" element={<AutoPage />} />
+  <Route path="/list-auto" element={<ListAutoPage />} />
+  <Route path="/list-car" element={<ListCarPage />} /> 
+  <Route path="/list-bike" element={<ListBikePage />} />
+  <Route path="/listed-bikes" element={<BikePage />} />
+        
         <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
         <Route path="/vehicle-details/:vehicleName" element={<VehicleHistory />} />
         <Route path="/vehicle-details/:vehicleName/edit/:bookingId" element={<EditCarDetails />} />
