@@ -1,7 +1,7 @@
 // src/pages/BookNow.tsx
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { vehicles } from "../data/vehicles";
+import { vehicles } from "./data/Vehicle";
 import { Vehicle } from "../types/Vehicle";
 import { Star } from "lucide-react";
 import BookingConfirmationModal from "../components/BookingConfirmationModal";
