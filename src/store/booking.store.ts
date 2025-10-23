@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
+export type VehicleType = 'vehicle' | 'car' | 'auto' | "bike"
 export interface Booking {
   id: string;
   vehicleId: string;
+   vehicleType: VehicleType; 
   vehicleName: string;
   vehicleType?: 'Cars' | 'Autos' | 'Bikes';
   customerName: string;

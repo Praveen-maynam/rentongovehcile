@@ -4,11 +4,13 @@ import Modal from "../../components/ui/modal"; // wrapper component
 import ProfileOption from "../../features/profile/components/profileOption";
 import Auto  from "../../assets/icons/Auto.png";
 import Car from "../../assets/icons/Car.png";
+import bike from "../../assets/icons/BikeLogo.png";
+
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (type: "car" | "auto") => void;
+  onSelect: (type: "car" | "auto" | "bike") => void;
 }
 
 const selectvehiclemodal: React.FC<Props> = ({ isOpen, onClose, onSelect }) => {
@@ -44,6 +46,17 @@ const selectvehiclemodal: React.FC<Props> = ({ isOpen, onClose, onSelect }) => {
               <img src={Auto} alt="Auto" className="w-8 h-8 object-contain filter brightness-0 invert" />
             </div>
             <span className="text-lg font-medium">Auto</span>
+            <span className="ml-auto text-gray-400">›</span>
+          </div>
+            {/* Bike Option */}
+          <div
+            className="flex items-center p-4 border rounded cursor-pointer hover:bg-gray-100 transition-colors"
+            onClick={() => onSelect("bike")}
+          >
+            <div className="bg-gradient-to-r from-indigo-500 to-blue-400 p-3 rounded mr-4 flex items-center justify-center w-14 h-14">
+              <img src={bike} alt="Bike" className="w-8 h-8 object-contain filter brightness-0 invert" />
+            </div>
+            <span className="text-lg font-medium">Bike</span>
             <span className="ml-auto text-gray-400">›</span>
           </div>
         </div>

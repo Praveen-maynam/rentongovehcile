@@ -179,6 +179,8 @@ const Navbar: React.FC = () => {
         navigate("/list-auto");
       } else if (type === "car") {
         navigate("/list-car");
+      } else if(type === "bike"){
+        navigate("/list-bike");
       }
     }}
     />

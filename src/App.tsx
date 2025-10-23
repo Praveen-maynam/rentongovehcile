@@ -11,10 +11,12 @@ import ListedCars from "./pages/ListedCars";
 import Auto from "./pages/Autos";
 import ListAutoPage from "./pages/ListAutoPage";
 import ListCarPage from "./pages/ListCarPage";
+import ListBikePage from "./pages/ListBikePage";
 import VehicleDetailsPage from "./pages/VehicleDetailsPage";
 import VehicleHistory from "./pages/VehicleHistory";
 import EditCarDetails from "./pages/EditCarDetails";
 import BookNow from "./pages/BookNow";
+import ListedBikes from "pages/ListedBikes";
 
 // import BookingConfirmation from "pages/BookingConformation";
 // import CallOrChat from "./pages/CallOrChat";
@@ -45,9 +47,12 @@ const App: React.FC = () => {
 
         {/* Cars / Autos */}
         <Route path="/listed" element={<ListedCars />} />
+       <Route path="/listed" element={<ListedBikes />} />
+
         <Route path="/auto" element={<Auto />} />
         <Route path="/list-auto" element={<ListAutoPage />} />
         <Route path="/list-car" element={<ListCarPage />} />
+          <Route path="/list-bike" element={<ListBikePage />} />
         <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
         <Route path="/vehicle-details/:vehicleName" element={<VehicleHistory />} />
         <Route path="/vehicle-details/:vehicleName/edit/:bookingId" element={<EditCarDetails />} />

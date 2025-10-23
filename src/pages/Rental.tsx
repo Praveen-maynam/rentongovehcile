@@ -18,7 +18,8 @@ const Rental: React.FC = () => {
 
   const cars = vehicles.filter((v) => v.type === "car");
   const autos = vehicles.filter((v) => v.type === "auto");
-
+   const bikes = vehicles.filter((v) => v.type === "bike");
+   //common reusable filter function
   const filteredCars = cars.filter(
     (v) =>
       v.name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -30,7 +31,11 @@ const Rental: React.FC = () => {
       v.name.toLowerCase().includes(searchText.toLowerCase()) ||
       v.location?.toLowerCase().includes(searchText.toLowerCase())
   );
-
+const filteredBikes = bikes.filter(
+    (v) =>
+      v.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      v.location?.toLowerCase().includes(searchText.toLowerCase())
+  );
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
 
