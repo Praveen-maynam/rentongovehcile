@@ -74,13 +74,15 @@ const Rental: React.FC = () => {
         </div>
       </div>
 
-      {/* 🚗 Nearby Cars */}
+   {/* 🚗 Nearby Cars */}
       <div className="px-6 py-4 flex flex-col gap-4">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-semibold">Nearby Cars</h2>
-          {filteredCars.length > 4 && !showAllCars && (
+
+          {filteredCars.length > 4 && (
             <button
-              onClick={() => setShowAllCars(true)}
+             onClick={() => navigate("/nearby-cars")}
+
               className="text-blue-600 hover:underline font-medium"
             >
               View More →
@@ -89,7 +91,7 @@ const Rental: React.FC = () => {
         </div>
 
         {filteredCars.length > 0 ? (
-          (showAllCars ? filteredCars : filteredCars.slice(0, 4)).map((v) => (
+          filteredCars.slice(0, 4).map((v) => (
             <VehicleCard
               key={v.id}
               vehicle={v}
@@ -99,15 +101,6 @@ const Rental: React.FC = () => {
           ))
         ) : (
           <p className="text-gray-500">No cars found.</p>
-        )}
-
-        {showAllCars && filteredCars.length > 4 && (
-          <button
-            onClick={() => setShowAllCars(false)}
-            className="text-blue-600 hover:underline font-medium text-center py-2"
-          >
-            Show Less ↑
-          </button>
         )}
       </div>
 
