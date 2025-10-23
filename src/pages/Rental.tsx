@@ -6,7 +6,6 @@ import AutoCard from "../components/ui/AutoCard";
 import DateTimePicker from "../components/ui/DateTimePicker";
 import FilterCard from "../components/ui/FilterCard";
 import PromoSlides from "../components/PromoSlides";
-import VehicleCarousel from "../components/VehicleCarousel";
 import { vehicles } from "./data/Vehicle";
 
 const Rental: React.FC = () => {
@@ -18,7 +17,6 @@ const Rental: React.FC = () => {
 
   const cars = vehicles.filter((v) => v.type === "car");
   const autos = vehicles.filter((v) => v.type === "auto");
-   const bikes = vehicles.filter((v) => v.type === "bike");
    //common reusable filter function
   const filteredCars = cars.filter(
     (v) =>
@@ -27,11 +25,6 @@ const Rental: React.FC = () => {
   );
 
   const filteredAutos = autos.filter(
-    (v) =>
-      v.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      v.location?.toLowerCase().includes(searchText.toLowerCase())
-  );
-const filteredBikes = bikes.filter(
     (v) =>
       v.name.toLowerCase().includes(searchText.toLowerCase()) ||
       v.location?.toLowerCase().includes(searchText.toLowerCase())

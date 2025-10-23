@@ -4,9 +4,8 @@ export type VehicleType = 'vehicle' | 'car' | 'auto' | "bike"
 export interface Booking {
   id: string;
   vehicleId: string;
-   vehicleType: VehicleType; 
+  vehicleType: 'Cars' | 'Autos' | 'Bikes';
   vehicleName: string;
-  vehicleType?: 'Cars' | 'Autos' | 'Bikes';
   customerName: string;
   bookingDate: string;
   bookingTime: string;

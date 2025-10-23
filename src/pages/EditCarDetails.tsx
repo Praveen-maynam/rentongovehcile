@@ -8,7 +8,6 @@ import { useVehicleStore } from "../store/vehicle.store";
 import { useListedCarsStore } from "../store/listedCars.store";
 import { useListedAutosStore } from "../store/listedAutos.store";
 import { useListedBikesStore } from "../store/listedBikes.store";
-import { useBookingStore } from "../store/booking.store";
 
 interface VehicleDetails {
   id?: string;
@@ -45,7 +44,6 @@ const EditCarDetails: React.FC = () => {
   const { cars, updateCar, deleteCar } = useListedCarsStore();
   const { autos, updateAuto, deleteAuto } = useListedAutosStore();
   const { bikes, updateBike, deleteBike } = useListedBikesStore();
-  const { getBookingById } = useBookingStore();
 
   const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [vehicleSource, setVehicleSource] = useState<'vehicle' | 'car' | 'auto' | 'bike' | 'none'>('none');
@@ -198,12 +196,6 @@ const EditCarDetails: React.FC = () => {
   const handleInputChange = (field: keyof VehicleDetails, value: any) =>
     setVehicleData(prev => ({ ...prev, [field]: value }));
 
-  const handleLocationChange = (field: keyof VehicleDetails["location"], value: string) =>
-    setVehicleData(prev => ({ ...prev, location: { ...prev.location, [field]: value } }));
-
-  const handleDocumentChange = (field: keyof VehicleDetails["documents"], value: any) =>
-    setVehicleData(prev => ({ ...prev, documents: { ...prev.documents, [field]: value } }));
-
   const handleSave = () => {
     if (vehicleSource === "vehicle" && vehicleId) {
       updateVehicle(vehicleId, vehicleData);
@@ -266,10 +258,6 @@ const EditCarDetails: React.FC = () => {
 
     alert("Vehicle deleted successfully!");
     navigate("/listed");
-  };
-
-  const handleAddPhoto = () => {
-    alert("Add photo functionality — file picker would open here.");
   };
 
   return (

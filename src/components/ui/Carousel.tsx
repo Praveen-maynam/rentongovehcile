@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CarouselProps {
@@ -21,9 +21,9 @@ const Carousel: React.FC<CarouselProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const totalSlides = children.length;
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % totalSlides);
-  };
+  }, [totalSlides]);
 
   const goToPrev = () => {
     setCurrentIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
@@ -38,7 +38,7 @@ const Carousel: React.FC<CarouselProps> = ({
       const interval = setInterval(goToNext, autoplayDelay);
       return () => clearInterval(interval);
     }
-  }, [autoplay, autoplayDelay, currentIndex]);
+  }, [autoplay, autoplayDelay, goToNext]);
 
   if (totalSlides === 0) return null;
 

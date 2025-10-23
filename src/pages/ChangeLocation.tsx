@@ -71,7 +71,6 @@ const ChangeLocation: React.FC = () => {
           setIsDetecting(false);
         },
         (error) => {
-          console.error("Geolocation error:", error);
           alert("Unable to detect your location. Please enable location services or select manually.");
           setIsDetecting(false);
         },

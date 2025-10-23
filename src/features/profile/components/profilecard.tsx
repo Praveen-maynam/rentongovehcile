@@ -27,7 +27,6 @@ const ProfileCard: React.FC = () => {
   };
 
   const handleSave = () => {
-    console.log("Profile saved:", profile);
     alert("Profile updated successfully!");
   };
 

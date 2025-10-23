@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -42,25 +42,25 @@ const ChangeView: React.FC<{ center: [number, number]; zoom: number }> = ({ cent
 const LocationMap: React.FC<LocationMapProps> = ({ city, country }) => {
   const [position, setPosition] = useState<[number, number]>([16.9891, 82.2475]); // Default: Kakinada
 
-  // City coordinates mapping
-  const cityCoordinates: { [key: string]: [number, number] } = {
-    Kakinada: [16.9891, 82.2475],
-    Hyderabad: [17.385044, 78.486671],
-    Vizag: [17.6868, 83.2185],
-    Mumbai: [19.076, 72.8777],
-    Delhi: [28.7041, 77.1025],
-    Bangalore: [12.9716, 77.5946],
-    Chennai: [13.0827, 80.2707],
-    Kolkata: [22.5726, 88.3639],
-    Pune: [18.5204, 73.8567],
-    Ahmedabad: [23.0225, 72.5714],
-  };
+  // City coordinates mapping - memoized to prevent recreating on every render
+  const cityCoordinates = useMemo(() => ({
+    Kakinada: [16.9891, 82.2475] as [number, number],
+    Hyderabad: [17.385044, 78.486671] as [number, number],
+    Vizag: [17.6868, 83.2185] as [number, number],
+    Mumbai: [19.076, 72.8777] as [number, number],
+    Delhi: [28.7041, 77.1025] as [number, number],
+    Bangalore: [12.9716, 77.5946] as [number, number],
+    Chennai: [13.0827, 80.2707] as [number, number],
+    Kolkata: [22.5726, 88.3639] as [number, number],
+    Pune: [18.5204, 73.8567] as [number, number],
+    Ahmedabad: [23.0225, 72.5714] as [number, number],
+  }), []);
 
   useEffect(() => {
     if (city && cityCoordinates[city]) {
       setPosition(cityCoordinates[city]);
     }
-  }, [city]);
+  }, [city, cityCoordinates]);
 
   return (
     <div className="h-full w-full rounded-lg overflow-hidden shadow-md">
