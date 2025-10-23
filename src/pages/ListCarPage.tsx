@@ -3,10 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
 
+
+
 const ListCarPage: React.FC = () => {
   const navigate = useNavigate();
   const { addCar } = useListedCarsStore();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+
+
   const [formData, setFormData] = useState({
     carName: "",
     vehicleNumber: "",
@@ -297,6 +302,15 @@ const ListCarPage: React.FC = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   required
                 />
+
+                {/* <ContactNumberInput
+         value={formData.contactNumber}
+         onChange={handleInputChange}
+           label="Contact Number"
+           placeholder="1234567897"
+           required
+           error={formData.contactNumber.length > 0 && formData.contactNumber.length < 10 ? "Invalid number" : ""}
+             /> */}
               </div>
             </div>
 
