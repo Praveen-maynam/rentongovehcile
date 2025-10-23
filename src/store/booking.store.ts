@@ -5,6 +5,7 @@ export interface Booking {
   id: string;
   vehicleId: string;
   vehicleName: string;
+  vehicleType?: 'Cars' | 'Autos' | 'Bikes';
   customerName: string;
   bookingDate: string;
   bookingTime: string;

@@ -503,6 +503,8 @@ const Rental: React.FC = () => {
   const navigate = useNavigate();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [showAllCars, setShowAllCars] = useState(false);
+  const [showAllAutos, setShowAllAutos] = useState(false);
 
   // Inline DateTime picker states
   const [showDateTimePicker, setShowDateTimePicker] = useState(false);
@@ -737,9 +739,11 @@ const Rental: React.FC = () => {
         </div>
       </div>
 
+      {/* Filter Card Modal */}
       {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
     </div>
   );
 };
 
 export default Rental;
+

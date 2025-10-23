@@ -143,11 +143,11 @@ const ListedCars: React.FC = () => {
   const dropdownIcon = selectedList === "cars" ? CarLogo : AutoLogo;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
       {/* Top Row */}
-      <div className="flex justify-between items-center mb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-6 gap-4">
         {/* Dropdown */}
-        <div className="flex items-center w-[300px] h-[50px] border rounded-lg px-3">
+        <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3">
           <img src={dropdownIcon} alt="Dropdown Logo" className="w-[24px] h-[24px]" />
           <select
             className="flex-1 ml-2 border-none outline-none text-sm"
@@ -165,8 +165,8 @@ const ListedCars: React.FC = () => {
         </div>
 
         {/* Search + Filter */}
-        <div className="flex gap-2">
-          <div className="relative w-[300px] h-[50px]">
+        <div className="flex gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:w-[300px] h-[50px]">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">
               🔍
             </span>
@@ -186,7 +186,7 @@ const ListedCars: React.FC = () => {
       </div>
 
       {/* Title */}
-      <h2 className="text-5xl font-semibold mb-6">
+      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6">
         Listed Car's
       </h2>
 
@@ -195,28 +195,28 @@ const ListedCars: React.FC = () => {
         {filteredCars.map((item, index) => (
           <div
             key={index}
-            className="flex flex-col sm:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-[1200px] h-[307px] overflow-hidden cursor-pointer"
+            className="flex flex-col lg:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-full max-w-full lg:max-w-[1200px] min-h-[307px] overflow-hidden cursor-pointer"
             onClick={() => handleCarClick(item)}
           >
             {/* Car Image */}
-            <div className="w-[270px] h-[270px] overflow-hidden rounded-lg flex-shrink-0">
+            <div className="w-full sm:w-[270px] h-[200px] sm:h-[270px] overflow-hidden rounded-lg flex-shrink-0">
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-[270px] h-[270px] object-cover object-[85%_50%]"
+                className="w-full h-full object-cover object-center sm:object-[85%_50%]"
               />
             </div>
 
             {/* Details */}
-            <div className="flex-1 mt-3 sm:mt-0 sm:ml-4">
-              <div className="flex items-center gap-4">
-                <h3 className="font-semibold text-lg">{item.name}</h3>
+            <div className="flex-1 mt-3 lg:mt-0 lg:ml-4 w-full lg:w-auto">
+              <div className="flex items-center gap-4 flex-wrap">
+                <h3 className="font-semibold text-base sm:text-lg">{item.name}</h3>
                 <span className="flex items-center justify-center w-[72px] h-[32px] text-gray-700 text-sm">
                   ⭐ {item.rating}
                 </span>
               </div>
 
-              <p className="font-bold text-blue-600 text-lg mt-1">
+              <p className="font-bold text-blue-600 text-base sm:text-lg mt-1">
                 ₹{item.price}/hr
               </p>
 
@@ -241,8 +241,8 @@ const ListedCars: React.FC = () => {
             </div>
 
             {/* Menu and Status */}
-            <div className="flex flex-col items-end w-full sm:w-auto mt-3 sm:mt-0">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col items-end w-full lg:w-auto mt-3 lg:mt-0">
+              <div className="flex items-center gap-2 justify-end">
                 <select
                   className={`text-sm font-medium px-2 py-1 rounded-lg border ${
                     item.available

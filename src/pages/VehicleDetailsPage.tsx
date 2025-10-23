@@ -3,8 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useReviewStore } from "../store/review.store";
 import { vehicles } from "./data/Vehicle";
+import StarRating from "../components/ui/StarRating";
 
 const VehicleDetailsPage: React.FC = () => {
+  
   const { id } = useParams();
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -53,24 +55,6 @@ const VehicleDetailsPage: React.FC = () => {
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + vehicle.images.length) % vehicle.images.length);
-  };
-
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />);
-    }
-    if (hasHalfStar) {
-      stars.push(<Star key="half" className="w-4 h-4 fill-yellow-400 text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} />);
-    }
-    const remainingStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < remainingStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
-    }
-    return stars;
   };
 
   return (
@@ -193,22 +177,22 @@ const VehicleDetailsPage: React.FC = () => {
                   <Star className="w-5 h-5 text-gray-400" />
                   <h3 className="font-semibold text-gray-900">Ratings & Reviews</h3>
                 </div>
-
+{/* {same} */}
                 <div className="flex items-end gap-4 mb-4">
                   <span className="text-5xl font-bold text-gray-900">{vehicle.rating}</span>
                   <div className="pb-2">
                     <div className="flex mb-1">
-                      {renderStars(vehicle.rating)}
+                      <StarRating rating={vehicle.rating} />
                     </div>
                     <p className="text-sm text-gray-600">{vehicle.totalReviews} reviews</p>
                   </div>
                 </div>
 
                 {/* Rating Distribution */}
-                <div className="space-y-2">
+                <div className="flex flex-row gap-2">
                   {ratingDistribution.map((item) => (
-                    <div key={item.stars} className="flex items-center gap-3">
-                      <span className="text-sm font-medium w-4">{item.stars}</span>
+                    <div key={item.stars} className="flex items-center gap-2">
+                      <span className="text-sm font-medium w-3">{item.stars}</span>
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
@@ -216,7 +200,7 @@ const VehicleDetailsPage: React.FC = () => {
                           style={{ width: `${item.percentage}%` }}
                         />
                       </div>
-                      <span className="text-sm text-gray-600 w-16 text-right">{item.count} ({item.percentage}%)</span>
+                      <span className="text-xs text-gray-500 w-10 text-right">{item.percentage}%</span>
                     </div>
                   ))}
                 </div>
@@ -244,7 +228,7 @@ const VehicleDetailsPage: React.FC = () => {
                             <div className="flex items-center justify-between mb-1">
                               <h4 className="font-semibold text-gray-900">{review.userName}</h4>
                               <div className="flex">
-                                {renderStars(review.rating)}
+                                <StarRating rating={review.rating} size="sm" />
                               </div>
                             </div>
                             <p className="text-xs text-gray-500 mb-2">{review.location}</p>

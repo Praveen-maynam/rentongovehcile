@@ -1,6 +1,9 @@
 
 import { Vehicle } from "../../types/Vehicle";
 
+import { Vehicle } from "../../types/Vehicle";
+import BlackCar from "../../assets/images/BlackCar.png";
+import AutoImage from "../../assets/images/Auto.png";
 export const vehicles: Vehicle[] = [
   {
     id: "1",
@@ -105,5 +108,58 @@ export const vehicles: Vehicle[] = [
     type: "car",
     location: "Hyderabad",
     available: true,
+  },
+
+  {
+    id: "3",
+    name: "Bajaj RE",
+    price: 150,
+    transmission: "Manual",
+    fuel: "CNG",
+    seats: 3,
+    location: "Kakinada, Main Road",
+    rating: 4.0,
+    available: true,
+    type: "auto",
+    image: AutoImage,
+  },
+  {
+    id: "4",
+    name: "Piaggio Ape",
+    price: 160,
+    transmission: "Manual",
+    fuel: "Diesel",
+    seats: 3,
+    location: "Rajahmundry, Kotipalli Bus Stand",
+    rating: 4.3,
+    available: true,
+    type: "auto",
+    image: AutoImage,
+  },
+  {
+    id: "5",
+    name: "TVS King",
+    price: 155,
+    transmission: "Manual",
+    fuel: "CNG",
+    seats: 3,
+    location: "Vijayawada, MG Road",
+    rating: 4.1,
+    available: true,
+    type: "auto",
+    image: AutoImage,
+  },
+  {
+    id: "6",
+    name: "Mahindra Alfa",
+    price: 165,
+    transmission: "Manual",
+    fuel: "Diesel",
+    seats: 3,
+    location: "Visakhapatnam, Dwaraka Nagar",
+    rating: 4.4,
+    available: true,
+    type: "auto",
+    image: AutoImage,
   },
 ];
