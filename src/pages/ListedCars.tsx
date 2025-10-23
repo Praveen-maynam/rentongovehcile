@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
+import { useLocation } from "../store/location.context";
 
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
@@ -73,6 +74,7 @@ const initialCars: Vehicle[] = [
 type VehicleListType = "cars" | "autos" | "bikes";
 const ListedCars: React.FC = () => {
   const navigate = useNavigate();
+  const { currentCity } = useLocation();
   const { cars: userListedCars, deleteCar } = useListedCarsStore();
   const [cars, setCars] = useState<Vehicle[]>(initialCars);
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
@@ -80,7 +82,7 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Combine default cars with user-listed cars
+  // Combine default cars with user-listed cars and filter by location
   const allCars = useMemo(() => {
     const userCars: Vehicle[] = userListedCars.map((car) => ({
       name: `${car.carName} ${car.model}`,
@@ -95,8 +97,14 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
       id: car.id, // Keep ID for deletion
     }));
     
-    return [...userCars, ...cars];
-  }, [userListedCars, cars]);
+    const allVehicles = [...userCars, ...cars];
+    
+    // Filter by current location
+    return allVehicles.filter((vehicle) => {
+      const vehicleCity = vehicle.location?.split(',')[0].trim() || '';
+      return vehicleCity.toLowerCase() === currentCity.toLowerCase();
+    });
+  }, [userListedCars, cars, currentCity]);
 
   // Update availability and navigate if Available
   const handleStatusChange = (index: number, value: string) => {
@@ -198,12 +206,18 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
 
       {/* Title */}
       <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6">
-        Listed Car's
+        Listed Cars in {currentCity}
       </h2>
 
       {/* Listed Cars */}
       <div className="flex flex-col gap-6">
-        {filteredCars.map((item, index) => (
+        {filteredCars.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg mb-2">No cars listed in {currentCity}</p>
+            <p className="text-gray-400 text-sm">Try changing your location to see more vehicles</p>
+          </div>
+        ) : (
+          filteredCars.map((item, index) => (
           <div
             key={index}
             className="flex flex-col lg:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-full max-w-full lg:max-w-[1200px] min-h-[307px] overflow-hidden cursor-pointer"
@@ -308,7 +322,8 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
               </div>
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

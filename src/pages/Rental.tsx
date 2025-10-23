@@ -1,29 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+<<<<<<< HEAD
 import { Search } from "lucide-react";
 import VehicleCard from "../components/ui/VehicleCard";
 import AutoCard from "../components/ui/AutoCard";
 import BikeCard from "../components/ui/BikeCard";// ✅ Corrected import
+=======
+import { Search, Calendar, Clock } from "lucide-react";
+import VehicleCard from "../components/ui/VehicleCard";
+import AutoCard from "../components/ui/AutoCard";
+import DateRangePickerModal from "../components/ui/DateRangePickerModal";
+>>>>>>> a0e652b (auto card)
 import DateTimePicker from "../components/ui/DateTimePicker";
 import FilterCard from "../components/ui/FilterCard";
 import PromoSlides from "../components/PromoSlides";
 import VehicleCarousel from "../components/VehicleCarousel";
 import { vehicles } from "./data/Vehicle";
+import { useLocation } from "../store/location.context";
 
 const Rental: React.FC = () => {
   const navigate = useNavigate();
+<<<<<<< HEAD
 
   // ✅ State management
+=======
+  const { currentCity } = useLocation();
+>>>>>>> a0e652b (auto card)
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [startDate, setStartDate] = useState(new Date());
   const [showAllCars, setShowAllCars] = useState(false);
   const [showAllAutos, setShowAllAutos] = useState(false);
   const [showAllBikes, setShowAllBikes] = useState(false);
 
+<<<<<<< HEAD
   // ✅ Filter vehicles by type
   const cars = vehicles.filter((v) => v.type === "car");
   const autos = vehicles.filter((v) => v.type === "auto");
   const bikes = vehicles.filter((v) => v.type === "bike");
+=======
+  // Filter vehicles by selected location (city)
+  const locationFilteredVehicles = useMemo(() => {
+    return vehicles.filter((v) => {
+      // Extract city name from location string (e.g., "Kakinada, Main Road" -> "Kakinada")
+      const vehicleCity = v.location?.split(',')[0].trim() || '';
+      return vehicleCity.toLowerCase() === currentCity.toLowerCase();
+    });
+  }, [currentCity]);
+
+  const cars = locationFilteredVehicles.filter((v) => v.type === "car");
+  const autos = locationFilteredVehicles.filter((v) => v.type === "auto");
+>>>>>>> a0e652b (auto card)
 
   // ✅ Common reusable filter
   const filterVehicles = (list: any[]) =>
@@ -50,7 +77,13 @@ const Rental: React.FC = () => {
           <h3 className="text-lg font-semibold mb-2 text-gray-800">
             Select Date & Time
           </h3>
-          <DateTimePicker />
+          <DateTimePicker 
+            value={startDate} 
+            onChange={setStartDate} 
+            minDate={new Date()} 
+          />
+
+          
         </div>
 
         <div className="flex items-center gap-2">
@@ -77,7 +110,7 @@ const Rental: React.FC = () => {
       {/* 🚗 Nearby Cars */}
       <div className="px-6 py-4 flex flex-col gap-4">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-semibold">Nearby Cars</h2>
+          <h2 className="text-xl font-semibold">Near by Cars  </h2>
           {filteredCars.length > 4 && !showAllCars && (
             <button
               onClick={() => setShowAllCars(true)}
@@ -98,7 +131,7 @@ const Rental: React.FC = () => {
             />
           ))
         ) : (
-          <p className="text-gray-500">No cars found.</p>
+          <p className="text-gray-500">No cars found in {currentCity}. Change location to see more vehicles.</p>
         )}
 
         {showAllCars && filteredCars.length > 4 && (
@@ -114,7 +147,7 @@ const Rental: React.FC = () => {
       {/* 🛺 Autos */}
       <div className="px-6 py-4 mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Looking for an Auto?</h2>
+          <h2 className="text-xl font-semibold">Autos in {currentCity}</h2>
           {filteredAutos.length > 4 && !showAllAutos && (
             <button
               onClick={() => setShowAllAutos(true)}
@@ -138,7 +171,7 @@ const Rental: React.FC = () => {
               )
             )
           ) : (
-            <p className="text-gray-500">No autos found.</p>
+            <p className="text-gray-500">No autos found in {currentCity}. Change location to see more vehicles.</p>
           )}
         </div>
 
@@ -199,4 +232,5 @@ const Rental: React.FC = () => {
 };
 
 export default Rental;
+
 
