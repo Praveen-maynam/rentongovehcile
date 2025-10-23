@@ -2,17 +2,14 @@ import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Edit2 } from "lucide-react";
 import { useReviewStore } from "../store/review.store";
-import { useNotificationStore } from "../store/notification.store";
 
 const Feedback: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { addReview } = useReviewStore();
-  const { deleteNotification } = useNotificationStore();
   
   const vehicleId = searchParams.get('vehicleId') || '1';
   const vehicleName = searchParams.get('vehicleName') || 'Vehicle';
-  const bookingId = searchParams.get('bookingId');
   
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");

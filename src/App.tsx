@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 // Layout
 import Navbar from "./components/layout/NavBar";
@@ -17,10 +17,6 @@ import VehicleHistory from "./pages/VehicleHistory";
 import EditCarDetails from "./pages/EditCarDetails";
 import BookNow from "./pages/BookNow";
 import ListedBikes from "pages/ListedBikes";
-
-// import BookingConfirmation from "pages/BookingConformation";
-// import CallOrChat from "./pages/CallOrChat";
-import Notifications from "./pages/Notifications";
 import NotificationPage from "./features/profile/pages/notification";
 import ProfilePage from "./features/profile/pages/profile";
 import MyProfile from "./pages/MyProfile";
@@ -76,31 +72,8 @@ const App: React.FC = () => {
 
         {/* Booking Flow */}
         <Route path="/book-now/:id" element={<BookNow />} />
-        {/* <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />
-        <Route path="/call-or-chat" element={<CallOrChat />} /> */}
       </Routes>
     </div>
-
-// import Confirmation from "pages/Confirmation";
-// import ProfilePage from "./pages/ProfilePage";
-
-// const App: React.FC = () => {
-//   return (
-//     <Router>
-//       <div className="min-h-screen bg-[#f8fafc]">
-//         <Navbar />
-//         <Routes>
-//           <Route path="/" element={<Rental />} />
-//           <Route path="/rental" element={<Rental />} />
-//           <Route path="/listed" element={<ListedCars />} />
-//           <Route path="/auto" element={<Auto />} />
-//           <Route path="/booknow/:id" element={<BookNow />} />
-//           <Route path="/booking-confirmation/:id" element={<Confirmation />} />
-//           <Route path="/profile" element={<ProfilePage />} />
-//         </Routes>
-//       </div>
-//     </Router>
-
   );
 };
 

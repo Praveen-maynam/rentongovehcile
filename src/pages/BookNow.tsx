@@ -22,13 +22,13 @@ const BookNow: React.FC = () => {
   
   if (!vehicle) return <p className="p-8">Vehicle not found!</p>;
 // Map vehicle.type safely
-  const mapVehicleType = (type: Vehicle['type'] | undefined): Vehicle['type'] => {
-    const typeMap: Record<string, Vehicle['type']> = {
-      car: 'car',
-      auto: 'auto',
-      bike: 'bike',
+  const mapVehicleType = (type: Vehicle['type'] | undefined): 'Cars' | 'Autos' | 'Bikes' => {
+    const typeMap: Record<string, 'Cars' | 'Autos' | 'Bikes'> = {
+      car: 'Cars',
+      auto: 'Autos',
+      bike: 'Bikes',
     };
-    return type ? typeMap[type] || 'car' : 'car';
+    return type ? typeMap[type] || 'Cars' : 'Cars';
   };
   const vehicleReviews = vehicle ? getReviewsByVehicleId(vehicle.id) : [];
   const averageRating = vehicle ? getAverageRating(vehicle.id) : 0;

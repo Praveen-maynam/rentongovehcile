@@ -28,7 +28,7 @@ const VehicleHistory: React.FC = () => {
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  const { getBookingsByVehicleName, updateBooking } = useBookingStore();
+  const { getBookingsByVehicleName } = useBookingStore();
   const { getVehicleByName } = useVehicleStore();
   const { cars } = useListedCarsStore();
   const { autos } = useListedAutosStore();
@@ -143,14 +143,12 @@ const VehicleHistory: React.FC = () => {
 
   const handleSave = () => {
     // Save logic here
-    console.log("Saving vehicle details:", editedVehicle);
     setIsEditMode(false);
     // You can add API call or store update here
   };
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this vehicle?")) {
-      console.log("Deleting vehicle:", vehicleName);
       // Add delete logic here
       navigate("/my-listings"); // Navigate back after delete
     }

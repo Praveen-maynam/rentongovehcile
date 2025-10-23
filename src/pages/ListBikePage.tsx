@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useListedBikesStore, ListedBike } from "../store/listedBikes.store";
+import { useListedBikesStore } from "../store/listedBikes.store";
 
 const BookingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -39,12 +39,6 @@ const BookingPage: React.FC = () => {
     }
 
     // Save booking (here we just log it, you can store it in another store)
-    console.log("Booking Created:", {
-      bikeId: bike.id,
-      bikeName: bike.vehicleName,
-      ...bookingDetails,
-    });
-
     alert(`Booking confirmed for ${bike.vehicleName}!`);
     navigate("/"); // redirect to homepage or booking list
   };

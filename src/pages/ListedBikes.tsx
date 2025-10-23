@@ -11,8 +11,6 @@ import ActivaBike from "../assets/images/Activa.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
 import BikeLogo from "../assets/icons/BikeLogo.png";
-import CarLogo from "../assets/icons/CarLogo.png";
-import AutoLogo from "../assets/icons/AutoLogo.png";
 import FilterLogo from "../assets/icons/FilterLogo.png";
 
 interface Vehicle {

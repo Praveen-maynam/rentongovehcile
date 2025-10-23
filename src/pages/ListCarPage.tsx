@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreVertical } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
 
 const ListCarPage: React.FC = () => {
