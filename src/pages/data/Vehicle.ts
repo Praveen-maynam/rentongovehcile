@@ -1,6 +1,10 @@
 import { Vehicle } from "../../types/Vehicle";
 import BlackCar from "../../assets/images/BlackCar.png";
 import AutoImage from "../../assets/images/Auto.png";
+import Enfied from "../../assets/images/Enfield.png";
+import yamaha from "../../assets/images/yamaha.png";
+import TVS from "../../assets/images/tvs-ntorq.png";
+import Activa from "../../assets/images/Activa.png";
 export const vehicles: Vehicle[] = [
   {
     id: "1",
@@ -158,5 +162,57 @@ export const vehicles: Vehicle[] = [
     available: true,
     type: "auto",
     image: AutoImage,
+  },
+  {
+    id: "b1",
+    name: "Royal Enfield Classic 350",
+    price: 120,
+    transmission: "Manual",
+    fuel: "Petrol",
+    seats: 2,
+    location: "Kakinada, Main Road",
+    rating: 4.6,
+    available: true,
+    image: Enfied,
+    type: "bike",
+  },
+  {
+    id: "b2",
+    name: "Yamaha FZ-S",
+    price: 100,
+    transmission: "Manual",
+    fuel: "Petrol",
+    seats: 2,
+    location: "Rajahmundry, Kotipalli Bus Stand",
+    rating: 4.3,
+    available: true,
+    image: yamaha,
+    type: "bike",
+  },
+  {
+    id: "b3",
+    name: "TVS Ntorq",
+    price: 100,
+    transmission: "Automatic",
+    fuel: "Petrol",
+    seats: 2,
+    location: "Vijayawada, MG Road",
+    rating: 4.4,
+    available: true,
+    image: TVS,
+    type: "bike",
+  },
+  {
+    id: "b4",
+    name: "Honda Activa 6G",
+    price: 90,
+    transmission: "Manual",
+    fuel: "Petrol",
+    seats: 2,
+    location: "Visakhapatnam, Dwaraka Nagar",
+    rating: 4.2,
+    available: true,
+    image: Activa,
+    type: "bike",
   },
 ];

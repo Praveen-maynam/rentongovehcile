@@ -693,7 +693,6 @@ const VehicleHistory: React.FC = () => {
                 placeholder="Door Name"
                 className="w-[343px] h-[48px] border-2 border-gray-400 rounded-md p-2 mt-2"
               />
-              
 
               <button className="w-[343px] h-[48px] bg-blue-600 text-white rounded-md mt-4">
                 Save

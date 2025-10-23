@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { vehicles } from "./data/Vehicle";
-import { Vehicle } from "../types/Vehicle";
+import { Vehicle} from "../types/Vehicle";
 import { Star } from "lucide-react";
 import BookingConfirmationModal from "../components/BookingConfirmationModal";
 import { useReviewStore } from "../store/review.store";
@@ -19,7 +19,17 @@ const BookNow: React.FC = () => {
   
   const [showContactButtons, setShowContactButtons] = React.useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = React.useState(false);
-
+  
+  if (!vehicle) return <p className="p-8">Vehicle not found!</p>;
+// Map vehicle.type safely
+  const mapVehicleType = (type: Vehicle['type'] | undefined): Vehicle['type'] => {
+    const typeMap: Record<string, Vehicle['type']> = {
+      car: 'car',
+      auto: 'auto',
+      bike: 'bike',
+    };
+    return type ? typeMap[type] || 'car' : 'car';
+  };
   const vehicleReviews = vehicle ? getReviewsByVehicleId(vehicle.id) : [];
   const averageRating = vehicle ? getAverageRating(vehicle.id) : 0;
   const totalReviews = vehicle ? getTotalReviewCount(vehicle.id) : 0;
@@ -37,6 +47,7 @@ const BookNow: React.FC = () => {
       addBooking({
         vehicleId: vehicle.id,
         vehicleName: vehicle.name,
+        vehicleType: mapVehicleType(vehicle.type),
         customerName: "Current User",
         bookingDate: currentDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
         bookingTime: currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),

@@ -1,90 +1,11 @@
-
-// import React from "react";
-// import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
-// import { MapPin } from "lucide-react";
-// import { useLocation } from "../../store/location.context";
-// import rentongoLogo from "../../assets/rentongo.png"; // ✅ correct relative path
-
-// const Navbar: React.FC = () => {
-//   const navigate = useNavigate();
-//   const routerLocation = useRouterLocation();
-//   const { currentCity } = useLocation();
-
-//   const navItems = [
-//     { name: "Rental", path: "/rental" },
-//     { name: "Listed", path: "/listed" },
-//     { name: "Auto", path: "/auto" },
-//     { name: "Profile", path: "/profile" },
-//     { name: "Notifications", path: "/notifications" },
-//   ];
-
-//   return (
-//     <nav className="w-full bg-white shadow-sm border-b border-gray-100">
-//       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-//         {/* ✅ Rentongo Logo */}
-//         <div
-//           className="flex items-center cursor-pointer"
-//           onClick={() => navigate("/")}
-//         >
-//           <img
-//             src={rentongoLogo}
-//             alt="Rentongo Logo"
-//             className="object-contain w-[214px] h-[64px]"
-//           />
-//         </div>
-
-//         {/* ✅ Location + Navigation Menu */}
-//         <div className="flex items-center gap-6 sm:gap-8">
-//           <div className="flex items-center gap-1 text-gray-700 cursor-pointer" onClick={() => navigate("/change-location")}>
-//             <MapPin size={18} />
-//             <span className="text-sm font-medium">{currentCity}</span>
-//           </div>
-
-//           {navItems.map((item) => (
-//             <button
-//               key={item.name}
-//               onClick={() => navigate(item.path)}
-//               className={`relative text-sm font-medium transition-all ${
-//                 routerLocation.pathname === item.path
-//                   ? "text-blue-600"
-//                   : "text-gray-700 hover:text-blue-600"
-//               }`}
-//             >
-//               {item.name}
-//               {routerLocation.pathname === item.path && (
-//                 <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-blue-600 rounded-full"></span>
-//               )}
-//             </button>
-//           ))}
-
-//           {/* ✅ Listing Button */}
-//           <button
-//             onClick={() => navigate("/listing")}
-//             className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-all"
-//           >
-//             Listing +
-//           </button>
-//         </div>
-//       </div>
-//     </nav>
-//   );
-// };
-
-// export default Navbar;
 import React, { useState } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { MapPin, Menu, X } from "lucide-react";
 import { useLocation } from "../../store/location.context";
 import { useNotificationStore } from "../../store/notification.store";
-import SelectVehicleModal from "../../components/ui/selectvehiclemodal"; // adjust path as needed
+import SelectVehicleModal from "../../components/ui/selectvehiclemodal"; // adjust path
 
-
-
-
-// ✅ Correct import with exact case
 import RentOnGoLogo from "../../assets/icons/RentOnGoLogo.png";
-
-
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -97,40 +18,38 @@ const Navbar: React.FC = () => {
   const navItems = [
     { name: "Rental", path: "/rental" },
     { name: "Listed", path: "/listed" },
-    // { name: "Auto", path: "/auto" },
     { name: "Profile", path: "/profile" },
     { name: "Notifications", path: "/notifications" },
   ];
 
   const handleNavigate = (path: string) => {
     navigate(path);
-    setMenuOpen(false); // close mobile menu when navigating
+    setMenuOpen(false);
+  };
+
+  const handleVehicleSelect = (type: "car" | "auto" | "bike") => {
+    setIsModalOpen(false);
+    if (type === "car") navigate("/list-car");
+    else if (type === "auto") navigate("/list-auto");
+    else if (type === "bike") navigate("/list-bike");
   };
 
   return (
-
-    
-
     <nav className="w-full bg-white shadow-sm border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-        {/* ✅ RentOnGo Logo */}
-
+        {/* Logo */}
         <div
           className="flex items-center cursor-pointer"
           onClick={() => handleNavigate("/")}
         >
           <img
-
             src={RentOnGoLogo}
-            alt="Rentongo Logo"
+            alt="RentOnGo Logo"
             className="object-contain w-[180px] sm:w-[214px] h-[48px] sm:h-[64px]"
-
-           
-
           />
         </div>
 
-        {/* ✅ Desktop Menu */}
+        {/* Desktop Menu */}
         <div className="hidden lg:flex items-center gap-6">
           <div
             className="flex items-center gap-1 text-gray-700 cursor-pointer hover:text-blue-600"
@@ -162,30 +81,16 @@ const Navbar: React.FC = () => {
             </button>
           ))}
 
-          {/* ✅ Listing Button */}
+          {/* Listing Button */}
           <button
-            onClick={() =>setIsModalOpen(true)}
+            onClick={() => setIsModalOpen(true)}
             className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-all"
           >
             Listing +
           </button>
-
-          <SelectVehicleModal
-       isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
-       onSelect={(type) => {
-      setIsModalOpen(false);
-      if (type === "auto") {
-        navigate("/list-auto");
-      } else if (type === "car") {
-        navigate("/list-car");
-      }
-    }}
-    />
-
         </div>
 
-        {/* ✅ Mobile Menu Button */}
+        {/* Mobile Menu Button */}
         <button
           className="lg:hidden flex items-center text-gray-700 hover:text-blue-600 transition"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -194,7 +99,7 @@ const Navbar: React.FC = () => {
         </button>
       </div>
 
-      {/* ✅ Mobile Menu Drawer */}
+      {/* Mobile Menu Drawer */}
       {menuOpen && (
         <div className="lg:hidden bg-white shadow-md border-t border-gray-100 px-6 py-4 animate-slide-down">
           <div
@@ -237,19 +142,12 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       )}
-      
-      {/* ✅ Modal for mobile (outside drawer) */}
+
+      {/* Select Vehicle Modal */}
       <SelectVehicleModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSelect={(type) => {
-          setIsModalOpen(false);
-          if (type === "auto") {
-            navigate("/list-auto");
-          } else if (type === "car") {
-            navigate("/list-car");
-          }
-        }}
+        onSelect={handleVehicleSelect}
       />
     </nav>
   );

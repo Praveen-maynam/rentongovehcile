@@ -12,12 +12,14 @@ export interface VehicleData {
   rating: string;
   image: string;
   description: string;
+   type: "car" | "auto" | "bike"; 
   location: {
     state: string;
     district: string;
     city: string;
     pincode: string;
     street: string;
+     
   };
   documents: {
     drivingLicense: boolean;
