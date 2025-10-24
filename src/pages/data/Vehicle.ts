@@ -86,9 +86,6 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Petrol",
     rating: 4.5,
-<<<<<<< HEAD
-    image: "/verna.jpg",
-=======
     image: BlackCar,
 >>>>>>> 66b6a0a (Initial commit)
     type: "car",
