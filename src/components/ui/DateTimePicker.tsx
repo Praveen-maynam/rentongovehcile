@@ -1,5 +1,5 @@
 import React from "react";
-
+ 
 interface DateTimePickerProps {
   value: Date;
   onChange: (date: Date) => void;
@@ -7,7 +7,7 @@ interface DateTimePickerProps {
   maxDate?: Date;
   className?: string;
 }
-
+ 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
   value,
   onChange,
@@ -18,7 +18,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   const formatDateForInput = (date: Date) => {
     return date.toISOString().slice(0, 16); // Format: "YYYY-MM-DDThh:mm"
   };
-
+ 
   return (
     <input
       type="datetime-local"
@@ -30,5 +30,6 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
     />
   );
 };
-
+ 
 export default DateTimePicker;
+ 

@@ -77,7 +77,7 @@ const App: React.FC = () => {
         {/* Calendar */}
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/calendar-screen" element={<CalendarScreen />} />
-
+        
         {/* Booking Flow */}
         <Route path="/book-now/:id" element={<BookNow />} />
         {/* <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />

@@ -1,4 +1,3 @@
-
 import { Vehicle } from "../../types/Vehicle";
 import BlackCar from "../../assets/images/BlackCar.png";
 import AutoImage from "../../assets/images/Auto.png";
@@ -217,5 +216,3 @@ export const vehicles: Vehicle[] = [
     type: "bike",
   },
 ];
-
-  
