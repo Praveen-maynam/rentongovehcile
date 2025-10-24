@@ -12,7 +12,8 @@ import AutoPage from "pages/Autos";
 import ListAutoPage from "./pages/ListAutoPage";
 import ListCarPage from "./pages/ListCarPage";
 import ListBikePage from "./pages/ListBikePage";
-import BikePage from "pages/Bike";
+import BikePage from "./pages/Bike";
+import Nearbycars from "./pages/NearByCars";
 
 import VehicleDetailsPage from "./pages/VehicleDetailsPage";
 import VehicleHistory from "./pages/VehicleHistory";
@@ -56,7 +57,9 @@ const App: React.FC = () => {
   <Route path="/list-car" element={<ListCarPage />} /> 
   <Route path="/list-bike" element={<ListBikePage />} />
   <Route path="/listed-bikes" element={<BikePage />} />
-        
+ <Route path="/nearby-cars" element={<Nearbycars />} />
+
+
         <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
         <Route path="/vehicle-details/:vehicleName" element={<VehicleHistory />} />
         <Route path="/vehicle-details/:vehicleName/edit/:bookingId" element={<EditCarDetails />} />

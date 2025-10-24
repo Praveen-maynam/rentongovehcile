@@ -60,6 +60,7 @@ const AutoPage: React.FC = () => {
     navigate(
       value === "cars" ? "/listed-cars" :
       value === "autos" ? "/listed-autos" :
+      value === "bikes" ? "/listed-bikes":
       "/listed-bikes"
     );
   };

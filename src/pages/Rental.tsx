@@ -195,184 +195,162 @@
 // export default Rental;
 
 import React, { useState } from "react";
-import { FaCalendarAlt } from "react-icons/fa";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from "react-router-dom";
+import { Search } from "lucide-react";
 
-const DateTimeRangePicker: React.FC = () => {
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [openPicker, setOpenPicker] = useState<"start" | "end" | null>(null);
+import VehicleCard from "../components/ui/VehicleCard";
+import AutoCard from "../components/ui/AutoCard";
+import BikeCard from "../components/ui/BikeCard";
+import DateTimePicker from "../components/ui/DateTimePicker";
+import FilterCard from "../components/ui/FilterCard";
+import PromoSlides from "../components/PromoSlides";
+import { vehicles } from "./data/Vehicle";
 
-  // Handle start date/time selection
-  const handleStartChange = (date: Date | null) => {
-    setStartDate(date);
-    if (date && (!endDate || date > endDate)) setEndDate(null); // reset end if before start
-    setOpenPicker("end"); // auto open end after start
-  };
+type VehicleType = "car" | "auto" | "bike";
 
-  // Handle end date/time selection
-  const handleEndChange = (date: Date | null) => {
-    setEndDate(date);
-    setOpenPicker(null);
-  };
+interface VehicleSectionProps {
+  title: string;
+  vehicles: typeof vehicles;
+  showBookButton?: boolean;
+  type: VehicleType;
+}
+
+const VehicleSection: React.FC<VehicleSectionProps> = ({
+  title,
+  vehicles,
+  showBookButton = false,
+  type,
+}) => {
+  const navigate = useNavigate();
+  const [showAll, setShowAll] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-8">
-      <div className="flex space-x-6">
-        {/* Start Date & Time */}
-        <div className="relative w-60">
+    <div className="px-6 py-4 mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        {vehicles.length > 4 && !showAll && (
           <button
-            onClick={() => setOpenPicker(openPicker === "start" ? null : "start")}
-            className="flex items-center justify-between border border-gray-300 rounded-lg px-4 py-2 w-full bg-white shadow-sm hover:border-blue-500 transition"
+            onClick={() => setShowAll(true)}
+            className="text-blue-600 hover:underline font-medium"
           >
-            <div className="flex items-center space-x-2">
-              <FaCalendarAlt className="text-gray-500" />
-              <div className="text-left">
-                <p className="text-sm text-gray-500">Start Date & Time</p>
-                <p className="font-medium text-gray-800">
-                  {startDate
-                    ? `${startDate.toLocaleDateString()} | ${startDate.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}`
-                    : "Select"}
-                </p>
-              </div>
-            </div>
-          </button>
-
-          {openPicker === "start" && (
-            <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg p-4 w-[500px] flex">
-              {/* Calendar */}
-              <div className="border-r pr-4">
-                <DatePicker
-                  selected={startDate}
-                  onChange={handleStartChange}
-                  inline
-                  showTimeSelect
-                  dateFormat="Pp"
-                />
-              </div>
-
-              {/* Time Selection */}
-              <div className="pl-4 w-1/2">
-                <h3 className="font-semibold mb-2">Select Time</h3>
-                <div className="flex justify-between space-x-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Start Time</p>
-                    <div className="bg-gray-100 px-3 py-2 rounded text-center font-medium">
-                      {startDate
-                        ? startDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                        : "--:--"}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">End Time</p>
-                    <div className="bg-gray-100 px-3 py-2 rounded text-center text-gray-400">
-                      Waiting...
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* End Date & Time */}
-        <div className="relative w-60">
-          <button
-            onClick={() => setOpenPicker(openPicker === "end" ? null : "end")}
-            disabled={!startDate}
-            className={`flex items-center justify-between border rounded-lg px-4 py-2 w-full shadow-sm transition ${
-              startDate
-                ? "bg-white border-gray-300 hover:border-blue-500"
-                : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-            }`}
-          >
-            <div className="flex items-center space-x-2">
-              <FaCalendarAlt className="text-gray-500" />
-              <div className="text-left">
-                <p className="text-sm text-gray-500">End Date & Time</p>
-                <p className="font-medium text-gray-800">
-                  {endDate
-                    ? `${endDate.toLocaleDateString()} | ${endDate.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}`
-                    : "Select"}
-                </p>
-              </div>
-            </div>
-          </button>
-
-          {openPicker === "end" && (
-            <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg p-4 w-[500px] flex">
-              {/* Calendar */}
-              <div className="border-r pr-4">
-                <DatePicker
-                  selected={endDate}
-                  onChange={handleEndChange}
-                  inline
-                  showTimeSelect
-                  dateFormat="Pp"
-                  minDate={startDate || undefined}
-                  minTime={
-                    startDate && endDate && startDate.toDateString() === endDate.toDateString()
-                      ? startDate
-                      : undefined
-                  }
-                />
-              </div>
-
-              {/* Time Selection */}
-              <div className="pl-4 w-1/2">
-                <h3 className="font-semibold mb-2">Select Time</h3>
-                <div className="flex justify-between space-x-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Start Time</p>
-                    <div className="bg-gray-100 px-3 py-2 rounded text-center font-medium">
-                      {startDate
-                        ? startDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                        : "--:--"}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">End Time</p>
-                    <div className="bg-gray-100 px-3 py-2 rounded text-center font-medium">
-                      {endDate
-                        ? endDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                        : "--:--"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {showAllAutos && filteredAutos.length > 4 && (
-          <button 
-            onClick={() => setShowAllAutos(false)}
-            className="text-blue-600 hover:underline font-medium text-center py-2 mt-4 w-full"
-          >
-            Show Less ↑
+            View More →
           </button>
         )}
       </div>
 
-      {/* Summary */}
-      {startDate && endDate && (
-        <div className="mt-6 bg-white p-4 rounded-lg shadow text-center">
-          <h3 className="font-semibold mb-2">Selected Range</h3>
-          <p>
-            <span className="font-medium">Start:</span> {startDate.toLocaleString()} <br />
-            <span className="font-medium">End:</span> {endDate.toLocaleString()}
-          </p>
-        </div>
+      <div className="flex flex-wrap gap-4">
+        {(showAll ? vehicles : vehicles.slice(0, 4)).map((v, index) => {
+          switch (type) {
+            case "car":
+              return (
+                <VehicleCard
+                  key={v.id}
+                  vehicle={v}
+                  showActions={false}
+                  onBook={() => navigate(`/book-now/${v.id}`)}
+                />
+              );
+            case "auto":
+              return (
+                <AutoCard
+                  key={v.id}
+                  vehicle={v}
+                  showBookButton={showBookButton && index === 0}
+                  onBook={() => navigate(`/book-now/${v.id}`)}
+                />
+              );
+            case "bike":
+              return (
+                <BikeCard
+                  key={v.id}
+                  vehicle={v}
+                  showBookButton={showBookButton && index === 0}
+                  onBook={() => navigate(`/book-now/${v.id}`)}
+                />
+              );
+          }
+        })}
+      </div>
+
+      {showAll && vehicles.length > 4 && (
+        <button
+          onClick={() => setShowAll(false)}
+          className="text-blue-600 hover:underline font-medium text-center py-2 mt-4 w-full"
+        >
+          Show Less ↑
+        </button>
       )}
     </div>
   );
 };
 
-export default DateTimeRangePicker;
+const Rental: React.FC = () => {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  // Filter vehicles by search text
+  const filterVehicles = (list: typeof vehicles) =>
+    list.filter(
+      (v) =>
+        v.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        v.location?.toLowerCase().includes(searchText.toLowerCase())
+    );
+
+  const cars = filterVehicles(vehicles.filter((v) => v.type === "car"));
+  const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
+  const bikes = filterVehicles(vehicles.filter((v) => v.type === "bike"));
+
+  return (
+    <div className="bg-gray-50 min-h-screen flex flex-col">
+      {/* 🔹 Promotional Slides */}
+      <div className="px-6 py-4">
+        <PromoSlides />
+      </div>
+
+      {/* 🔹 Search + DateTimePicker */}
+      <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-2 text-gray-800">
+            Select Date & Time
+          </h3>
+          <DateTimePicker value={selectedDate} onChange={setSelectedDate} />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-white border rounded-full px-3 py-1 w-full md:w-60">
+            <Search className="w-4 h-4 text-gray-500 mr-2" />
+            <input
+              type="text"
+              placeholder="Search by name or location..."
+              className="flex-1 outline-none text-gray-700 text-sm"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </div>
+
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium px-4 py-2 rounded-full shadow hover:opacity-90 transition"
+          >
+            Filter
+          </button>
+        </div>
+      </div>
+
+      {/* 🚗 Cars Section */}
+      <VehicleSection title="Nearby Cars" vehicles={cars} type="car" />
+
+      {/* 🛺 Autos Section */}
+      <VehicleSection title="Looking for an Auto?" vehicles={autos} type="auto" />
+
+      {/* 🏍 Bikes Section */}
+      <VehicleSection title="Looking for a Bike?" vehicles={bikes} type="bike" />
+
+      {/* Filter Card Modal */}
+      {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
+    </div>
+  );
+};
+
+export default Rental;
