@@ -1,7 +1,7 @@
-<<<<<<< HEAD
+// <<<<<<< HEAD
 
-=======
->>>>>>> 66b6a0a (Initial commit)
+// =======
+// >>>>>>> 66b6a0a (Initial commit)
 import { Vehicle } from "../../types/Vehicle";
 import BlackCar from "../../assets/images/BlackCar.png";
 import AutoImage from "../../assets/images/Auto.png";
@@ -18,11 +18,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Petrol",
     rating: 4.2,
-<<<<<<< HEAD
-    image: "/verna.jpg",
-=======
+
     image: BlackCar,
->>>>>>> 66b6a0a (Initial commit)
+
     type: "car",
     location: "Kakinada",
     available: true,
@@ -35,11 +33,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Petrol",
     rating: 4.0,
-<<<<<<< HEAD
-    image: "/swift.jpg",
-=======
+
     image: BlackCar,
->>>>>>> 66b6a0a (Initial commit)
+
     type: "car",
     location: "Kakinada",
     available: true,
@@ -52,11 +48,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "CNG",
     rating: 4.0,
-<<<<<<< HEAD
-    image: "/auto1.jpg",
-=======
+
     image:AutoImage,
->>>>>>> 66b6a0a (Initial commit)
+
     type: "auto",
     location: "Kakinada",
     available: true,
@@ -69,11 +63,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Diesel",
     rating: 4.3,
-<<<<<<< HEAD
-    image: "/auto2.jpg",
-=======
+
     image: AutoImage,
->>>>>>> 66b6a0a (Initial commit)
+
     type: "auto",
     location: "Kakinada",
     available: false,
@@ -86,8 +78,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Petrol",
     rating: 4.5,
+
     image: BlackCar,
->>>>>>> 66b6a0a (Initial commit)
+
     type: "car",
     location: "Bangalore",
     available: true,
@@ -100,11 +93,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Diesel",
     rating: 4.7,
-<<<<<<< HEAD
-    image: "/swift.jpg",
-=======
+
     image: BlackCar,
->>>>>>> 66b6a0a (Initial commit)
+
     type: "car",
     location: "Bangalore",
     available: true,
@@ -117,11 +108,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Diesel",
     rating: 4.4,
-<<<<<<< HEAD
-    image: "/verna.jpg",
-=======
+
     image: BlackCar,
->>>>>>> 66b6a0a (Initial commit)
+
     type: "car",
     location: "Hyderabad",
     available: true,
@@ -134,11 +123,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Petrol",
     rating: 4.3,
-<<<<<<< HEAD
-    image: "/swift.jpg",
-=======
+
     image: BlackCar,
->>>>>>> 66b6a0a (Initial commit)
+
     type: "car",
     location: "Hyderabad",
     available: true,
@@ -196,62 +183,4 @@ export const vehicles: Vehicle[] = [
     type: "auto",
     image: AutoImage,
   },
-<<<<<<< HEAD
-  {
-    id: "b1",
-    name: "Royal Enfield Classic 350",
-    price: 120,
-    transmission: "Manual",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Kakinada, Main Road",
-    rating: 4.6,
-    available: true,
-    image: Enfied,
-    type: "bike",
-  },
-  {
-    id: "b2",
-    name: "Yamaha FZ-S",
-    price: 100,
-    transmission: "Manual",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Rajahmundry, Kotipalli Bus Stand",
-    rating: 4.3,
-    available: true,
-    image: yamaha,
-    type: "bike",
-  },
-  {
-    id: "b3",
-    name: "TVS Ntorq",
-    price: 100,
-    transmission: "Automatic",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Vijayawada, MG Road",
-    rating: 4.4,
-    available: true,
-    image: TVS,
-    type: "bike",
-  },
-  {
-    id: "b4",
-    name: "Honda Activa 6G",
-    price: 90,
-    transmission: "Manual",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Visakhapatnam, Dwaraka Nagar",
-    rating: 4.2,
-    available: true,
-    image: Activa,
-    type: "bike",
-  },
 ];
-
-  
-=======
-];
->>>>>>> 66b6a0a (Initial commit)
