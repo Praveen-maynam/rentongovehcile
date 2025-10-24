@@ -4,7 +4,7 @@ import Modal from "../../components/ui/modal"; // wrapper component
 import ProfileOption from "../../features/profile/components/profileOption";
 import Auto  from "../../assets/icons/Auto.png";
 import Car from "../../assets/icons/Car.png";
-import bike from "../../assets/icons/BikeLogo.png";
+import bike from "../../assets/icons/sportbike.png";
 
 
 interface Props {

@@ -46,20 +46,8 @@ const AutoPage: React.FC = () => {
       image: auto.photos[0] || AutoImage,
       type: "auto",
     }));
-<<<<<<< HEAD
     return [...autos, ...userAutosAsVehicles];
   }, [autos, userListedAutos]);
-=======
-    
-    const allVehicles = [...autos, ...userAutosAsVehicles];
-    
-    // Filter by current location
-    return allVehicles.filter((vehicle) => {
-      const vehicleCity = vehicle.location?.split(',')[0].trim() || '';
-      return vehicleCity.toLowerCase() === currentCity.toLowerCase();
-    });
-  }, [userListedAutos, currentCity]);
->>>>>>> a0e652b (auto card)
 
   const filteredAutos = allAutos.filter((v) =>
     v.name.toLowerCase().includes(searchText.toLowerCase())
@@ -147,19 +135,8 @@ const AutoPage: React.FC = () => {
       <h2 className="text-3xl font-semibold mb-6">Listed Autos in {currentCity}</h2>
 
       {/* Autos List */}
-<<<<<<< HEAD
       <div className="flex flex-col gap-4 sm:gap-6">
         {filteredAutos.map((item, index) => (
-=======
-      <div className="flex flex-col gap-6">
-        {filteredAutos.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-2">No autos listed in {currentCity}</p>
-            <p className="text-gray-400 text-sm">Try changing your location to see more vehicles</p>
-          </div>
-        ) : (
-          filteredAutos.map((item, index) => (
->>>>>>> a0e652b (auto card)
           <div
             key={item.id || index}
             className="flex flex-col sm:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-full sm:w-[1200px] overflow-hidden"
@@ -224,8 +201,7 @@ const AutoPage: React.FC = () => {
               </div>
             </div>
           </div>
-          ))
-        )}
+        ))}
       </div>
 
       {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
