@@ -7,6 +7,8 @@ import DriverLogo from "../../assets/icons/seats.jpeg";
 interface BikeCardProps {
   vehicle: Vehicle;
   showBookButton?: boolean;
+   onEdit?: (vehicle: Vehicle) => void;
+  onDelete?: (vehicle: Vehicle) => void;
   onBook?: (vehicle: Vehicle) => void;
 }
 
@@ -14,6 +16,8 @@ const BikeCard: React.FC<BikeCardProps> = ({
   vehicle,
   showBookButton = false,
   onBook,
+  onEdit,
+  onDelete,
 }) => {
   const navigate = useNavigate();
   const { getAverageRating } = useReviewStore();
@@ -31,11 +35,12 @@ const BikeCard: React.FC<BikeCardProps> = ({
 
   return (
     <div className="flex flex-col">
-      {/* Bike Card */}
-      <div
-        className="flex flex-col bg-white shadow-md rounded-xl p-4 cursor-pointer hover:shadow-lg transition w-full sm:w-[250px] h-auto"
-        onClick={handleCardClick}
-      >
+    <div
+  className="flex flex-col bg-white shadow-md rounded-xl cursor-pointer border border-transparent
+             transition-all duration-200 hover:shadow-lg hover:border-blue-500 hover:scale-95
+             w-full sm:w-[220px] md:w-[240px] lg:w-[260px]"
+  onClick={handleCardClick}
+>
         {/* Bike Image */}
         <div className="w-full h-[200px] overflow-hidden rounded-lg mb-3">
           <img 
@@ -70,19 +75,7 @@ const BikeCard: React.FC<BikeCardProps> = ({
         </div>
       </div>
 
-      {/* Book Now Button (optional) */}
-      {showBookButton && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleBook();
-          }}
-          className="mt-3 w-full sm:w-[250px] bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium py-3 px-6 rounded-full shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2"
-        >
-          Book now
-          <span className="text-xl">→</span>
-        </button>
-      )}
+
     </div>
   );
 };

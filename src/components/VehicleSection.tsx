@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import VehicleCard from "../components/ui/VehicleCard";
 import AutoCard from "../components/ui/AutoCard";
@@ -11,8 +11,8 @@ interface VehicleSectionProps {
   vehicles: typeof import("../pages/data/Vehicle").vehicles;
   showBookButton?: boolean;
   type: VehicleType;
-  viewMoreLink?: string; // optional navigation link
-  hideViewMore?: boolean; // NEW prop to hide the button
+  hideViewMore?: boolean;
+  viewMoreLink?: string; // ✅ added this
 }
 
 const VehicleSection: React.FC<VehicleSectionProps> = ({
@@ -20,21 +20,44 @@ const VehicleSection: React.FC<VehicleSectionProps> = ({
   vehicles,
   showBookButton = false,
   type,
+  hideViewMore = false,
   viewMoreLink,
-  hideViewMore = false, // default false
 }) => {
   const navigate = useNavigate();
-  const [showAll, setShowAll] = useState(false);
+
+  // ✅ Only show first 4 vehicles
+  const visibleVehicles = vehicles.slice(0, 4);
+
+  // ✅ When clicking “View More”
+  const handleViewMore = () => {
+    if (viewMoreLink) navigate(viewMoreLink);
+    else {
+      switch (type) {
+        case "car":
+          navigate("/nearby-cars");
+          break;
+        case "auto":
+          navigate("/nearby-autos");
+          break;
+        case "bike":
+          navigate("/nearby-bikes");
+          break;
+        default:
+          break;
+      }
+    }
+  };
 
   return (
     <div className="px-6 py-4 mb-6">
+      {/* Title + View More */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">{title}</h2>
-        {!hideViewMore && vehicles.length > 4 && !showAll && (
+        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+
+        {/* ✅ fixed syntax */}
+        {!hideViewMore && vehicles.length > 4 && (
           <button
-            onClick={() =>
-              viewMoreLink ? navigate(viewMoreLink) : setShowAll(true)
-            }
+            onClick={handleViewMore}
             className="text-blue-600 hover:underline font-medium"
           >
             View More →
@@ -42,15 +65,15 @@ const VehicleSection: React.FC<VehicleSectionProps> = ({
         )}
       </div>
 
+      {/* Vehicle Grid */}
       <div className="flex flex-wrap gap-4">
-        {(showAll ? vehicles : vehicles.slice(0, 4)).map((v, index) => {
+        {visibleVehicles.map((v, index) => {
           switch (type) {
             case "car":
               return (
                 <VehicleCard
                   key={v.id}
                   vehicle={v}
-                  showActions={false}
                   onBook={() => navigate(`/book-now/${v.id}`)}
                 />
               );
@@ -72,18 +95,11 @@ const VehicleSection: React.FC<VehicleSectionProps> = ({
                   onBook={() => navigate(`/book-now/${v.id}`)}
                 />
               );
+            default:
+              return null; // ✅ Added explicit return
           }
         })}
       </div>
-
-      {showAll && !hideViewMore && vehicles.length > 4 && (
-        <button
-          onClick={() => setShowAll(false)}
-          className="text-blue-600 hover:underline font-medium text-center py-2 mt-4 w-full"
-        >
-          Show Less ↑
-        </button>
-      )}
     </div>
   );
 };

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
 import { useLocation } from "../store/location.context";
-
+import AvailabilityDateTimeModal from "../components/AvailabilityDateTimeModal";
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
@@ -73,6 +73,8 @@ const initialCars: Vehicle[] = [
 ];
 type VehicleListType = "cars" | "autos" | "bikes";
 const ListedCars: React.FC = () => {
+    // ...existing state
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
   const navigate = useNavigate();
   const { currentCity } = useLocation();
   const { cars: userListedCars, deleteCar } = useListedCarsStore();
@@ -111,9 +113,8 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
     const newCars = [...cars];
     newCars[index].available = value === "Available";
     setCars(newCars);
-
-    if (value === "Available") {
-      navigate("/Calendar");
+ if (value === "Available") {
+      setShowCalendarModal(true); // Show modal instead of navigating
     }
   };
 
@@ -158,11 +159,16 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
     : BikeLogo; // For bikes
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+      <>
+       <div className={`p-4 sm:p-6 bg-gray-50 min-h-screen transition-all duration-300 ${showCalendarModal ? 'blur-sm' : ''}`}>
+        {/* ...existing code for dropdown, search, listed cars */}
+       {/* Calendar Modal */}
+      
       {/* Top Row */}
       <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-6 gap-4">
         {/* Dropdown */}
         <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3">
+          
           <img src={dropdownIcon} alt="Dropdown Logo" className="w-[24px] h-[24px]" />
        <select
   className="flex-1 ml-2 border-none outline-none text-sm"
@@ -171,7 +177,7 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
     const value = e.target.value as "cars" | "autos" | "bikes";
     setSelectedList(value);
 
-    if (value === "cars") navigate("/listed-cars");
+    if (value === "cars") navigate("/listed");
     else if (value === "autos") navigate("/listed-autos");
     else if (value === "bikes") navigate("/listed-bikes");
   }}
@@ -220,11 +226,11 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
           filteredCars.map((item, index) => (
           <div
             key={index}
-            className="flex flex-col lg:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-full max-w-full lg:max-w-[1200px] min-h-[307px] overflow-hidden cursor-pointer"
+            className="flex flex-col lg:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-full max-w-full lg:max-w-[800px] min-h-[100px] overflow-hidden cursor-pointer"
             onClick={() => handleCarClick(item)}
           >
             {/* Car Image */}
-            <div className="w-full sm:w-[270px] h-[200px] sm:h-[270px] overflow-hidden rounded-lg flex-shrink-0">
+            <div className="w-full sm:w-[270px] h-[150px] sm:h-[200px] overflow-hidden rounded-lg flex-shrink-0">
               <img
                 src={item.image}
                 alt={item.name}
@@ -326,7 +332,18 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
         )}
       </div>
     </div>
-  );
-};
-
+{/* Calendar modal (outside blurred div) */}
+{showCalendarModal && (
+  <AvailabilityDateTimeModal
+    isOpen={showCalendarModal}
+    onClose={() => setShowCalendarModal(false)}
+    onConfirm={(startDate, endDate, startTime, endTime) => {
+      console.log({ startDate, endDate, startTime, endTime });
+      setShowCalendarModal(false);
+    }}
+  />
+)}
+    </>
+    );
+  };
 export default ListedCars;
