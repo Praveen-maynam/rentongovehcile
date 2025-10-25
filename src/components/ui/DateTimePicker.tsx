@@ -1,16 +1,23 @@
-import React, { useState } from "react";
+import React from "react";
 
-const DateTimePicker: React.FC = () => {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+interface DateTimePickerProps {
+  value: string; // you are using string dates
+  onChange: (newValue: string) => void;
+  minDate?: string; // optional minimum date
+}
 
+const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange, minDate }) => {
   return (
     <div className="flex gap-4 mb-6">
-      <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border rounded px-3 py-2" />
-      <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border rounded px-3 py-2" />
-    
+      <input
+        type="date"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        min={minDate}
+        className="border rounded px-3 py-2"
+      />
     </div>
   );
 };
 
-export default DateTimePickerModal;
+export default DateTimePicker;

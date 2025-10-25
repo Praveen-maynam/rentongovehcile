@@ -35,6 +35,14 @@ import Help from "./pages/Help";
 import Feedback from "./pages/Feedback";
 import Calendar from "./pages/Calendar";
 import CalendarScreen from "./pages/CalendarScreen";
+import ProfileCard from "./features/profile/components/profilecard";
+import Profile from "./features/profile/pages/profile";
+import listedCars from "./pages/ListedCars";
+import Autos from "./pages/Autos";
+
+
+
+
 
 const App: React.FC = () => {
   return (
@@ -59,11 +67,18 @@ const App: React.FC = () => {
   <Route path="/listed-bikes" element={<BikePage />} />
  <Route path="/nearby-cars" element={<Nearbycars />} />
 
+     
+<Route path="/profile" element={<ProfilePage />} />
+      <Route path="/cars" element={<ListedCars />} />
+  <Route path="/autos" element={<Autos />} />
+
 
         <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
         <Route path="/vehicle-details/:vehicleName" element={<VehicleHistory />} />
         <Route path="/vehicle-details/:vehicleName/edit/:bookingId" element={<EditCarDetails />} />
 
+
+  <Route path="/profile" element={<Profile />} />
         {/* Profile & User */}
         <Route path="/profile" element={<ProfilePage />} /> 
         <Route path="/my-profile" element={<MyProfile />} />

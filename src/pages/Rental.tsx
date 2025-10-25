@@ -91,7 +91,14 @@ const VehicleSection: React.FC<VehicleSectionProps> = ({
 const Rental: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  // Use string dates for the DateTimePicker
+  const [startDate, setStartDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const [endDate, setEndDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
 
   // Filter vehicles by search text
   const filterVehicles = (list: typeof vehicles) =>
@@ -118,7 +125,13 @@ const Rental: React.FC = () => {
           <h3 className="text-lg font-semibold mb-2 text-gray-800">
             Select Date & Time
           </h3>
-          <DateTimePicker value={selectedDate} onChange={setSelectedDate} />
+          {/* Updated DateTimePickers */}
+          <DateTimePicker
+            value={startDate}
+            onChange={setStartDate}
+            minDate={new Date().toISOString().split("T")[0]}
+          />
+          <DateTimePicker value={endDate} onChange={setEndDate} minDate={startDate} />
         </div>
 
         <div className="flex items-center gap-2">

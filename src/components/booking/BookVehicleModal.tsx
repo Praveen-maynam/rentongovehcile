@@ -16,8 +16,11 @@ export const BookVehicleModal: React.FC<BookVehicleModalProps> = ({
   vehicleId,
   vehicleName,
 }) => {
-  const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>(new Date());
+  // Use string dates compatible with your DateTimePicker
+  const today = new Date().toISOString().split('T')[0];
+  const [startDate, setStartDate] = useState<string>(today);
+  const [endDate, setEndDate] = useState<string>(today);
+
   const { createBooking, isLoading, error } = useBooking();
 
   if (!isOpen) return null;
@@ -27,9 +30,9 @@ export const BookVehicleModal: React.FC<BookVehicleModalProps> = ({
       await createBooking({
         vehicleId,
         vehicleName,
-        startDate,
-        endDate,
-        userId: 'current-user-id', // In production, get from auth context
+        startDate: new Date(startDate), // convert string to Date
+      endDate: new Date(endDate),     // convert string to Date
+      userId: 'current-user-id', // Get from auth context in production
       });
       onClose();
     } catch (err) {
@@ -53,38 +56,31 @@ export const BookVehicleModal: React.FC<BookVehicleModalProps> = ({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Start Date & Time
+              Start Date
             </label>
             <DateTimePicker
               value={startDate}
               onChange={setStartDate}
-              minDate={new Date()}
+              minDate={today}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              End Date & Time
+              End Date
             </label>
             <DateTimePicker
               value={endDate}
               onChange={setEndDate}
-              minDate={startDate}
+              minDate={startDate} // endDate cannot be before startDate
             />
           </div>
 
           <div className="flex gap-3 justify-end pt-4">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={isLoading}
-            >
+            <Button variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button
-              onClick={handleBooking}
-              loading={isLoading}
-            >
+            <Button onClick={handleBooking} loading={isLoading}>
               Book Now
             </Button>
           </div>
