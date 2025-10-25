@@ -24,14 +24,14 @@ const ListedAutos: React.FC = () => {
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const navigate = useNavigate();
   const { currentCity } = useLocation();
-  const { autos: userListedAutos, deleteAuto } = useListedAutosStore();
+  const { autos: userAutos, deleteAuto } = useListedAutosStore();
 
   const [autos, setAutos] = useState<Vehicle[]>(intialAutos);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("autos");
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
 
-  // Combine default autos with user-listed autos and filter by location
+  // Combine default autos + user autos
   const allAutos = useMemo(() => {
     const userAutosFormatted: Vehicle[] = userAutos.map((auto) => ({
       id: auto.id,
@@ -54,8 +54,7 @@ const ListedAutos: React.FC = () => {
       const vehicleCity = vehicle.location?.split(',')[0].trim() || '';
       return vehicleCity.toLowerCase() === currentCity.toLowerCase();
     });
-  }, [userListedAutos, currentCity]);
-
+  }, [userAutos, autos, currentCity]);
 
   const filteredAutos = allAutos.filter((auto) =>
     auto.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -106,7 +105,7 @@ const ListedAutos: React.FC = () => {
               onChange={(e) => {
                 const value = e.target.value as "cars" | "autos" | "bikes";
                 setSelectedList(value);
-                if (value === "cars") navigate("/listed");
+                if (value === "cars") navigate("/listed-cars");
                 else if (value === "autos") navigate("/listed-autos");
                 else navigate("/listed-bikes");
               }}
@@ -135,7 +134,7 @@ const ListedAutos: React.FC = () => {
           </div>
         </div>
 
-      <h2 className="text-3xl font-semibold mb-6">Listed Autos in {currentCity}</h2>
+        <h2 className="text-3xl font-semibold mb-6">Listed Autos in {currentCity}</h2>
 
         <div className="flex flex-col gap-6">
           {filteredAutos.length === 0 ? (
@@ -151,7 +150,7 @@ const ListedAutos: React.FC = () => {
                 onClick={() => handleCarClick(item)}
               >
                 {/* Image */}
-                <div className="w-full sm:w-[200px] h-[100px] sm:h-[200px] overflow-hidden rounded-lg flex-shrink-0">
+                <div className="w-full sm:w-[270px] h-[100px] sm:h-[270px] overflow-hidden rounded-lg flex-shrink-0">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover object-[85%_50%]" />
                 </div>
 
