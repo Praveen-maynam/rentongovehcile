@@ -1,49 +1,3 @@
-// // Profile page component will be implemented here
-// import React from "react";
-// import {
-//   User,
-//   CalendarDays,
-//   ListChecks,
-//   Languages,
-//   Download,
-//   Info,
-//   Shield,
-//   HelpCircle,
-// } from "lucide-react";
-// import ProfileOption from "../components/profileOption";
-// import ProfileCard from "../components/profilecard"
-
-// const Profile: React.FC = () => {
-//   return (
-//     <div className="max-w-md mx-auto bg-white shadow-md rounded-xl mt-6 overflow-hidden">
-//       <div className="px-4 py-3 border-b border-gray-200">
-//         <h2 className="text-lg font-semibold text-gray-900">Profile</h2>
-//       </div>
-
-//       <div className="divide-y divide-gray-100">
-//         {/* Main Section */}
-//         <ProfileOption icon={User} label="My Profile" onClick={() =><ProfileCard/>} />
-//         <ProfileOption icon={CalendarDays} label="My Bookings" onClick={() => console.log("My Bookings")} />
-//         <ProfileOption icon={ListChecks} label="My Listing Bookings" onClick={() => console.log("My Listing Bookings")} />
-//         <ProfileOption icon={Languages} label="Change Language" onClick={() => console.log("Change Language")} />
-//         <ProfileOption icon={Download} label="Download Our App" onClick={() => console.log("Download App")} />
-         
-//         {/* Subheader */}
-//         <div className="px-4 py-2 text-xs font-semibold text-gray-500 bg-gray-50">Support & Settings</div>
-
-//         {/* Support Section */}
-//         <ProfileOption icon={Shield} label="Privacy Policy" onClick={() => console.log("Privacy Policy")} />
-//         <ProfileOption icon={Info} label="About Us" onClick={() => console.log("About Us")} />
-//         <ProfileOption icon={HelpCircle} label="Help" onClick={() => console.log("Help")} />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Profile;
-
-
-// src/pages/Profile.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -60,24 +14,27 @@ import {
 } from "lucide-react";
 import ProfileOption from "../components/profileOption";
 import ProfileCard from "../components/profilecard";
+
 import { useLanguageStore, Language } from "../../../store/languageStore";
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { currentLanguage, setLanguage } = useLanguageStore();
+
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+
   const modalRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   const languages = [
-    { code: 'en' as Language, name: 'English' },
-    { code: 'es' as Language, name: 'Español' },
-    { code: 'fr' as Language, name: 'Français' },
-    { code: 'de' as Language, name: 'Deutsch' },
+    { code: "en" as Language, name: "English" },
+    { code: "es" as Language, name: "Español" },
+    { code: "fr" as Language, name: "Français" },
+    { code: "de" as Language, name: "Deutsch" },
   ];
 
-  // close on ESC
+  // Close modals on ESC
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -85,11 +42,12 @@ const Profile: React.FC = () => {
         setShowLanguageModal(false);
       }
     };
-    if (showProfileModal || showLanguageModal) document.addEventListener("keydown", onKey);
+    if (showProfileModal || showLanguageModal)
+      document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [showProfileModal, showLanguageModal]);
 
-  // return focus to trigger after close
+  // Return focus to trigger after close
   useEffect(() => {
     if (!showProfileModal && triggerRef.current) triggerRef.current.focus();
   }, [showProfileModal]);
@@ -106,18 +64,18 @@ const Profile: React.FC = () => {
 
   const handleDownloadApp = () => {
     const userAgent = navigator.userAgent || navigator.vendor;
-    
-    // Check if iOS
+
     if (/iPad|iPhone|iPod/.test(userAgent)) {
-      window.open('https://apps.apple.com/app/rentongo', '_blank');
-    }
-    // Check if Android
-    else if (/android/i.test(userAgent)) {
-      window.open('https://play.google.com/store/apps/details?id=com.rentongo', '_blank');
-    }
-    // Desktop or unknown
-    else {
-      alert('📱 Download our mobile app from:\n\n🍎 App Store (iOS)\n🤖 Google Play Store (Android)\n\nComing soon!');
+      window.open("https://apps.apple.com/app/rentongo", "_blank");
+    } else if (/android/i.test(userAgent)) {
+      window.open(
+        "https://play.google.com/store/apps/details?id=com.rentongo",
+        "_blank"
+      );
+    } else {
+      alert(
+        "📱 Download our mobile app from:\n\n🍎 App Store (iOS)\n🤖 Google Play Store (Android)\n\nComing soon!"
+      );
     }
   };
 
@@ -142,21 +100,21 @@ const Profile: React.FC = () => {
           <ProfileOption
             icon={CalendarDays}
             label="My Bookings"
-            onClick={() => navigate('/my-bookings')}
+            onClick={() => navigate("/my-bookings")}
           />
-          
+
           <ProfileOption
             icon={ListChecks}
             label="My Listing Bookings"
-            onClick={() => navigate('/my-listing-bookings')}
+            onClick={() => navigate("/my-listing-bookings")}
           />
-          
+
           <ProfileOption
             icon={Languages}
             label="Change Language"
             onClick={() => setShowLanguageModal(true)}
           />
-          
+
           <ProfileOption
             icon={Download}
             label="Download Our App"
@@ -164,25 +122,27 @@ const Profile: React.FC = () => {
           />
 
           {/* Subheader */}
-          <div className="px-4 py-2 text-xs font-semibold text-gray-500 bg-gray-50">Support & Settings</div>
+          <div className="px-4 py-2 text-xs font-semibold text-gray-500 bg-gray-50">
+            Support & Settings
+          </div>
 
           {/* Support Section */}
           <ProfileOption
             icon={Shield}
             label="Privacy Policy"
-            onClick={() => navigate('/privacy-policy')}
+            onClick={() => navigate("/privacy-policy")}
           />
-          
+
           <ProfileOption
             icon={Info}
             label="About Us"
-            onClick={() => navigate('/about-us')}
+            onClick={() => navigate("/about-us")}
           />
-          
+
           <ProfileOption
             icon={HelpCircle}
             label="Help"
-            onClick={() => navigate('/help')}
+            onClick={() => navigate("/help")}
           />
         </div>
       </div>
@@ -205,14 +165,7 @@ const Profile: React.FC = () => {
             className="relative z-10 max-w-md w-full mx-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              aria-label="Close profile modal"
-              className="absolute top-2 right-2 z-20 p-2 rounded-md bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-lg"
-              onClick={() => setShowProfileModal(false)}
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <ProfileCard />
+            <ProfileCard onClose={() => setShowProfileModal(false)} />
           </div>
         </div>
       )}
@@ -252,8 +205,8 @@ const Profile: React.FC = () => {
                   onClick={() => handleLanguageChange(lang.code)}
                   className={`w-full text-left px-4 py-3 rounded-lg transition ${
                     currentLanguage === lang.code
-                      ? 'bg-blue-50 border-2 border-blue-500 text-blue-700 font-semibold'
-                      : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100 text-gray-700'
+                      ? "bg-blue-50 border-2 border-blue-500 text-blue-700 font-semibold"
+                      : "bg-gray-50 border-2 border-transparent hover:bg-gray-100 text-gray-700"
                   }`}
                 >
                   <div className="flex items-center justify-between">

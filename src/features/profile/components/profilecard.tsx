@@ -1,6 +1,11 @@
 import React, { useState } from "react";
+import { X } from "lucide-react";
 
-const ProfileCard: React.FC = () => {
+interface ProfileCardProps {
+  onClose: () => void; // called when user clicks X
+}
+
+const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
   const [profile, setProfile] = useState({
     name: "Manoj kumar",
     phone: "+62651561565",
@@ -9,16 +14,12 @@ const ProfileCard: React.FC = () => {
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
@@ -27,38 +28,32 @@ const ProfileCard: React.FC = () => {
   };
 
   const handleSave = () => {
-    console.log("Profile saved:", profile);
+    localStorage.setItem("userProfile", JSON.stringify(profile));
     alert("Profile updated successfully!");
   };
 
   return (
-    // <div className="flex justify-center items-center h-100 bg-gray-50">
-      <div className="bg-white rounded-2xl shadow-md w-[380px] p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-md w-[580px] h-[450px] p-6 relative">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition"
+        >
+          <X size={22} />
+        </button>
+
         <div className="flex flex-col items-center mb-6">
           <div className="relative">
             <img
               src={profile.image}
               alt="Profile"
-              className="w-20 h-20 rounded-full object-cover border"
+              className="w-[96px] h-[87px] rounded-lg object-cover border"
             />
             <label
               htmlFor="profilePic"
               className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow cursor-pointer"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4 text-gray-600"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L7.21 19.44a4.5 4.5 0 01-1.897 1.13l-2.684.8.8-2.684a4.5 4.5 0 011.13-1.897L16.862 4.487z"
-                />
-              </svg>
               <input
                 id="profilePic"
                 type="file"
@@ -66,6 +61,7 @@ const ProfileCard: React.FC = () => {
                 onChange={handleImageChange}
                 className="hidden"
               />
+              <span className="text-gray-600">✎</span>
             </label>
           </div>
         </div>
@@ -112,7 +108,7 @@ const ProfileCard: React.FC = () => {
           </button>
         </div>
       </div>
-    // </div>
+    </div>
   );
 };
 

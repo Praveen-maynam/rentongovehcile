@@ -24,14 +24,14 @@ const ListedAutos: React.FC = () => {
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const navigate = useNavigate();
   const { currentCity } = useLocation();
-  const { autos: userAutos, deleteAuto } = useListedAutosStore();
+  const { autos: userListedAutos, deleteAuto } = useListedAutosStore();
 
   const [autos, setAutos] = useState<Vehicle[]>(intialAutos);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("autos");
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
 
-  // Combine default autos + user autos
+  // Combine default autos with user-listed autos and filter by location
   const allAutos = useMemo(() => {
     const userAutosFormatted: Vehicle[] = userAutos.map((auto) => ({
       id: auto.id,
@@ -54,7 +54,8 @@ const ListedAutos: React.FC = () => {
       const vehicleCity = vehicle.location?.split(',')[0].trim() || '';
       return vehicleCity.toLowerCase() === currentCity.toLowerCase();
     });
-  }, [userAutos, autos, currentCity]);
+  }, [userListedAutos, currentCity]);
+
 
   const filteredAutos = allAutos.filter((auto) =>
     auto.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -134,7 +135,7 @@ const ListedAutos: React.FC = () => {
           </div>
         </div>
 
-        <h2 className="text-3xl font-semibold mb-6">Listed Autos in {currentCity}</h2>
+      <h2 className="text-3xl font-semibold mb-6">Listed Autos in {currentCity}</h2>
 
         <div className="flex flex-col gap-6">
           {filteredAutos.length === 0 ? (

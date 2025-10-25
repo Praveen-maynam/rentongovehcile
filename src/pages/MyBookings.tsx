@@ -2,16 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBookingStore } from "../store/booking.store";
 import { Calendar, Clock, MoreVertical, Star } from "lucide-react";
+import BlackCar from '../assets/images/BlackCar.png'; // adjust path according to your file
 
 const MyBookings: React.FC = () => {
   const navigate = useNavigate();
   const { bookings, deleteBooking } = useBookingStore();
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
-  const [vehicleFilter, setVehicleFilter] = useState<"Both" | "Cars" | "Autos">("Both");
+const [vehicleFilter, setVehicleFilter] = React.useState<"All" | "Cars" | "Autos" | "Bikes">("All");
+
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   const [showBookingMenu, setShowBookingMenu] = useState<string | null>(null);
+const bookingMenuRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const bookingMenuRef = useRef<HTMLDivElement>(null);
+ 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -31,41 +34,57 @@ const MyBookings: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showDeleteMenu, showBookingMenu]);
+   const handleVehicleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as "All" | "Cars" | "Autos"|"Bikes";
+    setVehicleFilter(value);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Not Booked":
-        return (
-          <span className="px-3 py-1 text-xs font-semibold bg-red-100 text-red-600 rounded">
-            Not Booked
-          </span>
-        );
-      case "Booked":
-        return (
-          <span className="px-3 py-1 text-xs font-semibold bg-green-100 text-green-600 rounded">
-            Booked
-          </span>
-        );
-      case "Picked":
-        return (
-          <span className="px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-600 rounded">
-            Picked
-          </span>
-        );
-      case "Completed":
-        return (
-          <span className="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-600 rounded">
-            Completed
-          </span>
-        );
-      default:
-        return (
-          <span className="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-600 rounded">
-            {status}
-          </span>
-        );
+       if (value === "Cars") {
+      navigate("/cars"); // your Cars page route
+    } else if (value === "Autos") {
+      navigate("/autos"); // your Autos page route
+    } 
+    else if (value === "Bikes") {
+      navigate("/Bikes"); // your Autos page route
+    } else {
+      navigate("/bookings"); // optional: if "All" selected
     }
   };
+
+
+  // ✅ Updated getStatusBadge (toggle-capable)
+const getStatusBadge = (status: string, onClick: () => void) => {
+  const baseClasses =
+    "w-[199px] h-[50px] flex items-center justify-center rounded-lg font-semibold text-sm cursor-pointer transition";
+  switch (status) {
+    case "Booked":
+      return (
+        <button
+          onClick={onClick}
+          className={`${baseClasses} bg-green-100 text-green-700 hover:bg-green-200`}
+        >
+          Booked
+        </button>
+      );
+    case "Not Booked":
+      return (
+        <button
+          onClick={onClick}
+          className={`${baseClasses} bg-red-100 text-red-700 hover:bg-red-200`}
+        >
+          Not Booked
+        </button>
+      );
+    default:
+      return (
+        <button
+          onClick={onClick}
+          className={`${baseClasses} bg-gray-100 text-gray-700`}
+        >
+          {status}
+        </button>
+      );
+  }
+};
 
   const handleBookingClick = (bookingId: string) => {
     if (selectedBooking === bookingId) {
@@ -85,7 +104,7 @@ const MyBookings: React.FC = () => {
       return;
     }
 
-    const confirmMessage = vehicleFilter === "Both" 
+    const confirmMessage = vehicleFilter === "All" 
       ? `Are you sure you want to delete all ${bookingsToDelete.length} bookings?`
       : `Are you sure you want to delete all ${bookingsToDelete.length} ${vehicleFilter.toLowerCase()} bookings?`;
     
@@ -119,74 +138,79 @@ const MyBookings: React.FC = () => {
   };
 
   // Sample data if no bookings exist
-  const allBookings = bookings.length === 0 ? [
-    {
-      id: "1",
-      vehicleName: "Hyundai Verna",
-      vehicleType: "Cars",
-      vehicleImage: "https://imgd.aeplcdn.com/664x374/n/cw/ec/141867/verna-exterior-right-front-three-quarter-71.jpeg",
-      price: "250",
-      startDate: "30-10-2023",
-      endDate: "30-10-2023",
-      startTime: "11 AM",
-      endTime: "11 AM",
-      modelNo: "123457007",
-      status: "Not Booked",
+  
+
+const allBookings = bookings.length === 0
+  ? [
+      {
+        id: "1",
+        vehicleName: "Hyundai Verna",
+        vehicleType: "Cars",
+        vehicleImage: BlackCar,
+        price: "250",
+        startDate: "30-10-2023",
+        endDate: "30-10-2023",
+        startTime: "11 AM",
+        endTime: "11 AM",
+        modelNo: "123457007",
+        status: "Not Booked",
+        rating: 4,
+      },
+      {
+        id: "2",
+        vehicleName: "Pradeep Auto",
+        vehicleType: "Autos",
+        vehicleImage: BlackCar,
+        price: "25",
+        startDate: "10-10-2023",
+        endDate: "",
+        startTime: "11 AM",
+        endTime: "",
+        modelNo: "123457007",
+        status: "Booked",
+        rating: 0,
+      },
+      {
+        id: "3",
+        vehicleName: "Hyundai Verna",
+        vehicleType: "Cars",
+        vehicleImage: BlackCar,
+        price: "250",
+        startDate: "30-10-2023",
+        endDate: "30-10-2023",
+        startTime: "11 AM",
+        endTime: "11 AM",
+        modelNo: "123457007",
+        status: "Not Booked",
+        rating: 4,
+      },
+      {
+        id: "4",
+        vehicleName: "Piaggio Ape",
+        vehicleType: "Autos",
+        vehicleImage: BlackCar,
+        price: "25",
+        startDate: "10-10-2023",
+        endDate: "",
+        startTime: "11 AM",
+        endTime: "",
+        modelNo: "123457007",
+        status: "Booked",
+        rating: 0,
+      },
+    ]
+  : bookings.map((booking) => ({
+      ...booking,
+      vehicleType:
+        booking.vehicleType ||
+        (booking.vehicleName.toLowerCase().includes("verna") ? "Cars" : "Autos"),
+      vehicleImage: BlackCar, // use BlackCar for all
       rating: 4,
-    },
-    {
-      id: "2",
-      vehicleName: "Pradeep Auto",
-      vehicleType: "Autos",
-      vehicleImage: "https://imgd.aeplcdn.com/1056x594/n/cw/ec/51435/piaggio-ape-e-city-right-front-three-quarter2.jpeg",
-      price: "25",
-      startDate: "10-10-2023",
-      endDate: "",
-      startTime: "11 AM",
-      endTime: "",
-      modelNo: "123457007",
-      status: "Booked",
-      rating: 0,
-    },
-    {
-      id: "3",
-      vehicleName: "Hyundai Verna",
-      vehicleType: "Cars",
-      vehicleImage: "https://imgd.aeplcdn.com/664x374/n/cw/ec/141867/verna-exterior-right-front-three-quarter-71.jpeg",
-      price: "250",
-      startDate: "30-10-2023",
-      endDate: "30-10-2023",
-      startTime: "11 AM",
-      endTime: "11 AM",
-      modelNo: "123457007",
-      status: "Not Booked",
-      rating: 4,
-    },
-    {
-      id: "4",
-      vehicleName: "Piaggio Ape",
-      vehicleType: "Autos",
-      vehicleImage: "https://imgd.aeplcdn.com/1056x594/n/cw/ec/51435/piaggio-ape-e-city-right-front-three-quarter2.jpeg",
-      price: "25",
-      startDate: "10-10-2023",
-      endDate: "",
-      startTime: "11 AM",
-      endTime: "",
-      modelNo: "123457007",
-      status: "Booked",
-      rating: 0,
-    },
-  ] : bookings.map(booking => ({
-    ...booking,
-    vehicleType: booking.vehicleType || (booking.vehicleName.toLowerCase().includes('verna') ? "Cars" : "Autos"),
-    vehicleImage: booking.vehicleName.toLowerCase().includes('verna') 
-      ? "https://imgd.aeplcdn.com/664x374/n/cw/ec/141867/verna-exterior-right-front-three-quarter-71.jpeg"
-      : "https://imgd.aeplcdn.com/1056x594/n/cw/ec/51435/piaggio-ape-e-city-right-front-three-quarter2.jpeg",
-    rating: 4,
-  }));
+    }));
+
 
   // Filter bookings based on selected vehicle type
-  const filteredBookings = vehicleFilter === "Both" 
+  const filteredBookings = vehicleFilter === "All" 
     ? allBookings 
     : allBookings.filter(booking => booking.vehicleType === vehicleFilter);
 
@@ -194,57 +218,66 @@ const MyBookings: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">My Bookings</h1>
-          <div className="flex items-center gap-3">
-            <select 
-              value={vehicleFilter}
-              onChange={(e) => setVehicleFilter(e.target.value as "Both" | "Cars" | "Autos")}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white"
+  <div className="w-full px-4 py-4 flex items-center justify-between">
+    <h1 className="text-2xl font-semibold text-gray-900">My Bookings</h1>
+
+    <div className="flex items-center gap-3">
+      {/* Dropdown */}
+      <select
+        value={vehicleFilter}
+        onChange={handleVehicleChange}
+        className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white"
+      >
+        <option value="All">All</option>
+        <option value="Cars">Cars</option>
+        <option value="Autos">Autos</option>
+         <option value="Bikes">Bikes</option>
+      </select>
+
+      {/* MoreVertical */}
+      <div className="relative" ref={menuRef}>
+        <button
+          onClick={() => setShowDeleteMenu(!showDeleteMenu)}
+          className="p-2 hover:bg-gray-100 rounded"
+        >
+          <MoreVertical className="w-5 h-5 text-gray-600" />
+        </button>
+
+        {showDeleteMenu && (
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+            <button
+              onClick={handleDeleteAll}
+              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-lg"
             >
-              <option value="Both">Both</option>
-              <option value="Cars">Cars</option>
-              <option value="Autos">Autos</option>
-            </select>
-            <div className="relative" ref={menuRef}>
-              <button 
-                onClick={() => setShowDeleteMenu(!showDeleteMenu)}
-                className="p-2 hover:bg-gray-100 rounded"
-              >
-                <MoreVertical className="w-5 h-5 text-gray-600" />
-              </button>
-              {showDeleteMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
-                  <button
-                    onClick={handleDeleteAll}
-                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    Delete All {vehicleFilter === "Both" ? "Bookings" : vehicleFilter}
-                  </button>
-                </div>
-              )}
-            </div>
+              Delete All {vehicleFilter === "All" ? "Bookings" : vehicleFilter}
+            </button>
           </div>
+      )}
+    </div>
+</div>
+
         </div>
       </div>
 
       {/* Bookings List */}
-      <div className="max-w-4xl mx-auto p-4 space-y-3">
+      <div className="max-w-4xl ml-0 p-4 space-y-3">
         {filteredBookings.map((booking) => (
           <div
-            key={booking.id}
-            onClick={() => handleBookingClick(booking.id)}
-            className={`bg-white rounded-lg overflow-hidden transition-all cursor-pointer ${
-              selectedBooking === booking.id ? "ring-2 ring-blue-500 shadow-lg" : "shadow"
-            }`}
-          >
+  key={booking.id}
+  onClick={() => handleBookingClick(booking.id)}
+  style={{ width: "1200px", height: "290px" }}
+  className={`bg-white rounded-lg overflow-hidden transition-all cursor-pointer flex relative ${
+    selectedBooking === booking.id ? "ring-2 ring-blue-500 shadow-lg" : "shadow"
+  }`}
+>
             <div className="flex gap-4 p-4">
               {/* Vehicle Image */}
               <div className="flex-shrink-0">
                 <img
                   src={booking.vehicleImage}
                   alt={booking.vehicleName}
-                  className="w-24 h-24 object-cover rounded-lg"
+                  style={{ width: "277px", height: "277px" }}
+                  className="w-24 h-24 object-right  rounded-lg"
                 />
               </div>
 
@@ -259,30 +292,31 @@ const MyBookings: React.FC = () => {
                       ₹{booking.price}
                     </p>
                   </div>
-                  <div className="relative" ref={showBookingMenu === booking.id ? bookingMenuRef : null}>
-                    <button 
-                      onClick={(e) => toggleBookingMenu(booking.id, e)}
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <MoreVertical className="w-5 h-5 text-gray-400" />
-                    </button>
-                    {showBookingMenu === booking.id && (
-                      <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
-                        <button
-                          onClick={(e) => handleViewDetails(booking, e)}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg"
-                        >
-                          View Details
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteBooking(booking.id, booking.vehicleName, e)}
-                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-b-lg border-t"
-                        >
-                          Delete Booking
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                   <div className="absolute top-2 right-2" ref={showBookingMenu === booking.id ? bookingMenuRef : null}>
+  <button 
+    onClick={(e) => toggleBookingMenu(booking.id, e)}
+    className="p-1 hover:bg-gray-100 rounded top-1 right-8"
+  >
+    <MoreVertical className="w-5 h-5 text-gray-400" />
+  </button>
+  {showBookingMenu === booking.id && (
+    <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+      <button
+        onClick={(e) => handleViewDetails(booking, e)}
+        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg"
+      >
+        View Details
+      </button>
+      <button
+        onClick={(e) => handleDeleteBooking(booking.id, booking.vehicleName, e)}
+        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-b-lg border-t"
+      >
+        Delete Booking
+      </button>
+    </div>
+  )}
+</div>
+
                 </div>
 
                 {/* Rating */}
@@ -301,40 +335,80 @@ const MyBookings: React.FC = () => {
                   </div>
                 )} */}
 
-                {/* Date and Time */}
-                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-2">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>{booking.startDate}</span>
-                  </div>
-                  <span>@</span>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{booking.startTime}</span>
-                  </div>
-                  {booking.endDate && (
-                    <>
-                      <span>@</span>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{booking.endDate}</span>
-                      </div>
-                      <span>@</span>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{booking.endTime}</span>
-                      </div>
-                    </>
-                  )}
-                </div>
+ {/* Dates Row */}
+<div className="flex items-center gap-4 text-sm pt-6 text-gray-900 mb-1">
+  <div className="flex items-center gap-2">
+    <Calendar className="w-4 h-4" />
+    <span className="font-medium">FROM:</span>
+    <span>{booking.startDate}</span>
+  </div>
+  {booking.endDate && (
+    <>
+      <span className="mx-3 font-semibold text-gray-700">|</span>
+      <div className="flex items-center gap-2">
+        <Calendar className="w-4 h-4" />
+        <span className="font-medium">TO:</span>
+        <span>{booking.endDate}</span>
+      </div>
+    </>
+  )}
+</div>
+
+{/* Times Row */}
+<div className="flex items-center gap-4 text-sm text-gray-900 pt-6">
+  <div className="flex items-center gap-2">
+    <Clock className="w-4 h-4" />
+    <span className="font-medium">FROM:</span>
+    <span>{booking.startTime}</span>
+  </div>
+  {booking.endTime && (
+    <>
+      <span className="mx-3 font-semibold text-gray-700">|</span>
+      <div className="flex items-center gap-2">
+        <Clock className="w-4 h-4" />
+        <span className="font-medium">TO:</span>
+        <span>{booking.endTime}</span>
+      </div>
+    </>
+  )}
+</div>
+
+
 
                 {/* Model Number and Status */}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">
-                    Model No: {booking.modelNo || (booking as any).vehicleId || "N/A"}
-                  </span>
-                  {getStatusBadge(booking.status)}
-                </div>
+               {/* Model Number and Status */}
+{/* Model Number and Status */}
+<div className="flex items-center justify-between pt-6">
+  <span className="text-sm font-semibold text-gray-900">
+    Model No:{" "}
+    <span className="font-bold text-gray-900">
+      {(booking.modelNo || (booking as any).vehicleId || "N/A")
+        .toString()
+        .slice(0, 10)} {/* show only 10 digits */}
+    </span>
+  </span>
+</div>
+
+{/* Status Section */}
+<div className="pt-5 flex items-center gap-5">
+  <span className="text-base font-semibold text-gray-900">Status:</span>
+  <div
+    className="flex items-center justify-center rounded-lg font-semibold text-sm"
+    style={{
+      width: "199px",
+      height: "50px",
+    }}
+  >
+    {getStatusBadge(booking.status, () => {
+      booking.status =
+        booking.status === "Booked" ? "Not Booked" : "Booked";
+      // Force re-render
+      setSelectedBooking(booking.id + Math.random());
+    })}
+  </div>
+</div>
+
+
               </div>
             </div>
           </div>
@@ -342,7 +416,7 @@ const MyBookings: React.FC = () => {
 
         {filteredBookings.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">{bookings.length === 0 ? "Sample bookings shown above" : `No ${vehicleFilter === "Both" ? "bookings" : vehicleFilter.toLowerCase()} found`}</p>
+            <p className="text-gray-500 mb-4">{bookings.length === 0 ? "Sample bookings shown above" : `No ${vehicleFilter === "All" ? "bookings" : vehicleFilter.toLowerCase()} found`}</p>
             <button
               onClick={() => navigate("/rental")}
               className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition"

@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+=======
+// <<<<<<< HEAD
+
+// =======
+// >>>>>>> 66b6a0a (Initial commit)
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
 import { Vehicle } from "../../types/Vehicle";
 import BlackCar from "../../assets/images/BlackCar.png";
 import AutoImage from "../../assets/images/Auto.png";
@@ -14,7 +21,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Petrol",
     rating: 4.2,
+
     image: BlackCar,
+
     type: "car",
     location: "Kakinada,Gandhi nagar near varnika function hall",
     available: true,
@@ -27,7 +36,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Petrol",
     rating: 4.0,
+
     image: BlackCar,
+
     type: "car",
     location:  "Kakinada,Gandhi nagar near varnika function hall",
     available: true,
@@ -40,7 +51,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "CNG",
     rating: 4.0,
+
     image:AutoImage,
+
     type: "auto",
     location:  "Kakinada,Gandhi nagar near varnika function hall",
     available: true,
@@ -53,7 +66,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Diesel",
     rating: 4.3,
+
     image: AutoImage,
+
     type: "auto",
     location:  "Kakinada,Gandhi nagar near varnika function hall",
     available: false,
@@ -66,7 +81,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Petrol",
     rating: 4.5,
+
     image: BlackCar,
+
     type: "car",
     location:  "Kakinada,Gandhi nagar near varnika function hall",
     available: true,
@@ -79,7 +96,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Diesel",
     rating: 4.7,
+
     image: BlackCar,
+
     type: "car",
     location: "Bangalore",
     available: true,
@@ -92,7 +111,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Automatic",
     fuel: "Diesel",
     rating: 4.4,
+
     image: BlackCar,
+
     type: "car",
     location: "Hyderabad",
     available: true,
@@ -105,7 +126,9 @@ export const vehicles: Vehicle[] = [
     transmission: "Manual",
     fuel: "Petrol",
     rating: 4.3,
+
     image: BlackCar,
+
     type: "car",
     location: "Hyderabad",
     available: true,
@@ -163,6 +186,7 @@ export const vehicles: Vehicle[] = [
     type: "auto",
     image: AutoImage,
   },
+<<<<<<< HEAD
   {
     id: "b1",
     name: "Royal Enfield Classic 350",
@@ -270,3 +294,6 @@ export const vehicles: Vehicle[] = [
 ];
 
 
+=======
+];
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec

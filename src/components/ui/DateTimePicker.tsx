@@ -1,12 +1,11 @@
 import React from "react";
  
 interface DateTimePickerProps {
-  value: Date;
-  onChange: (date: Date) => void;
-  minDate?: Date;
-  maxDate?: Date;
-  className?: string;
+  value: string; // you are using string dates
+  onChange: (newValue: string) => void;
+  minDate?: string; // optional minimum date
 }
+<<<<<<< HEAD
  
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
   value,
@@ -19,15 +18,20 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
     return date.toISOString().slice(0, 16); // Format: "YYYY-MM-DDThh:mm"
   };
  
+=======
+
+const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange, minDate }) => {
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
   return (
-    <input
-      type="datetime-local"
-      value={formatDateForInput(value)}
-      onChange={(e) => onChange(new Date(e.target.value))}
-      min={minDate ? formatDateForInput(minDate) : undefined}
-      max={maxDate ? formatDateForInput(maxDate) : undefined}
-      className={`w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${className}`}
-    />
+    <div className="flex gap-4 mb-6">
+      <input
+        type="date"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        min={minDate}
+        className="border rounded px-3 py-2"
+      />
+    </div>
   );
 };
  

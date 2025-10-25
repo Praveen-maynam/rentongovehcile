@@ -15,8 +15,12 @@ import ListCarPage from "./pages/ListCarPage";
 import ListBikePage from "./pages/ListBikePage";
 import BikePage from "./pages/Bike";
 import Nearbycars from "./pages/NearByCars";
+<<<<<<< HEAD
 import NearbyAutos from "pages/NearByAutos";
 import NearbyBikes from "pages/NearByBikes";
+=======
+
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
 import VehicleDetailsPage from "./pages/VehicleDetailsPage";
 import VehicleHistory from "./pages/VehicleHistory";
 import EditCarDetails from "./pages/EditCarDetails";
@@ -37,6 +41,14 @@ import Help from "./pages/Help";
 import Feedback from "./pages/Feedback";
 import Calendar from "./pages/Calendar";
 import CalendarScreen from "./pages/CalendarScreen";
+import ProfileCard from "./features/profile/components/profilecard";
+import Profile from "./features/profile/pages/profile";
+import listedCars from "./pages/ListedCars";
+import Autos from "./pages/Autos";
+
+
+
+
 
 const App: React.FC = () => {
   return (
@@ -62,10 +74,28 @@ const App: React.FC = () => {
         <Route path="/nearby-autos" element={<NearbyAutos />} />
         <Route path="/nearby-bikes" element={<NearbyBikes />} />
 
+<<<<<<< HEAD
+=======
+  <Route path="/listed-autos" element={<AutoPage />} />
+  <Route path="/list-auto" element={<ListAutoPage />} />
+  <Route path="/list-car" element={<ListCarPage />} /> 
+  <Route path="/list-bike" element={<ListBikePage />} />
+  <Route path="/listed-bikes" element={<BikePage />} />
+ <Route path="/nearby-cars" element={<Nearbycars />} />
+
+     
+<Route path="/profile" element={<ProfilePage />} />
+      <Route path="/cars" element={<ListedCars />} />
+  <Route path="/autos" element={<Autos />} />
+
+
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
         <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
         <Route path="/vehicle-details/:vehicleName" element={<VehicleHistory />} />
         <Route path="/vehicle-details/:vehicleName/edit/:bookingId" element={<EditCarDetails />} />
 
+
+  <Route path="/profile" element={<Profile />} />
         {/* Profile & User */}
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/my-profile" element={<MyProfile />} />
@@ -86,7 +116,7 @@ const App: React.FC = () => {
         />
 
         <Route path="/calendar-screen" element={<CalendarScreen />} />
-
+        
         {/* Booking Flow */}
         <Route path="/book-now/:id" element={<BookNow />} />
         {/* <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />

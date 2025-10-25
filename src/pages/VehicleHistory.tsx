@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // import React, { useState } from "react";
 // import { useParams } from "react-router-dom";
 // import { MoreVertical } from "lucide-react";
@@ -224,10 +225,19 @@
 // export default VehicleHistory;
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+=======
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
 import { MoreVertical } from "lucide-react";
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
+<<<<<<< HEAD
+=======
+import AvailabilityDateTimeModal from "../components/AvailabilityDateTimeModal";
+
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
 
 interface BookingHistory {
   customerName: string;
@@ -253,11 +263,22 @@ interface VehicleDetails {
   mobile: string;
   email: string;
 }
+<<<<<<< HEAD
 
 const VehicleHistory: React.FC = () => {
   const { vehicleName } = useParams<{ vehicleName: string }>();
   const [editOpen, setEditOpen] = useState(false);
 
+=======
+
+const VehicleHistory: React.FC = () => {
+    const navigate = useNavigate();
+  const { vehicleName } = useParams<{ vehicleName: string }>();
+  const [editOpen, setEditOpen] = useState(false);
+  const [isDateTimeModalOpen, setIsDateTimeModalOpen] = useState(false);
+
+
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
   const vehicleImages = [BlackCar, BlackCar, BlackCar, BlackCar];
   const [currentImage, setCurrentImage] = useState(0);
 
@@ -350,6 +371,7 @@ const VehicleHistory: React.FC = () => {
   
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-gray-50 px-6 py-6 flex justify-center">
       <div className="max-w-[1228px] w-full flex flex-col md:flex-row gap-10">
         {/* Left Section */}
@@ -359,6 +381,17 @@ const VehicleHistory: React.FC = () => {
               src={vehicleImages[currentImage]}
               alt={`${initialVehicle.name} ${currentImage + 1}`}
               className="w-full h-full object-cover transition-all duration-500 ease-in-out"
+=======
+    <div className="min-h-screen bg-gray-50 px-4 py-6 flex justify-center">
+      <div className="max-w-[1228px] w-full flex flex-col md:flex-row gap-10">
+        {/* Left Section */}
+        <div className="flex flex-col md:flex-row bg-white p-6 rounded-2xl shadow-lg w-auto md:w-[860px]">
+          <div className="relative w-[409px] h-[309px] overflow-hidden rounded-xl shadow-md flex-shrink-0">
+            <img
+              src={vehicleImages[currentImage]}
+              alt={`${initialVehicle.name} ${currentImage + 1}`}
+              className="w-auto h-auto object-cover transition-all duration-500 ease-in-out"
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
             />
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
               {vehicleImages.map((_, idx) => (
@@ -412,6 +445,7 @@ const VehicleHistory: React.FC = () => {
             </div>
           </div>
         </div>
+<<<<<<< HEAD
 
         {/* Right Section */}
         <div className="w-full md:w-[350px] flex flex-col gap-4">
@@ -590,6 +624,172 @@ const VehicleHistory: React.FC = () => {
                 <span className="text-2xl font-medium text-gray-800">Driving Licence</span>
                 {renderToggle(drivingLicence, setDrivingLicence)}
               </div>
+=======
+
+        {/* Right Section */}
+        <div className="w-full md:w-[350px] flex flex-col gap-4">
+          {!editOpen ? (
+            <div>
+              <h2 className="text-2xl font-semibold mb-4">Booking History</h2>
+              <div className="space-y-4">
+                {bookingHistory.map((booking, idx) => (
+                  <div key={idx} className="border border-gray-200 rounded-xl p-4 relative hover:shadow-md transition">
+             <button
+  onClick={() => setIsDateTimeModalOpen(true)}
+  className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+>
+  <MoreVertical className="w-5 h-5" />
+</button>
+
+                    <h3 className="font-semibold text-gray-800 mb-1">{booking.customerName}</h3>
+                    <p className="text-sm text-gray-600">{booking.startDate} - {booking.endDate}</p>
+                    <p className="text-sm text-gray-600">{booking.startTime} - {booking.endTime}</p>
+                    <p className="text-sm text-gray-600">Mobile: {booking.mobile}</p>
+                    <p className="text-xs font-medium mt-1">{booking.status}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+           <div className="flex flex-col gap-4">
+  {/* Edit Card Header */}
+  <div className="flex items-center justify-left  border-gray-400 w-[250px]">
+    <span className="font-bold text-gray-700 text-2xl">Edit Car Details</span>
+  </div>
+
+
+
+              {/* Description Heading */}
+<div className="text-gray-700 font-semibold text-2l gap-1">
+  Description
+</div>
+<div className="bg-white shadow-md rounded-md w-[343px] h-[107px] border-2 border-gray-300 p-4">
+  <textarea
+    className="w-full h-full text-sm text-gray-600 resize-none outline-none"
+    placeholder="Enter car description..."
+  />
+</div>
+
+<div className="flex items-center justify-between w-[343px] mt-1">
+  {/* Heading */}
+  <div className="text-gray-700 font-semibold text-lg">
+     AC Available
+  </div>
+
+  {/* Toggle Button */}
+  <button
+    onClick={() => setAcAvailable(!acAvailable)}
+    className={`w-12 h-6 rounded-full relative flex items-center transition-colors duration-300 ${
+      acAvailable ? "bg-green-500" : "bg-gray-300"
+    }`}
+  >
+    <span
+      className={`absolute w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300 ${
+        acAvailable ? "translate-x-6" : "translate-x-1"
+      }`}
+    ></span>
+  </button>
+</div>
+
+    {/* Rent Price and Hour Box */}
+              <div className="text-gray-700 font-semibold text-xl mt-0">Price</div>
+              <div className="flex items-center mt-2 space-x-2">
+                <div className="w-[180px] h-[47px] border-2 border-gray-400 rounded-md p-1 flex flex-col justify-center relative mt-0.5">
+                  <span className="absolute -top-2 left-2 bg-white px-1 text-gray-500 text-sm ">Rent Price</span>
+                  <input
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="Enter price"
+                    className="font-semibold text-gray-800 text-lg mt-1 outline-none bg-transparent w-full px-2"
+                  />
+                </div>
+
+                <div
+                  className="w-[82px] h-[48px] border-2 border-gray-400 rounded-md flex items-center justify-between px-3 cursor-pointer"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  <span className="text-gray-800 font-medium text-sm">
+                    {selectedHour || "Hour"}
+                  </span>
+                  <svg
+                    className="w-4 h-4 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Hour Modal */}
+              {isModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+                  <div className="bg-white rounded-lg p-4 w-[200px] max-h-[37px] overflow-y-auto shadow-lg">
+                    <h2 className="text-gray-800 text-lg font-semibold mb-3 text-center">Select Hour</h2>
+                    <div className="grid grid-cols-3 gap-2">
+                      {hours.map((hour) => (
+                        <button
+                          key={hour}
+                          onClick={() => handleSelectHour(hour)}
+                          className="border border-gray-300 rounded-md py-2 hover:bg-blue-100 transition"
+                        >
+                          {hour}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setIsModalOpen(false)}
+                      className="mt-4 w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            {/* Contact Information Heading */}
+<h1 className="text-xl font-bold text-gray-800 mt-0">
+  Your Contact Information
+</h1>
+
+
+{/* Name Input Box */}
+<div className="flex items-center space-x-3 mt-0">
+  {/* Name Input Box */}
+  <div className="w-[200px] h-[38px] border-2 border-gray-400 rounded-md p-1 flex items-center relative pl-0">
+    <span className="absolute -top-2 left-2 bg-white px-1 text-gray-500 text-sm">
+      Name
+    </span>
+    <input
+      type="text"
+      placeholder="Enter your name"
+      className="w-full text-gray-800 font-medium text-base ml-1 outline-none bg-transparent"
+    />
+  </div>
+
+  {/* Contact Number Input Box */}
+  <div className="w-[200px] h-[38px] border-2 border-gray-400 rounded-md p-1 flex items-center relative">
+    <span className="absolute -top-2 left-2 bg-white px-1 text-gray-500 text-sm">
+      Contact Number
+    </span>
+    <input
+      type="tel"
+      placeholder="Enter your mobile number"
+      className="w-full text-gray-800 font-medium text-base ml-1 outline-none bg-transparent"
+    />
+  </div>
+</div>
+
+      {/* Document Toggles */}
+              <h2 className="text-2xl font-semibold text-gray-800 mt-0">Customer Required Documents</h2>
+
+              <div className="w-[343px] h-[48px] p-2 flex items-center justify-between relative mt-6">
+                <span className="text-2xl font-medium text-gray-800">Driving Licence</span>
+                {renderToggle(drivingLicence, setDrivingLicence)}
+              </div>
+>>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
               <div className="w-[343px] h-[48px] p-2 flex items-center justify-between relative mt-4">
                 <span className="text-2xl font-medium text-gray-800">Aadhaar Card</span>
                 {renderToggle(aadhaarCard, setAadhaarCard)}
@@ -703,6 +903,17 @@ const VehicleHistory: React.FC = () => {
             </div>
           )}
         </div>
+        {isDateTimeModalOpen && (
+  <AvailabilityDateTimeModal
+    isOpen={isDateTimeModalOpen}
+    onClose={() => setIsDateTimeModalOpen(false)}
+    onConfirm={(startDate, endDate, startTime, endTime) => {
+      console.log("Selected:", startDate, endDate, startTime, endTime);
+      setIsDateTimeModalOpen(false);
+    }}
+  />
+)}
+
       </div>
     </div>
   );
