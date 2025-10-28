@@ -11,15 +11,10 @@ const MyListingBookings: React.FC = () => {
   const { cars } = useListedCarsStore();
   const { autos } = useListedAutosStore();
 
-  // Get all vehicle IDs that belong to the user
-  const myVehicleIds = [
-    ...cars.map((car) => car.id),
-    ...autos.map((auto) => auto.id),
-  ];
+  const myVehicleIds = [...cars.map((c) => c.id), ...autos.map((a) => a.id)];
 
-  // Filter bookings for user's vehicles
-  const myListingBookings = bookings.filter((booking) =>
-    myVehicleIds.includes(booking.vehicleId)
+  const myListingBookings = bookings.filter((b) =>
+    myVehicleIds.includes(b.vehicleId)
   );
 
   const getStatusColor = (status: string) => {
@@ -38,7 +33,6 @@ const MyListingBookings: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate(-1)}
@@ -51,88 +45,34 @@ const MyListingBookings: React.FC = () => {
           </h1>
         </div>
 
-        {/* Info Card */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <p className="text-sm text-blue-800">
-            📋 These are bookings made by others for your listed vehicles
-          </p>
-        </div>
-
-        {/* Bookings List */}
         {myListingBookings.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-8 sm:p-12 text-center">
+          <div className="bg-white rounded-xl shadow-md p-8 text-center">
             <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No bookings for your listings yet
+              No bookings yet
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
-              When someone books your vehicles, they'll appear here
-            </p>
-            <button
-              onClick={() => navigate("/listed")}
-              className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition"
-            >
-              View My Listings
-            </button>
           </div>
         ) : (
           <div className="space-y-4">
-            {myListingBookings.map((booking) => (
+            {myListingBookings.map((b) => (
               <div
-                key={booking.id}
+                key={b.id}
                 className="bg-white rounded-xl shadow-md p-4 sm:p-6 hover:shadow-lg transition"
               >
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {booking.vehicleName}
-                      </h3>
-                      <span
-                        className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusColor(
-                          booking.status
-                        )}`}
-                      >
-                        {booking.status}
-                      </span>
-                    </div>
-
-                    {/* Customer Info */}
-                    <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                      <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
-                        <User className="w-4 h-4" />
-                        <span className="font-semibold">Customer:</span>
-                        <span>{booking.customerName}</span>
-                      </div>
-                      {booking.contactNumber && (
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <Phone className="w-4 h-4" />
-                          <span>{booking.contactNumber}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Booking Details */}
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          Booking: {booking.bookingDate} at {booking.bookingTime}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-semibold">Duration:</span> {booking.startDate}{" "}
-                        {booking.startTime} → {booking.endDate} {booking.endTime}
-                      </div>
-                      <div>
-                        <span className="font-semibold">Model:</span> {booking.modelNo}
-                      </div>
-                    </div>
+                <div className="flex flex-col sm:flex-row justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold">{b.vehicleName}</h3>
+                    <p className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusColor(b.status)}`}>
+                      {b.status}
+                    </p>
+                    <p className="mt-2 text-sm text-gray-600">
+                      Duration: {b.startDate} {b.startTime} → {b.endDate} {b.endTime}
+                    </p>
+                    <p className="text-sm text-gray-600">Model: {b.modelNo || "N/A"}</p>
                   </div>
-
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-green-600">₹{booking.price}</p>
-                    <p className="text-xs text-gray-500 mt-1">Earning</p>
+                    <p className="text-2xl font-bold text-green-600">₹{b.price}</p>
+                    <p className="text-xs text-gray-500">Earning</p>
                   </div>
                 </div>
               </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import VehicleCard from "../components/ui/VehicleCard";
 import AutoCard from "../components/ui/AutoCard";
 import BikeCard from "../components/ui/BikeCard";
-
+import { Vehicle } from "../types/Vehicle";
 type VehicleType = "car" | "auto" | "bike";
 
 interface VehicleSectionProps {
@@ -12,7 +12,7 @@ interface VehicleSectionProps {
   showBookButton?: boolean;
   type: VehicleType;
   hideViewMore?: boolean;
-  viewMoreLink?: string; // ✅ added this
+  viewMoreLink?: string;
 }
 
 const VehicleSection: React.FC<VehicleSectionProps> = ({
@@ -25,10 +25,14 @@ const VehicleSection: React.FC<VehicleSectionProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // ✅ Only show first 4 vehicles
-  const visibleVehicles = vehicles.slice(0, 4);
+  // ✅ Always show first 4 vehicles initially
+ // VehicleSection.tsx
+const visibleVehicles = vehicles
+  .filter(v => v.type === type) // <-- filter by type
+  .slice(0, 4);                // <-- then take first 4
 
-  // ✅ When clicking “View More”
+
+  // ✅ Handle “View More” navigation
   const handleViewMore = () => {
     if (viewMoreLink) navigate(viewMoreLink);
     else {
@@ -50,12 +54,12 @@ const VehicleSection: React.FC<VehicleSectionProps> = ({
 
   return (
     <div className="px-6 py-4 mb-6">
-      {/* Title + View More */}
+      {/* Title + View More Button */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
 
-        {/* ✅ fixed syntax */}
-        {!hideViewMore && vehicles.length > 4 && (
+        {/* ✅ Always show “View More” (no vehicle length condition) */}
+        {!hideViewMore && (
           <button
             onClick={handleViewMore}
             className="text-blue-600 hover:underline font-medium"
@@ -86,17 +90,18 @@ const VehicleSection: React.FC<VehicleSectionProps> = ({
                   onBook={() => navigate(`/book-now/${v.id}`)}
                 />
               );
-            case "bike":
-              return (
-                <BikeCard
-                  key={v.id}
-                  vehicle={v}
-                  showBookButton={showBookButton && index === 0}
-                  onBook={() => navigate(`/book-now/${v.id}`)}
-                />
-              );
+         case "bike":
+  return (
+    <BikeCard
+      key={v.id}
+      vehicle={v}
+    
+     onBook={() => navigate(`/book-now/${v.id}`)}
+    />
+  );
+
             default:
-              return null; // ✅ Added explicit return
+              return null;
           }
         })}
       </div>

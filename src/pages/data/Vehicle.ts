@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-=======
-// <<<<<<< HEAD
 
-// =======
-// >>>>>>> 66b6a0a (Initial commit)
->>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
 import { Vehicle } from "../../types/Vehicle";
 import BlackCar from "../../assets/images/BlackCar.png";
 import AutoImage from "../../assets/images/Auto.png";
@@ -25,8 +19,9 @@ export const vehicles: Vehicle[] = [
     image: BlackCar,
 
     type: "car",
-    location: "Kakinada,Gandhi nagar near varnika function hall",
+    location: "Kakinada",
     available: true,
+      description: "Compact hatchback perfect for city rides."
   },
   {
     id: "2",
@@ -40,8 +35,9 @@ export const vehicles: Vehicle[] = [
     image: BlackCar,
 
     type: "car",
-    location:  "Kakinada,Gandhi nagar near varnika function hall",
+    location:  "Hyderabad",
     available: true,
+      description: "Compact hatchback perfect for city rides."
   },
   {
     id: "3",
@@ -55,8 +51,9 @@ export const vehicles: Vehicle[] = [
     image:AutoImage,
 
     type: "auto",
-    location:  "Kakinada,Gandhi nagar near varnika function hall",
+    location:  "Kakinada",
     available: true,
+     description: "Compact hatchback perfect for city rides."
   },
   {
     id: "4",
@@ -70,8 +67,9 @@ export const vehicles: Vehicle[] = [
     image: AutoImage,
 
     type: "auto",
-    location:  "Kakinada,Gandhi nagar near varnika function hall",
+    location:  "Kakinada",
     available: false,
+      description: "Compact hatchback perfect for city rides."
   },
   {
     id: "5",
@@ -85,8 +83,9 @@ export const vehicles: Vehicle[] = [
     image: BlackCar,
 
     type: "car",
-    location:  "Kakinada,Gandhi nagar near varnika function hall",
+    location:  "Hyderabad",
     available: true,
+      description: "Compact hatchback perfect for city rides."
   },
   {
     id: "6",
@@ -102,6 +101,7 @@ export const vehicles: Vehicle[] = [
     type: "car",
     location: "Bangalore",
     available: true,
+      description: "Compact hatchback perfect for city rides."
   },
   {
     id: "7",
@@ -115,8 +115,9 @@ export const vehicles: Vehicle[] = [
     image: BlackCar,
 
     type: "car",
-    location: "Hyderabad",
+    location: "kakinada",
     available: true,
+      description: "Compact hatchback perfect for city rides."
   },
   {
     id: "8",
@@ -128,172 +129,125 @@ export const vehicles: Vehicle[] = [
     rating: 4.3,
 
     image: BlackCar,
-
-    type: "car",
+  description: "Compact hatchback perfect for city rides",
+   
     location: "Hyderabad",
     available: true,
+     type: "car",
   },
 
   {
-    id: "3",
+    id: "9",
     name: "Bajaj RE",
     price: 150,
     transmission: "Manual",
     fuel: "CNG",
     seats: 3,
-    location: "Kakinada, Main Road",
+    location: "Hyderabad",
     rating: 4.0,
     available: true,
     type: "auto",
     image: AutoImage,
+      description: "Compact hatchback perfect for city rides."
   },
   {
-    id: "4",
+    id: "10",
     name: "Piaggio Ape",
     price: 160,
     transmission: "Manual",
     fuel: "Diesel",
     seats: 3,
-    location: "Rajahmundry, Kotipalli Bus Stand",
+    location: "Rajahmundry",
     rating: 4.3,
     available: true,
     type: "auto",
     image: AutoImage,
+      description: "Compact hatchback perfect for city rides."
   },
   {
-    id: "5",
+    id: "11",
     name: "TVS King",
     price: 155,
     transmission: "Manual",
     fuel: "CNG",
     seats: 3,
-    location: "Vijayawada, MG Road",
+    location: "Vijayawada",
     rating: 4.1,
     available: true,
     type: "auto",
     image: AutoImage,
+      description: "Compact hatchback perfect for city rides."
   },
   {
-    id: "6",
+    id: "12",
     name: "Mahindra Alfa",
     price: 165,
     transmission: "Manual",
     fuel: "Diesel",
     seats: 3,
-    location: "Visakhapatnam, Dwaraka Nagar",
+    location: "Visakhapatnam",
     rating: 4.4,
     available: true,
     type: "auto",
     image: AutoImage,
+      description: "Compact hatchback perfect for city rides."
   },
-<<<<<<< HEAD
-  {
-    id: "b1",
-    name: "Royal Enfield Classic 350",
-    price: 120,
-    transmission: "Manual",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Kakinada, Main Road",
-    rating: 4.6,
-    available: true,
-    image: Enfied,
-    type: "bike",
+   {
+    id: "13",
+  name: "Royal Enfield ",
+  price: 120,
+  transmission: "Manual",
+  fuel: "Petrol",
+  seats: 2,
+  location: "Kakinada",
+  rating: 4.6,
+  available: true,
+  image: Enfied, // ✅ corrected
+  type: "bike",
+    description: "Compact hatchback perfect for city rides."
   },
   {
-    id: "b2",
+    id: "14",
     name: "Yamaha FZ-S",
     price: 100,
     transmission: "Manual",
     fuel: "Petrol",
     seats: 2,
-    location: "Rajahmundry, Kotipalli Bus Stand",
-    rating: 4.3,
+    location: "Rajahmundry",
+    rating: 4.4,
     available: true,
     image: yamaha,
     type: "bike",
+      description: "Compact hatchback perfect for city rides."
   },
   {
-    id: "b3",
+    id: "15",
     name: "TVS Ntorq",
-    price: 100,
+    price: 90,
     transmission: "Automatic",
     fuel: "Petrol",
     seats: 2,
-    location: "Vijayawada, MG Road",
-    rating: 4.4,
+    location: "Kakinada",
+    rating: 4.3,
     available: true,
     image: TVS,
     type: "bike",
+      description: "Compact hatchback perfect for city rides."
   },
   {
-    id: "b4",
+    id: "16",
     name: "Honda Activa 6G",
-    price: 90,
-    transmission: "Manual",
+    price: 80,
+    transmission: "Automatic",
     fuel: "Petrol",
     seats: 2,
-    location: "Visakhapatnam, Dwaraka Nagar",
-    rating: 4.2,
-    available: true,
-    image: Activa,
-    type: "bike",
-  },
-  {
-    id: "b1",
-    name: "Royal Enfield Classic 350",
-    price: 120,
-    transmission: "Manual",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Kakinada, Main Road",
+    location: "Vijayawada",
     rating: 4.6,
     available: true,
-    image: Enfied,
-    type: "bike",
-  },
-  {
-    id: "b2",
-    name: "Yamaha FZ-S",
-    price: 100,
-    transmission: "Manual",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Rajahmundry, Kotipalli Bus Stand",
-    rating: 4.3,
-    available: true,
-    image: yamaha,
-    type: "bike",
-  },
-  {
-    id: "b3",
-    name: "TVS Ntorq",
-    price: 100,
-    transmission: "Automatic",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Vijayawada, MG Road",
-    rating: 4.4,
-    available: true,
-    image: TVS,
-    type: "bike",
-  },
-  {
-    id: "b4",
-    name: "Honda Activa 6G",
-    price: 90,
-    transmission: "Manual",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Visakhapatnam, Dwaraka Nagar",
-    rating: 4.2,
-    available: true,
     image: Activa,
     type: "bike",
+      description: "Compact hatchback perfect for city rides."
   },
 ];
 
 
-=======
-];
->>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec

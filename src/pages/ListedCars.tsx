@@ -11,6 +11,10 @@ import CarLogo from "../assets/icons/CarLogo.png";
 import AutoLogo from "../assets/icons/AutoLogo.png";
 import FilterLogo from "../assets/icons/FilterLogo.png";
 import BikeLogo from "../assets/icons/BikeLogo.png";
+import Petrol from "../assets/icons/Petrol.png";
+import Location from "../assets/icons/Location.png";
+import Search from "../assets/icons/Search.png";
+import FilterCard from "../components/ui/FilterCard";
 
 interface Vehicle {
   name: string;
@@ -22,7 +26,7 @@ interface Vehicle {
   rating: string;
   available: boolean;
   image: string;
-  id?: string; // Optional ID for user-added cars
+  id?: string;
 }
 
 const initialCars: Vehicle[] = [
@@ -71,18 +75,19 @@ const initialCars: Vehicle[] = [
     image: BlackCar,
   },
 ];
-type VehicleListType = "cars" | "autos" | "bikes";
+
 const ListedCars: React.FC = () => {
-    // ...existing state
-  const [showCalendarModal, setShowCalendarModal] = useState(false);
   const navigate = useNavigate();
   const { currentCity } = useLocation();
   const { cars: userListedCars, deleteCar } = useListedCarsStore();
+
   const [cars, setCars] = useState<Vehicle[]>(initialCars);
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
-const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("cars");
-
+  const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("cars");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showFilter, setShowFilter] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   // Combine default cars with user-listed cars and filter by location
   const allCars = useMemo(() => {
@@ -91,30 +96,35 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
       price: car.rentPrice,
       transmission: car.transmission,
       fuel: car.fuel,
-      seats: "5 Seaters", // Default value
+      seats: "5 Seaters",
       location: `${car.city}, ${car.street}`,
       rating: car.rating.toString(),
       available: true,
       image: car.photos[0] || BlackCar,
-      id: car.id, // Keep ID for deletion
+      id: car.id,
     }));
-    
+
     const allVehicles = [...userCars, ...cars];
-    
-    // Filter by current location
+
     return allVehicles.filter((vehicle) => {
-      const vehicleCity = vehicle.location?.split(',')[0].trim() || '';
+      const vehicleCity = vehicle.location?.split(",")[0].trim() || "";
       return vehicleCity.toLowerCase() === currentCity.toLowerCase();
     });
   }, [userListedCars, cars, currentCity]);
 
-  // Update availability and navigate if Available
+  // Handle availability change
   const handleStatusChange = (index: number, value: string) => {
     const newCars = [...cars];
-    newCars[index].available = value === "Available";
+    const vehicle = newCars[index];
+    const isNowAvailable = value === "Available";
+
+    vehicle.available = isNowAvailable;
     setCars(newCars);
- if (value === "Available") {
-      setShowCalendarModal(true); // Show modal instead of navigating
+
+    if (!isNowAvailable) {
+      // If car becomes unavailable → open calendar modal
+      setSelectedVehicle(vehicle);
+      setShowCalendarModal(true);
     }
   };
 
@@ -126,12 +136,10 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
   const handleDeleteVehicle = (vehicle: Vehicle) => {
     const confirmDelete = window.confirm(`Delete ${vehicle.name}?`);
     if (confirmDelete) {
-      // If vehicle has an ID, it's a user-added car
       if (vehicle.id) {
         deleteCar(vehicle.id);
       } else {
-        // For default cars, remove from state
-        setCars(cars.filter(car => car.name !== vehicle.name));
+        setCars(cars.filter((car) => car.name !== vehicle.name));
       }
       alert(`${vehicle.name} deleted.`);
     }
@@ -143,8 +151,7 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
   };
 
   const handleCarClick = (vehicle: Vehicle) => {
-    // Navigate to vehicle details page
-    navigate(`/vehicle-details/${vehicle.name.toLowerCase().replace(/\s+/g, '-')}`);
+    navigate(`/vehicle-details/${vehicle.name.toLowerCase().replace(/\s+/g, "-")}`);
   };
 
   const filteredCars = allCars.filter((car) =>
@@ -152,198 +159,218 @@ const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("ca
   );
 
   const dropdownIcon =
-  selectedList === "cars"
-    ? CarLogo
-    : selectedList === "autos"
-    ? AutoLogo
-    : BikeLogo; // For bikes
+    selectedList === "cars"
+      ? CarLogo
+      : selectedList === "autos"
+      ? AutoLogo
+      : BikeLogo;
 
   return (
-      <>
-       <div className={`p-4 sm:p-6 bg-gray-50 min-h-screen transition-all duration-300 ${showCalendarModal ? 'blur-sm' : ''}`}>
-        {/* ...existing code for dropdown, search, listed cars */}
-       {/* Calendar Modal */}
-      
-      {/* Top Row */}
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-6 gap-4">
-        {/* Dropdown */}
-        <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3">
-          
-          <img src={dropdownIcon} alt="Dropdown Logo" className="w-[24px] h-[24px]" />
-       <select
-  className="flex-1 ml-2 border-none outline-none text-sm"
-  value={selectedList}
-  onChange={(e) => {
-    const value = e.target.value as "cars" | "autos" | "bikes";
-    setSelectedList(value);
+    <>
+      <div
+        className={`p-4 sm:p-6 bg-gray-50 min-h-screen transition-all duration-300 ${
+          showCalendarModal ? "blur-sm" : ""
+        }`}
+      >
+        {/* Top Row */}
+        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-6 gap-4">
+          {/* Dropdown */}
+          <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3">
+            <img src={dropdownIcon} alt="Dropdown Logo" className="w-[24px] h-[24px]" />
+            <select
+              className="flex-1 ml-2 border-none outline-none text-sm"
+              value={selectedList}
+              onChange={(e) => {
+                const value = e.target.value as "cars" | "autos" | "bikes";
+                setSelectedList(value);
 
-    if (value === "cars") navigate("/listed");
-    else if (value === "autos") navigate("/listed-autos");
-    else if (value === "bikes") navigate("/listed-bikes");
-  }}
->
-  <option value="cars">Listed Cars</option>
-  <option value="autos">Listed Autos</option>
-  <option value="bikes">Listed Bikes</option>
-</select>
-
-        </div>
-
-        {/* Search + Filter */}
-        <div className="flex gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:w-[300px] h-[50px]">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">
-              🔍
-            </span>
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-full rounded-full border pl-12 pr-4 focus:outline-none"
-            />
+                if (value === "cars") navigate("/listed");
+                else if (value === "autos") navigate("/listed-autos");
+                else if (value === "bikes") navigate("/listed-bikes");
+              }}
+            >
+              <option value="cars">Listed Cars</option>
+              <option value="autos">Listed Autos</option>
+              <option value="bikes">Listed Bikes</option>
+            </select>
           </div>
-          <button className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all">
-            <img src={FilterLogo} alt="Filter" className="w-6 h-6" />
-            Filter
-          </button>
-        </div>
-      </div>
 
-      {/* Title */}
-      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6">
-        Listed Cars in {currentCity}
-      </h2>
-
-      {/* Listed Cars */}
-      <div className="flex flex-col gap-6">
-        {filteredCars.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-2">No cars listed in {currentCity}</p>
-            <p className="text-gray-400 text-sm">Try changing your location to see more vehicles</p>
-          </div>
-        ) : (
-          filteredCars.map((item, index) => (
-          <div
-            key={index}
-            className="flex flex-col lg:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-full max-w-full lg:max-w-[800px] min-h-[100px] overflow-hidden cursor-pointer"
-            onClick={() => handleCarClick(item)}
-          >
-            {/* Car Image */}
-            <div className="w-full sm:w-[270px] h-[150px] sm:h-[200px] overflow-hidden rounded-lg flex-shrink-0">
+          {/* Search + Filter */}
+          <div className="flex gap-2 w-full md:w-auto">
+            <div className="relative flex-1 md:w-[300px] h-[40px]">
               <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-full object-cover object-center sm:object-[85%_50%]"
+                src={Search}
+                alt="Search "
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full h-full rounded-full border pl-12 pr-4 focus:outline-none"
               />
             </div>
 
-            {/* Details */}
-            <div className="flex-1 mt-3 lg:mt-0 lg:ml-4 w-full lg:w-auto">
-              <div className="flex items-center gap-4 flex-wrap">
-                <h3 className="font-semibold text-base sm:text-lg">{item.name}</h3>
-                <span className="flex items-center justify-center w-[72px] h-[32px] text-gray-700 text-sm">
-                  ⭐ {item.rating}
-                </span>
-              </div>
-
-              <p className="font-bold text-blue-600 text-base sm:text-lg mt-1">
-                ₹{item.price}/hr
-              </p>
-
-              <div className="flex flex-col gap-2 mt-2 text-gray-600 text-sm">
-                <div className="flex items-center gap-2">
-                  <img src={AutomaticLogo} alt="Transmission" className="w-[25px] h-[25px]" />
-                  <span>{item.transmission}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <img src={DriverLogo} alt="Seats" className="w-[25px] h-[25px]" />
-                  <span>{item.seats}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span>⛽</span>
-                  <span>{item.fuel}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span>📍</span>
-                  <span>{item.location}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Menu and Status */}
-            <div className="flex flex-col items-end w-full lg:w-auto mt-3 lg:mt-0">
-              <div className="flex items-center gap-2 justify-end">
-                <select
-                  className={`text-sm font-medium px-2 py-1 rounded-lg border ${
-                    item.available
-                      ? "bg-green-100 text-green-700 border-green-300"
-                      : "bg-red-100 text-red-700 border-red-300"
-                  }`}
-                  value={item.available ? "Available" : "Not Available"}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleStatusChange(index, e.target.value);
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <option value="Available">Available</option>
-                  <option value="Not Available">Not Available</option>
-                </select>
-
-                <div className="relative">
-                  <button
-                    className="p-2 rounded hover:bg-gray-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMenuToggle(index);
-                    }}
-                  >
-                    <MoreVertical className="w-5 h-5 text-gray-600" />
-                  </button>
-
-                  {menuOpenIndex === index && (
-                    <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-lg border border-gray-100 z-10">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(item);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteVehicle(item);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <button
+              onClick={() => setShowFilter(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
+            >
+              <img src={FilterLogo} alt="Filter" className="w-6 h-6" />
+              Filter
+            </button>
           </div>
-          ))
-        )}
+        </div>
+
+        {/* Title */}
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6">
+          Listed Cars in {currentCity}
+        </h2>
+
+        {/* Listed Cars */}
+        <div className="flex flex-col gap-6">
+          {filteredCars.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg mb-2">
+                No cars listed in {currentCity}
+              </p>
+              <p className="text-gray-400 text-sm">
+                Try changing your location to see more vehicles
+              </p>
+            </div>
+          ) : (
+            filteredCars.map((item, index) => (
+              <div
+                key={index}
+                className="flex flex-col lg:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-full max-w-full lg:max-w-[800px] min-h-[100px] overflow-hidden cursor-pointer"
+                onClick={() => handleCarClick(item)}
+              >
+                {/* Car Image */}
+                <div className="w-full sm:w-[270px] h-[150px] sm:h-[200px] overflow-hidden rounded-lg flex-shrink-0">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover object-center sm:object-[85%_50%]"
+                  />
+                </div>
+
+                {/* Details */}
+                <div className="flex-1 mt-3 lg:mt-0 lg:ml-4 w-full lg:w-auto">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <h3 className="font-semibold text-base sm:text-lg">{item.name}</h3>
+                    <span className="flex items-center justify-center w-[72px] h-[32px] text-gray-700 text-sm">
+                      ⭐ {item.rating}
+                    </span>
+                  </div>
+
+                  <p className="font-bold text-blue-600 text-base sm:text-lg mt-1">
+                    ₹{item.price}/hr
+                  </p>
+
+                  <div className="flex flex-col gap-2 mt-2 text-gray-600 text-sm">
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={AutomaticLogo}
+                        alt="Transmission"
+                        className="w-[25px] h-[25px]"
+                      />
+                      <span>{item.transmission}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <img src={DriverLogo} alt="Seats" className="w-[25px] h-[25px]" />
+                      <span>{item.seats}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <img src={Petrol} alt="Fuel" className="w-[25px] h-[25px]" />
+                      <span>{item.fuel}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <img src={Location} alt="Location" className="w-[25px] h-[25px]" />
+                      <span>{item.location}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu and Status */}
+                <div className="flex flex-col items-end w-full lg:w-auto mt-3 lg:mt-0">
+                  <div className="flex items-center gap-2 justify-end">
+                    <select
+                      className={`text-sm font-medium px-2 py-1 rounded-lg border ${
+                        item.available
+                          ? "bg-green-100 text-green-700 border-green-300"
+                          : "bg-red-100 text-red-700 border-red-300"
+                      }`}
+                      value={item.available ? "Available" : "Not Available"}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(index, e.target.value);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <option value="Available">Available</option>
+                      <option value="Not Available">Not Available</option>
+                    </select>
+
+                    <div className="relative">
+                      <button
+                        className="p-2 rounded hover:bg-gray-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMenuToggle(index);
+                        }}
+                      >
+                        <MoreVertical className="w-5 h-5 text-gray-600" />
+                      </button>
+
+                      {menuOpenIndex === index && (
+                        <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-lg border border-gray-100 z-10">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(item);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteVehicle(item);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
-    </div>
-{/* Calendar modal (outside blurred div) */}
-{showCalendarModal && (
-  <AvailabilityDateTimeModal
-    isOpen={showCalendarModal}
-    onClose={() => setShowCalendarModal(false)}
-    onConfirm={(startDate, endDate, startTime, endTime) => {
-      console.log({ startDate, endDate, startTime, endTime });
-      setShowCalendarModal(false);
-    }}
-  />
-)}
+
+      {/* Calendar Modal */}
+      {showCalendarModal && selectedVehicle && (
+        <AvailabilityDateTimeModal
+          isOpen={showCalendarModal}
+          onClose={() => setShowCalendarModal(false)}
+          onConfirm={(startDate, endDate, startTime, endTime) => {
+            console.log(
+              `Vehicle: ${selectedVehicle.name}, Unavailable from ${startDate} to ${endDate}, ${startTime}-${endTime}`
+            );
+            setShowCalendarModal(false);
+          }}
+        />
+      )}
+
+      {/* Filter Modal */}
+      {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
     </>
-    );
-  };
+  );
+};
+
 export default ListedCars;

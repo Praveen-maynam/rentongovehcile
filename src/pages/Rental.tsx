@@ -1,99 +1,15 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
-
-import VehicleCard from "../components/ui/VehicleCard";
-import AutoCard from "../components/ui/AutoCard";
-import BikeCard from "../components/ui/BikeCard";
+import VehicleSection from "../components/VehicleSection";
 import DateTimePicker from "../components/ui/DateTimePicker";
 import FilterCard from "../components/ui/FilterCard";
 import PromoSlides from "../components/PromoSlides";
 import { vehicles } from "./data/Vehicle";
-
-type VehicleType = "car" | "auto" | "bike";
-
-interface VehicleSectionProps {
-  title: string;
-  vehicles: typeof vehicles;
-  showBookButton?: boolean;
-  type: VehicleType;
-}
-
-const VehicleSection: React.FC<VehicleSectionProps> = ({
-  title,
-  vehicles,
-  showBookButton = false,
-  type,
-}) => {
-  const navigate = useNavigate();
-  const [showAll, setShowAll] = useState(false);
-
-  return (
-    <div className="px-6 py-4 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
-        {vehicles.length > 4 && !showAll && (
-          <button
-            onClick={() => setShowAll(true)}
-            className="text-blue-600 hover:underline font-medium"
-          >
-            View More →
-          </button>
-        )}
-      </div>
-
-      <div className="flex flex-wrap gap-4">
-        {(showAll ? vehicles : vehicles.slice(0, 4)).map((v, index) => {
-          switch (type) {
-            case "car":
-              return (
-                <VehicleCard
-                  key={v.id}
-                  vehicle={v}
-                  showActions={false}
-                  onBook={() => navigate(`/book-now/${v.id}`)}
-                />
-              );
-            case "auto":
-              return (
-                <AutoCard
-                  key={v.id}
-                  vehicle={v}
-                  showBookButton={showBookButton && index === 0}
-                  onBook={() => navigate(`/book-now/${v.id}`)}
-                />
-              );
-            case "bike":
-              return (
-                <BikeCard
-                  key={v.id}
-                  vehicle={v}
-                  showBookButton={showBookButton && index === 0}
-                  onBook={() => navigate(`/book-now/${v.id}`)}
-                />
-              );
-            default:
-              return null;
-          }
-        })}
-      </div>
-
-      {showAll && vehicles.length > 4 && (
-        <button
-          onClick={() => setShowAll(false)}
-          className="text-blue-600 hover:underline font-medium text-center py-2 mt-4 w-full"
-        >
-          Show Less ↑
-        </button>
-      )}
-    </div>
-  );
-};
+import Filter from "../assets/icons/FilterLogo.png";
 
 const Rental: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-
   const [startDate, setStartDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
@@ -101,6 +17,7 @@ const Rental: React.FC = () => {
     new Date().toISOString().split("T")[0]
   );
 
+  // ✅ Filter vehicles by search text
   const filterVehicles = (list: typeof vehicles) =>
     list.filter(
       (v) =>
@@ -114,17 +31,19 @@ const Rental: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
-      {/* 🔹 Promotional Slides */}
+      {/* 🔹 Promo Slides */}
       <div className="px-6 py-4">
         <PromoSlides />
       </div>
 
-      {/* 🔹 Search + DateTimePickers */}
+      {/* 🔹 Search & Date Pickers */}
       <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h3 className="text-lg font-semibold mb-2 text-gray-800">
             Select Date & Time
           </h3>
+
+          {/* ✅ Horizontal Calendars */}
           <div className="flex flex-col sm:flex-row gap-3">
             <DateTimePicker
               value={startDate}
@@ -139,9 +58,11 @@ const Rental: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white border rounded-full px-3 py-1 w-full md:w-60">
-            <Search className="w-4 h-4 text-gray-500 mr-2" />
+        {/* 🔹 Search & Filter */}
+        <div className="flex gap-2 w-full md:w-auto">
+          <div className="flex items-center bg-white border rounded-full relative flex-1 md:w-[300px] h-[40px]">
+            <Search className="w-6 h-6 text-gray-500 mr-4 ml-2" />
+
             <input
               type="text"
               placeholder="Search by name or location..."
@@ -153,15 +74,16 @@ const Rental: React.FC = () => {
 
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium px-4 py-2 rounded-full shadow hover:opacity-90 transition"
+            className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
           >
+            <img src={Filter} alt="Filter" className="w-6 h-6" />
             Filter
           </button>
         </div>
       </div>
 
       {/* 🚗 Cars Section */}
-      <VehicleSection title="Nearby Cars" vehicles={cars} type="car" />
+      <VehicleSection title="Looking for an Car?" vehicles={cars} type="car" />
 
       {/* 🛺 Autos Section */}
       <VehicleSection title="Looking for an Auto?" vehicles={autos} type="auto" />

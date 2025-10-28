@@ -7,25 +7,21 @@ import Navbar from "./components/layout/NavBar";
 // Pages
 import Rental from "./pages/Rental";
 import ChangeLocation from "./pages/ChangeLocation";
-import ListedCars from "./pages/ListedCars";
 
-import AutoPage from "pages/Autos";
+
+import AutoPage from "./pages/Autos";
 import ListAutoPage from "./pages/ListAutoPage";
 import ListCarPage from "./pages/ListCarPage";
 import ListBikePage from "./pages/ListBikePage";
-import BikePage from "./pages/Bike";
+
 import Nearbycars from "./pages/NearByCars";
-<<<<<<< HEAD
 import NearbyAutos from "pages/NearByAutos";
 import NearbyBikes from "pages/NearByBikes";
-=======
-
->>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
 import VehicleDetailsPage from "./pages/VehicleDetailsPage";
 import VehicleHistory from "./pages/VehicleHistory";
 import EditCarDetails from "./pages/EditCarDetails";
 import BookNow from "./pages/BookNow";
-import ListedBikes from "pages/ListedBikes";
+
 
 // import BookingConfirmation from "pages/BookingConformation";
 // import CallOrChat from "./pages/CallOrChat";
@@ -43,10 +39,14 @@ import Calendar from "./pages/Calendar";
 import CalendarScreen from "./pages/CalendarScreen";
 import ProfileCard from "./features/profile/components/profilecard";
 import Profile from "./features/profile/pages/profile";
-import listedCars from "./pages/ListedCars";
+import listed from "./pages/ListedCars";
 import Autos from "./pages/Autos";
+import ListedCars from "./pages/ListedCars";
+import ListedBikes from "pages/ListedBikes";
 
-
+import BookedAutos from "pages/BookedAutos";
+import BookedBikes from "pages/BookedBikes";
+import BookedCars from "pages/BookedCars";
 
 
 
@@ -63,39 +63,33 @@ const App: React.FC = () => {
         <Route path="/rental" element={<Rental />} />
 
         {/* Cars / Autos */}
-        <Route path="/listed" element={<ListedCars />} />
-     
-          <Route path="/listed-autos" element={<AutoPage />} />
+        <Route path="/listed" element={<ListedCars/>} />
+      <Route path="/listed-bikes" element={<ListedBikes/>}/>
+        <Route path="/listed-autos" element={<AutoPage />} />
         <Route path="/list-auto" element={<ListAutoPage />} />
         <Route path="/list-car" element={<ListCarPage />} />
         <Route path="/list-bike" element={<ListBikePage />} />
-        <Route path="/listed-bikes" element={<ListedBikes />} />
+   
         <Route path="/nearby-cars" element={<Nearbycars />} />
         <Route path="/nearby-autos" element={<NearbyAutos />} />
         <Route path="/nearby-bikes" element={<NearbyBikes />} />
-
-<<<<<<< HEAD
-=======
-  <Route path="/listed-autos" element={<AutoPage />} />
-  <Route path="/list-auto" element={<ListAutoPage />} />
-  <Route path="/list-car" element={<ListCarPage />} /> 
-  <Route path="/list-bike" element={<ListBikePage />} />
-  <Route path="/listed-bikes" element={<BikePage />} />
- <Route path="/nearby-cars" element={<Nearbycars />} />
-
+ <Route path="/booked-cars" element={<BookedCars />} />
+        <Route path="/booked-autos" element={<BookedAutos />} />
+        <Route path="/booked-bikes" element={<BookedBikes />} />
      
-<Route path="/profile" element={<ProfilePage />} />
-      <Route path="/cars" element={<ListedCars />} />
-  <Route path="/autos" element={<Autos />} />
+     
 
 
->>>>>>> 4aeffab8e1a0bddc7d50843caf921abcb758f1ec
+        <Route path="/profile" element={<ProfilePage />} />
+       
+
+
         <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
         <Route path="/vehicle-details/:vehicleName" element={<VehicleHistory />} />
         <Route path="/vehicle-details/:vehicleName/edit/:bookingId" element={<EditCarDetails />} />
 
 
-  <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<Profile />} />
         {/* Profile & User */}
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/my-profile" element={<MyProfile />} />
@@ -116,7 +110,7 @@ const App: React.FC = () => {
         />
 
         <Route path="/calendar-screen" element={<CalendarScreen />} />
-        
+
         {/* Booking Flow */}
         <Route path="/book-now/:id" element={<BookNow />} />
         {/* <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />

@@ -1,25 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import { useBookingStore } from "../store/booking.store";
-import { VehicleType, Booking } from "../types/booking";
 import BlackCar from "../assets/images/BlackCar.png";
-import Auto from "../assets/images/Auto.png";
-import Enfield from "../assets/images/Enfield.png";
+import { Booking } from "../types/booking";
 
-const MyBookings: React.FC = () => {
+const BookedCars: React.FC = () => {
   const navigate = useNavigate();
   const { bookings, deleteBooking } = useBookingStore();
 
-  const [vehicleFilter, setVehicleFilter] = useState<"All" | VehicleType>("All");
-  const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
-  const [showBookingMenu, setShowBookingMenu] = useState<string | null>(null);
+  const [vehicleFilter, setVehicleFilter] = useState<"All" | "Car" | "Auto" | "Bike">("Car");
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
+  const [showBookingMenu, setShowBookingMenu] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const bookingMenuRef = useRef<HTMLDivElement>(null);
 
-  // Handle clicks outside dropdowns to close them
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -34,10 +32,11 @@ const MyBookings: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-    const handleVehicleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const value = e.target.value as "All" | "Car" | "Auto" | "Bike";
-      setVehicleFilter(value);
-  
+  const handleVehicleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as "All" | "Car" | "Auto" | "Bike";
+    setVehicleFilter(value);
+
+    // Navigate based on selection
     switch (value) {
       case "Car":
         navigate("/booked-cars");
@@ -149,7 +148,7 @@ const MyBookings: React.FC = () => {
               onClick={() => setSelectedBooking(selectedBooking === booking.id ? null : booking.id)}
               className={`bg-white rounded-lg shadow flex gap-4 p-4 relative cursor-pointer ${selectedBooking === booking.id ? "ring-2 ring-blue-500" : ""}`}
             >
-              <img src={booking.vehicleImage || Auto} alt={booking.vehicleName} className="w-32 h-32 object-cover rounded-lg" />
+              <img src={booking.vehicleImage || BlackCar} alt={booking.vehicleName} className="w-32 h-32 object-cover rounded-lg" />
 
               <div className="flex-1 flex flex-col justify-between relative">
                 <div>
@@ -195,5 +194,4 @@ const MyBookings: React.FC = () => {
   );
 };
 
-
-export default MyBookings ;
+export default BookedCars;

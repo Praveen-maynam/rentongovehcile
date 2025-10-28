@@ -3,25 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { Vehicle } from "../../types/Vehicle";
 import { useReviewStore } from "../../store/review.store";
 import DriverLogo from "../../assets/icons/seats.jpeg";
+import Petrol from "../../assets/icons/fuel.jpeg";
+import { MapPin } from "lucide-react";
 
 interface BikeCardProps {
   vehicle: Vehicle;
   showBookButton?: boolean;
-   onEdit?: (vehicle: Vehicle) => void;
+  onEdit?: (vehicle: Vehicle) => void;
   onDelete?: (vehicle: Vehicle) => void;
   onBook?: (vehicle: Vehicle) => void;
 }
 
-const BikeCard: React.FC<BikeCardProps> = ({
-  vehicle,
-  showBookButton = false,
-  onBook,
-  onEdit,
-  onDelete,
-}) => {
+const BikeCard: React.FC<BikeCardProps> = ({ vehicle, onBook }) => {
   const navigate = useNavigate();
   const { getAverageRating } = useReviewStore();
-
   const rating = getAverageRating(vehicle.id);
 
   const handleBook = () => {
@@ -34,48 +29,57 @@ const BikeCard: React.FC<BikeCardProps> = ({
   };
 
   return (
-    <div className="flex flex-col">
     <div
-  className="flex flex-col bg-white shadow-md rounded-xl cursor-pointer border border-transparent
-             transition-all duration-200 hover:shadow-lg hover:border-blue-500 hover:scale-95
-             w-full sm:w-[220px] md:w-[240px] lg:w-[260px]"
-  onClick={handleCardClick}
->
-        {/* Bike Image */}
-        <div className="w-full h-[200px] overflow-hidden rounded-lg mb-3">
-          <img 
-            src={vehicle.image} 
-            alt={vehicle.name} 
-            className="w-full h-full object-cover" 
-          />
-        </div>
-
-        {/* Bike Info */}
-        <div className="flex-1 flex flex-col justify-between">
-          <div>
-            {/* Name and Rating */}
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-lg text-gray-900">{vehicle.name}</h3>
-              <span className="flex items-center justify-center px-3 py-1 text-gray-900 text-sm bg-yellow-50 border border-yellow-400 rounded">
-                ⭐ {rating.toFixed(1)}
-              </span>
-            </div>
-
-            {/* Price */}
-            <p className="text-gray-900 font-bold text-xl mb-3">
-              ₹{vehicle.price}<span className="text-base font-normal text-gray-600">/hr</span>
-            </p>
-
-            {/* Seats */}
-            <div className="flex items-center gap-2 text-gray-600 text-base">
-              <img src={DriverLogo} alt="Seats" className="w-6 h-6" />
-              <span>{vehicle.seats} Seaters</span>
-            </div>
-          </div>
-        </div>
+      onClick={handleCardClick}
+      className="flex flex-col bg-white shadow-md rounded-xl cursor-pointer border border-transparent
+                 transition-all duration-200 hover:shadow-lg hover:border-blue-500 hover:scale-95
+                 w-full sm:w-[220px] md:w-[240px] lg:w-[260px]"
+    >
+      {/* Bike Image */}
+      <div className="w-full h-48 sm:h-52 md:h-56 lg:h-60 overflow-hidden rounded-t-xl">
+        <img
+          src={vehicle.image}
+          alt={vehicle.name}
+          className="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-105"
+          loading="lazy"
+        />
       </div>
 
+      {/* Bike Info */}
+      <div className="flex flex-col p-3">
+        {/* Name + Rating */}
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
+            {vehicle.name}
+          </h3>
+          <span className="px-1.5 py-0.5 text-xs sm:text-sm bg-yellow-50 border border-yellow-400 text-gray-900 rounded">
+            ⭐ {rating.toFixed(1)}
+          </span>
+        </div>
 
+        {/* Price */}
+        <p className="text-gray-700 font-bold text-sm sm:text-base mb-2">
+          ₹{vehicle.price}{" "}
+          <span className="text-gray-500 font-normal text-xs sm:text-sm">/hr</span>
+        </p>
+
+        {/* Features */}
+        <div className="flex flex-col gap-1.5 text-gray-600 text-xs sm:text-sm">
+          <div className="flex items-center gap-2">
+            <img src={DriverLogo} alt="Seats" className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span>{vehicle.seats} Seaters</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <img src={Petrol} alt="Fuel" className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span>{vehicle.fuel}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 mt-0.5 flex-shrink-0" />
+            <span className="text-gray-500 line-clamp-2">{vehicle.location}</span>
+          </div>
+        </div>
+
+     </div>
     </div>
   );
 };

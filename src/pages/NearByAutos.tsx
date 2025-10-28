@@ -1,80 +1,75 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { vehicles } from "./data/Vehicle";
-
+import React, { useState } from "react";
+import { Search } from "lucide-react";
+import AutoCard from "../components/ui/AutoCard";
+import { vehicles as vehicleData } from "./data/Vehicle";
+import FilterLogo from "../assets/icons/FilterLogo.png";
+import FilterCard from "../components/ui/FilterCard"; // ✅ import FilterCard
+ 
 const NearbyAutos: React.FC = () => {
-  const navigate = useNavigate();
-
-  // Filter only autos
-  const autos = vehicles.filter((v) => v.type === "auto");
-
+  const [searchText, setSearchText] = useState("");
+  const [autos] = useState(vehicleData.filter((v) => v.type === "auto"));
+  const [showFilter, setShowFilter] = useState(false); // ✅ Filter modal state
+ 
+  const filteredAutos = autos.filter(
+    (v) =>
+      v.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      v.location?.toLowerCase().includes(searchText.toLowerCase())
+  );
+ 
   return (
-    <div className="bg-gray-50 min-h-screen px-4 sm:px-6 py-4">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">
-        Nearby Autos
-      </h2>
-
-      {/* Responsive grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {autos.map((auto) => (
-          <div
-            key={auto.id}
-            onClick={() => navigate(`/book-now/${auto.id}`)}
-            className="cursor-pointer"
-          >
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex flex-col gap-3 hover:shadow-md transition hover:border-blue-400">
-              
-              {/* Vehicle Image */}
-              <div className="w-full h-[200px] sm:h-[220px] md:h-[220px] lg:h-[250px] overflow-hidden rounded-lg">
-                <img
-                  src={auto.image}
-                  alt={auto.name}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                />
-              </div>
-
-              {/* Vehicle Details */}
-              <div className="flex flex-col text-gray-700 gap-1 items-center">
-                {/* Title + Rating */}
-                <div className="flex justify-between items-center w-full">
-                  <h3 className="text-base font-semibold text-gray-900 truncate">
-                    {auto.name}
-                  </h3>
-                  <span className="inline-flex items-center bg-yellow-100 text-yellow-700 text-xs font-medium px-2 py-0.5 rounded-md">
-                    ⭐ {auto.rating}
-                  </span>
-                </div>
-
-                {/* Price */}
-                <p className="text-sm font-semibold text-black w-full text-left">
-                  ₹{auto.price} <span className="text-xs text-gray-500">/km</span>
-                </p>
-
-                {/* Seats */}
-                <p className="text-xs text-gray-500 w-full text-left">{auto.seats} persons</p>
-
-                {/* Availability */}
-                <div className="mt-2">
-                  <select
-                    value={auto.available ? "Available" : "Not Available"}
-                    disabled
-                    className={`text-xs font-medium px-2 py-1 rounded-md border focus:outline-none w-28 text-center block mx-auto ${
-                      auto.available
-                        ? "bg-green-100 text-green-700 border-green-300"
-                        : "bg-red-100 text-red-700 border-red-300"
-                    }`}
-                  >
-                    <option value="Available">Available</option>
-                    <option value="Not Available">Not Available</option>
-                  </select>
-                </div>
-              </div>
+    <>
+      <div
+        className={`bg-gray-50 min-h-screen p-6 flex flex-col transition-all duration-300 ${
+          showFilter ? "blur-sm" : ""
+        }`}
+      >
+        {/* Header with Search & Filter */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Nearby Autos</h2>
+ 
+          {/* Search + Filter Row */}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* Search Bar */}
+            <div className="flex items-center bg-white border rounded-full px-3 py-2 w-full sm:w-64 shadow-sm">
+              <Search className="w-4 h-4 text-gray-500 mr-2" />
+              <input
+                type="text"
+                placeholder="Search by name or location..."
+                className="flex-1 outline-none text-gray-700 text-sm"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
             </div>
+ 
+            {/* Filter Button */}
+            <button
+              onClick={() => setShowFilter(true)} // ✅ opens modal
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-semibold px-4 py-2 rounded-full shadow-sm hover:opacity-90 transition-all duration-200"
+            >
+              <img src={FilterLogo} alt="Filter" className="w-4 h-4" />
+              <span className="text-sm">Filter</span>
+            </button>
           </div>
-        ))}
+        </div>
+ 
+        {/* Autos Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filteredAutos.length > 0 ? (
+            filteredAutos.map((v) => <AutoCard key={v.id} vehicle={v} />)
+          ) : (
+            <p className="text-gray-500 col-span-full text-center">
+              No autos available.
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+ 
+      {/* ✅ Filter Modal */}
+      {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
+    </>
   );
 };
-
+ 
 export default NearbyAutos;
+ 
+ 

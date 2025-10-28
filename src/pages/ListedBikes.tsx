@@ -2,110 +2,121 @@ import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
 
-import EnfieldBike from "../assets/images/Enfield.png";
-import YamahaBike from "../assets/images/yamaha.png";
+import Enfield from "../assets/images/Enfield.png";
+import yamaha from "../assets/images/yamaha.png";
 import TVSNtorqBike from "../assets/images/tvs-ntorq.png";
 import ActivaBike from "../assets/images/Activa.png";
-import BikeLogo from "../assets/icons/BikeLogo.png";
+
 import CarLogo from "../assets/icons/CarLogo.png";
 import AutoLogo from "../assets/icons/AutoLogo.png";
-import DriverLogo from "../assets/icons/DriverLogo.png";
+import BikeLogo from "../assets/icons/BikeLogo.png";
 import FilterLogo from "../assets/icons/FilterLogo.png";
-import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
+import DriverLogo from "../assets/icons/DriverLogo.png";
+import Petrol from "../assets/icons/Petrol.png";
+import Location from "../assets/icons/Location.png";
+import Search from "../assets/icons/Search.png";
+
 import AvailabilityDateTimeModal from "../components/AvailabilityDateTimeModal";
+import FilterCard from "../components/ui/FilterCard";
 import { Vehicle } from "../types/Vehicle";
 import { useListedBikesStore } from "../store/listedBikes.store";
 import { useLocation } from "../store/location.context";
 
-const initialBikes: Vehicle[] = [
+const defaultBikes: Vehicle[] = [
   {
-    id: "1",
-    name: "Royal Enfield Classic 350",
+    id: "b1",
+    name: "Royal Enfield",
     price: 120,
     transmission: "Manual",
     fuel: "Petrol",
     seats: 2,
-    location: "Kakinada, Gandhi Nagar near Varnika Function Hall",
+    location: "Kakinada, Main Road",
     rating: 4.6,
     available: true,
-    image: EnfieldBike,
+    image: Enfield,
     type: "bike",
+    description: "Powerful and comfortable cruiser.",
   },
   {
-    id: "2",
+    id: "b2",
     name: "Yamaha FZ-S",
     price: 100,
     transmission: "Manual",
     fuel: "Petrol",
     seats: 2,
-    location: "Rajahmundry, near RTC Complex",
-    rating: 4.4,
+    location: "Rajahmundry, Kotipalli Bus Stand",
+    rating: 4.3,
     available: true,
-    image: YamahaBike,
+    image: yamaha,
     type: "bike",
+    description: "Sporty and reliable for city rides.",
   },
   {
-    id: "3",
+    id: "b3",
     name: "TVS Ntorq",
+    price: 100,
+    transmission: "Automatic",
+    fuel: "Petrol",
+    seats: 2,
+    location: "Vijayawada, MG Road",
+    rating: 4.4,
+    available: true,
+    image: TVSNtorqBike,
+    type: "bike",
+    description: "Smart scooter with Bluetooth features.",
+  },
+  {
+    id: "b4",
+    name: "Honda Activa 6G",
     price: 90,
     transmission: "Automatic",
     fuel: "Petrol",
     seats: 2,
-    location: "Kakinada, Jagannaickpur",
-    rating: 4.3,
-    available: true,
-    image: TVSNtorqBike,
-    type: "bike",
-  },
-  {
-    id: "4",
-    name: "Honda Activa 6G",
-    price: 80,
-    transmission: "Automatic",
-    fuel: "Petrol",
-    seats: 2,
-    location: "Vijayawada, Benz Circle",
-    rating: 4.6,
+    location: "Visakhapatnam, Dwaraka Nagar",
+    rating: 4.2,
     available: true,
     image: ActivaBike,
     type: "bike",
+    description: "Smooth and efficient city scooter.",
   },
 ];
 
 const ListedBikes: React.FC = () => {
+  const [bikes, setBikes] = useState<Vehicle[]>(defaultBikes);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showFilter, setShowFilter] = useState(false);
+  const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
+  const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("bikes");
+
   const navigate = useNavigate();
   const { currentCity } = useLocation();
-  const { bikes: userBikes, deleteBike } = useListedBikesStore();
+  const { bikes: userListedBikes, deleteBike } = useListedBikesStore();
 
-  const [bikes, setBikes] = useState<Vehicle[]>(initialBikes);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("bikes");
-  const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
-
-  // Combine default + user bikes
+  // ✅ Merge default + user-listed bikes
   const allBikes = useMemo(() => {
-    const userBikesFormatted: Vehicle[] = userBikes.map((bike) => ({
+    const userBikesAsVehicles: Vehicle[] = userListedBikes.map((bike) => ({
       id: bike.id,
       name: bike.vehicleName,
       price: parseFloat(bike.farePrice) || 0,
       transmission: bike.transmission || "Manual",
       fuel: bike.fuel || "Petrol",
       seats: 2,
-      location: bike.description || "Unknown Location",
+      location: bike.city ? `${bike.city}, ${bike.street || ""}` : "Unknown Location",
       rating: bike.rating || 0,
       available: true,
-      image: bike.photos?.[0] || EnfieldBike,
+      image: bike.photos?.[0] || BikeLogo,
       type: "bike",
+      description: bike.description || "No description provided",
     }));
 
-    const allVehicles = [...userBikesFormatted, ...bikes];
-
+    const allVehicles = [...userBikesAsVehicles, ...bikes];
     return allVehicles.filter((vehicle) => {
-      const city = vehicle.location?.split(",")[0].trim().toLowerCase() || "";
-      return city === currentCity.toLowerCase();
+      const vehicleCity = vehicle.location?.split(",")[0].trim() || "";
+      return vehicleCity.toLowerCase() === currentCity.toLowerCase();
     });
-  }, [userBikes, bikes, currentCity]);
+  }, [userListedBikes, bikes, currentCity]);
 
   const filteredBikes = allBikes.filter((bike) =>
     bike.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -114,11 +125,19 @@ const ListedBikes: React.FC = () => {
   const dropdownIcon =
     selectedList === "cars" ? CarLogo : selectedList === "autos" ? AutoLogo : BikeLogo;
 
+  // ✅ Show calendar when "Not Available"
   const handleStatusChange = (index: number, value: string) => {
-    const newBikes = [...bikes];
-    newBikes[index].available = value === "Available";
-    setBikes(newBikes);
-    if (value === "Available") setShowCalendarModal(true);
+    const updatedBikes = [...bikes];
+    const vehicle = updatedBikes[index];
+    const isNowAvailable = value === "Available";
+
+    vehicle.available = isNowAvailable;
+    setBikes(updatedBikes);
+
+    if (!isNowAvailable) {
+      setSelectedVehicle(vehicle);
+      setShowCalendarModal(true);
+    }
   };
 
   const handleEdit = (vehicle: Vehicle) => {
@@ -130,7 +149,7 @@ const ListedBikes: React.FC = () => {
     const confirmDelete = window.confirm(`Delete ${vehicle.name}?`);
     if (confirmDelete) {
       if (vehicle.id) deleteBike(vehicle.id);
-      else setBikes(bikes.filter((b) => b.name !== vehicle.name));
+      else setBikes(bikes.filter((a) => a.name !== vehicle.name));
       alert(`${vehicle.name} deleted.`);
     }
     setMenuOpenIndex(null);
@@ -139,8 +158,9 @@ const ListedBikes: React.FC = () => {
   const handleMenuToggle = (index: number) =>
     setMenuOpenIndex(menuOpenIndex === index ? null : index);
 
-  const handleBikeClick = (vehicle: Vehicle) =>
+  const handleCardClick = (vehicle: Vehicle) => {
     navigate(`/vehicle-details/${vehicle.name.toLowerCase().replace(/\s+/g, "-")}`);
+  };
 
   return (
     <>
@@ -149,7 +169,7 @@ const ListedBikes: React.FC = () => {
           showCalendarModal ? "blur-sm" : ""
         }`}
       >
-        {/* Top Controls */}
+        {/* Header Controls */}
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-6">
           <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3">
             <img src={dropdownIcon} alt="Dropdown Icon" className="w-[24px] h-[24px]" />
@@ -170,30 +190,37 @@ const ListedBikes: React.FC = () => {
             </select>
           </div>
 
-          {/* Search and Filter */}
+          {/* Search + Filter */}
           <div className="flex gap-2 w-full md:w-auto">
-            <div className="relative flex-1 md:flex-none h-[50px]">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">
-                🔍
-              </span>
+            <div className="relative flex-1 md:w-[300px] h-[40px]">
+              <img
+                src={Search}
+                alt="Search"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+              />
               <input
                 type="text"
                 placeholder="Search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-full rounded-full border pl-12 pr-4 focus:outline-none bg-white"
+                className="w-full h-full rounded-full border pl-12 pr-4 focus:outline-none"
               />
             </div>
-            <button className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-1 rounded-md">
+
+            <button
+              onClick={() => setShowFilter(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
+            >
               <img src={FilterLogo} alt="Filter" className="w-6 h-6" />
               Filter
             </button>
           </div>
         </div>
 
+        {/* Title */}
         <h2 className="text-3xl font-semibold mb-6">Listed Bikes in {currentCity}</h2>
 
-        {/* Bike Cards */}
+        {/* Bike List */}
         <div className="flex flex-col gap-6">
           {filteredBikes.length === 0 ? (
             <div className="text-center py-12">
@@ -206,11 +233,11 @@ const ListedBikes: React.FC = () => {
             filteredBikes.map((item, index) => (
               <div
                 key={index}
-                className="flex flex-col lg:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-full max-w-full lg:max-w-[800px] min-h-[250px] overflow-hidden cursor-pointer"
-                onClick={() => handleBikeClick(item)}
+                className="flex flex-col lg:flex-row justify-between items-start bg-white shadow-md rounded-xl p-4 hover:shadow-lg transition w-full max-w-full lg:max-w-[800px] cursor-pointer"
+                onClick={() => handleCardClick(item)}
               >
                 {/* Image */}
-                <div className="w-full sm:w-[150px] h-[80px] sm:h-[150px] overflow-hidden rounded-lg flex-shrink-0">
+                <div className="w-full sm:w-[270px] h-[150px] sm:h-[200px] overflow-hidden rounded-lg flex-shrink-0">
                   <img
                     src={item.image}
                     alt={item.name}
@@ -228,30 +255,26 @@ const ListedBikes: React.FC = () => {
                   </div>
 
                   <p className="font-bold text-blue-600 text-2xl sm:text-3xl mt-2">
-                    ₹{item.price}/hr
+                    ₹{item.price}/km
                   </p>
 
                   <div className="flex flex-col gap-2 mt-4 text-gray-600 text-sm">
-                    <div className="flex items-center gap-2">
-                      <img src={AutomaticLogo} alt="Transmission" className="w-[25px] h-[25px]" />
-                      <span>{item.transmission}</span>
-                    </div>
                     <div className="flex items-center gap-2">
                       <img src={DriverLogo} alt="Seats" className="w-[25px] h-[25px]" />
                       <span>{item.seats} Seater</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span>⛽</span>
+                      <img src={Petrol} alt="Fuel" className="w-[25px] h-[25px]" />
                       <span>{item.fuel}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span>📍</span>
+                      <img src={Location} alt="Location" className="w-[25px] h-[25px]" />
                       <span>{item.location}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Status & Menu */}
+                {/* Menu + Status */}
                 <div className="flex flex-col items-end w-full lg:w-auto mt-3 lg:mt-0">
                   <div className="flex items-center gap-2 justify-end">
                     <select
@@ -313,17 +336,26 @@ const ListedBikes: React.FC = () => {
         </div>
       </div>
 
-      {/* Calendar Modal */}
-      {showCalendarModal && (
+      {/* ✅ Calendar Modal */}
+      {showCalendarModal && selectedVehicle && (
         <AvailabilityDateTimeModal
           isOpen={showCalendarModal}
           onClose={() => setShowCalendarModal(false)}
           onConfirm={(startDate, endDate, startTime, endTime) => {
-            console.log({ startDate, endDate, startTime, endTime });
+            console.log({
+              startDate,
+              endDate,
+              startTime,
+              endTime,
+              forVehicle: selectedVehicle.name,
+            });
             setShowCalendarModal(false);
           }}
         />
       )}
+
+      {/* Filter Modal */}
+      {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
     </>
   );
 };

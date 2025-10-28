@@ -1,25 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react"; // <--- important
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import { useBookingStore } from "../store/booking.store";
-import { VehicleType, Booking } from "../types/booking";
-import BlackCar from "../assets/images/BlackCar.png";
+import { BookVehicleModal } from "../components/booking/BookVehicleModal";
+import BookingCard from "../components/BookingCard";
+import { Booking, VehicleType } from "../types/booking";
 import Auto from "../assets/images/Auto.png";
-import Enfield from "../assets/images/Enfield.png";
 
-const MyBookings: React.FC = () => {
+const BookedAutos: React.FC = () => {
   const navigate = useNavigate();
   const { bookings, deleteBooking } = useBookingStore();
-
-  const [vehicleFilter, setVehicleFilter] = useState<"All" | VehicleType>("All");
-  const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
-  const [showBookingMenu, setShowBookingMenu] = useState<string | null>(null);
+  const [vehicleFilter, setVehicleFilter] = useState<"All" | "Car" | "Auto" | "Bike">("Auto");
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
+  const [showBookingMenu, setShowBookingMenu] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const bookingMenuRef = useRef<HTMLDivElement>(null);
 
-  // Handle clicks outside dropdowns to close them
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -33,7 +31,7 @@ const MyBookings: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
+  
     const handleVehicleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const value = e.target.value as "All" | "Car" | "Auto" | "Bike";
       setVehicleFilter(value);
@@ -196,4 +194,4 @@ const MyBookings: React.FC = () => {
 };
 
 
-export default MyBookings ;
+export default BookedAutos;
