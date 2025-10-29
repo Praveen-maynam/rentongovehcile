@@ -15,6 +15,9 @@ import Petrol from "../assets/icons/Petrol.png";
 import Location from "../assets/icons/Location.png";
 import Search from "../assets/icons/Search.png";
 import FilterCard from "../components/ui/FilterCard";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+
+
 
 interface Vehicle {
   name: string;
@@ -80,6 +83,8 @@ const ListedCars: React.FC = () => {
   const navigate = useNavigate();
   const { currentCity } = useLocation();
   const { cars: userListedCars, deleteCar } = useListedCarsStore();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
 
   const [cars, setCars] = useState<Vehicle[]>(initialCars);
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
@@ -112,24 +117,31 @@ const ListedCars: React.FC = () => {
     });
   }, [userListedCars, cars, currentCity]);
 
-  // Handle availability change
+  // ✅ Show calendar when "Not Available"
+    // ✅ Show calendar when "Not Available"
   const handleStatusChange = (index: number, value: string) => {
-    const newCars = [...cars];
-    const vehicle = newCars[index];
+    const updatedCars = [...cars];
+    const vehicle = updatedCars[index];
     const isNowAvailable = value === "Available";
 
     vehicle.available = isNowAvailable;
-    setCars(newCars);
+    setCars(updatedCars);
 
+    // ✅ If user selects "Not Available", open the calendar modal
     if (!isNowAvailable) {
-      // If car becomes unavailable → open calendar modal
       setSelectedVehicle(vehicle);
       setShowCalendarModal(true);
     }
   };
 
+  // ✅ Edit vehicle handler (fix misplaced braces)
   const handleEdit = (vehicle: Vehicle) => {
-    alert(`Edit clicked for ${vehicle.name}`);
+    navigate("/Car-Details", {
+      state: {
+        carData: vehicle,
+        openEditForm: true,
+      },
+    });
     setMenuOpenIndex(null);
   };
 
@@ -324,24 +336,34 @@ const ListedCars: React.FC = () => {
 
                       {menuOpenIndex === index && (
                         <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-lg border border-gray-100 z-10">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEdit(item);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteVehicle(item);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                          >
-                            Delete
-                          </button>
+                           <>
+      {/* Example Edit button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleEdit(item);
+        }}
+        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
+        Edit
+      </button>
+    </>
+   <button
+  onClick={(e) => {
+    e.stopPropagation();
+    navigate("/Car-Details", {
+      state: { 
+        carData: item,       // send the vehicle data
+        openDeleteModal: true // flag to open modal
+      },
+    });
+  }}
+  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+>
+  Delete
+</button>
+
+
                         </div>
                       )}
                     </div>
@@ -353,7 +375,7 @@ const ListedCars: React.FC = () => {
         </div>
       </div>
 
-      {/* Calendar Modal */}
+           {/* Calendar Modal */}
       {showCalendarModal && selectedVehicle && (
         <AvailabilityDateTimeModal
           isOpen={showCalendarModal}
@@ -369,8 +391,29 @@ const ListedCars: React.FC = () => {
 
       {/* Filter Modal */}
       {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
+
+      {/* ✅ Delete Confirmation Modal */}
+      {showDeleteModal && vehicleToDelete && (
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onConfirm={() => {
+            if (vehicleToDelete.id) {
+              deleteCar(vehicleToDelete.id);
+            } else {
+              setCars(cars.filter((car) => car.name !== vehicleToDelete.name));
+            }
+            setShowDeleteModal(false);
+            setVehicleToDelete(null);
+          }}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setVehicleToDelete(null);
+          }}
+        />
+      )}
     </>
   );
 };
+
 
 export default ListedCars;

@@ -125,7 +125,6 @@ const ListedBikes: React.FC = () => {
   const dropdownIcon =
     selectedList === "cars" ? CarLogo : selectedList === "autos" ? AutoLogo : BikeLogo;
 
-  // ✅ Show calendar when "Not Available"
   const handleStatusChange = (index: number, value: string) => {
     const updatedBikes = [...bikes];
     const vehicle = updatedBikes[index];
@@ -141,7 +140,12 @@ const ListedBikes: React.FC = () => {
   };
 
   const handleEdit = (vehicle: Vehicle) => {
-    alert(`Edit clicked for ${vehicle.name}`);
+    navigate("/Car-Details", {
+      state: {
+        carData: vehicle,
+        openEditForm: true,
+      },
+    });
     setMenuOpenIndex(null);
   };
 
@@ -316,6 +320,7 @@ const ListedBikes: React.FC = () => {
                           >
                             Edit
                           </button>
+
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

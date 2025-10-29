@@ -42,12 +42,12 @@ import Profile from "./features/profile/pages/profile";
 import listed from "./pages/ListedCars";
 import Autos from "./pages/Autos";
 import ListedCars from "./pages/ListedCars";
-import ListedBikes from "pages/ListedBikes";
+import ListedBikes from "./pages/ListedBikes";
 
 import BookedAutos from "pages/BookedAutos";
 import BookedBikes from "pages/BookedBikes";
 import BookedCars from "pages/BookedCars";
-
+import CarDetails from "./pages/CarDetails";
 
 
 const App: React.FC = () => {
@@ -81,7 +81,7 @@ const App: React.FC = () => {
 
 
         <Route path="/profile" element={<ProfilePage />} />
-       
+       <Route path="/car-Details" element={<CarDetails/>}/>
 
 
         <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />

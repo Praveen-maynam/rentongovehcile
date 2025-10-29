@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Search } from "lucide-react";
 import VehicleSection from "../components/VehicleSection";

@@ -88,10 +88,14 @@ const ListedAutos: React.FC = () => {
   };
 
   const handleEdit = (vehicle: Vehicle) => {
-    alert(`Edit clicked for ${vehicle.name}`);
+    navigate("/Car-Details", {
+      state: {
+        carData: vehicle,
+        openEditForm: true,
+      },
+    });
     setMenuOpenIndex(null);
   };
-
 
   const handleDeleteVehicle = (vehicle: Vehicle) => {
     const confirmDelete = window.confirm(`Delete ${vehicle.name}?`);
@@ -244,15 +248,16 @@ const ListedAutos: React.FC = () => {
                         
                                               {menuOpenIndex === index && (
                                                 <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-lg border border-gray-100 z-10">
-                                                  <button
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      handleEdit(item);
-                                                    }}
-                                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                  >
-                                                    Edit
-                                                  </button>
+                                                 <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(item);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            Edit
+                          </button>
+
                                                   <button
                                                     onClick={(e) => {
                                                       e.stopPropagation();
