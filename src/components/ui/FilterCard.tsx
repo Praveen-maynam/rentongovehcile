@@ -13,7 +13,7 @@ const [selectedName, setSelectedName] = useState("");
 // Vehicle name lists
 const carNames = ["Hyundai", "Ford", "Tata", "Suzuki", "Mahindra"];
 const bikeNames = ["Yamaha", "Honda", "Hero", "Bajaj", "TVS"];
-const autoNames = ["Bajaj", "Piaggio", "Mahindra Treo", "Atul Auto"];
+// const autoNames = ["Bajaj", "Piaggio", "Mahindra Treo", "Atul Auto"];
  
 // Handle vehicle type selection
 const handleCheckboxChange = (type: string) => {
@@ -29,7 +29,7 @@ setSelectedName("");
 const getNameOptions = () => {
 if (vehicleType.includes("car")) return carNames;
 if (vehicleType.includes("bikes")) return bikeNames;
-if (vehicleType.includes("auto")) return autoNames;
+// if (vehicleType.includes("auto")) return autoNames;
 return [];
 };
  
@@ -46,7 +46,8 @@ return (
     {/* Vehicle Type */}
     <div className="mb-6">
       <p className="font-medium mb-2">Vehicle Type</p>
-      {["car", "auto", "bikes"].map((type) => (
+      {/* {["car", "auto", "bikes"].map((type) => ( */}
+       {["car", "bikes"].map((type) => (
         <label key={type} className="block text-sm">
           <input
             type="checkbox"

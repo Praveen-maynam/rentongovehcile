@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, Navigation, Loader } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ListBikePage = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -33,6 +34,7 @@ const ListBikePage = () => {
     depositMoney: "0",
   });
 
+  const navigate = useNavigate();
   // 🧭 Automatically fetch coordinates when address changes
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -210,11 +212,9 @@ const ListBikePage = () => {
       alert("Failed to post bike. Please try again.");
     }
   };
-
   const handleModalClose = () => {
     setShowSuccessModal(false);
-    // Navigate to desired page after successful submission
-    window.location.href = "/bike";
+    navigate("/listed-bikes"); // ✅ Navigate to Listed Bikes page
   };
 
   return (
@@ -356,7 +356,7 @@ const ListBikePage = () => {
                 multiple
                 accept="image/*"
                 onChange={handlePhotoUpload}
-                className="mb-2 w-full"
+                className="mb-2 w-full h-280"
                 required
               />
               {formData.photos.length > 0 && (

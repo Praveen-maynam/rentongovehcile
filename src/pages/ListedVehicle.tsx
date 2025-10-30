@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BikeLogo from "../assets/icons/BikeLogo.png";
+import CarLogo from "../assets/icons/CarLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
 import Petrol from "../assets/icons/Petrol.png";
 import Location from "../assets/icons/Location.png";
@@ -11,20 +12,20 @@ import AvailabilityDateTimeModal from "../components/AvailabilityDateTimeModal";
 import { useLocation } from "../store/location.context";
 import { Vehicle } from "../types/Vehicle";
 
-const ListedBikes: React.FC = () => {
-  const [apiBikes, setApiBikes] = useState<Vehicle[]>([]);
+const ListedVehicles: React.FC = () => {
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilter, setShowFilter] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
-  const [selectedList, setSelectedList] = useState<"both" | "cars" | "bikes">("bikes");
+  const [selectedList, setSelectedList] = useState<"both" | "cars" | "bikes">("both");
 
   const navigate = useNavigate();
   const { currentCity } = useLocation();
 
-  // Fetch bikes from API
+  // Fetch both bikes and cars
   useEffect(() => {
     const userId = "68fe269b6f13375a65dc587a";
     setLoading(true);
@@ -37,15 +38,19 @@ const ListedBikes: React.FC = () => {
       })
       .then((result) => {
         let bikesData: any[] = [];
-        if (result.data?.bikes && Array.isArray(result.data.bikes)) {
-          bikesData = result.data.bikes;
-        } else if (Array.isArray(result)) {
-          bikesData = result;
+        let carsData: any[] = [];
+
+        if (result.data) {
+          if (result.data.bikes && Array.isArray(result.data.bikes)) {
+            bikesData = result.data.bikes;
+          }
+          if (result.data.cars && Array.isArray(result.data.cars)) {
+            carsData = result.data.cars;
+          }
         }
 
-        const bikesOnly = bikesData.filter((v) => v.bikeName);
-
-        const transformedBikes: Vehicle[] = bikesOnly.map((v: any) => ({
+        // Transform bikes
+        const transformedBikes: Vehicle[] = bikesData.map((v: any) => ({
           id: v._id,
           name: v.bikeName,
           model: v.bikeModel,
@@ -64,32 +69,43 @@ const ListedBikes: React.FC = () => {
           bikeNumber: v.bikeNumber,
         }));
 
-        setApiBikes(transformedBikes);
+        // Transform cars
+        const transformedCars: Vehicle[] = carsData.map((v: any) => ({
+          id: v._id,
+          name: v.CarName,
+          model: v.CarModel,
+          price: v.RentPerHour || 0,
+          seats: v.Carseater || 5,
+          fuel: v.fuelType || "Petrol",
+          transmission: v.transmissionType || "Manual",
+          location: `${v.pickupCity || "Unknown"}, ${v.pickupCityState || ""}`,
+          rating: 0,
+          available: v.Available !== undefined ? v.Available : true,
+          image: v.carImages && v.carImages.length > 0 && v.carImages[0] ? v.carImages[0] : CarLogo,
+          type: "car",
+          description: v.description || "No description provided",
+          contactName: v.contactName,
+          contactNumber: v.contactNumber,
+        }));
+
+        setVehicles([...transformedBikes, ...transformedCars]);
       })
       .catch((error) => {
-        console.error("Error fetching bikes:", error);
-        setError("Failed to load bikes. Please try again.");
+        console.error("Error fetching vehicles:", error);
+        setError("Failed to load vehicles. Please try again.");
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredBikes = apiBikes.filter((bike) =>
-    bike.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredVehicles = vehicles.filter((v) =>
+    v.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCardClick = (vehicle: Vehicle) => {
     navigate(`/book-now/${vehicle.id}`, { state: { vehicleData: vehicle, openContact: false } });
   };
 
-  const handleDelete = (vehicle: Vehicle) => {
-    const confirmDelete = window.confirm(`Delete ${vehicle.name}?`);
-    if (confirmDelete) {
-      setApiBikes(apiBikes.filter((a) => a.id !== vehicle.id));
-      alert(`${vehicle.name} deleted.`);
-    }
-  };
-
-  if (loading) return <div className="text-center py-12">Loading bikes...</div>;
+  if (loading) return <div className="text-center py-12">Loading vehicles...</div>;
   if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
 
   return (
@@ -106,9 +122,9 @@ const ListedBikes: React.FC = () => {
               onChange={(e) => {
                 const value = e.target.value as "both" | "cars" | "bikes";
                 setSelectedList(value);
-                if (value === "both") navigate("/listed-vehicles");
-                else if (value === "cars") navigate("/listed");
-                // stay on listed-bikes if value is bikes
+                if (value === "cars") navigate("/listed");
+                else if (value === "bikes") navigate("/listed-bikes");
+                // stay on listed-vehicles if value is both
               }}
             >
               <option value="both">Both</option>
@@ -123,7 +139,7 @@ const ListedBikes: React.FC = () => {
               <img src={Search} alt="Search" className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search Bikes..."
+                placeholder="Search Vehicles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full h-full rounded-full border pl-12 pr-4 focus:outline-none"
@@ -138,38 +154,38 @@ const ListedBikes: React.FC = () => {
           </div>
         </div>
 
-        {/* Bikes Grid */}
+        {/* Vehicles Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredBikes.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-gray-500">No bikes listed in {currentCity}</div>
+          {filteredVehicles.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-gray-500">No vehicles listed in {currentCity}</div>
           ) : (
-            filteredBikes.map((bike) => (
+            filteredVehicles.map((v) => (
               <div
-                key={bike.id}
+                key={v.id}
                 className="flex flex-col bg-white shadow-md rounded-xl cursor-pointer hover:shadow-lg border border-transparent transition-all"
-                onClick={() => handleCardClick(bike)}
+                onClick={() => handleCardClick(v)}
               >
-                <div className="relative w-full h-65 overflow-hidden rounded-t-xl bg-gray-100">
-                  <img src={bike.image} alt={bike.name} className="w-full h-full object-cover" />
-                  {!bike.available && (
+                <div className="relative w-full h-40 overflow-hidden rounded-t-xl bg-gray-100">
+                  <img src={v.image} alt={v.name} className="w-full h-full object-cover" />
+                  {!v.available && (
                     <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs rounded">
                       Not Available
                     </div>
                   )}
                 </div>
                 <div className="flex flex-col p-3">
-                  <h3 className="font-semibold text-sm">{bike.name}</h3>
-                  <p className="text-gray-600 text-xs">{bike.model}</p>
-                  <p className="text-blue-600 font-bold text-sm mt-1">₹{bike.price}/km</p>
+                  <h3 className="font-semibold text-sm">{v.name}</h3>
+                  <p className="text-gray-600 text-xs">{v.model}</p>
+                  <p className="text-blue-600 font-bold text-sm mt-1">₹{v.price}/km</p>
                   <div className="flex gap-2 mt-2 text-gray-600 text-xs">
                     <div className="flex items-center gap-1">
-                      <img src={DriverLogo} alt="Seats" className="w-4 h-4" /> {bike.seats} Seater
-  </div>
-                    <div className="flex items-center gap-1 mb-1">
-                      <img src={Petrol} alt="Fuel" className="w-4 h-4" /> {bike.fuel}
+                      <img src={DriverLogo} alt="Seats" className="w-4 h-4" /> {v.seats} Seater
                     </div>
                     <div className="flex items-center gap-1">
-                      <img src={Location} alt="Location" className="w-4 h-4" /> {bike.location}
+                      <img src={Petrol} alt="Fuel" className="w-4 h-4" /> {v.fuel}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <img src={Location} alt="Location" className="w-4 h-4" /> {v.location}
                     </div>
                   </div>
                 </div>
@@ -194,4 +210,4 @@ const ListedBikes: React.FC = () => {
   );
 };
 
-export default ListedBikes;
+export default ListedVehicles;

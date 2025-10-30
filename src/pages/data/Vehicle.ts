@@ -1,7 +1,7 @@
 
 import { Vehicle } from "../../types/Vehicle";
 import BlackCar from "../../assets/images/BlackCar.png";
-import AutoImage from "../../assets/images/Auto.png";
+// import AutoImage from "../../assets/images/Auto.png";
 import Enfied from "../../assets/images/Enfield.png";
 import yamaha from "../../assets/images/yamaha.png";
 import TVS from "../../assets/images/tvs-ntorq.png";
@@ -39,38 +39,38 @@ export const vehicles: Vehicle[] = [
     available: true,
       description: "Compact hatchback perfect for city rides."
   },
-  {
-    id: "3",
-    name: "Bajaj RE",
-    price: 150,
-    seats: 3,
-    transmission: "Manual",
-    fuel: "CNG",
-    rating: 4.0,
+  // {
+  //   id: "3",
+  //   name: "Bajaj RE",
+  //   price: 150,
+  //   seats: 3,
+  //   transmission: "Manual",
+  //   fuel: "CNG",
+  //   rating: 4.0,
 
-    image:AutoImage,
+  //   image:AutoImage,
 
-    type: "auto",
-    location:  "Kakinada",
-    available: true,
-     description: "Compact hatchback perfect for city rides."
-  },
-  {
-    id: "4",
-    name: "Piaggio Ape",
-    price: 160,
-    seats: 3,
-    transmission: "Manual",
-    fuel: "Diesel",
-    rating: 4.3,
+  //   type: "auto",
+  //   location:  "Kakinada",
+  //   available: true,
+  //    description: "Compact hatchback perfect for city rides."
+  // },
+  // {
+  //   id: "4",
+  //   name: "Piaggio Ape",
+  //   price: 160,
+  //   seats: 3,
+  //   transmission: "Manual",
+  //   fuel: "Diesel",
+  //   rating: 4.3,
 
-    image: AutoImage,
+  //   image: AutoImage,
 
-    type: "auto",
-    location:  "Kakinada",
-    available: false,
-      description: "Compact hatchback perfect for city rides."
-  },
+  //   type: "auto",
+  //   location:  "Kakinada",
+  //   available: false,
+  //     description: "Compact hatchback perfect for city rides."
+  // },
   {
     id: "5",
     name: "Honda City",
@@ -136,62 +136,62 @@ export const vehicles: Vehicle[] = [
      type: "car",
   },
 
-  {
-    id: "9",
-    name: "Bajaj RE",
-    price: 150,
-    transmission: "Manual",
-    fuel: "CNG",
-    seats: 3,
-    location: "Hyderabad",
-    rating: 4.0,
-    available: true,
-    type: "auto",
-    image: AutoImage,
-      description: "Compact hatchback perfect for city rides."
-  },
-  {
-    id: "10",
-    name: "Piaggio Ape",
-    price: 160,
-    transmission: "Manual",
-    fuel: "Diesel",
-    seats: 3,
-    location: "Rajahmundry",
-    rating: 4.3,
-    available: true,
-    type: "auto",
-    image: AutoImage,
-      description: "Compact hatchback perfect for city rides."
-  },
-  {
-    id: "11",
-    name: "TVS King",
-    price: 155,
-    transmission: "Manual",
-    fuel: "CNG",
-    seats: 3,
-    location: "Vijayawada",
-    rating: 4.1,
-    available: true,
-    type: "auto",
-    image: AutoImage,
-      description: "Compact hatchback perfect for city rides."
-  },
-  {
-    id: "12",
-    name: "Mahindra Alfa",
-    price: 165,
-    transmission: "Manual",
-    fuel: "Diesel",
-    seats: 3,
-    location: "Visakhapatnam",
-    rating: 4.4,
-    available: true,
-    type: "auto",
-    image: AutoImage,
-      description: "Compact hatchback perfect for city rides."
-  },
+  // {
+  //   id: "9",
+  //   name: "Bajaj RE",
+  //   price: 150,
+  //   transmission: "Manual",
+  //   fuel: "CNG",
+  //   seats: 3,
+  //   location: "Hyderabad",
+  //   rating: 4.0,
+  //   available: true,
+  //   type: "auto",
+  //   image: AutoImage,
+  //     description: "Compact hatchback perfect for city rides."
+  // },
+  // {
+  //   id: "10",
+  //   name: "Piaggio Ape",
+  //   price: 160,
+  //   transmission: "Manual",
+  //   fuel: "Diesel",
+  //   seats: 3,
+  //   location: "Rajahmundry",
+  //   rating: 4.3,
+  //   available: true,
+  //   type: "auto",
+  //   image: AutoImage,
+  //     description: "Compact hatchback perfect for city rides."
+  // },
+  // {
+  //   id: "11",
+  //   name: "TVS King",
+  //   price: 155,
+  //   transmission: "Manual",
+  //   fuel: "CNG",
+  //   seats: 3,
+  //   location: "Vijayawada",
+  //   rating: 4.1,
+  //   available: true,
+  //   type: "auto",
+  //   image: AutoImage,
+  //     description: "Compact hatchback perfect for city rides."
+  // },
+  // {
+  //   id: "12",
+  //   name: "Mahindra Alfa",
+  //   price: 165,
+  //   transmission: "Manual",
+  //   fuel: "Diesel",
+  //   seats: 3,
+  //   location: "Visakhapatnam",
+  //   rating: 4.4,
+  //   available: true,
+  //   type: "auto",
+  //   image: AutoImage,
+  //     description: "Compact hatchback perfect for city rides."
+  // },
    {
     id: "13",
   name: "Royal Enfield ",

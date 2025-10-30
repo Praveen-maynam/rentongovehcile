@@ -1,5 +1,5 @@
-export type VehicleType = "Car" | "Auto" | "Bike";
-
+// export type VehicleType = "Car" | "Auto" | "Bike";
+export type VehicleType = "Car" | "Bike";
 export interface Booking {
   id: string;
   vehicleId: string;

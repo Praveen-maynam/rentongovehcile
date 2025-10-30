@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import VehicleCard from "../components/ui/VehicleCard";
-import AutoCard from "../components/ui/AutoCard";
+// import AutoCard from "../components/ui/AutoCard";
 import BikeCard from "../components/ui/BikeCard";
 import { Vehicle } from "../types/Vehicle";
 type VehicleType = "car" | "auto" | "bike";
@@ -81,15 +81,15 @@ const visibleVehicles = vehicles
                   onBook={() => navigate(`/book-now/${v.id}`)}
                 />
               );
-            case "auto":
-              return (
-                <AutoCard
-                  key={v.id}
-                  vehicle={v}
-                  showBookButton={showBookButton && index === 0}
-                  onBook={() => navigate(`/book-now/${v.id}`)}
-                />
-              );
+            // case "auto":
+            //   return (
+            //     <AutoCard
+            //       key={v.id}
+            //       vehicle={v}
+            //       showBookButton={showBookButton && index === 0}
+            //       onBook={() => navigate(`/book-now/${v.id}`)}
+            //     />
+            //   );
          case "bike":
   return (
     <BikeCard

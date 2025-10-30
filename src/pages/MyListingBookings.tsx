@@ -2,17 +2,17 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useBookingStore } from "../store/booking.store";
 import { useListedCarsStore } from "../store/listedCars.store";
-import { useListedAutosStore } from "../store/listedAutos.store";
+// import { useListedAutosStore } from "../store/listedAutos.store";
 import { Calendar, User, Phone, ArrowLeft } from "lucide-react";
-
+import { useListedBikesStore } from "store/listedBikes.store";
 const MyListingBookings: React.FC = () => {
   const navigate = useNavigate();
   const { bookings } = useBookingStore();
   const { cars } = useListedCarsStore();
-  const { autos } = useListedAutosStore();
-
-  const myVehicleIds = [...cars.map((c) => c.id), ...autos.map((a) => a.id)];
-
+  // const { autos } = useListedAutosStore();
+const {bikes} =useListedBikesStore();
+  // const myVehicleIds = [...cars.map((c) => c.id), ...autos.map((a) => a.id)];
+const myVehicleIds=[...cars.map((c) => c.id), ... bikes.map((b)=> b.id)];
   const myListingBookings = bookings.filter((b) =>
     myVehicleIds.includes(b.vehicleId)
   );

@@ -103,11 +103,11 @@ const Profile: React.FC = () => {
             onClick={() => navigate("/my-bookings")}
           />
 
-          <ProfileOption
+          {/* <ProfileOption
             icon={ListChecks}
             label="My Listing Bookings"
             onClick={() => navigate("/my-listing-bookings")}
-          />
+          /> */}
 
           <ProfileOption
             icon={Languages}

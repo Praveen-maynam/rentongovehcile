@@ -8,7 +8,6 @@ import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
 import CarLogo from "../assets/icons/CarLogo.png";
-import AutoLogo from "../assets/icons/AutoLogo.png";
 import FilterLogo from "../assets/icons/FilterLogo.png";
 import BikeLogo from "../assets/icons/BikeLogo.png";
 import Petrol from "../assets/icons/Petrol.png";
@@ -16,8 +15,6 @@ import Location from "../assets/icons/Location.png";
 import Search from "../assets/icons/Search.png";
 import FilterCard from "../components/ui/FilterCard";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
-
-
 
 interface Vehicle {
   name: string;
@@ -84,11 +81,11 @@ const ListedCars: React.FC = () => {
   const { currentCity } = useLocation();
   const { cars: userListedCars, deleteCar } = useListedCarsStore();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
+  const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
 
   const [cars, setCars] = useState<Vehicle[]>(initialCars);
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
-  const [selectedList, setSelectedList] = useState<"cars" | "autos" | "bikes">("cars");
+  const [selectedList, setSelectedList] = useState<"both" | "cars" | "bikes">("cars");
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilter, setShowFilter] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
@@ -117,8 +114,7 @@ const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
     });
   }, [userListedCars, cars, currentCity]);
 
-  // ✅ Show calendar when "Not Available"
-    // ✅ Show calendar when "Not Available"
+  // Show calendar when "Not Available"
   const handleStatusChange = (index: number, value: string) => {
     const updatedCars = [...cars];
     const vehicle = updatedCars[index];
@@ -127,14 +123,14 @@ const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
     vehicle.available = isNowAvailable;
     setCars(updatedCars);
 
-    // ✅ If user selects "Not Available", open the calendar modal
+    // If user selects "Not Available", open the calendar modal
     if (!isNowAvailable) {
       setSelectedVehicle(vehicle);
       setShowCalendarModal(true);
     }
   };
 
-  // ✅ Edit vehicle handler (fix misplaced braces)
+  // Edit vehicle handler
   const handleEdit = (vehicle: Vehicle) => {
     navigate("/Car-Details", {
       state: {
@@ -171,11 +167,9 @@ const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
   );
 
   const dropdownIcon =
-    selectedList === "cars"
-      ? CarLogo
-      : selectedList === "autos"
-      ? AutoLogo
-      : BikeLogo;
+    selectedList === "both" ? CarLogo :
+    selectedList === "cars" ? CarLogo :
+    BikeLogo;
 
   return (
     <>
@@ -193,16 +187,20 @@ const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
               className="flex-1 ml-2 border-none outline-none text-sm"
               value={selectedList}
               onChange={(e) => {
-                const value = e.target.value as "cars" | "autos" | "bikes";
+                const value = e.target.value as "both" | "cars" | "bikes";
                 setSelectedList(value);
 
-                if (value === "cars") navigate("/listed");
-                else if (value === "autos") navigate("/listed-autos");
-                else if (value === "bikes") navigate("/listed-bikes");
+                // Navigate based on selection
+                if (value === "both") {
+                  navigate("/listed-vehicles");
+                } else if (value === "bikes") {
+                  navigate("/listed-bikes");
+                }
+                // Stay on current page if "cars" is selected
               }}
             >
+              <option value="both">Both </option>
               <option value="cars">Listed Cars</option>
-              <option value="autos">Listed Autos</option>
               <option value="bikes">Listed Bikes</option>
             </select>
           </div>
@@ -336,34 +334,29 @@ const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
 
                       {menuOpenIndex === index && (
                         <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-lg border border-gray-100 z-10">
-                           <>
-      {/* Example Edit button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          handleEdit(item);
-        }}
-        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-      >
-        Edit
-      </button>
-    </>
-   <button
-  onClick={(e) => {
-    e.stopPropagation();
-    navigate("/Car-Details", {
-      state: { 
-        carData: item,       // send the vehicle data
-        openDeleteModal: true // flag to open modal
-      },
-    });
-  }}
-  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
->
-  Delete
-</button>
-
-
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(item);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate("/Car-Details", {
+                                state: { 
+                                  carData: item,
+                                  openDeleteModal: true
+                                },
+                              });
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          >
+                            Delete
+                          </button>
                         </div>
                       )}
                     </div>
@@ -375,7 +368,7 @@ const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
         </div>
       </div>
 
-           {/* Calendar Modal */}
+      {/* Calendar Modal */}
       {showCalendarModal && selectedVehicle && (
         <AvailabilityDateTimeModal
           isOpen={showCalendarModal}
@@ -392,7 +385,7 @@ const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
       {/* Filter Modal */}
       {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
 
-      {/* ✅ Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       {showDeleteModal && vehicleToDelete && (
         <DeleteConfirmationModal
           isOpen={showDeleteModal}
@@ -414,6 +407,5 @@ const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
     </>
   );
 };
-
 
 export default ListedCars;

@@ -6,7 +6,7 @@ import BlackCar from "../assets/images/BlackCar.png";
 // ✅ Zustand Stores
 import { useVehicleStore } from "../store/vehicle.store";
 import { useListedCarsStore } from "../store/listedCars.store";
-import { useListedAutosStore } from "../store/listedAutos.store";
+// import { useListedAutosStore } from "../store/listedAutos.store";
 import { useListedBikesStore } from "../store/listedBikes.store";
 import { useBookingStore } from "../store/booking.store";
 
@@ -43,7 +43,7 @@ const EditCarDetails: React.FC = () => {
 
   const { getVehicleByName, updateVehicle, deleteVehicle, addVehicle } = useVehicleStore();
   const { cars, updateCar, deleteCar } = useListedCarsStore();
-  const { autos, updateAuto, deleteAuto } = useListedAutosStore();
+  // const { autos, updateAuto, deleteAuto } = useListedAutosStore();
   const { bikes, updateBike, deleteBike } = useListedBikesStore();
   const { getBookingById } = useBookingStore();
 
@@ -94,37 +94,37 @@ const EditCarDetails: React.FC = () => {
     }
 
     // Listed Autos
-    const auto = autos.find(a => `Auto ${a.vehicleNumber}` === vehicleName);
-    if (auto) {
-      setVehicleId(auto.id);
-      setVehicleSource("auto");
-      return {
-        id: auto.id,
-        name: `Auto ${auto.vehicleNumber}`,
-        price: auto.farePrice,
-        transmission: "Manual",
-        seats: "3 Seaters",
-        fuel: "CNG",
-        ac: false,
-        rating: auto.rating?.toString() || "4.0",
-        image: auto.photos[0] || BlackCar,
-        description: auto.description || "Auto rickshaw available for rent.",
-        location: {
-          state: "Andhra Pradesh",
-          district: "East Godavari",
-          city: auto.ownerName,
-          pincode: "533001",
-          street: "",
-        },
-        documents: {
-          drivingLicense: false,
-          aadharCard: false,
-          depositVehicle: false,
-          depositMoney: "0",
-        },
-        createdAt: Date.now(),
-      };
-    }
+    // const auto = autos.find(a => `Auto ${a.vehicleNumber}` === vehicleName);
+    // if (auto) {
+    //   setVehicleId(auto.id);
+    //   setVehicleSource("auto");
+    //   return {
+    //     id: auto.id,
+    //     name: `Auto ${auto.vehicleNumber}`,
+    //     price: auto.farePrice,
+    //     transmission: "Manual",
+    //     seats: "3 Seaters",
+    //     fuel: "CNG",
+    //     ac: false,
+    //     rating: auto.rating?.toString() || "4.0",
+    //     image: auto.photos[0] || BlackCar,
+    //     description: auto.description || "Auto rickshaw available for rent.",
+    //     location: {
+    //       state: "Andhra Pradesh",
+    //       district: "East Godavari",
+    //       city: auto.ownerName,
+    //       pincode: "533001",
+    //       street: "",
+    //     },
+    //     documents: {
+    //       drivingLicense: false,
+    //       aadharCard: false,
+    //       depositVehicle: false,
+    //       depositMoney: "0",
+    //     },
+    //     createdAt: Date.now(),
+    //   };
+    // }
 
     // Listed Bikes
     const bike = bikes.find(b => b.vehicleName === vehicleName);
@@ -186,8 +186,8 @@ const EditCarDetails: React.FC = () => {
       },
       createdAt: Date.now(),
     };
-  }, [vehicleName, getVehicleByName, cars, autos, bikes]);
-
+  // }, [vehicleName, getVehicleByName, cars, autos, bikes]);
+  }, [vehicleName, getVehicleByName, cars,  bikes]);
   const [vehicleData, setVehicleData] = useState<VehicleDetails>(initialVehicleData);
 
   useEffect(() => {
@@ -224,11 +224,11 @@ const EditCarDetails: React.FC = () => {
         depositVehicle: vehicleData.documents.depositVehicle,
         depositMoney: vehicleData.documents.depositMoney,
       });
-    } else if (vehicleSource === "auto" && vehicleId) {
-      updateAuto(vehicleId, {
-        farePrice: vehicleData.price,
-        description: vehicleData.description,
-      });
+    // } else if (vehicleSource === "auto" && vehicleId) {
+    //   updateAuto(vehicleId, {
+    //     farePrice: vehicleData.price,
+    //     description: vehicleData.description,
+    //   });
     } else if (vehicleSource === "bike" && vehicleId) {
       updateBike(vehicleId, {
         vehicleName: vehicleData.name,
@@ -261,7 +261,7 @@ const EditCarDetails: React.FC = () => {
 
     if (vehicleSource === "vehicle" && vehicleId) deleteVehicle(vehicleId);
     else if (vehicleSource === "car" && vehicleId) deleteCar(vehicleId);
-    else if (vehicleSource === "auto" && vehicleId) deleteAuto(vehicleId);
+    // else if (vehicleSource === "auto" && vehicleId) deleteAuto(vehicleId);
     else if (vehicleSource === "bike" && vehicleId) deleteBike(vehicleId);
 
     alert("Vehicle deleted successfully!");

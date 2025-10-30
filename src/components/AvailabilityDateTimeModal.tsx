@@ -1,7 +1,6 @@
-// src/components/AvailabilityDateTimeModal.tsx
 import React from "react";
 import { X, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-
+ 
 interface AvailabilityDateTimeModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,7 +12,7 @@ interface AvailabilityDateTimeModalProps {
     availability: string
   ) => void;
 }
-
+ 
 const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
   isOpen,
   onClose,
@@ -26,12 +25,12 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
   const [startTime, setStartTime] = React.useState("06 PM");
   const [endTime, setEndTime] = React.useState("08 PM");
   const [availability, setAvailability] = React.useState("Available");
-
+ 
   if (!isOpen) return null;
-
+ 
   const monthName = currentMonth.toLocaleDateString("en-US", { month: "short", year: "numeric" });
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
+ 
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth() + 1,
@@ -42,12 +41,12 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
     currentMonth.getMonth(),
     1
   ).getDay();
-
+ 
   const previousMonth = () =>
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
   const nextMonth = () =>
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
-
+ 
   const handleDateClick = (date: Date) => {
     if (activeInput === "start") {
       setSelectedStartDate(date);
@@ -57,13 +56,13 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
       setActiveInput(null);
     }
   };
-
+ 
   const renderCalendarDays = () => {
     const days = [];
     const startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-
+ 
     for (let i = 0; i < startDay; i++) days.push(<div key={`empty-${i}`} />);
-
+ 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       const isSelected =
@@ -88,7 +87,7 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
     const period = i < 12 ? "AM" : "PM";
     return `${hour.toString().padStart(2, "0")} ${period}`;
   });
-
+ 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl p-6 relative">
@@ -96,9 +95,9 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
           <X size={20} />
         </button>
-
+ 
         <h2 className="text-xl font-bold text-gray-900 mb-6">Availability Date & Time</h2>
-
+ 
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Column: Dates + Calendar */}
           <div className="flex-1 space-y-4">
@@ -116,7 +115,7 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
                   {selectedStartDate?.toLocaleDateString() || "Select"}
                 </div>
               </div>
-
+ 
               <div className="flex-1 cursor-pointer" onClick={() => setActiveInput("end")}>
                 <label className="flex items-center gap-2 text-sm text-gray-500 font-medium">
                   <Calendar size={20} className="text-gray-400" /> End Date
@@ -141,7 +140,7 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
                   <ChevronRight size={20} />
                 </button>
               </div>
-
+ 
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {weekDays.map((day) => (
                   <div key={day} className="text-center text-xs text-gray-500 font-medium">
@@ -149,27 +148,15 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
                   </div>
                 ))}
               </div>
-
+ 
               <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
             </div>
-
-            {/* Availability Dropdown */}
-            <div className="flex justify-start mt-4">
-              <select
-                value={availability}
-                onChange={(e) => setAvailability(e.target.value)}
-                className={`w-[200px] rounded-lg p-3 text-center font-semibold outline-none focus:outline-none transition ${
-                  availability === "Available"
-                    ? "bg-green-600 text-white border border-green-700"
-                    : "bg-red-500 text-black border border-red-600"
-                }`}
-              >
-                <option value="Available">Available</option>
-                <option value="Not Available">Not Available</option>
-              </select>
-            </div>
+ 
+ 
+         
+           
           </div>
-
+ 
           {/* Right Column: Time Selection */}
           <div className="w-1/3 space-y-4">
             <div>
@@ -202,7 +189,7 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
             </div>
           </div>
         </div>
-
+ 
         {/* Confirm Button */}
         <div className="flex justify-end mt-6">
           <button
@@ -215,7 +202,7 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
                 availability
               )
             }
-            className="w-[200px] bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-semibold py-3 px-6 rounded-lg transition shadow-md"
+            className="w-[200px] bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-semibold py-3 px-6 rounded-lg transition shadow-md hover:shadow-lg hover:scale-105"
           >
             Confirm
           </button>
@@ -224,5 +211,6 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
     </div>
   );
 };
-
+ 
 export default AvailabilityDateTimeModal;
+ 

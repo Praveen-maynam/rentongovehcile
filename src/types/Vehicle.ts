@@ -9,8 +9,9 @@ export interface Vehicle {
   rating: number;
   available?: boolean;
   image: string;
-   description: string;
+ description?: string;
+model?:string;
   
-  type?: "car" | "auto" | "bike";
-
+  // type?: "car" | "auto" | "bike";
+  type?: "car" | "bike";
 }

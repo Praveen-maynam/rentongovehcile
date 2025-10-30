@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "../../components/ui/modal"; // wrapper component
 // any icons you use
 import ProfileOption from "../../features/profile/components/profileOption";
-import Auto  from "../../assets/icons/Auto.png";
+// import Auto  from "../../assets/icons/Auto.png";
 import Car from "../../assets/icons/Car.png";
 import bike from "../../assets/icons/sportbike.png";
 
@@ -10,7 +10,8 @@ import bike from "../../assets/icons/sportbike.png";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (type: "car" | "auto" | "bike") => void;
+  // onSelect: (type: "car" | "auto" | "bike") => void;
+  onSelect: (type: "car" |"bike") => void;
 }
 
 const selectvehiclemodal: React.FC<Props> = ({ isOpen, onClose, onSelect }) => {
@@ -38,7 +39,7 @@ const selectvehiclemodal: React.FC<Props> = ({ isOpen, onClose, onSelect }) => {
           </div>
 
           {/* Auto Option */}
-          <div
+          {/* <div
             className="flex items-center p-4 border rounded cursor-pointer hover:bg-gray-100 transition-colors"
             onClick={() => onSelect("auto")}
           >
@@ -47,7 +48,7 @@ const selectvehiclemodal: React.FC<Props> = ({ isOpen, onClose, onSelect }) => {
             </div>
             <span className="text-lg font-medium">Auto</span>
             <span className="ml-auto text-gray-400">›</span>
-          </div>
+          </div> */}
             {/* Bike Option */}
           <div
             className="flex items-center p-4 border rounded cursor-pointer hover:bg-gray-100 transition-colors"

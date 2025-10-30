@@ -27,10 +27,11 @@ const Navbar: React.FC = () => {
     setMenuOpen(false);
   };
 
-  const handleVehicleSelect = (type: "car" | "auto" | "bike") => {
+  // const handleVehicleSelect = (type: "car" | "auto" | "bike") => {
+    const handleVehicleSelect = (type: "car" |  "bike") => {
     setIsModalOpen(false);
     if (type === "car") navigate("/list-car");
-    else if (type === "auto") navigate("/list-auto");
+    // else if (type === "auto") navigate("/list-auto");
     else if (type === "bike") navigate("/list-bike");
   };
 

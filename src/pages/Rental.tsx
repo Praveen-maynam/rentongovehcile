@@ -27,7 +27,7 @@ const Rental: React.FC = () => {
     );
 
   const cars = filterVehicles(vehicles.filter((v) => v.type === "car"));
-  const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
+  // const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
   const bikes = filterVehicles(vehicles.filter((v) => v.type === "bike"));
 
   return (
@@ -85,9 +85,9 @@ const Rental: React.FC = () => {
 
       {/* 🚗 Cars Section */}
       <VehicleSection title="Looking for an Car?" vehicles={cars} type="car" />
-
-      {/* 🛺 Autos Section */}
-      <VehicleSection title="Looking for an Auto?" vehicles={autos} type="auto" />
+{/* 
+      🛺 Autos Section
+      <VehicleSection title="Looking for an Auto?" vehicles={autos} type="auto" /> */}
 
       {/* 🏍 Bikes Section */}
       <VehicleSection title="Looking for a Bike?" vehicles={bikes} type="bike" />
