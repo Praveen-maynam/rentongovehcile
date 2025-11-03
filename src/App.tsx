@@ -248,13 +248,13 @@ const App: React.FC = () => {
         {/* Profile & User */}
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/my-profile" element={<MyProfile />} />
-        <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/mybookings" element={<MyBookings />} />
         <Route path="/my-listing-bookings" element={<MyListingBookings />} />
         <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/change-location" element={<ChangeLocation />} />
- 
-       <Route path="/vehicle-history/:id" element={<VehicleHistory />} />
+ <Route path="/vehicle-history/:vehicleName" element={<VehicleHistory />} />
+
  
         {/* Support & Info */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />

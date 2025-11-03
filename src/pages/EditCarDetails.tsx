@@ -1,14 +1,12 @@
 // src/pages/EditCarDetails.tsx
-import React, { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useMemo } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import BlackCar from "../assets/images/BlackCar.png";
 
 // ✅ Zustand Stores
 import { useVehicleStore } from "../store/vehicle.store";
 import { useListedCarsStore } from "../store/listedCars.store";
-// import { useListedAutosStore } from "../store/listedAutos.store";
 import { useListedBikesStore } from "../store/listedBikes.store";
-import { useBookingStore } from "../store/booking.store";
 
 interface VehicleDetails {
   id?: string;
@@ -37,34 +35,55 @@ interface VehicleDetails {
   createdAt?: number;
 }
 
+const defaultVehicle: VehicleDetails = {
+  id: undefined,
+  name: "Hyundai Verna",
+  price: "250",
+  transmission: "Automatic",
+  seats: "5 Seaters",
+  fuel: "Petrol",
+  ac: true,
+  rating: "4.2",
+  image: BlackCar,
+  description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
+  location: {
+    state: "Andhra Pradesh",
+    district: "East Godavari",
+    city: "Kakinada",
+    pincode: "533001",
+    street: "Gandhi Nagar",
+  },
+  documents: {
+    drivingLicense: true,
+    aadharCard: true,
+    depositVehicle: true,
+    depositMoney: "10000",
+  },
+  createdAt: Date.now(),
+};
+
 const EditCarDetails: React.FC = () => {
   const { vehicleName } = useParams<{ vehicleName: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { getVehicleByName, updateVehicle, deleteVehicle, addVehicle } = useVehicleStore();
   const { cars, updateCar, deleteCar } = useListedCarsStore();
-  // const { autos, updateAuto, deleteAuto } = useListedAutosStore();
   const { bikes, updateBike, deleteBike } = useListedBikesStore();
-  const { getBookingById } = useBookingStore();
 
-  const [vehicleId, setVehicleId] = useState<string | null>(null);
-  const [vehicleSource, setVehicleSource] = useState<'vehicle' | 'car' | 'auto' | 'bike' | 'none'>('none');
+  // Check if navigation state has vehicle
+  const vehicleFromState = location.state?.carData;
 
-  // ✅ Determine initial vehicle data
-  const initialVehicleData: VehicleDetails = useMemo(() => {
-    // Vehicle Store
+  const [vehicleData, setVehicleData] = useState<VehicleDetails>(() => {
+    if (vehicleFromState) return vehicleFromState;
+
+    // Lookup in vehicle store
     const storedVehicle = getVehicleByName(vehicleName || "");
-    if (storedVehicle) {
-      setVehicleId(storedVehicle.id);
-      setVehicleSource("vehicle");
-      return storedVehicle;
-    }
+    if (storedVehicle) return storedVehicle;
 
-    // Listed Cars
+    // Lookup in cars store
     const car = cars.find(c => c.carName === vehicleName);
     if (car) {
-      setVehicleId(car.id);
-      setVehicleSource("car");
       return {
         id: car.id,
         name: car.carName,
@@ -93,44 +112,9 @@ const EditCarDetails: React.FC = () => {
       };
     }
 
-    // Listed Autos
-    // const auto = autos.find(a => `Auto ${a.vehicleNumber}` === vehicleName);
-    // if (auto) {
-    //   setVehicleId(auto.id);
-    //   setVehicleSource("auto");
-    //   return {
-    //     id: auto.id,
-    //     name: `Auto ${auto.vehicleNumber}`,
-    //     price: auto.farePrice,
-    //     transmission: "Manual",
-    //     seats: "3 Seaters",
-    //     fuel: "CNG",
-    //     ac: false,
-    //     rating: auto.rating?.toString() || "4.0",
-    //     image: auto.photos[0] || BlackCar,
-    //     description: auto.description || "Auto rickshaw available for rent.",
-    //     location: {
-    //       state: "Andhra Pradesh",
-    //       district: "East Godavari",
-    //       city: auto.ownerName,
-    //       pincode: "533001",
-    //       street: "",
-    //     },
-    //     documents: {
-    //       drivingLicense: false,
-    //       aadharCard: false,
-    //       depositVehicle: false,
-    //       depositMoney: "0",
-    //     },
-    //     createdAt: Date.now(),
-    //   };
-    // }
-
-    // Listed Bikes
+    // Lookup in bikes store
     const bike = bikes.find(b => b.vehicleName === vehicleName);
     if (bike) {
-      setVehicleId(bike.id);
-      setVehicleSource("bike");
       return {
         id: bike.id,
         name: bike.vehicleName,
@@ -159,42 +143,10 @@ const EditCarDetails: React.FC = () => {
       };
     }
 
-    // Default fallback
-    return {
-      id: Date.now().toString(),
-      name: vehicleName || "Hyundai Verna",
-      price: "250",
-      transmission: "Automatic",
-      seats: "5 Seaters",
-      fuel: "Petrol",
-      ac: true,
-      rating: "4.2",
-      image: BlackCar,
-      description: "Lorem ipsum is simply dummy text of the printing and typesetting industry.",
-      location: {
-        state: "Andhra Pradesh",
-        district: "East Godavari",
-        city: "Kakinada",
-        pincode: "533001",
-        street: "Gandhi Nagar",
-      },
-      documents: {
-        drivingLicense: true,
-        aadharCard: true,
-        depositVehicle: true,
-        depositMoney: "10000",
-      },
-      createdAt: Date.now(),
-    };
-  // }, [vehicleName, getVehicleByName, cars, autos, bikes]);
-  }, [vehicleName, getVehicleByName, cars,  bikes]);
-  const [vehicleData, setVehicleData] = useState<VehicleDetails>(initialVehicleData);
+    return defaultVehicle;
+  });
 
-  useEffect(() => {
-    setVehicleData(initialVehicleData);
-  }, [initialVehicleData]);
-
-  // ✅ Handlers
+  // Handlers
   const handleInputChange = (field: keyof VehicleDetails, value: any) =>
     setVehicleData(prev => ({ ...prev, [field]: value }));
 
@@ -205,9 +157,16 @@ const EditCarDetails: React.FC = () => {
     setVehicleData(prev => ({ ...prev, documents: { ...prev.documents, [field]: value } }));
 
   const handleSave = () => {
-    if (vehicleSource === "vehicle" && vehicleId) {
-      updateVehicle(vehicleId, vehicleData);
-    } else if (vehicleSource === "car" && vehicleId) {
+    const vehicleId = vehicleData.id;
+    if (!vehicleId) {
+      addVehicle({ ...vehicleData, type: "car" });
+      alert("Vehicle added successfully!");
+      navigate("/listed");
+      return;
+    }
+
+    // Update in the correct store
+    if (cars.find(c => c.id === vehicleId)) {
       updateCar(vehicleId, {
         carName: vehicleData.name,
         rentPrice: vehicleData.price,
@@ -224,12 +183,7 @@ const EditCarDetails: React.FC = () => {
         depositVehicle: vehicleData.documents.depositVehicle,
         depositMoney: vehicleData.documents.depositMoney,
       });
-    // } else if (vehicleSource === "auto" && vehicleId) {
-    //   updateAuto(vehicleId, {
-    //     farePrice: vehicleData.price,
-    //     description: vehicleData.description,
-    //   });
-    } else if (vehicleSource === "bike" && vehicleId) {
+    } else if (bikes.find(b => b.id === vehicleId)) {
       updateBike(vehicleId, {
         vehicleName: vehicleData.name,
         farePrice: vehicleData.price,
@@ -246,10 +200,7 @@ const EditCarDetails: React.FC = () => {
         depositMoney: vehicleData.documents.depositMoney,
       });
     } else {
-      addVehicle({
-        ...vehicleData,
-        type: (vehicleSource === 'none' ? 'car' : vehicleSource) as 'car' | 'auto' | 'bike',
-      });
+      updateVehicle(vehicleId, vehicleData);
     }
 
     alert("Vehicle details saved successfully!");
@@ -259,10 +210,12 @@ const EditCarDetails: React.FC = () => {
   const handleDelete = () => {
     if (!window.confirm("Are you sure you want to delete this vehicle?")) return;
 
-    if (vehicleSource === "vehicle" && vehicleId) deleteVehicle(vehicleId);
-    else if (vehicleSource === "car" && vehicleId) deleteCar(vehicleId);
-    // else if (vehicleSource === "auto" && vehicleId) deleteAuto(vehicleId);
-    else if (vehicleSource === "bike" && vehicleId) deleteBike(vehicleId);
+    const vehicleId = vehicleData.id;
+    if (!vehicleId) return;
+
+    if (cars.find(c => c.id === vehicleId)) deleteCar(vehicleId);
+    else if (bikes.find(b => b.id === vehicleId)) deleteBike(vehicleId);
+    else deleteVehicle(vehicleId);
 
     alert("Vehicle deleted successfully!");
     navigate("/listed");
@@ -276,7 +229,7 @@ const EditCarDetails: React.FC = () => {
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Edit Vehicle Details</h1>
 
-      {/* Example Input */}
+      {/* Name */}
       <div className="mb-4">
         <label className="block text-gray-700">Name</label>
         <input
@@ -286,6 +239,7 @@ const EditCarDetails: React.FC = () => {
         />
       </div>
 
+      {/* Price */}
       <div className="mb-4">
         <label className="block text-gray-700">Price</label>
         <input
@@ -295,9 +249,46 @@ const EditCarDetails: React.FC = () => {
         />
       </div>
 
-      {/* Add more inputs as needed for transmission, fuel, etc. */}
+      {/* Description */}
+      <div className="mb-4">
+        <label className="block text-gray-700">Description</label>
+        <textarea
+          className="border p-2 w-full"
+          value={vehicleData.description}
+          onChange={(e) => handleInputChange("description", e.target.value)}
+        />
+      </div>
 
-      <div className="flex gap-4">
+      {/* Location */}
+      <div className="mb-4 grid grid-cols-2 gap-2">
+        <input
+          className="border p-2"
+          placeholder="State"
+          value={vehicleData.location.state}
+          onChange={(e) => handleLocationChange("state", e.target.value)}
+        />
+        <input
+          className="border p-2"
+          placeholder="City"
+          value={vehicleData.location.city}
+          onChange={(e) => handleLocationChange("city", e.target.value)}
+        />
+        <input
+          className="border p-2"
+          placeholder="District"
+          value={vehicleData.location.district}
+          onChange={(e) => handleLocationChange("district", e.target.value)}
+        />
+        <input
+          className="border p-2"
+          placeholder="Pincode"
+          value={vehicleData.location.pincode}
+          onChange={(e) => handleLocationChange("pincode", e.target.value)}
+        />
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-4 mt-4">
         <button
           className="bg-green-500 text-white px-4 py-2 rounded"
           onClick={handleSave}
@@ -310,9 +301,16 @@ const EditCarDetails: React.FC = () => {
         >
           Delete
         </button>
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={handleAddPhoto}
+        >
+          Add Photo
+        </button>
       </div>
     </div>
   );
 };
 
 export default EditCarDetails;
+

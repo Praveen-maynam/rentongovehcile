@@ -5,7 +5,7 @@ import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
 import AvailabilityDateTimeModal from "../components/AvailabilityDateTimeModal";
-
+import { useLocation } from "react-router-dom";
 
 interface BookingHistory {
   customerName: string;
@@ -38,6 +38,8 @@ const VehicleHistory: React.FC = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [isDateTimeModalOpen, setIsDateTimeModalOpen] = useState(false);
 
+const location = useLocation();
+const vehicleData = location.state?.vehicleData;
 
   const vehicleImages = [BlackCar, BlackCar, BlackCar, BlackCar];
   const [currentImage, setCurrentImage] = useState(0);

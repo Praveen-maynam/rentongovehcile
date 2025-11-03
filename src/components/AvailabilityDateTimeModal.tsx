@@ -1,6 +1,6 @@
 import React from "react";
 import { X, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
- 
+
 interface AvailabilityDateTimeModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,7 +12,7 @@ interface AvailabilityDateTimeModalProps {
     availability: string
   ) => void;
 }
- 
+
 const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
   isOpen,
   onClose,
@@ -25,12 +25,30 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
   const [startTime, setStartTime] = React.useState("06 PM");
   const [endTime, setEndTime] = React.useState("08 PM");
   const [availability, setAvailability] = React.useState("Available");
- 
+
   if (!isOpen) return null;
- 
+
+  // Format date to YYYY-MM-DD for API
+  const formatDateForAPI = (date: Date | null): string => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Format date for display (YYYY/MM/DD)
+  const formatDateForDisplay = (date: Date | null): string => {
+    if (!date) return "Select";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}/${month}/${day}`;
+  };
+
   const monthName = currentMonth.toLocaleDateString("en-US", { month: "short", year: "numeric" });
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
- 
+
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth() + 1,
@@ -41,12 +59,12 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
     currentMonth.getMonth(),
     1
   ).getDay();
- 
+
   const previousMonth = () =>
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
   const nextMonth = () =>
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
- 
+
   const handleDateClick = (date: Date) => {
     if (activeInput === "start") {
       setSelectedStartDate(date);
@@ -56,23 +74,33 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
       setActiveInput(null);
     }
   };
- 
+
   const renderCalendarDays = () => {
     const days = [];
     const startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
- 
+
     for (let i = 0; i < startDay; i++) days.push(<div key={`empty-${i}`} />);
- 
+
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       const isSelected =
         (selectedStartDate && selectedStartDate.getTime() === date.getTime()) ||
         (selectedEndDate && selectedEndDate.getTime() === date.getTime());
+      const isInRange =
+        selectedStartDate &&
+        selectedEndDate &&
+        date.getTime() >= selectedStartDate.getTime() &&
+        date.getTime() <= selectedEndDate.getTime();
+
       days.push(
         <button
           key={day}
           className={`py-2 rounded-full transition w-full ${
-            isSelected ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-blue-50"
+            isSelected
+              ? "bg-blue-600 text-white"
+              : isInRange
+              ? "bg-blue-100 text-blue-700"
+              : "text-gray-700 hover:bg-blue-50"
           }`}
           onClick={() => handleDateClick(date)}
         >
@@ -82,12 +110,20 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
     }
     return days;
   };
+
   const timeOptions = Array.from({ length: 24 }, (_, i) => {
     const hour = i % 12 === 0 ? 12 : i % 12;
     const period = i < 12 ? "AM" : "PM";
     return `${hour.toString().padStart(2, "0")} ${period}`;
   });
- 
+
+  const handleConfirm = () => {
+    const formattedStartDate = formatDateForAPI(selectedStartDate);
+    const formattedEndDate = formatDateForAPI(selectedEndDate);
+
+    onConfirm(formattedStartDate, formattedEndDate, startTime, endTime, availability);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl p-6 relative">
@@ -95,13 +131,13 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
           <X size={20} />
         </button>
- 
+
         <h2 className="text-xl font-bold text-gray-900 mb-6">Availability Date & Time</h2>
- 
+
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Column: Dates + Calendar */}
           <div className="flex-1 space-y-4">
-            {/* Horizontal Start & End Date */}
+            {/* Start & End Date */}
             <div className="flex gap-4">
               <div className="flex-1 cursor-pointer" onClick={() => setActiveInput("start")}>
                 <label className="flex items-center gap-2 text-sm text-gray-500 font-medium">
@@ -112,10 +148,10 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
                     activeInput === "start" ? "ring-2 ring-blue-500" : ""
                   }`}
                 >
-                  {selectedStartDate?.toLocaleDateString() || "Select"}
+                  {formatDateForDisplay(selectedStartDate)}
                 </div>
               </div>
- 
+
               <div className="flex-1 cursor-pointer" onClick={() => setActiveInput("end")}>
                 <label className="flex items-center gap-2 text-sm text-gray-500 font-medium">
                   <Calendar size={20} className="text-gray-400" /> End Date
@@ -125,10 +161,11 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
                     activeInput === "end" ? "ring-2 ring-blue-500" : ""
                   }`}
                 >
-                  {selectedEndDate?.toLocaleDateString() || "Select"}
+                  {formatDateForDisplay(selectedEndDate)}
                 </div>
               </div>
             </div>
+
             {/* Calendar */}
             <div className="border rounded-lg p-4">
               <div className="flex justify-between items-center mb-2">
@@ -140,7 +177,7 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
                   <ChevronRight size={20} />
                 </button>
               </div>
- 
+
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {weekDays.map((day) => (
                   <div key={day} className="text-center text-xs text-gray-500 font-medium">
@@ -148,23 +185,25 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
                   </div>
                 ))}
               </div>
- 
+
               <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
             </div>
- 
- 
-         
-           
+
+            {/* Info Note */}
+            <div className="text-xs text-gray-500 flex items-center gap-2 bg-blue-50 p-2 rounded">
+              <span>ℹ️</span>
+              <span>Date format: YYYY/MM/DD (e.g., 2025/11/15)</span>
+            </div>
           </div>
- 
+
           {/* Right Column: Time Selection */}
-          <div className="w-1/3 space-y-4">
+          <div className="w-full md:w-1/3 space-y-4">
             <div>
               <label className="text-sm text-gray-500 font-medium">Start Time</label>
               <select
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full p-3 border rounded-lg bg-white text-gray-900 font-semibold outline-none focus:outline-none mt-1"
+                className="w-full p-3 border rounded-lg bg-white text-gray-900 font-semibold outline-none mt-1"
               >
                 {timeOptions.map((time) => (
                   <option key={time} value={time}>
@@ -173,12 +212,13 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="text-sm text-gray-500 font-medium">End Time</label>
               <select
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full p-3 border rounded-lg bg-white text-gray-900 font-semibold outline-none focus:outline-none mt-1"
+                className="w-full p-3 border rounded-lg bg-white text-gray-900 font-semibold outline-none mt-1"
               >
                 {timeOptions.map((time) => (
                   <option key={time} value={time}>
@@ -189,20 +229,13 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
             </div>
           </div>
         </div>
- 
+
         {/* Confirm Button */}
         <div className="flex justify-end mt-6">
           <button
-            onClick={() =>
-              onConfirm(
-                selectedStartDate?.toISOString() || "",
-                selectedEndDate?.toISOString() || "",
-                startTime,
-                endTime,
-                availability
-              )
-            }
-            className="w-[200px] bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-semibold py-3 px-6 rounded-lg transition shadow-md hover:shadow-lg hover:scale-105"
+            onClick={handleConfirm}
+            disabled={!selectedStartDate || !selectedEndDate}
+            className="w-[200px] bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-semibold py-3 px-6 rounded-lg transition shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             Confirm
           </button>
@@ -211,6 +244,5 @@ const AvailabilityDateTimeModal: React.FC<AvailabilityDateTimeModalProps> = ({
     </div>
   );
 };
- 
+
 export default AvailabilityDateTimeModal;
- 

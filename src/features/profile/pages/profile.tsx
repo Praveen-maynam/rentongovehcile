@@ -97,11 +97,11 @@ const Profile: React.FC = () => {
             }}
           />
 
-          <ProfileOption
+          {/* <ProfileOption
             icon={CalendarDays}
             label="My Bookings"
             onClick={() => navigate("/my-bookings")}
-          />
+          /> */}
 
           {/* <ProfileOption
             icon={ListChecks}

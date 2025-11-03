@@ -1,11 +1,9 @@
- 
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
 import AvailabilityDateTimeModal from "../components/AvailabilityDateTimeModal";
- 
 interface VehicleDetails {
   name: string;
   price: string;
@@ -25,6 +23,7 @@ interface VehicleDetails {
   doorName?: string;
   id?: string;
 }
+ 
  
 const defaultVehicle: VehicleDetails = {
   name: "Hyundai Verna",
@@ -63,30 +62,12 @@ const CarDetails: React.FC = () => {
   // Edit form model (prefilled from navigation state or default)
   const [editVehicle, setEditVehicle] = useState<VehicleDetails>(defaultVehicle);
  
-  // toggles & form fields
-  const [drivingLicence, setDrivingLicence] = useState(false);
-  const [aadhaarCard, setAadhaarCard] = useState(false);
-  const [depositVehicle, setDepositVehicle] = useState(false);
-  const [depositMoney, setDepositMoney] = useState(false);
-  const [acAvailable, setAcAvailable] = useState(false);
  
-  const [stateOpen, setStateOpen] = useState(false);
-  const [cityOpen, setCityOpen] = useState(false);
-  const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
  
-  const states = ["Maharashtra", "Karnataka", "Tamil Nadu", "Delhi"];
-  const cities: { [key: string]: string[] } = {
-    Maharashtra: ["Mumbai", "Pune", "Nagpur"],
-    Karnataka: ["Bangalore", "Mysore", "Mangalore"],
-    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai"],
-    Delhi: ["New Delhi", "Dwarka", "Rohini"],
-  };
  
-  // address fields
-  const [pincode, setPincode] = useState("");
-  const [street, setStreet] = useState("");
-  const [doorName, setDoorName] = useState("");
+ 
+ 
+ 
  
   // price / hour picker state
   const [price, setPrice] = useState("");
@@ -119,17 +100,12 @@ const CarDetails: React.FC = () => {
         ownerName: (carData.ownerName || defaultVehicle.ownerName) as string,
         mobile: (carData.mobile || defaultVehicle.mobile) as string,
         email: (carData.email || defaultVehicle.email) as string,
-        city: (carData.city || carData.location?.split?.(",")?.[0] || defaultVehicle.city) as string,
-        street: (carData.street || defaultVehicle.street) as string,
-        pincode: (carData.pincode || defaultVehicle.pincode) as string,
-        doorName: (carData.doorName || defaultVehicle.doorName) as string,
+ 
         id: carData.id || undefined,
       };
       setEditVehicle(mapped);
       // prefill address fields & preview
-      setPincode(mapped.pincode || "");
-      setStreet(mapped.street || "");
-      setDoorName(mapped.doorName || "");
+   
       setPreview(mapped.image || null);
     }
    
@@ -386,7 +362,6 @@ const CarDetails: React.FC = () => {
                     className="w-full border border-gray-300 rounded-lg p-2"
                   />
                 </div>
- 
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">Contact Number</label>
                   <input
@@ -397,135 +372,9 @@ const CarDetails: React.FC = () => {
                   />
                 </div>
                 <div className="flex items-center justify-between w-[343px] mt-1">
-  {/* Heading */}
-  <div className="text-gray-700 font-semibold text-lg">
-     AC Available
-  </div>
  
-  {/* Toggle Button */}
-  <button
-    onClick={() => setAcAvailable(!acAvailable)}
-    className={`w-12 h-6 rounded-full relative flex items-center transition-colors duration-300 ${
-      acAvailable ? "bg-green-500" : "bg-gray-300"
-    }`}
-  >
-    <span
-      className={`absolute w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300 ${
-        acAvailable ? "translate-x-6" : "translate-x-1"
-      }`}
-    ></span>
-  </button>
 </div>
  
-                {/* Document toggles */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span>Driving Licence</span>
-                    {renderToggle(drivingLicence, setDrivingLicence)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Aadhaar Card</span>
-                    {renderToggle(aadhaarCard, setAadhaarCard)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Deposit Vehicle</span>
-                    {renderToggle(depositVehicle, setDepositVehicle)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Deposit Money (₹5000)</span>
-                    {renderToggle(depositMoney, setDepositMoney)}
-                  </div>
-                </div>
- 
-                {/* Vehicle Picking Address */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">State</label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setStateOpen((s) => !s)}
-                      className="w-full text-left border border-gray-300 rounded-lg p-2"
-                    >
-                      {selectedState || "Select State"}
-                    </button>
-                    {stateOpen && (
-                      <div className="absolute z-20 w-full bg-white border border-gray-200 rounded mt-1 max-h-40 overflow-y-auto">
-                        {states.map((s) => (
-                          <div
-                            key={s}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              setSelectedState(s);
-                              setSelectedCity(null);
-                              setStateOpen(false);
-                            }}
-                          >
-                            {s}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
- 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">City</label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => selectedState && setCityOpen((s) => !s)}
-                      className="w-full text-left border border-gray-300 rounded-lg p-2"
-                    >
-                      {selectedCity || "Select City"}
-                    </button>
-                    {cityOpen && selectedState && (
-                      <div className="absolute z-20 w-full bg-white border border-gray-200 rounded mt-1 max-h-40 overflow-y-auto">
-                        {cities[selectedState].map((c) => (
-                          <div
-                            key={c}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              setSelectedCity(c);
-                              setCityOpen(false);
-                            }}
-                          >
-                            {c}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
- 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Pincode</label>
-                  <input
-                    value={pincode}
-                    onChange={(e) => setPincode(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2"
-                    placeholder="Pincode"
-                  />
-                </div>
- 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Street</label>
-                  <input
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2"
-                    placeholder="Street"
-                  />
-                </div>
- 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Door Name</label>
-                  <input
-                    value={doorName}
-                    onChange={(e) => setDoorName(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2"
-                    placeholder="Door Name"
-                  />
-                </div>
  
                 {/* Car Image Upload */}
                 <div>
@@ -594,5 +443,7 @@ const CarDetails: React.FC = () => {
 };
  
 export default CarDetails;
+ 
+ 
  
  
