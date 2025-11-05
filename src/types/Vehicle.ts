@@ -16,4 +16,6 @@ export interface Vehicle {
   contactName?: string;
   contactNumber?: string;
   bikeNumber?: string;
+    // ✅ Add this line:
+  unavailableDates?: { startDate: string; endDate: string; startTime: string; endTime: string }[];
 }

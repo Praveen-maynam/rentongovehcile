@@ -19,6 +19,7 @@ interface BookingStore {
   deleteBooking: (id: string) => void;
   getBookingById: (id: string) => Booking | undefined;
   clearAllBookings: () => void;
+  setBookings: (bookings: Booking[]) => void;
 }
  
 // ✅ Zustand store with localStorage persistence
@@ -74,6 +75,13 @@ export const useBookingStore = create<BookingStore>()(
         set(() => ({
           bookings: [],
         })),
+
+      // 🔄 Replace all bookings with new data (for API sync)
+      setBookings: (bookings) =>
+        set(() => {
+          console.log(`📦 Syncing ${bookings.length} bookings from API`);
+          return { bookings };
+        }),
     }),
     {
       name: "booking-storage", // localStorage key

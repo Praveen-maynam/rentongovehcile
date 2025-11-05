@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { vehicles } from "./data/Vehicle";
 import { Vehicle } from "../types/Vehicle";
-import { Star } from "lucide-react";
+import { Star, Loader2 } from "lucide-react";
+import apiService from "../services/api.service";
 import AvailabilityDateTimeModal from "../components/AvailabilityDateTimeModal";
 import WaitingPopup from "../components/ui/WaitingPopup";
 import BookingAcceptance from "../components/ui/BookingAcceptance";
@@ -38,6 +39,11 @@ const BookNow: React.FC = () => {
   } = useReviewStore();
   const { addNotification } = useNotificationStore();
   const { addBooking } = useBookingStore();
+
+  // API car data state
+  const [apiCarData, setApiCarData] = useState<any>(null);
+  const [loadingCarData, setLoadingCarData] = useState(true);
+  const [carDataError, setCarDataError] = useState("");
  
   const [isDateTimeModalOpen, setIsDateTimeModalOpen] = useState(false);
   const [showContactButtons, setShowContactButtons] = useState(false);
@@ -56,6 +62,52 @@ const BookNow: React.FC = () => {
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [apiError, setApiError] = useState<string>("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Fetch car details from API
+  useEffect(() => {
+    const fetchCarDetails = async () => {
+      if (id) {
+        try {
+          setLoadingCarData(true);
+          setCarDataError("");
+          console.log(`🚗 Fetching car details for ID: ${id}`);
+          
+          const response = await apiService.car.getCarById(id);
+          console.log("✅ Full API response:", response);
+          console.log("✅ Response type:", typeof response);
+          console.log("✅ Response keys:", response ? Object.keys(response) : 'no keys');
+          
+          // Handle different response structures
+          let carData = null;
+          
+          if (response) {
+            // Check if data is nested in a 'data' property
+            if ((response as any).data) {
+              console.log("📦 Data found in response.data");
+              carData = (response as any).data;
+            } else if ((response as any).car) {
+              console.log("📦 Data found in response.car");
+              carData = (response as any).car;
+            } else {
+              console.log("📦 Using response directly");
+              carData = response;
+            }
+            
+            console.log("🎯 Final car data to set:", carData);
+            setApiCarData(carData);
+          }
+        } catch (err: any) {
+          console.error("❌ Error fetching car details:", err);
+          console.error("❌ Error response:", err.response?.data);
+          setCarDataError(err.message || "Failed to load car details");
+        } finally {
+          setLoadingCarData(false);
+        }
+      }
+    };
+
+    fetchCarDetails();
+  }, [id]);
  
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -74,16 +126,91 @@ const BookNow: React.FC = () => {
       handleTimerComplete();
     }
   }, [waitingTimerSeconds, showWaitingPopup]);
+
+  // Show loading while fetching API data
+  if (loadingCarData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+        <div className="text-center space-y-4 p-8">
+          <Loader2 className="w-16 h-16 animate-spin text-blue-600 mx-auto" />
+          <p className="text-xl text-gray-700 font-semibold">Loading vehicle details...</p>
+          <p className="text-sm text-gray-500">Please wait while we fetch the car information</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if API fetch failed and no local vehicle data
+  if (carDataError && !vehicle) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-pink-50">
+        <div className="text-center space-y-4 p-8 bg-white rounded-2xl shadow-lg max-w-md">
+          <div className="text-6xl">❌</div>
+          <p className="text-xl text-red-600 font-bold">Error Loading Vehicle</p>
+          <p className="text-gray-600">{carDataError}</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:opacity-90 transition font-semibold"
+          >
+            ← Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if we have either local vehicle data or API data
+  if (!vehicle && !apiCarData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center space-y-4 p-8 bg-white rounded-2xl shadow-lg max-w-md">
+          <div className="text-6xl">🚗</div>
+          <p className="text-xl text-gray-700 font-bold">Vehicle Not Found</p>
+          <p className="text-gray-600">The vehicle you're looking for doesn't exist or has been removed.</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:opacity-90 transition font-semibold"
+          >
+            ← Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
  
-  if (!vehicle) return <p className="p-8">Vehicle not found!</p>;
- 
-  const mapVehicleType = (type: Vehicle["type"] | undefined): "Car" | "Auto" | "Bike" => {
+  // Map vehicle type for API (capitalized as required by backend enum)
+  const mapVehicleTypeForAPI = (type: Vehicle["type"] | undefined): "Car" | "Auto" | "Bike" => {
+    console.log("🔍 DEBUG mapVehicleTypeForAPI INPUT:", type);
+    
+    if (!type) {
+      console.warn("⚠️ Vehicle type is undefined/null, defaulting to 'Car'");
+      return "Car";
+    }
+    
+    const normalized = type.toLowerCase();
+    console.log("🔍 DEBUG normalized type:", normalized);
+    
+    // Backend enum expects capitalized first letter: Car, Auto, Bike
     const typeMap: Record<string, "Car" | "Auto" | "Bike"> = {
       car: "Car",
       auto: "Auto",
       bike: "Bike",
     };
-    return type ? typeMap[type] : "Car";
+    
+    const result = typeMap[normalized] || "Car";
+    console.log("🔍 DEBUG mapVehicleTypeForAPI OUTPUT:", result);
+    
+    return result;
+  };
+  
+  // Map vehicle type for store (capitalized as expected by booking store)
+  const mapVehicleTypeForStore = (type: Vehicle["type"] | undefined): "Car" | "Auto" | "Bike" => {
+    const typeMap: Record<string, "Car" | "Auto" | "Bike"> = {
+      car: "Car",
+      auto: "Auto",
+      bike: "Bike",
+    };
+    return type ? typeMap[type.toLowerCase()] || "Car" : "Car";
   };
  
   const calculateTotalHours = (
@@ -161,14 +288,33 @@ const BookNow: React.FC = () => {
     return timeString;
   };
  
-  const createBookingAPI = async (
+  /**
+   * Production-Level Create Booking API Integration
+   * 
+   * Features:
+   * - Dynamic user/car data retrieval
+   * - Comprehensive error handling
+   * - Multiple API endpoint fallback strategies
+   * - Request/response validation
+   * - Notification integration
+   * - Booking store persistence
+   * - Detailed logging for debugging
+   */
+  const createBookingAPI = async ( 
     startDate: string,
     endDate: string,
     startTime: string,
     endTime: string
   ) => {
-    if (!vehicle) {
-      setApiError("Vehicle information is missing");
+    // Validation: Check if vehicle data exists
+    if (!currentVehicle) {
+      const errorMsg = "Vehicle information is missing. Please try again.";
+      setApiError(errorMsg);
+      addNotification({
+        title: "Booking Failed",
+        message: errorMsg,
+        type: "booking_declined",
+      });
       return null;
     }
  
@@ -176,46 +322,177 @@ const BookNow: React.FC = () => {
     setApiError("");
  
     try {
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("🚀 PRODUCTION BOOKING API - START");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      
+      // Calculate booking details
       const totalHours = calculateTotalHours(startDate, endDate, startTime, endTime);
-      const pricePerHour = parseInt(String(vehicle?.price ?? "0"), 10);
+      const pricePerDay = parseInt(String(apiCarData?.RentPerDay || currentVehicle.price || "0"), 10);
+      const pricePerHour = pricePerDay > 0 ? Math.round(pricePerDay / 24) : parseInt(String(currentVehicle.price || "0"), 10);
       const totalPrice = totalHours * pricePerHour;
+      
+      console.log("💰 Pricing Calculation:");
+      console.log("   Price/Day:", pricePerDay);
+      console.log("   Price/Hour:", pricePerHour);
+      console.log("   Total Hours:", totalHours);
+      console.log("   Total Price:", totalPrice);
  
+      // Format dates and times for API
       const formattedFromDate = formatDateForAPI(startDate);
       const formattedToDate = formatDateForAPI(endDate);
       const formattedFromTime = formatTimeForAPI(startTime);
       const formattedToTime = formatTimeForAPI(endTime);
+      
+      // Get dynamic user data (from localStorage or defaults)
+      const userId = localStorage.getItem('userId') || "68ff377085e67372e72d1f39";
+      const contactNumber = localStorage.getItem('contactNumber') || "6301818409";
+      const contactName = localStorage.getItem('contactName') || localStorage.getItem('userName') || "User";
+      const userLatitude = localStorage.getItem('latitude') || "17.438095";
+      const userLongitude = localStorage.getItem('longitude') || "78.4485";
  
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("🚗 CURRENT VEHICLE DEBUG:");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("currentVehicle:", currentVehicle);
+      console.log("currentVehicle.id:", currentVehicle.id);
+      console.log("currentVehicle.type:", currentVehicle.type);
+      console.log("currentVehicle.name:", currentVehicle.name);
+      console.log("typeof currentVehicle.type:", typeof currentVehicle.type);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+      // Build comprehensive request body with all car information
       const requestBody = {
-        userId: "68fe32425c4f3da11dc7d030",
-        vechileType: mapVehicleType(vehicle.type),
-        VechileId: vehicle.id,
-        pricePerKm: String(pricePerHour),
-        contactNumber: "6301818409",
-        contactName: "ganesh",
-        latitude: "17.438095",
-        longitude: "78.4485",
+        // User Information
+        userId: userId,
+        contactNumber: contactNumber,
+        contactName: contactName,
+        
+        // Location
+        latitude: userLatitude,
+        longitude: userLongitude,
+        
+        // Vehicle Information (Dynamic from BookNow page)
+        VechileId: currentVehicle.id,
+        vechileType: mapVehicleTypeForAPI(currentVehicle.type),
+        carName: apiCarData?.CarName || currentVehicle.name || '',
+        carModel: apiCarData?.Model || '',
+        carBrand: apiCarData?.Brand || '',
+        carNumber: apiCarData?.CarNumber || '',
+        fuelType: apiCarData?.FuelType || '',
+        transmissionType: apiCarData?.TransmissionType || '',
+        seatingCapacity: apiCarData?.SeatingCapacity?.toString() || '',
+        
+        // Pricing
+        pricePerDay: pricePerDay.toString(),
+        pricePerHour: pricePerHour.toString(),
+        pricePerKm: pricePerHour.toString(),
+        
+        // Booking Dates/Times
         FromDate: formattedFromDate,
         ToDate: formattedToDate,
         FromTime: formattedFromTime,
         ToTime: formattedToTime,
+        
+        // Calculated Values
         totalHours: totalHours.toString(),
-        totalPrice: totalPrice.toString()
+        totalPrice: totalPrice.toString(),
+        
+        // Additional
+        pickupAddress: apiCarData?.pickupAddress || '',
+        dropoffAddress: apiCarData?.pickupAddress || '',
       };
  
-      console.log("📤 Sending booking request:", requestBody);
+      console.log("� Request Body:");
+      console.table(requestBody);
+      console.log("VALIDATION: vechileType =", requestBody.vechileType);
+      console.log("VALIDATION: VechileId =", requestBody.VechileId);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
  
+      // Prepare URL-encoded body for API
       const urlencoded = new URLSearchParams();
       Object.entries(requestBody).forEach(([key, value]) => {
-        urlencoded.append(key, value);
+        if (value !== null && value !== undefined) {
+          urlencoded.append(key, String(value));
+        }
       });
+      
+      // Verify critical fields made it to URLSearchParams
+      console.log("URLENCODED CHECK: vechileType =", urlencoded.get('vechileType'));
+      console.log("URLENCODED CHECK: VechileId =", urlencoded.get('VechileId'));
  
-      const directApiUrl = `${API_BASE_URL}/createBooking`;
-     
-      // Try multiple proxies
-      for (let i = 0; i < CORS_PROXIES.length; i++) {
+      const API_ENDPOINT = `${API_BASE_URL}/createBooking`;
+      
+      // Production Strategy 1: Try using apiService (with built-in CORS handling)
+      console.log("🎯 Strategy 1: Using apiService.booking.createBooking");
+      try {
+        // Pass the complete requestBody (already has correct field names and vechileType)
+        const apiServiceResponse = await apiService.booking.createBooking(requestBody);
+        
+        console.log("✅ API Service Response:", apiServiceResponse);
+        
+        const bookingIdFromResponse = (apiServiceResponse as any)?.data?.bookingId || 
+                                     (apiServiceResponse as any)?.data?._id ||
+                                     (apiServiceResponse as any)?.bookingId ||
+                                     (apiServiceResponse as any)?._id ||
+                                     `BOOK-${Date.now()}`;
+        
+        setBookingId(bookingIdFromResponse);
+        
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.log("🎉 BOOKING CREATED SUCCESSFULLY!");
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.log("📌 Booking ID:", bookingIdFromResponse);
+        console.log("🚗 Car ID:", currentVehicle.id);
+        console.log("📛 Car Name:", requestBody.carName);
+        console.log("💰 Total Price:", totalPrice);
+        console.log("✅ Strategy: apiService");
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        
+        // Add success notification
+        addNotification({
+          title: "Booking Created Successfully! 🎉",
+          message: `Your booking for ${requestBody.carName} has been confirmed!`,
+          type: "booking_confirmed",
+          vehicleId: currentVehicle.id,
+          vehicleName: requestBody.carName,
+          bookingId: bookingIdFromResponse,
+        });
+        
+        // Add to booking store
+        addBooking({
+          id: bookingIdFromResponse,
+          vehicleId: currentVehicle.id,
+          vehicleName: requestBody.carName,
+          vehicleImage: currentVehicle.image,
+          vehicleType: mapVehicleTypeForStore(currentVehicle.type),
+          price: totalPrice,
+          startDate: formattedFromDate,
+          endDate: formattedToDate,
+          startTime: formattedFromTime,
+          endTime: formattedToTime,
+          status: 'Booked',
+        });
+        
+        return apiServiceResponse;
+        
+      } catch (apiServiceError: any) {
+        console.warn("⚠️ Strategy 1 failed:", apiServiceError.message);
+        console.log("🔄 Falling back to Strategy 2 (CORS Proxies)...");
+      }
+      
+      // Production Strategy 2: CORS Proxies with improved reliability
+      const PRODUCTION_PROXIES = [
+        "https://api.allorigins.win/raw?url=",
+        "https://api.codetabs.com/v1/proxy?quest=",
+        "https://thingproxy.freeboard.io/fetch/",
+      ];
+      
+      console.log("🌐 Strategy 2: Trying CORS Proxies");
+      for (let i = 0; i < PRODUCTION_PROXIES.length; i++) {
         try {
-          const proxiedUrl = `${CORS_PROXIES[i]}${encodeURIComponent(directApiUrl)}`;
-          console.log(`🌐 Trying proxy ${i + 1}:`, proxiedUrl);
+          const proxiedUrl = `${PRODUCTION_PROXIES[i]}${encodeURIComponent(API_ENDPOINT)}`;
+          console.log(`🔄 Proxy ${i + 1}/${PRODUCTION_PROXIES.length}: ${PRODUCTION_PROXIES[i].substring(0, 30)}...`);
  
           const response = await Promise.race([
             fetch(proxiedUrl, {
@@ -226,15 +503,15 @@ const BookNow: React.FC = () => {
               body: urlencoded.toString(),
             }),
             new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error('Timeout')), 10000)
+              setTimeout(() => reject(new Error('Proxy timeout after 15s')), 15000)
             )
           ]);
  
-          console.log("📡 Response status:", response.status);
+          console.log(`✓ Proxy ${i + 1} Response:`, response.status, response.statusText);
  
           if (response.ok) {
             const text = await response.text();
-            console.log("📄 Response:", text);
+            console.log("✅ Raw Response:", text.substring(0, 200));
            
             let result;
             try {
@@ -243,43 +520,117 @@ const BookNow: React.FC = () => {
               result = { success: true, message: text };
             }
  
-            const tempId = `BOOK-${Date.now()}`;
-            setBookingId(tempId);
-            console.log("✅ Booking created with ID:", tempId);
+            const bookingIdFromResponse = result?.bookingId || 
+                                         result?.data?.bookingId || 
+                                         result?._id || 
+                                         result?.data?._id || 
+                                         `BOOK-${Date.now()}`;
+            
+            setBookingId(bookingIdFromResponse);
+            
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            console.log("🎉 BOOKING CREATED SUCCESSFULLY!");
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            console.log("📌 Booking ID:", bookingIdFromResponse);
+            console.log("🚗 Car:", requestBody.carName);
+            console.log("✅ Strategy: Proxy", i + 1);
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            
+            // Add success notification
+            addNotification({
+              title: "Booking Created Successfully! 🎉",
+              message: `Your booking for ${requestBody.carName} has been confirmed!`,
+              type: "booking_confirmed",
+              vehicleId: currentVehicle.id,
+              vehicleName: requestBody.carName,
+              bookingId: bookingIdFromResponse,
+            });
+            
+            // Add to booking store
+            addBooking({
+              id: bookingIdFromResponse,
+              vehicleId: currentVehicle.id,
+              vehicleName: requestBody.carName,
+              vehicleImage: currentVehicle.image,
+              vehicleType: mapVehicleTypeForStore(currentVehicle.type),
+              price: totalPrice,
+              startDate: formattedFromDate,
+              endDate: formattedToDate,
+              startTime: formattedFromTime,
+              endTime: formattedToTime,
+              status: 'Booked',
+            });
+            
             return result;
+          } else {
+            console.warn(`⚠️ Proxy ${i + 1} returned status ${response.status}`);
           }
-        } catch (error) {
-          console.warn(`⚠️ Proxy ${i + 1} failed:`, error);
-          if (i === CORS_PROXIES.length - 1) {
-            throw error;
-          }
+        } catch (proxyError: any) {
+          console.warn(`❌ Proxy ${i + 1} failed:`, proxyError.message);
         }
       }
- 
-      // If all proxies fail, proceed anyway for demo
-      console.log("⚠️ All API attempts failed, proceeding with demo mode");
-      const tempId = `BOOK-${Date.now()}`;
-      setBookingId(tempId);
-      return { success: true, bookingId: tempId, message: "Demo booking created" };
+      
+      // All strategies failed
+      throw new Error("Unable to connect to booking server. Please check your internet connection and try again.");
  
     } catch (error: any) {
-      console.error("❌ Error creating booking:", error);
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.error("❌ BOOKING CREATION FAILED");
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.error("🚗 Car:", currentVehicle.name);
+      console.error("❌ Error:", error.message);
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
      
-      // Proceed anyway for demo - don't block user
-      const tempId = `BOOK-${Date.now()}`;
-      setBookingId(tempId);
-      console.log("⚠️ Creating demo booking:", tempId);
-      return { success: true, bookingId: tempId };
+      const errorMessage = error.message || "Failed to create booking. Please try again.";
+      setApiError(errorMessage);
+      
+      // Add error notification
+      addNotification({
+        title: "Booking Failed ❌",
+        message: errorMessage,
+        type: "booking_declined",
+        vehicleId: currentVehicle.id,
+        vehicleName: currentVehicle.name,
+      });
+      
+      return null;
      
     } finally {
       setIsSubmittingBooking(false);
     }
   };
  
-  const vehicleReviews = getReviewsByVehicleId(vehicle.id);
-  const averageRating = getAverageRating(vehicle.id);
-  const totalReviews = getTotalReviewCount(vehicle.id);
-  const ratingDistribution = getRatingDistribution(vehicle.id);
+  // Create current vehicle object - use API data if local vehicle not found
+  const currentVehicle = vehicle || (apiCarData ? {
+    id: apiCarData._id || apiCarData.id || id || '',
+    name: apiCarData.CarName || 'Unknown Vehicle',
+    image: (apiCarData.carImages && apiCarData.carImages.length > 0) 
+      ? apiCarData.carImages[0] 
+      : apiCarData.carImage || apiCarData.image || 'https://via.placeholder.com/400',
+    price: apiCarData.RentPerDay || apiCarData.pricePerHour || '0',
+    type: 'car' as Vehicle["type"],
+  } : null);
+
+  if (!currentVehicle) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4 p-8">
+          <p className="text-xl text-gray-700">Vehicle data not available!</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const vehicleReviews = getReviewsByVehicleId(currentVehicle.id);
+  const averageRating = getAverageRating(currentVehicle.id);
+  const totalReviews = getTotalReviewCount(currentVehicle.id);
+  const ratingDistribution = getRatingDistribution(currentVehicle.id);
  
   const handleTimerComplete = () => {
     console.log("⏰ Timer completed - Opening BookingAcceptance");
@@ -322,7 +673,7 @@ const BookNow: React.FC = () => {
   };
  
   const handleConfirmBooking = () => {
-    if (!vehicle || !selectedDateTime) {
+    if (!currentVehicle || !selectedDateTime) {
       console.error("❌ Cannot confirm booking");
       return;
     }
@@ -332,10 +683,10 @@ const BookNow: React.FC = () => {
  
     addBooking({
       id: bookingId || Date.now().toString(),
-      vehicleId: vehicle.id,
-      vehicleName: vehicle.name,
-      vehicleImage: vehicle.image,
-      vehicleType: mapVehicleType(vehicle.type),
+      vehicleId: currentVehicle.id,
+      vehicleName: currentVehicle.name,
+      vehicleImage: currentVehicle.image,
+      vehicleType: mapVehicleTypeForStore(currentVehicle.type),
       customerName: "Current User",
       bookingDate: currentDate.toLocaleDateString("en-US"),
       bookingTime: currentDate.toLocaleTimeString("en-US", {
@@ -346,9 +697,9 @@ const BookNow: React.FC = () => {
       startTime: selectedDateTime.startTime,
       endDate: selectedDateTime.endDate,
       endTime: selectedDateTime.endTime,
-      modelNo: vehicle.id.toUpperCase(),
+      modelNo: currentVehicle.id.toUpperCase(),
       status: "Booked",
-      price: vehicle.price,
+      price: currentVehicle.price,
     });
  
     setShowSuccessModal(true);
@@ -357,8 +708,8 @@ const BookNow: React.FC = () => {
     <div className="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-1">
         <img
-          src={vehicle.image}
-          alt={vehicle.name}
+          src={currentVehicle.image}
+          alt={currentVehicle.name}
           className="rounded-xl w-full mb-4"
         />
         <div className="flex justify-center space-x-2 mt-2">
@@ -369,14 +720,14 @@ const BookNow: React.FC = () => {
       </div>
  
       <div className="lg:col-span-1">
-        <h2 className="text-2xl font-bold">{vehicle.name}</h2>
-        <p className="text-gray-600 text-lg mt-1">₹{vehicle.price}/hr</p>
+        <h2 className="text-2xl font-bold">{currentVehicle.name}</h2>
+        <p className="text-gray-600 text-lg mt-1">₹{currentVehicle.price}/hr</p>
  
         <div className="flex gap-4 mt-4">
           {[
-            { img: Automatic, label: "Automatic" },
-            { img: Driver, label: "5 Seaters" },
-            { img: Petrol, label: "Petrol" },
+            { img: Automatic, label: apiCarData?.transmissionType },
+            { img: Driver, label: apiCarData?.Carseater },
+            { img: Petrol, label: apiCarData?.fuelType },
             { img: Acicon, label: "AC" },
           ].map((item, idx) => (
             <div key={idx} className="flex flex-col items-center p-2 border rounded-lg">
@@ -389,9 +740,79 @@ const BookNow: React.FC = () => {
         <div className="mt-6">
           <h3 className="font-semibold text-lg mb-2">Description</h3>
           <p className="text-gray-600 text-sm">
-            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+            {apiCarData?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}
           </p>
         </div>
+
+        {/* Production-Level API Car Details Card */}
+        {/* {apiCarData && (
+          <div className="mt-6 bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 rounded-2xl p-6 border-2 border-purple-200 shadow-xl"> */}
+            {/* <div className="flex items-center justify-between mb-5"> */}
+              {/* <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                🚗 Live Car Details
+              </h3>
+              <span className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-full shadow-md animate-pulse">
+                REAL-TIME DATA
+              </span> */}
+            {/* </div> */}
+
+            {/* Debug: Show all available fields */}
+            {/* <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-xs font-bold text-yellow-800 mb-2">🔍 Debug: Available API Fields</p>
+              <pre className="text-xs text-gray-700 overflow-auto max-h-32">
+                {JSON.stringify(apiCarData, null, 2)}
+              </pre>
+            </div> */}
+            
+            {/* <div className="grid grid-cols-2 gap-3"> */}
+              {/* <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm hover:shadow-md transition border border-purple-100">
+                <p className="text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wide">Car ID</p>
+                <p className="text-sm font-bold text-gray-900 truncate">{apiCarData._id || apiCarData.id || 'N/A'}</p>
+              </div> */}
+              
+              {/* <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm hover:shadow-md transition border border-blue-100">
+                <p className="text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wide">Car Name</p>
+                <p className="text-sm font-bold text-blue-700">{apiCarData.CarName || 'N/A'}</p>
+              </div> */}
+              
+              {/* <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm hover:shadow-md transition border border-cyan-100">
+                <p className="text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wide">Model</p>
+                <p className="text-sm font-bold text-cyan-700">{apiCarData.CarModel || 'N/A'}</p>
+              </div> */}
+              
+              {/* <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm hover:shadow-md transition border border-purple-100">
+                <p className="text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wide">Location</p>
+                <p className="text-sm font-bold text-purple-700">{apiCarData.location || 'N/A'}</p>
+              </div> */}
+              
+              {/* <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm hover:shadow-md transition border border-green-100">
+                <p className="text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wide">Rent Per Day</p>
+                <p className="text-sm font-bold text-green-600">₹{apiCarData.RentPerDay || 'N/A'}</p>
+              </div> */}
+              
+              {/* <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm hover:shadow-md transition border border-indigo-100">
+                <p className="text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wide">Car Number</p>
+                <p className="text-sm font-bold text-indigo-700">{apiCarData.carNumber || 'N/A'}</p>
+              </div> */}
+            {/* </div> */}
+
+            {apiCarData.carImages && apiCarData.carImages.length > 1 && (
+              <div className="mt-4 pt-4 border-t border-purple-200">
+                <p className="text-xs text-gray-600 font-semibold mb-2 uppercase tracking-wide">Additional Images</p>
+                <div className="flex gap-2 overflow-x-auto">
+                  {apiCarData.carImages.slice(1, 4).map((img: string, idx: number) => (
+                    <img 
+                      key={idx}
+                      src={img} 
+                      alt={`Car ${idx + 2}`}
+                      className="w-10 h-8 rounded-lg object-cover border-2 border-white shadow-md"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          {/* </div> */}
+        {/* )} */}
  
         {apiError && (
           <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -550,6 +971,134 @@ const BookNow: React.FC = () => {
  
       <BookingRejectModal isOpen={showRejectModal} onClose={handleCloseRejectModal} />
  
+      {/* Production Loading Overlay - Shows during API call */}
+      {isSubmittingBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100] p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl animate-fadeIn">
+            <div className="flex flex-col items-center">
+              {/* Animated Loader */}
+              <div className="relative mb-6">
+                <Loader2 className="w-16 h-16 text-blue-600 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+              
+              {/* Title */}
+              <h2 className="text-2xl font-bold text-center text-gray-900 mb-3">
+                Creating Your Booking...
+              </h2>
+              
+              {/* Car Information Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 w-full mb-4 border border-blue-100 shadow-sm">
+                {currentVehicle && (
+                  <>
+                    {/* Car Image & Name */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <img 
+                        src={currentVehicle.image} 
+                        alt={currentVehicle.name}
+                        className="w-16 h-16 rounded-lg object-cover shadow-sm"
+                      />
+                      <div className="flex-1">
+                        <p className="font-bold text-gray-900 text-lg">{currentVehicle.name}</p>
+                        <p className="text-sm text-gray-600 capitalize">{currentVehicle.type}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Car Details */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Car ID</span>
+                        <span className="font-mono text-xs bg-white px-2 py-1 rounded border border-gray-200 text-gray-700">
+                          {currentVehicle.id.substring(0, 12)}...
+                        </span>
+                      </div>
+                      
+                      {apiCarData?.CarNumber && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Car Number</span>
+                          <span className="font-semibold text-gray-900">{apiCarData.CarNumber}</span>
+                        </div>
+                      )}
+                      
+                      {selectedDateTime && (
+                        <div className="border-t border-blue-200 pt-2 mt-3">
+                          <p className="text-xs text-gray-600 mb-1">Booking Period</p>
+                          <p className="text-sm text-gray-700 font-medium">
+                            {selectedDateTime.startDate} {selectedDateTime.startTime}
+                            <br />
+                            to {selectedDateTime.endDate} {selectedDateTime.endTime}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              {/* Status Messages */}
+              <div className="text-center space-y-2">
+                <p className="text-gray-600 text-sm">
+                  Please wait while we process your booking...
+                </p>
+                <p className="text-blue-600 font-medium text-sm">
+                  Connecting to server & validating data
+                </p>
+              </div>
+              
+              {/* Progress Dots Animation */}
+              <div className="flex gap-2 mt-5">
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Production Error Banner - Shows when booking fails */}
+      {apiError && !isSubmittingBooking && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[110] max-w-md w-full mx-4 animate-slideDown">
+          <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-xl">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-bold text-red-800">Booking Failed</h3>
+                <p className="mt-1 text-sm text-red-700">{apiError}</p>
+                {currentVehicle && (
+                  <p className="mt-1 text-xs text-red-600">
+                    Car: {currentVehicle.name} (ID: {currentVehicle.id.substring(0, 8)}...)
+                  </p>
+                )}
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => {
+                      setApiError("");
+                      setIsDateTimeModalOpen(true);
+                    }}
+                    className="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                  >
+                    Retry Booking
+                  </button>
+                  <button
+                    onClick={() => setApiError("")}
+                    className="px-3 py-1.5 bg-white text-red-600 text-sm font-medium rounded-lg border border-red-300 hover:bg-red-50 transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
@@ -570,9 +1119,9 @@ const BookNow: React.FC = () => {
  
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
               <div className="flex items-center gap-3 mb-3">
-                <img src={vehicle.image} alt={vehicle.name} className="w-16 h-16 rounded-lg object-cover" />
+                <img src={currentVehicle.image} alt={currentVehicle.name} className="w-16 h-16 rounded-lg object-cover" />
                 <div>
-                  <h3 className="font-semibold text-gray-900">{vehicle.name}</h3>
+                  <h3 className="font-semibold text-gray-900">{currentVehicle.name}</h3>
                   <p className="text-sm text-gray-500">Booking ID: {bookingId}</p>
                 </div>
               </div>

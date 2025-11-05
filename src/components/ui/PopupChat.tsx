@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Send, X, Minimize2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Send, X, Minimize2, Image } from 'lucide-react';
  
 interface Message {
   id: number;
   text: string;
   sender: 'you' | 'other';
   time: string;
+  image?: string;
 }
  
 interface PopupChatProps {
@@ -14,13 +15,13 @@ interface PopupChatProps {
   ownerName?: string;
   ownerAvatar?: string;
 }
- 
 const PopupChat: React.FC<PopupChatProps> = ({
   isOpen,
   onClose,
   ownerName = "Manoj Kumar",
   ownerAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Manoj"
 }) => {
+  // State for messages with initial conversation
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -35,9 +36,12 @@ const PopupChat: React.FC<PopupChatProps> = ({
       time: '09:25 AM'
     }
   ]);
+ 
+  // Other state variables
   const [inputValue, setInputValue] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
- 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Handler for sending text messages
   const handleSend = () => {
     if (inputValue.trim()) {
       const newMessage: Message = {
@@ -54,14 +58,42 @@ const PopupChat: React.FC<PopupChatProps> = ({
     }
   };
  
+  // Handler for selecting and sending images
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageUrl = event.target?.result as string;
+        const newMessage: Message = {
+          id: messages.length + 1,
+          text: '',
+          sender: 'you',
+          time: new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          image: imageUrl
+        };
+        setMessages([...messages, newMessage]);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Reset the file input to allow selecting the same file again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+ 
+  // Handler for Enter key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSend();
     }
   };
  
+  // Don't render if chat is closed
   if (!isOpen) return null;
- 
   return (
     <>
       {/* Backdrop - semi-transparent overlay */}
@@ -70,7 +102,7 @@ const PopupChat: React.FC<PopupChatProps> = ({
         onClick={onClose}
       />
  
-      {/* Chat Popup */}
+      {/* Chat Popup Container */}
       <div
         className={`fixed right-6 bottom-6 bg-white rounded-2xl shadow-2xl z-50 flex flex-col transition-all duration-300 ${
           isMinimized ? 'h-16' : 'h-[600px]'
@@ -104,7 +136,6 @@ const PopupChat: React.FC<PopupChatProps> = ({
             <X className="w-5 h-5 text-gray-600" />
           </button>
         </div>
- 
         {/* Chat Content - Hidden when minimized */}
         {!isMinimized && (
           <>
@@ -138,7 +169,16 @@ const PopupChat: React.FC<PopupChatProps> = ({
                             : 'bg-white text-gray-900 rounded-bl-sm border border-gray-200'
                         }`}
                       >
-                        <p className="text-sm">{message.text}</p>
+                        {message.image ? (
+                          <img
+                            src={message.image}
+                            alt="Sent image"
+                            className="max-w-full h-auto rounded-lg max-h-64 cursor-pointer"
+                            onClick={() => window.open(message.image, '_blank')}
+                          />
+                        ) : (
+                          <p className="text-sm">{message.text}</p>
+                        )}
                       </div>
                       <p className="text-xs text-gray-400 mt-1 ml-2">
                         {message.time}
@@ -155,10 +195,28 @@ const PopupChat: React.FC<PopupChatProps> = ({
                 </div>
               ))}
             </div>
- 
             {/* Input Area */}
             <div className="border-t border-gray-200 p-4 bg-white rounded-b-2xl">
               <div className="flex items-center gap-2">
+                {/* Hidden file input for image selection */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageSelect}
+                  accept="image/*"
+                  className="hidden"
+                />
+               
+                {/* Image upload button */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-2.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-all shadow-sm hover:shadow-md"
+                  title="Send image"
+                >
+                  <Image className="w-5 h-5" />
+                </button>
+               
+                {/* Text input */}
                 <input
                   type="text"
                   value={inputValue}
@@ -167,6 +225,8 @@ const PopupChat: React.FC<PopupChatProps> = ({
                   placeholder="Write your message..."
                   className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
                 />
+               
+                {/* Send button */}
                 <button
                   onClick={handleSend}
                   disabled={!inputValue.trim()}
@@ -182,6 +242,5 @@ const PopupChat: React.FC<PopupChatProps> = ({
     </>
   );
 };
- 
 export default PopupChat;
  

@@ -7,8 +7,11 @@ import FilterCard from "../components/ui/FilterCard";
 import PromoSlides from "../components/PromoSlides";
 import { vehicles } from "./data/Vehicle";
 import Filter from "../assets/icons/FilterLogo.png";
+import NearbyCars from "./NearByCars";
+import NearbyBikes from "./NearByBikes";
 
-const Rental: React.FC = () => {
+
+const Rental: React.FC = (FeedbackModal) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [startDate, setStartDate] = useState<string>(
@@ -57,6 +60,8 @@ const Rental: React.FC = () => {
               minDate={startDate}
             />
           </div>
+        
+         
         </div>
 
         {/* 🔹 Search & Filter */}
@@ -72,7 +77,7 @@ const Rental: React.FC = () => {
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
-
+        
           <button
             onClick={() => setIsFilterOpen(true)}
             className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
@@ -84,16 +89,16 @@ const Rental: React.FC = () => {
       </div>
 
       {/* 🚗 Cars Section */}
-      <VehicleSection title="Looking for an Car?" vehicles={cars} type="car" />
-{/* 
-      🛺 Autos Section
-      <VehicleSection title="Looking for an Auto?" vehicles={autos} type="auto" /> */}
+      {/* <VehicleSection title="Looking for an Car?" vehicles={cars} type="car" /> */} <NearbyCars />
+      {/* 🛺 Autos Section */}
+      {/* <VehicleSection title="Looking for an Auto?" vehicles={autos} type="auto" /> */}
 
       {/* 🏍 Bikes Section */}
-      <VehicleSection title="Looking for a Bike?" vehicles={bikes} type="bike" />
-
+      {/* <VehicleSection title="Looking for a Bike?" vehicles={bikes} type="bike" /> */}
+       <NearbyBikes/>
       {/* 🔹 Filter Modal */}
       {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
+      
     </div>
   );
 };

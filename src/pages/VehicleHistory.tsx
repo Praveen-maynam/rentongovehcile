@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { MoreVertical } from "lucide-react";
-import BlackCar from "../assets/images/BlackCar.png";
-import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
-import DriverLogo from "../assets/icons/DriverLogo.png";
-import AvailabilityDateTimeModal from "../components/AvailabilityDateTimeModal";
-import { useLocation } from "react-router-dom";
+
+
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { Loader2 } from "lucide-react";
+
+const API_BASE_URL = "http://52.66.238.227:3000";
 
 interface BookingHistory {
   customerName: string;
@@ -17,476 +16,328 @@ interface BookingHistory {
   status: "Booked" | "Picked" | "Completed";
 }
 
-interface VehicleDetails {
-  name: string;
-  price: string;
-  rating: string;
-  transmission: string;
-  seats: string;
-  fuel: string;
-  ac: string;
-  image: string;
-  description: string;
-  ownerName: string;
-  mobile: string;
-  email: string;
+interface VehicleData {
+  _id: string;
+  CarName?: string;
+  CarModel?: string;
+  CarNumber?: string;
+  Carseater?: string;
+  RentPerHour?: number;
+  RentPerDay?: number;
+  carImages?: string[];
+  fuelType?: string;
+  transmissionType?: string;
+  Ac_available?: boolean;
+
+  bikeName?: string;
+  bikeModel?: string;
+  bikeNumber?: string;
+  pricePerKm?: number;
+  bikeImages?: string[];
+
+  description?: string;
+  contactName?: string;
+  contactNumber?: string;
+  Available?: boolean;
+  pickupCity?: string;
+  pickupCityState?: string;
+  pickupArea?: string;
 }
 
 const VehicleHistory: React.FC = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { vehicleName } = useParams<{ vehicleName: string }>();
-  const [editOpen, setEditOpen] = useState(false);
-  const [isDateTimeModalOpen, setIsDateTimeModalOpen] = useState(false);
 
-const location = useLocation();
-const vehicleData = location.state?.vehicleData;
+  const [vehicleData, setVehicleData] = useState<VehicleData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const vehicleImages = [BlackCar, BlackCar, BlackCar, BlackCar];
-  const [currentImage, setCurrentImage] = useState(0);
+  const passedVehicleData = location.state?.vehicleData;
+  const vehicleType = passedVehicleData?.vehicleType || "bike"; // ✅ fallback to bike
+  const vehicleId = passedVehicleData?._id || passedVehicleData?.id;
+
+  useEffect(() => {
+    if (!vehicleId) {
+      setError("No vehicle ID provided");
+      setLoading(false);
+      return;
+    }
+
+    const fetchVehicleDetails = async () => {
+      try {
+        setLoading(true);
+        const endpoint =
+          vehicleType === "car"
+            ? `${API_BASE_URL}/getCarById/${vehicleId}`
+            : `${API_BASE_URL}/getBikeById/${vehicleId}`;
+
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const result = await response.json();
+        const data = result.car || result.bike || result.data;
+        if (data) setVehicleData(data);
+        else throw new Error("Vehicle data not found");
+      } catch (err) {
+        console.error("Error fetching vehicle details:", err);
+        setError("Failed to load vehicle details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicleDetails();
+  }, [vehicleId, vehicleType]);
 
   const bookingHistory: BookingHistory[] = [
-    { customerName: "Manoj Kumar", startDate: "30-10-2025", startTime: "11 AM", endDate: "30-10-2025", endTime: "11 AM", mobile: "1234567898", status: "Booked" },
-    { customerName: "Manoj Kumar", startDate: "30-10-2025", startTime: "11 AM", endDate: "30-10-2025", endTime: "11 AM", mobile: "1234567898", status: "Picked" },
-    { customerName: "Manoj Kumar", startDate: "30-10-2025", startTime: "11 AM", endDate: "30-10-2025", endTime: "11 AM", mobile: "1234567898", status: "Completed" },
+    {
+      customerName: "Manoj Kumar",
+      startDate: "30-10-2025",
+      startTime: "11 AM",
+      endDate: "30-10-2025",
+      endTime: "11 AM",
+      mobile: "1234567898",
+      status: "Booked",
+    },
+    {
+      customerName: "Rajesh Singh",
+      startDate: "28-10-2025",
+      startTime: "09 AM",
+      endDate: "29-10-2025",
+      endTime: "06 PM",
+      mobile: "9876543210",
+      status: "Completed",
+    },
   ];
-   const [editingBookingIndex, setEditingBookingIndex] = useState<number | null>(null);
-  const [tempBooking, setTempBooking] = useState<BookingHistory>({
-    customerName: "",
-    startDate: "",
-    startTime: "",
-    endDate: "",
-    endTime: "",
-    mobile: "",
-    status: "Booked",
-  });
 
-  const initialVehicle: VehicleDetails = {
-    name: "Hyundai Verna",
-    price: "250",
-    rating: "4.2",
-    transmission: "Automatic",
-    seats: "5 Seaters",
-    fuel: "Petrol",
-    ac: "AC",
-    image: BlackCar,
-    description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-    ownerName: "Manoj Kumar",
-    mobile: "1234567898",
-    email: "owner@example.com",
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="animate-spin mx-auto mb-4" size={48} />
+        <p className="text-gray-600">Loading vehicle details...</p>
+      </div>
+    );
+  }
+
+  if (error || !vehicleData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-red-600 text-lg mb-4">{error || "Vehicle not found"}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }// ✅ Detect if it's a car
+const isCar =
+  !!vehicleData.CarName || !!vehicleData.carImages || vehicleType === "car";
+
+// ✅ Get vehicle images
+let vehicleImages =
+  (isCar ? vehicleData.carImages : vehicleData.bikeImages) || [];
+
+// ✅ Clean invalid entries
+vehicleImages = vehicleImages.filter(
+  (img) => img && img.trim() !== "" && img !== "undefined"
+);
+
+// ✅ Dummy images (online placeholders)
+const dummyImages = [
+  "https://via.placeholder.com/400x300?text=Vehicle+Image+1",
+  "https://via.placeholder.com/400x300?text=Vehicle+Image+2",
+  "https://via.placeholder.com/400x300?text=Vehicle+Image+3",
+];
+
+// ✅ If empty, use dummies
+if (vehicleImages.length === 0) {
+  vehicleImages = dummyImages;
+} else if (vehicleImages.length === 1) {
+  vehicleImages = [vehicleImages[0], ...dummyImages.slice(0, 2)];
+}
+
+console.log("vehicleImages:", vehicleImages);
+
+
+  // ✅ Derived display values
+  const displayName = isCar
+    ? vehicleData.CarName || "Unknown Vehicle"
+    : vehicleData.bikeName || "Unknown Bike";
+
+  const displayModel = isCar
+    ? vehicleData.CarModel || "N/A"
+    : vehicleData.bikeModel || "N/A";
+
+  const displayNumber = isCar
+    ? vehicleData.CarNumber || "N/A"
+    : vehicleData.bikeNumber || "N/A";
+
+  const displayPrice = isCar
+    ? `₹${vehicleData.RentPerHour || 0}/hr`
+    : `₹${vehicleData.pricePerKm || 0}/km`;
+
+  const displayLocation = `${vehicleData.pickupCity || "Unknown"}, ${
+    vehicleData.pickupCityState || ""
+  }`;
+
+  const handleBookingClick = (booking: BookingHistory) => {
+    navigate(`/booking-history/${vehicleId}`, {
+      state: { booking, vehicleData },
+    });
   };
-
-  const [editVehicle, setEditVehicle] = useState<VehicleDetails>(initialVehicle);
-  
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setEditVehicle(prev => ({ ...prev, [name]: value }));
-  };
-    const [drivingLicence, setDrivingLicence] = useState(false);
-  const [aadhaarCard, setAadhaarCard] = useState(false);
-  const [depositVehicle, setDepositVehicle] = useState(false);
-  const [depositMoney, setDepositMoney] = useState(false);
-  const [acAvailable, setAcAvailable] = useState(false);
-
-  const [stateOpen, setStateOpen] = useState(false);
-  const [cityOpen, setCityOpen] = useState(false);
-  const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
-
-  const states = ["Maharashtra", "Karnataka", "Tamil Nadu", "Delhi"];
-  const cities: { [key: string]: string[] } = {
-    Maharashtra: ["Mumbai", "Pune", "Nagpur"],
-    Karnataka: ["Bangalore", "Mysore", "Mangalore"],
-    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai"],
-    
-    Delhi: ["New Delhi", "Dwarka", "Rohini"],
-  };
-  
-  const [pincode, setPincode] = useState("");
-  const [street, setStreet] = useState("");
-  const [doorName, setDoorName] = useState("");
-
-  
-  const renderToggle = (state: boolean, setState: React.Dispatch<React.SetStateAction<boolean>>) => (
-    <button
-      onClick={() => setState(!state)}
-      className={`w-12 h-6 rounded-full relative flex items-center transition-colors duration-300 ${
-        state ? "bg-green-500" : "bg-gray-300"
-      }`}
-    >
-      <span
-        className={`absolute w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300 ${
-          state ? "translate-x-6" : "translate-x-0.5"
-        }`}
-      ></span>
-    </button>
-  );
-    const [price, setPrice] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedHour, setSelectedHour] = useState<string | null>(null);
-  const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, "0")}:00`);
-
-  const handleSelectHour = (hour: string) => {
-    setSelectedHour(hour);
-    setIsModalOpen(false);
-  };
-  
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6 flex justify-center">
       <div className="max-w-[1228px] w-full flex flex-col md:flex-row gap-10">
         {/* Left Section */}
-        <div className="flex flex-col md:flex-row bg-white p-6 rounded-2xl shadow-lg w-auto md:w-[860px]">
-          <div className="relative w-[409px] h-[309px] overflow-hidden rounded-xl shadow-md flex-shrink-0">
-            <img
-              src={vehicleImages[currentImage]}
-              alt={`${initialVehicle.name} ${currentImage + 1}`}
-              className="w-auto h-auto object-cover transition-all duration-500 ease-in-out"
-            />
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-              {vehicleImages.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentImage(idx)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${idx === currentImage ? "bg-white" : "bg-gray-400"}`}
+        <div className="flex flex-col md:flex-row bg-white p-6 rounded-2xl shadow-lg w-full md:w-[860px]">
+          <div className="relative w-full md:w-[409px] h-[309px] overflow-hidden rounded-xl shadow-md flex-shrink-0">
+            {vehicleImages.length > 0 ? (
+              <>
+                <img
+                  src={vehicleImages[currentImageIndex]}
+                  alt={`${displayName} ${currentImageIndex + 1}`}
+                  className="w-full h-full object-cover transition-all duration-500"
                 />
-              ))}
-            </div>
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                  {vehicleImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`w-3 h-3 rounded-full ${
+                        idx === currentImageIndex
+                          ? "bg-white scale-110"
+                          : "bg-gray-400"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400 text-lg">
+                  No Image Available
+                </span>
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col ml-6 mt-6 md:mt-0">
+          {/* Vehicle Info */}
+          <div className="flex flex-col ml-0 md:ml-6 mt-6 md:mt-0">
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-semibold">{initialVehicle.name}</h1>
+              <h1 className="text-3xl font-semibold">{displayName}</h1>
               <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-md">
-                <span className="text-sm font-semibold text-yellow-800">★ {initialVehicle.rating}</span>
+                <span className="text-sm font-semibold text-yellow-800">★ 4.2</span>
               </div>
             </div>
-            <div className="flex items-baseline mt-2">
-              <span className="text-3xl font-bold">₹{initialVehicle.price}</span>
-              <span className="text-gray-500 ml-2 text-sm">/hr</span>
+
+            <p className="text-sm text-gray-500 mt-1">
+              {displayModel} • {displayNumber}
+            </p>
+
+            <div className="flex items-baseline mt-3">
+              <span className="text-3xl font-bold text-blue-600">
+                {displayPrice}
+              </span>
             </div>
 
+            {/* Specifications */}
             <div className="flex items-center mt-4 border border-gray-300 rounded-xl overflow-hidden">
-              <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                <div className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full mb-1">
-                  <img src={AutomaticLogo} alt="Auto" className="w-6 h-6" />
-                </div>
-                <p className="text-sm text-gray-700">{initialVehicle.transmission}</p>
-              </div>
-              <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                <div className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full mb-1">
-                  <img src={DriverLogo} alt="Seats" className="w-6 h-6" />
-                </div>
-                <p className="text-sm text-gray-700">{initialVehicle.seats}</p>
-              </div>
-              <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                <div className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full mb-1">⛽</div>
-                <p className="text-sm text-gray-700">{initialVehicle.fuel}</p>
-              </div>
-              <div className="flex flex-col items-center px-4 py-3">
-                <div className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full mb-1">❄️</div>
-                <p className="text-sm text-gray-700">{initialVehicle.ac}</p>
-              </div>
+              {isCar ? (
+                <>
+                  <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
+                    🚗{" "}
+                    <p className="text-sm text-gray-700">
+                      {vehicleData.transmissionType || "Manual"}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
+                    👥{" "}
+                    <p className="text-sm text-gray-700">
+                      {vehicleData.Carseater || "5"} Seater
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
+                    ⛽{" "}
+                    <p className="text-sm text-gray-700">
+                      {vehicleData.fuelType || "Petrol"}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center px-4 py-3">
+                    ❄️{" "}
+                    <p className="text-sm text-gray-700">
+                      {vehicleData.Ac_available ? "AC" : "Non-AC"}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
+                    🏍️ <p className="text-sm text-gray-700">Bike</p>
+                  </div>
+                  <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
+                    ⛽ <p className="text-sm text-gray-700">Petrol</p>
+                  </div>
+                  <div className="flex flex-col items-center px-4 py-3">
+                    📍{" "}
+                    <p className="text-sm text-gray-700">{displayLocation}</p>
+                  </div>
+                </>
+              )}
             </div>
 
+            {/* Description */}
             <div className="mt-6">
               <h2 className="text-xl font-semibold mb-2">Description</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">{initialVehicle.description}</p>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {vehicleData.description || "No description available"}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Right Section */}
+        {/* Booking History Section */}
         <div className="w-full md:w-[350px] flex flex-col gap-4">
-          {!editOpen ? (
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Booking History</h2>
-              <div className="space-y-4">
-                {bookingHistory.map((booking, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-xl p-4 relative hover:shadow-md transition">
-             <button
-  onClick={() => setIsDateTimeModalOpen(true)}
-  className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
->
-  <MoreVertical className="w-5 h-5" />
-</button>
-
-                    <h3 className="font-semibold text-gray-800 mb-1">{booking.customerName}</h3>
-                    <p className="text-sm text-gray-600">{booking.startDate} - {booking.endDate}</p>
-                    <p className="text-sm text-gray-600">{booking.startTime} - {booking.endTime}</p>
-                    <p className="text-sm text-gray-600">Mobile: {booking.mobile}</p>
-                    <p className="text-xs font-medium mt-1">{booking.status}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-           <div className="flex flex-col gap-4">
-  {/* Edit Card Header */}
-  <div className="flex items-center justify-left  border-gray-400 w-[250px]">
-    <span className="font-bold text-gray-700 text-2xl">Edit Car Details</span>
-  </div>
-
-
-
-              {/* Description Heading */}
-<div className="text-gray-700 font-semibold text-2l gap-1">
-  Description
-</div>
-<div className="bg-white shadow-md rounded-md w-[343px] h-[107px] border-2 border-gray-300 p-4">
-  <textarea
-    className="w-full h-full text-sm text-gray-600 resize-none outline-none"
-    placeholder="Enter car description..."
-  />
-</div>
-
-<div className="flex items-center justify-between w-[343px] mt-1">
-  {/* Heading */}
-  <div className="text-gray-700 font-semibold text-lg">
-     AC Available
-  </div>
-
-  {/* Toggle Button */}
-  <button
-    onClick={() => setAcAvailable(!acAvailable)}
-    className={`w-12 h-6 rounded-full relative flex items-center transition-colors duration-300 ${
-      acAvailable ? "bg-green-500" : "bg-gray-300"
-    }`}
-  >
-    <span
-      className={`absolute w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300 ${
-        acAvailable ? "translate-x-6" : "translate-x-1"
-      }`}
-    ></span>
-  </button>
-</div>
-
-    {/* Rent Price and Hour Box */}
-              <div className="text-gray-700 font-semibold text-xl mt-0">Price</div>
-              <div className="flex items-center mt-2 space-x-2">
-                <div className="w-[180px] h-[47px] border-2 border-gray-400 rounded-md p-1 flex flex-col justify-center relative mt-0.5">
-                  <span className="absolute -top-2 left-2 bg-white px-1 text-gray-500 text-sm ">Rent Price</span>
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="Enter price"
-                    className="font-semibold text-gray-800 text-lg mt-1 outline-none bg-transparent w-full px-2"
-                  />
-                </div>
-
-                <div
-                  className="w-[82px] h-[48px] border-2 border-gray-400 rounded-md flex items-center justify-between px-3 cursor-pointer"
-                  onClick={() => setIsModalOpen(true)}
+          <h2 className="text-2xl font-semibold">Booking History</h2>
+          <div className="space-y-4">
+            {bookingHistory.map((booking, idx) => (
+              <div
+                key={idx}
+                onClick={() => handleBookingClick(booking)}
+                className="border border-gray-200 rounded-xl p-4 relative hover:shadow-md transition bg-white cursor-pointer"
+              >
+                <h3 className="font-semibold text-gray-800 mb-2">
+                  {booking.customerName}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  📅 {booking.startDate} - {booking.endDate}
+                </p>
+                <p className="text-sm text-gray-600">
+                  🕐 {booking.startTime} - {booking.endTime}
+                </p>
+                <p className="text-sm text-gray-600">📱 {booking.mobile}</p>
+                <span
+                  className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                    booking.status === "Completed"
+                      ? "bg-green-100 text-green-700"
+                      : booking.status === "Picked"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
                 >
-                  <span className="text-gray-800 font-medium text-sm">
-                    {selectedHour || "Hour"}
-                  </span>
-                  <svg
-                    className="w-4 h-4 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+                  {booking.status}
+                </span>
               </div>
-
-              {/* Hour Modal */}
-              {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-                  <div className="bg-white rounded-lg p-4 w-[200px] max-h-[37px] overflow-y-auto shadow-lg">
-                    <h2 className="text-gray-800 text-lg font-semibold mb-3 text-center">Select Hour</h2>
-                    <div className="grid grid-cols-3 gap-2">
-                      {hours.map((hour) => (
-                        <button
-                          key={hour}
-                          onClick={() => handleSelectHour(hour)}
-                          className="border border-gray-300 rounded-md py-2 hover:bg-blue-100 transition"
-                        >
-                          {hour}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      onClick={() => setIsModalOpen(false)}
-                      className="mt-4 w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-            {/* Contact Information Heading */}
-<h1 className="text-xl font-bold text-gray-800 mt-0">
-  Your Contact Information
-</h1>
-
-
-{/* Name Input Box */}
-<div className="flex items-center space-x-3 mt-0">
-  {/* Name Input Box */}
-  <div className="w-[200px] h-[38px] border-2 border-gray-400 rounded-md p-1 flex items-center relative pl-0">
-    <span className="absolute -top-2 left-2 bg-white px-1 text-gray-500 text-sm">
-      Name
-    </span>
-    <input
-      type="text"
-      placeholder="Enter your name"
-      className="w-full text-gray-800 font-medium text-base ml-1 outline-none bg-transparent"
-    />
-  </div>
-
-  {/* Contact Number Input Box */}
-  <div className="w-[200px] h-[38px] border-2 border-gray-400 rounded-md p-1 flex items-center relative">
-    <span className="absolute -top-2 left-2 bg-white px-1 text-gray-500 text-sm">
-      Contact Number
-    </span>
-    <input
-      type="tel"
-      placeholder="Enter your mobile number"
-      className="w-full text-gray-800 font-medium text-base ml-1 outline-none bg-transparent"
-    />
-  </div>
-</div>
-
-      {/* Document Toggles */}
-              <h2 className="text-2xl font-semibold text-gray-800 mt-0">Customer Required Documents</h2>
-
-              <div className="w-[343px] h-[48px] p-2 flex items-center justify-between relative mt-6">
-                <span className="text-2xl font-medium text-gray-800">Driving Licence</span>
-                {renderToggle(drivingLicence, setDrivingLicence)}
-              </div>
-              <div className="w-[343px] h-[48px] p-2 flex items-center justify-between relative mt-4">
-                <span className="text-2xl font-medium text-gray-800">Aadhaar Card</span>
-                {renderToggle(aadhaarCard, setAadhaarCard)}
-              </div>
-              <div className="w-[343px] h-[48px] border-2 border-gray-400 rounded-md p-2 flex items-center justify-between relative mt-4">
-                <span className="text-2xl font-medium text-gray-800">Deposit Vehicle</span>
-                {renderToggle(depositVehicle, setDepositVehicle)}
-              </div>
-              <div className="w-[343px] h-[48px] border-2 border-gray-400 rounded-md p-2 flex items-center justify-between relative mt-4">
-                <span className="absolute -top-2 left-2 bg-white px-1 text-gray-500 text-sm">Deposit Money</span>
-                <span className="text-2xl font-medium text-gray-800">₹5000</span>
-                {renderToggle(depositMoney, setDepositMoney)}
-              </div>
-
- <h2 className="text-2xl font-semibold text-gray-800 mt-6">
-                Vehicle Picking Address
-              </h2>
-
-              <div className="relative">
-                {/* State */}
-                <div
-                  className="w-[343px] h-[48px] border-2 border-gray-400 rounded-md p-2 flex items-center justify-between mt-4 cursor-pointer"
-                  onClick={() => setStateOpen(!stateOpen)}
-                >
-                  <span className="absolute -top-2 left-2 bg-white px-1 text-gray-500 text-sm">State</span>
-                  <span className="text-2xl font-medium text-gray-800">{selectedState || "Select State"}</span>
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </div>
-
-                {stateOpen && (
-                  <div className="absolute top-[50px] left-0 w-[343px] bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-40 overflow-y-auto">
-                    {states.map((state) => (
-                      <div
-                        key={state}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => {
-                          setSelectedState(state);
-                          setSelectedCity(null);
-                          setStateOpen(false);
-                        }}
-                      >
-                        {state}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* City */}
-              <div className="relative">
-                <div
-                  className="w-[343px] h-[48px] border-2 border-gray-400 rounded-md p-2 flex items-center justify-between mt-4 cursor-pointer"
-                  onClick={() => selectedState && setCityOpen(!cityOpen)}
-                >
-                  <span className="absolute -top-2 left-2 bg-white px-1 text-gray-500 text-sm">City</span>
-                  <span className="text-2xl font-medium text-gray-800">{selectedCity || "Select City"}</span>
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </div>
-
-                {cityOpen && selectedState && (
-                  <div className="absolute top-[50px] left-0 w-[343px] bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-40 overflow-y-auto">
-                    {cities[selectedState].map((city) => (
-                      <div
-                        key={city}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => {
-                          setSelectedCity(city);
-                          setCityOpen(false);
-                        }}
-                      >
-                        {city}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Address Form Fields */}
-              <input
-                type="text"
-                value={pincode}
-                onChange={(e) => setPincode(e.target.value)}
-                placeholder="Pincode"
-                className="w-[343px] h-[48px] border-2 border-gray-400 rounded-md p-2 mt-2"
-              />
-              <input
-                type="text"
-                value={street}
-                onChange={(e) => setStreet(e.target.value)}
-                placeholder="Street"
-                className="w-[343px] h-[48px] border-2 border-gray-400 rounded-md p-2 mt-2"
-              />
-              <input
-                type="text"
-                value={doorName}
-                onChange={(e) => setDoorName(e.target.value)}
-                placeholder="Door Name"
-                className="w-[343px] h-[48px] border-2 border-gray-400 rounded-md p-2 mt-2"
-              />
-
-              <button className="w-[343px] h-[48px] bg-blue-600 text-white rounded-md mt-4">
-                Save
-              </button>
-              <button className="w-[343px] h-[48px] border-2 border-red-500 text-red-500 bg-white rounded-md mt-2 hover:bg-red-50 transition">
-  Delete
-</button>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
-        {isDateTimeModalOpen && (
-  <AvailabilityDateTimeModal
-    isOpen={isDateTimeModalOpen}
-    onClose={() => setIsDateTimeModalOpen(false)}
-    onConfirm={(startDate, endDate, startTime, endTime) => {
-      console.log("Selected:", startDate, endDate, startTime, endTime);
-      setIsDateTimeModalOpen(false);
-    }}
-  />
-)}
-
       </div>
     </div>
   );
 };
-
 
 export default VehicleHistory;

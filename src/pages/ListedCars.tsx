@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Loader2 } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
 import { useLocation } from "../store/location.context";
+import apiService from "../services/api.service";
 import AvailabilityDateTimeModal from "../components/AvailabilityDateTimeModal";
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
@@ -29,51 +30,66 @@ interface Vehicle {
   id?: string;
 }
 
+interface ApiCar {
+  _id: string;
+  carName: string;
+  carModel: string;
+  carNumber: string;
+  pricePerHour: number;
+  transmission?: string;
+  fuelType?: string;
+  seatingCapacity?: number;
+  location?: string;
+  carImages?: string[];
+  rating?: number;
+  isAvailable?: boolean;
+}
+
 const initialCars: Vehicle[] = [
-  {
-    name: "Hyundai Verna",
-    price: "250",
-    transmission: "Automatic",
-    fuel: "Petrol",
-    seats: "5 Seaters",
-    location: "Kakinada, Gandhi Nagar near Varnika Function Hall",
-    rating: "4.2",
-    available: false,
-    image: BlackCar,
-  },
-  {
-    name: "Honda City",
-    price: "300",
-    transmission: "Manual",
-    fuel: "Diesel",
-    seats: "5 Seaters",
-    location: "Rajahmundry, near RTC Complex",
-    rating: "4.5",
-    available: true,
-    image: BlackCar,
-  },
-  {
-    name: "Tata Nexon",
-    price: "280",
-    transmission: "Automatic",
-    fuel: "Petrol",
-    seats: "5 Seaters",
-    location: "Kakinada, Jagannaickpur",
-    rating: "4.3",
-    available: true,
-    image: BlackCar,
-  },
-  {
-    name: "Maruti Swift",
-    price: "220",
-    transmission: "Manual",
-    fuel: "Petrol",
-    seats: "5 Seaters",
-    location: "Vijayawada, Benz Circle",
-    rating: "4.1",
-    available: true,
-    image: BlackCar,
-  },
+  //{
+  //   name: "Hyundai Verna",
+  //   price: "250",
+  //   transmission: "Automatic",
+  //   fuel: "Petrol",
+  //   seats: "5 Seaters",
+  //   location: "Kakinada, Gandhi Nagar near Varnika Function Hall",
+  //   rating: "4.2",
+  //   available: false,
+  //   image: BlackCar,
+  // },
+  // {
+  //   name: "Honda City",
+  //   price: "300",
+  //   transmission: "Manual",
+  //   fuel: "Diesel",
+  //   seats: "5 Seaters",
+  //   location: "Rajahmundry, near RTC Complex",
+  //   rating: "4.5",
+  //   available: true,
+  //   image: BlackCar,
+  // },
+  // {
+  //   name: "Tata Nexon",
+  //   price: "280",
+  //   transmission: "Automatic",
+  //   fuel: "Petrol",
+  //   seats: "5 Seaters",
+  //   location: "Kakinada, Jagannaickpur",
+  //   rating: "4.3",
+  //   available: true,
+  //   image: BlackCar,
+  // },
+  // {
+  //   name: "Maruti Swift",
+  //   price: "220",
+  //   transmission: "Manual",
+  //   fuel: "Petrol",
+  //   seats: "5 Seaters",
+  //   location: "Vijayawada, Benz Circle",
+  //   rating: "4.1",
+  //   available: true,
+  //   image: BlackCar,
+  // },
 ];
 
 const ListedCars: React.FC = () => {
@@ -83,13 +99,67 @@ const ListedCars: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
 
-  const [cars, setCars] = useState<Vehicle[]>(initialCars);
+  const [cars, setCars] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
   const [selectedList, setSelectedList] = useState<"both" | "cars" | "bikes">("cars");
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilter, setShowFilter] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [deletingCarId, setDeletingCarId] = useState<string | null>(null);
+
+  // Fetch cars from API
+  useEffect(() => {
+    const fetchMyCars = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        // Get userId from environment or localStorage
+        const userId = process.env.REACT_APP_USER_ID || localStorage.getItem('userId') || '68fe269b6f13375a65dc587a';
+        
+        console.log('Fetching cars for userId:', userId);
+
+        const response = await apiService.car.getMyVehicles(userId);
+        console.log('My vehicles response:', response);
+
+        // Handle different response structures
+        const responseData = response.data || response;
+        const carsArray = Array.isArray(responseData)
+          ? responseData
+          : Array.isArray(responseData.data)
+          ? responseData.data
+          : responseData.cars || [];
+
+        // Transform API response to Vehicle interface
+        const formattedCars: Vehicle[] = carsArray.map((car: ApiCar) => ({
+          id: car._id,
+          name: `${car.carName} ${car.carModel}`,
+          price: car.pricePerHour?.toString() || "0",
+          transmission: car.transmission || "Manual",
+          fuel: car.fuelType || "Petrol",
+          seats: `${car.seatingCapacity || 5} Seaters`,
+          location: car.location || currentCity,
+          rating: car.rating?.toString() || "4.0",
+          available: car.isAvailable !== false,
+          image: car.carImages && car.carImages.length > 0 
+            ? car.carImages[0] 
+            : BlackCar,
+        }));
+
+        setCars(formattedCars);
+      } catch (err: any) {
+        console.error("Error fetching my cars:", err);
+        setError(err.message || "Failed to fetch your cars. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMyCars();
+  }, [currentCity]);
 
   // Combine default cars with user-listed cars and filter by location
   const allCars = useMemo(() => {
@@ -141,17 +211,43 @@ const ListedCars: React.FC = () => {
     setMenuOpenIndex(null);
   };
 
-  const handleDeleteVehicle = (vehicle: Vehicle) => {
-    const confirmDelete = window.confirm(`Delete ${vehicle.name}?`);
-    if (confirmDelete) {
+  const handleDeleteVehicle = async (vehicle: Vehicle) => {
+    if (!vehicle.id) {
+      alert('Cannot delete vehicle without ID');
+      return;
+    }
+
+    const confirmDelete = window.confirm(`Are you sure you want to delete ${vehicle.name}?`);
+    if (!confirmDelete) {
+      setMenuOpenIndex(null);
+      return;
+    }
+
+    try {
+      setDeletingCarId(vehicle.id);
+      console.log('Deleting car with ID:', vehicle.id);
+
+      // Call delete API
+      await apiService.car.deleteCarById(vehicle.id);
+      
+      console.log('Car deleted successfully');
+
+      // Remove from local state
+      setCars(cars.filter((car) => car.id !== vehicle.id));
+      
+      // Also remove from store if it exists there
       if (vehicle.id) {
         deleteCar(vehicle.id);
-      } else {
-        setCars(cars.filter((car) => car.name !== vehicle.name));
       }
-      alert(`${vehicle.name} deleted.`);
+
+      alert(`${vehicle.name} has been deleted successfully.`);
+    } catch (error: any) {
+      console.error('Error deleting car:', error);
+      alert(`Failed to delete ${vehicle.name}. ${error.message || 'Please try again.'}`);
+    } finally {
+      setDeletingCarId(null);
+      setMenuOpenIndex(null);
     }
-    setMenuOpenIndex(null);
   };
 
   const handleMenuToggle = (index: number) => {
@@ -237,18 +333,46 @@ const ListedCars: React.FC = () => {
           Listed Cars in {currentCity}
         </h2>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center h-60 text-gray-600">
+            <Loader2 className="animate-spin mr-2" size={24} />
+            <span>Loading your cars...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center text-red-500 mt-10">
+            <p>{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Listed Cars */}
-        <div className="flex flex-col gap-6">
-          {filteredCars.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-2">
-                No cars listed in {currentCity}
-              </p>
-              <p className="text-gray-400 text-sm">
-                Try changing your location to see more vehicles
-              </p>
-            </div>
-          ) : (
+        {!loading && !error && (
+          <div className="flex flex-col gap-6">
+            {filteredCars.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg mb-2">
+                  No cars listed yet
+                </p>
+                <p className="text-gray-400 text-sm">
+                  Start listing your cars to earn money!
+                </p>
+                <button
+                  onClick={() => navigate('/list-car')}
+                  className="mt-4 px-6 py-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white rounded-lg hover:opacity-90"
+                >
+                  List Your First Car
+                </button>
+              </div>
+            ) : (
             filteredCars.map((item, index) => (
               <div
                 key={index}
@@ -340,22 +464,26 @@ const ListedCars: React.FC = () => {
                               handleEdit(item);
                             }}
                             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            disabled={deletingCarId === item.id}
                           >
                             Edit
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate("/Car-Details", {
-                                state: { 
-                                  carData: item,
-                                  openDeleteModal: true
-                                },
-                              });
+                              handleDeleteVehicle(item);
                             }}
-                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50 flex items-center gap-2"
+                            disabled={deletingCarId === item.id}
                           >
-                            Delete
+                            {deletingCarId === item.id ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              'Delete'
+                            )}
                           </button>
                         </div>
                       )}
@@ -364,8 +492,9 @@ const ListedCars: React.FC = () => {
                 </div>
               </div>
             ))
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Calendar Modal */}
