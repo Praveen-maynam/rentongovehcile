@@ -11926,9 +11926,7 @@ const VehicleAvailabilityCalendar: React.FC<VehicleAvailabilityCalendarProps> = 
   onAvailabilityDeleted,
   onConfirm,
 }) => {
-  // ==========================================
-  // STATE MANAGEMENT
-  // ==========================================
+  
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);

@@ -253,6 +253,7 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit }) => {
                 seats: Number(v.Carseater) || 0,
                 location: `${v.pickupArea || ""}, ${v.pickupCity || ""}`,
                 rating: Number(v.averageRating) || 0,
+                distance:String(v.distance),
                 image:
                   v.carImages?.[0] ||
                   "https://via.placeholder.com/400x250?text=No+Image",

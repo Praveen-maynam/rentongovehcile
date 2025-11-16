@@ -169,6 +169,10 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
             <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 mt-0.5 flex-shrink-0" />
             <span className="text-gray-500 line-clamp-2">{vehicle.location}</span>
           </div>
+           <div className="flex items-start gap-2">
+            
+            <span className="text-gray-500 line-clamp-2">{vehicle.distance}</span>
+          </div>
         </div>
       </div>
     </div>
