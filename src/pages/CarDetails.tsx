@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // // import React, { useEffect, useState } from "react";
 // // import { useParams, useLocation, useNavigate } from "react-router-dom";
 // // import apiService from "../services/api.service";
@@ -1813,6 +1814,9 @@
 // };
 
 // export default CarDetails;
+=======
+
+>>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
 
 
 

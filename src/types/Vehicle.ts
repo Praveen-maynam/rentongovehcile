@@ -17,6 +17,10 @@ export interface Vehicle {
   contactName?: string;
   contactNumber?: string;
   bikeNumber?: string;
+<<<<<<< HEAD
    distance: number;
+=======
+  distance?:string;
+>>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
   unavailableDates?: { startDate: string; endDate: string; startTime: string; endTime: string }[];
 }

@@ -170,6 +170,10 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
             <p className="text-sm text-gray-600">{vehicle.distance} km away</p>
 
           </div>
+           <div className="flex items-start gap-2">
+            
+            <span className="text-gray-500 line-clamp-2">{vehicle.distance}</span>
+          </div>
         </div>
       </div>
     </div>

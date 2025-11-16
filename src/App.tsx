@@ -301,8 +301,6 @@
  
 // export default App;import React from "react";
 
-
-
 import { Routes, Route } from "react-router-dom";
  
 // Layout
@@ -323,24 +321,26 @@ import NotificationPage from "./features/profile/pages/notification";
 import ProfilePage from "./features/profile/pages/profile";
 import MyProfile from "./pages/MyProfile";
 import MyBookings from "./pages/MyBookings";
-// import MyListingBookings from "./pages/MyListingBookings";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AboutUs from "./pages/AboutUs";
 import Help from "./pages/Help";
 import Feedback from "./pages/Feedback";
 import Calendar from "./pages/Calendar";
-
 import CalendarScreen from "./pages/CalendarScreen";
 import CarDetails from "./pages/CarDetails";
-import BookingHistory from "./pages/BookingHistory";
+import BikeDetails from "./pages/BikeDetails";
 import ListedCars from "./pages/ListedCars";
 import ListedBikes from "./pages/ListedBikes";
+<<<<<<< HEAD
 import BikeDetails from "./pages/BikeDetails";
 import Notifications from "pages/Notifications";
 
 // import VehicleReviews from './pages/VehicleReviews';
 
 
+=======
+import BookingDetail from "pages/BookingHistory";
+>>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
 const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -363,15 +363,12 @@ const App: React.FC = () => {
         <Route path="/nearby-cars" element={<Nearbycars />} />
         <Route path="/nearby-bikes" element={<NearbyBikes />} />
         
-        {/* Vehicle Details - ✅ FIXED: Changed from /vehicle/:id to /vehicle-details/:id */}
+        {/* Vehicle Details */}
         <Route path="/vehicle-details/:id" element={<VehicleDetailsPage />} />
         
         {/* Edit Vehicle Details */}
         <Route path="/Car-Details/:carId" element={<CarDetails />} />
-
-
-       <Route path="/Bike-Details/:bikeId" element={<BikeDetails />} />
-
+        <Route path="/Bike-Details/:bikeId" element={<BikeDetails />} />
 
         {/* Vehicle History & Booking */}
         <Route path="/vehicle-history/:vehicleName" element={<VehicleHistory />} />
@@ -379,13 +376,12 @@ const App: React.FC = () => {
         
         {/* Booking */}
         <Route path="/book-now/:id" element={<BookNow />} />
-        <Route path="/booking-history/:vehicleId" element={<BookingHistory />} />
+        <Route path="/booking-detail/:vehicleId" element={<BookingDetail />} />
         
         {/* Profile & User */}
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/my-profile" element={<MyProfile />} />
         <Route path="/mybookings" element={<MyBookings />} />
-        {/* <Route path="/my-listing-bookings" element={<MyListingBookings />} /> */}
         
         {/* Notifications & Feedback */}
         <Route path="/notifications" element={<NotificationPage />} />

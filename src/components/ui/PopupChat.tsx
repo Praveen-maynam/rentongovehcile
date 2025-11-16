@@ -14,13 +14,19 @@
 //   onClose: () => void;
 //   ownerName?: string;
 //   ownerAvatar?: string;
+<<<<<<< HEAD
 //     recipientName: string;     // ✅ ADD THIS
 //   recipientImage: string;    // ✅ ADD THIS
+=======
+>>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
 // }
 // const PopupChat: React.FC<PopupChatProps> = ({
 //   isOpen,
 //   onClose,
+<<<<<<< HEAD
   
+=======
+>>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
 //   ownerName = "Manoj Kumar",
 //   ownerAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Manoj"
 // }) => {
@@ -254,8 +260,11 @@
 
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
 import React, { useEffect, useRef, useState, ChangeEvent } from "react";
 import io, { Socket } from "socket.io-client";
 
@@ -401,6 +410,7 @@ const PopupChat: React.FC<PopupChatProps> = ({ userId, receiverId, bookingId, ap
   );
 };
 
+<<<<<<< HEAD
 export default PopupChat;
 
 
@@ -419,3 +429,6 @@ export default PopupChat;
 //   bookingId="690ca08de524c979c76104d6"
 //   apiUrl="http://3.110.122.127:3000"
 // /> */}
+=======
+export default PopupChat;
+>>>>>>> 4b041fca879f812eed351c473026be6b8721efa3

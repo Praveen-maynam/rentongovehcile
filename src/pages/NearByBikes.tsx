@@ -249,6 +249,7 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit }) => {
                 seats: 2,
                 location: `${v.pickupArea || ""}, ${v.pickupCity || ""}`,
                 rating: Number(v.averageRating) || 0,
+                distance:String(v.distance || 0),
                 image:
                   v.bikeImages?.[0] ||
                   "https://via.placeholder.com/400x250?text=No+Image",

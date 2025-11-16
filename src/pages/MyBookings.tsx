@@ -1094,6 +1094,7 @@
 
 
 
+<<<<<<< HEAD
 
 
 
@@ -1102,6 +1103,8 @@
 
  
   
+=======
+>>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, RefreshCw, X } from "lucide-react";
@@ -1109,9 +1112,9 @@ import { useBookingStore } from "../store/booking.store";
 import { Booking } from "../types/booking";
 import Auto from "../assets/images/Auto.png";
 import apiService from "../services/api.service";
- 
+
 type VehicleType = "Car" | "Auto" | "Bike";
- 
+
 const mapVehicleType = (type: string | undefined): VehicleType => {
   if (!type) return "Car";
   const lower = type.toLowerCase();
@@ -1119,35 +1122,54 @@ const mapVehicleType = (type: string | undefined): VehicleType => {
   if (lower.includes("bike")) return "Bike";
   return "Car";
 };
- 
-interface ApiBooking {
-  _id: string;
-  userId: string;
-  vechileType: string;
-  VechileId: string;
-  pricePerKm: string;
-  contactNumber: string;
-  contactName: string;
-  latitude: string;
-  longitude: string;
-  FromDate: string;
-  ToDate: string;
-  FromTime: string;
-  ToTime: string;
-  totalHours: string;
-  totalPrice: string;
-  status?: "Pending" | "Confirmed" | "Cancelled" | "Rejected" | "Completed" | "Picked";
-  rejectionReason?: string;
-  createdAt?: string;
-  updatedAt?: string;
+
+// ✅ FIXED: Match the actual API response structure
+interface ApiBookingResponse {
+  booking: {
+    _id: string;
+    userId: string;
+    vechileType: string;
+    VechileId: string;
+    pricePerKm: number;
+    pricePerHour: number;
+    pricePerDay: number;
+    contactNumber: string;
+    contactName: string;
+    latitude: string;
+    longitude: string;
+    FromDate: string;
+    ToDate: string;
+    FromTime: string;
+    ToTime: string;
+    totalHours: number;
+    totalPrice: number;
+    status?: "Pending" | "Confirmed" | "Cancelled" | "Rejected" | "Completed" | "Picked";
+    rejectionReason?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  user: any;
+  vehicle: {
+    _id: string;
+    CarName?: string;
+    carName?: string;
+    bikeName?: string;
+    CarModel?: string;
+    bikeModel?: string;
+    carImages?: string[];
+    bikeImages?: string[];
+    pickupCity?: string;
+  };
+  reviews: any[];
 }
- 
+
 interface GetBookingsResponse {
-  success: boolean;
-  message: string;
-  bookings: ApiBooking[];
+  success?: boolean;
+  message?: string;
+  count?: number;
+  data: ApiBookingResponse[]; // ✅ Changed from bookings to data
 }
- 
+
 const MyBookings: React.FC = () => {
   const navigate = useNavigate();
   const { bookings, setBookings } = useBookingStore();
@@ -1157,124 +1179,108 @@ const MyBookings: React.FC = () => {
   const [apiError, setApiError] = useState<string>("");
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
-  const [rejectedBooking, setRejectedBooking] = useState<ApiBooking | null>(null);
-const fetchVehicleDetails = async (vehicleId: string, vehicleType: string) => {
-  try {
-    console.log("🚗 Fetching vehicle details", { vehicleId, vehicleType });
- 
-    let response;
-    const type = vehicleType?.toLowerCase();
- 
-    if (type === "car") {
-      response = await apiService.car.getCarById(vehicleId);
-    } else if (type === "bike") {
-      response = await apiService.bike.getBikeById(vehicleId);
- 
-    } else {
-      console.warn("❌ Unknown vehicle type:", vehicleType);
-      return null;
-    }
- 
-    console.log("✅ API Response:", response);
- 
-    const vehicleData = response?.data || response; // handle both axios and custom responses
-    if (!vehicleData) {
-      console.warn("⚠️ No vehicle data found in response.");
-      return null;
-    }
- 
-const name =
-  vehicleData.CarName ||
-  vehicleData.carName ||
-  vehicleData.BikeName ||
-  vehicleData.bikeName ||
-  vehicleData.AutoName ||
-  vehicleData.autoName ||
-  vehicleData.name ||
-  "Unknown Vehicle";
- 
- 
-    const image =
-      (vehicleData.carImages && vehicleData.carImages[0]) ||
-      (vehicleData.bikeImages && vehicleData.bikeImages[0]) ||
-      (vehicleData.autoImages && vehicleData.autoImages[0]) ||
-      vehicleData.image ||
-      Auto;
- 
-    console.log("✅ Normalized Vehicle:", { name, image });
- 
-    return { name, image };
-  } catch (error) {
-    console.error("❌ Vehicle fetch error:", error);
-    return null;
-  }
-};
- 
- 
+  const [rejectedBooking, setRejectedBooking] = useState<ApiBookingResponse["booking"] | null>(null);
+  const [bookingsDataCache, setBookingsDataCache] = useState<ApiBookingResponse[]>([]);
+
   useEffect(() => {
     fetchUserBookings();
     const interval = setInterval(() => fetchUserBookings(true), 60000);
     return () => clearInterval(interval);
   }, []);
- 
+
   const fetchUserBookings = async (silent = false, retryCount = 0) => {
     if (!silent) setIsLoadingBookings(true);
     setIsRefreshing(true);
     setApiError("");
- 
+
     const MAX_RETRIES = 2;
     const RETRY_DELAY = 1000;
+    
     try {
-      const userId = localStorage.getItem("userId") || "68fe269b6f13375a65dc587a";
+      const userId = localStorage.getItem("userId") || "690308d03a633b650dbc7e61";
+      console.log("🔍 Fetching bookings for user:", userId);
+      
       const response = await apiService.booking.getAllBookings(userId);
-      const data: GetBookingsResponse = response.data
-        ? response
-        : { success: true, message: "Success", bookings: response };
- 
-      if (data.success && data.bookings?.length) {
-        const convertedBookings: Booking[] = await Promise.all(
-          data.bookings.map(async (apiBooking) => {
-            const newStatus = mapApiStatus(apiBooking.status);
-            const existingBooking = bookings.find((b) => b.id === apiBooking._id);
-            if (
-              existingBooking &&
-              existingBooking.status !== "Cancelled" &&
-              newStatus === "Cancelled" &&
-              apiBooking.status === "Rejected"
-            ) {
-              setRejectedBooking(apiBooking);
-              setShowRejectionModal(true);
-            }
- 
-            const vehicleData = await fetchVehicleDetails(apiBooking.VechileId, apiBooking.vechileType);
-            return {
-              id: apiBooking._id,
-              vehicleId: apiBooking.VechileId,
-              vehicleName: vehicleData?.name || `${apiBooking.vechileType} Vehicle`,
-              vehicleImage: vehicleData?.image || Auto,
-              vehicleType: mapVehicleType(apiBooking.vechileType),
-              customerName: apiBooking.contactName,
-              bookingDate: new Date(apiBooking.createdAt || apiBooking.FromDate).toLocaleDateString(),
-              bookingTime: new Date(apiBooking.createdAt || apiBooking.FromDate).toLocaleTimeString(),
-              startDate: formatApiDate(apiBooking.FromDate),
-              startTime: formatApiTime(apiBooking.FromTime),
-              endDate: formatApiDate(apiBooking.ToDate),
-              endTime: formatApiTime(apiBooking.ToTime),
-              modelNo: apiBooking._id.slice(0, 10).toUpperCase(),
-              status: newStatus,
-              price:
-                Number(apiBooking.totalPrice) / Number(apiBooking.totalHours) ||
-                Number(apiBooking.pricePerKm) ||
-                0,
-            };
-          })
-        );
+      console.log("📦 Raw API Response:", response);
+
+      // ✅ FIXED: Handle the actual API response structure
+      const bookingsData: ApiBookingResponse[] = response.data || response;
+      
+      console.log("📦 Extracted bookings data:", bookingsData);
+
+      if (bookingsData && bookingsData.length > 0) {
+        // ✅ Cache the full API response for later use
+        setBookingsDataCache(bookingsData);
+        
+        const convertedBookings: Booking[] = bookingsData.map((item) => {
+          const apiBooking = item.booking;
+          const vehicle = item.vehicle;
+          
+          console.log("🚗 Processing booking:", {
+            bookingId: apiBooking._id,
+            vehicleId: apiBooking.VechileId,
+            vehicle: vehicle
+          });
+
+          const newStatus = mapApiStatus(apiBooking.status);
+          
+          // Check if booking was rejected
+          const existingBooking = bookings.find((b) => b.id === apiBooking._id);
+          if (
+            existingBooking &&
+            existingBooking.status !== "Cancelled" &&
+            newStatus === "Cancelled" &&
+            apiBooking.status === "Rejected"
+          ) {
+            setRejectedBooking(apiBooking);
+            setShowRejectionModal(true);
+          }
+
+          // ✅ Use vehicle data from the response
+          const vehicleName = 
+            vehicle?.CarName || 
+            vehicle?.carName || 
+            vehicle?.bikeName || 
+            `${apiBooking.vechileType} Vehicle`;
+          
+          const vehicleImage = 
+            (vehicle?.carImages && vehicle.carImages[0]) ||
+            (vehicle?.bikeImages && vehicle.bikeImages[0]) ||
+            Auto;
+
+          return {
+            id: apiBooking._id,
+            vehicleId: apiBooking.VechileId,
+            vehicleName: vehicleName,
+            vehicleImage: vehicleImage,
+            vehicleType: mapVehicleType(apiBooking.vechileType),
+            customerName: apiBooking.contactName,
+            bookingDate: new Date(apiBooking.createdAt || apiBooking.FromDate).toLocaleDateString(),
+            bookingTime: new Date(apiBooking.createdAt || apiBooking.FromDate).toLocaleTimeString(),
+            startDate: formatApiDate(apiBooking.FromDate),
+            startTime: formatApiTime(apiBooking.FromTime),
+            endDate: formatApiDate(apiBooking.ToDate),
+            endTime: formatApiTime(apiBooking.ToTime),
+            modelNo: apiBooking._id.slice(0, 10).toUpperCase(),
+            status: newStatus,
+            price:
+              Number(apiBooking.pricePerHour) ||
+              Number(apiBooking.pricePerKm) ||
+              Number(apiBooking.pricePerDay) ||
+              (Number(apiBooking.totalPrice) / Number(apiBooking.totalHours)) ||
+              0,
+          };
+        });
+
+        console.log("✅ Converted bookings:", convertedBookings);
         setBookings(convertedBookings);
         setLastSyncTime(new Date());
       } else {
         setApiError("No bookings found.");
       }
     } catch (error: any) {
+      console.error("❌ Error fetching bookings:", error);
+      
       if (retryCount < MAX_RETRIES) {
         await new Promise((res) => setTimeout(res, RETRY_DELAY * Math.pow(2, retryCount)));
         return fetchUserBookings(silent, retryCount + 1);
@@ -1285,7 +1291,7 @@ const name =
       setIsRefreshing(false);
     }
   };
- 
+
   const mapApiStatus = (apiStatus?: string): "Booked" | "Cancelled" | "Picked" | "Completed" => {
     switch (apiStatus) {
       case "Confirmed":
@@ -1302,7 +1308,7 @@ const name =
         return "Booked";
     }
   };
- 
+
   const formatApiDate = (dateStr: string): string => {
     try {
       const date = new Date(dateStr.trim());
@@ -1313,7 +1319,7 @@ const name =
       return dateStr;
     }
   };
- 
+
   const formatApiTime = (timeStr: string): string => {
     try {
       const [hours, minutes] = timeStr.split(".");
@@ -1326,21 +1332,62 @@ const name =
       return timeStr;
     }
   };
- 
-const handleBookingClick = (booking: Booking) => {
-  if (!booking.vehicleId) return alert("Vehicle details not found.");
- 
-  const type = booking.vehicleType.toLowerCase(); // "car", "bike", "auto"
- 
-  navigate(`/booking-history/${booking.vehicleId}`, {
-    state: { booking, vehicleType: type, openContact: false },
-  });
-};
- 
- 
- 
+
+  const handleBookingClick = (booking: Booking) => {
+    console.log("🖱️ Booking clicked:", booking);
+    
+    if (!booking.vehicleId) {
+      alert("Vehicle details not found.");
+      return;
+    }
+
+    const type = booking.vehicleType.toLowerCase();
+
+    // ✅ Find the full vehicle data from the bookingsData cache
+    const bookingResponse = bookingsDataCache.find(
+      item => item.booking._id === booking.id
+    );
+
+    const vehicleData = bookingResponse?.vehicle;
+
+    console.log("🚗 Navigate to booking detail:", {
+      bookingId: booking.id,
+      vehicleId: booking.vehicleId,
+      vehicleType: type,
+      vehicleData: vehicleData,
+      path: `/booking-detail/${booking.vehicleId}`
+    });
+
+    try {
+      // ✅ Navigate to booking detail with FULL vehicle data
+      navigate(`/booking-detail/${booking.vehicleId}`, {
+        state: { 
+          booking, 
+          vehicleType: type, 
+          openContact: false,
+          vehicleData: vehicleData || {
+            _id: booking.vehicleId,
+            vehicleType: type,
+            bikeName: booking.vehicleName,
+            carName: booking.vehicleName,
+            bikeImages: booking.vehicleImage ? [booking.vehicleImage] : [],
+            carImages: booking.vehicleImage ? [booking.vehicleImage] : [],
+            pricePerKm: booking.price,
+            RentPerHour: booking.price
+          }
+        },
+      });
+      
+      console.log("✅ Navigation initiated successfully");
+    } catch (error) {
+      console.error("❌ Navigation error:", error);
+    }
+  };
+
   const handleRefresh = () => fetchUserBookings();
+
  
+
   const getStatusBadge = (status: string, isRejected = false) => {
     const base = "inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm";
     if (isRejected || status === "Cancelled")
@@ -1353,7 +1400,7 @@ const handleBookingClick = (booking: Booking) => {
       return <div className={`${base} bg-blue-100 text-blue-700`}>✔️ Completed</div>;
     return <div className={`${base} bg-gray-100 text-gray-700`}>{status}</div>;
   };
- 
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -1373,12 +1420,19 @@ const handleBookingClick = (booking: Booking) => {
           </button>
         </div>
       </div>
- 
+
       {/* Loading */}
       {isLoadingBookings && (
         <div className="flex items-center justify-center py-12 text-gray-600">Loading your bookings...</div>
       )}
- 
+
+      {/* Error Message */}
+      {apiError && !isLoadingBookings && (
+        <div className="max-w-4xl mx-auto mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          {apiError}
+        </div>
+      )}
+
       {/* Bookings List */}
       {!isLoadingBookings && (
         <div className="max-w-4xl ml-0 p-4 space-y-3">
@@ -1398,6 +1452,9 @@ const handleBookingClick = (booking: Booking) => {
                     alt={booking.vehicleName}
                     style={{ width: "277px", height: "290px" }}
                     className="object-cover rounded-lg"
+                    onError={(e) => {
+                      e.currentTarget.src = Auto;
+                    }}
                   />
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-3">
@@ -1456,7 +1513,7 @@ const handleBookingClick = (booking: Booking) => {
           )}
         </div>
       )}
- 
+
       {/* Rejection Modal */}
       {showRejectionModal && rejectedBooking && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1517,7 +1574,12 @@ const handleBookingClick = (booking: Booking) => {
     </div>
   );
 };
+<<<<<<< HEAD
  
 export default MyBookings;
  
  
+=======
+
+export default MyBookings;
+>>>>>>> 4b041fca879f812eed351c473026be6b8721efa3

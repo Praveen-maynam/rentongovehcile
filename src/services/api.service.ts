@@ -1149,9 +1149,19 @@ export const bookingAPI = {
     return apiClient.put(`/bookings/${bookingId}`, bookingData);
   },
  
-  // Delete booking by ID
+   // Get pending bookings for an owner
+  getPendingBookingsOfOwner: async (ownerId: string) => {
+    return apiClient.get(`/getPendingBookingsOfOwner/${ownerId}`);
+  },
+
+  // Confirm a booking
+  confirmBooking: async (bookingId: string) => {
+    return apiClient.post(`/confirmBooking/${bookingId}/conform`);
+  },
+
+  // Delete booking is already there, just make sure it exists
   deleteBooking: async (bookingId: string) => {
-    return apiClient.delete(`/bookings/${bookingId}`);
+    return apiClient.delete(`/deleteBooking/${bookingId}`);
   },
  
   // Get bookings for vehicle owner
@@ -1159,7 +1169,7 @@ export const bookingAPI = {
     return apiClient.get(`/bookings/owner/${ownerId}`);
   },
 };
- 
+  
 // ==================== AVAILABILITY APIs ====================
 
 export const availabilityAPI = {
