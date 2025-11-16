@@ -1,4 +1,4 @@
-
+ 
 // import React, { useState } from "react";
 // import { Search } from "lucide-react";
 // import VehicleSection from "../components/VehicleSection";
@@ -9,10 +9,11 @@
 // import Filter from "../assets/icons/FilterLogo.png";
 // import NearbyCars from "./NearByCars";
 // import NearbyBikes from "./NearByBikes";
-
-
+//  import { useNavigate } from "react-router-dom";
+ 
 // const Rental: React.FC = (FeedbackModal) => {
 //   const [isFilterOpen, setIsFilterOpen] = useState(false);
+//   const navigate = useNavigate();
 //   const [searchText, setSearchText] = useState("");
 //   const [startDate, setStartDate] = useState<string>(
 //     new Date().toISOString().split("T")[0]
@@ -20,7 +21,7 @@
 //   const [endDate, setEndDate] = useState<string>(
 //     new Date().toISOString().split("T")[0]
 //   );
-
+ 
 //   // ✅ Filter vehicles by search text
 //   const filterVehicles = (list: typeof vehicles) =>
 //     list.filter(
@@ -28,10 +29,11 @@
 //         v.name.toLowerCase().includes(searchText.toLowerCase()) ||
 //         v.location?.toLowerCase().includes(searchText.toLowerCase())
 //     );
-
-//   const cars = filterVehicles(vehicles.filter((v) => v.type === "car"));
+ 
+//   const cars = filterVehicles(vehicles.filter((v) => v.type === "Car"));
 //   // const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
-//   const bikes = filterVehicles(vehicles.filter((v) => v.type === "bike"));
+//   const bikes = filterVehicles(vehicles.filter((v) => v.type === "Bike"));
+ 
 
 //   return (
 //     <div className="bg-gray-50 min-h-screen flex flex-col">
@@ -60,8 +62,6 @@
 //               minDate={startDate}
 //             />
 //           </div>
-        
-         
 //         </div>
 
 //         {/* 🔹 Search & Filter */}
@@ -77,7 +77,6 @@
 //               onChange={(e) => setSearchText(e.target.value)}
 //             />
 //           </div>
-        
 //           <button
 //             onClick={() => setIsFilterOpen(true)}
 //             className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
@@ -89,16 +88,35 @@
 //       </div>
 
 //       {/* 🚗 Cars Section */}
-//       {/* <VehicleSection title="Looking for an Car?" vehicles={cars} type="car" /> */} <NearbyCars />
-//       {/* 🛺 Autos Section */}
-//       {/* <VehicleSection title="Looking for an Auto?" vehicles={autos} type="auto" /> */}
+//       <div className="px-6">
+    
+//         <div className="flex justify-end mt-[-10px] mb-6">
+//           <button
+//             onClick={() => navigate("/nearby-cars")}
+//             className="text-[#0B0E92] font-semibold hover:underline"
+//           >
+//             View More →
+//           </button>
+//         </div>
+//            <NearbyCars/>
+//       </div>
 
 //       {/* 🏍 Bikes Section */}
-//       {/* <VehicleSection title="Looking for a Bike?" vehicles={bikes} type="bike" /> */}
-//        <NearbyBikes/>
+//       <div className="px-6">
+       
+//         <div className="flex justify-end mt-[-10px] mb-6">
+//           <button
+//             onClick={() => navigate("/nearby-bikes")}
+//             className="text-[#0B0E92] font-semibold hover:underline"
+//           >
+//             View More →
+//           </button>
+//         </div>
+//         <NearbyBikes/>
+//       </div>
+
 //       {/* 🔹 Filter Modal */}
 //       {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
-      
 //     </div>
 //   );
 // };
@@ -120,8 +138,7 @@ import Filter from "../assets/icons/FilterLogo.png";
 import NearbyCars from "./NearByCars";
 import NearbyBikes from "./NearByBikes";
  import { useNavigate } from "react-router-dom";
- import Register  from "./Register";
- import Call from "../components/ui/call";
+ 
 const Rental: React.FC = (FeedbackModal) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const navigate = useNavigate();
@@ -141,11 +158,11 @@ const Rental: React.FC = (FeedbackModal) => {
         v.location?.toLowerCase().includes(searchText.toLowerCase())
     );
  
-  const cars = filterVehicles(vehicles.filter((v) => v.type === "car"));
+  const cars = filterVehicles(vehicles.filter((v) => v.type === "Car"));
   // const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
-  const bikes = filterVehicles(vehicles.filter((v) => v.type === "bike"));
+  const bikes = filterVehicles(vehicles.filter((v) => v.type === "Bike"));
  
- 
+
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
       {/* 🔹 Promo Slides */}
@@ -188,7 +205,6 @@ const Rental: React.FC = (FeedbackModal) => {
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
- 
           <button
             onClick={() => setIsFilterOpen(true)}
             className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
@@ -198,43 +214,38 @@ const Rental: React.FC = (FeedbackModal) => {
           </button>
         </div>
       </div>
- 
-      {/* 🚗 Cars Section */}
-      <div className="px-6">
-   
-        <div className="flex justify-end mt-[-10px] mb-6">
-          <button
-            onClick={() => navigate("/nearby-cars")}
-            className="text-[#0B0E92] font-semibold hover:underline"
-          >
-            View More →
-          </button>
-        </div>
-           <NearbyCars/>
-      </div>
- 
-      {/* 🏍 Bikes Section */}
-      <div className="px-6">
-       
-        <div className="flex justify-end mt-[-10px] mb-6">
-          <button
-            onClick={() => navigate("/nearby-bikes")}
-            className="text-[#0B0E92] font-semibold hover:underline"
-          >
-            View More →
-          </button>
-        </div>
-        <NearbyBikes/>
-        <Call userId="69189b3a06702f6b9f7b40b4" receiverId="690c9b5ce524c979c761040c" /> 
-                              <Register/>
-      </div>
-   
- 
+
+     {/* 🚗 Cars Section */}
+<div className="px-6">
+  <div className="flex justify-end mt-[-10px] mb-6">
+    <button
+      onClick={() => navigate("/nearby-cars")}
+      className="text-[#0B0E92] font-semibold hover:underline"
+    >
+      View More →
+    </button>
+  </div>
+  <NearbyCars limit={4} />
+</div>
+
+{/* 🏍 Bikes Section */}
+<div className="px-6">
+  <div className="flex justify-end mt-[-10px] mb-6">
+    <button
+      onClick={() => navigate("/nearby-bikes")}
+      className="text-[#0B0E92] font-semibold hover:underline"
+    >
+      View More →
+    </button>
+  </div>
+  <NearbyBikes limit={4} />
+</div>
+
+
       {/* 🔹 Filter Modal */}
       {isFilterOpen && <FilterCard onApply={() => setIsFilterOpen(false)} />}
     </div>
   );
 };
- 
+
 export default Rental;
- 

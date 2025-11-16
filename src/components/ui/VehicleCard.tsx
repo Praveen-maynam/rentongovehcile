@@ -85,10 +85,7 @@
 
 
 
-
-
-
-
+ 
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin } from "lucide-react";
@@ -97,17 +94,17 @@ import { useReviewStore } from "../../store/review.store";
 import AutomaticLogo from "../../assets/icons/automatic.jpeg";
 import DriverLogo from "../../assets/icons/seats.jpeg";
 import Petrol from "../../assets/icons/fuel.jpeg";
-
+ 
 interface VehicleCardProps {
   vehicle: Vehicle;
   onBook?: (vehicle: Vehicle) => void;
 }
-
+ 
 const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
   const navigate = useNavigate();
   const { getAverageRating } = useReviewStore();
   const rating = getAverageRating(vehicle.id);
-
+ 
  const handleCardClick = () => {
   if (onBook) {
     onBook(vehicle);
@@ -117,7 +114,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
     });
   }
 };
-
+ 
   return (
     <div
       onClick={handleCardClick}
@@ -134,7 +131,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
           loading="lazy"
         />
       </div>
-
+ 
       {/* Vehicle Info */}
       <div className="flex flex-col p-3">
         {/* Name + Rating */}
@@ -146,13 +143,13 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
             ⭐ {rating.toFixed(1)}
           </span>
         </div>
-
+ 
         {/* Price */}
         <p className="text-gray-700 font-bold text-sm sm:text-base mb-2">
           ₹{vehicle.price}{" "}
           <span className="text-gray-500 font-normal text-xs sm:text-sm">/day</span>
         </p>
-
+ 
         {/* Specs */}
         <div className="flex flex-col gap-1.5 text-gray-600 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
@@ -170,12 +167,16 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
           <div className="flex items-start gap-2">
             <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 mt-0.5 flex-shrink-0" />
             <span className="text-gray-500 line-clamp-2">{vehicle.location}</span>
+            <p className="text-sm text-gray-600">{vehicle.distance} km away</p>
+
           </div>
         </div>
       </div>
     </div>
   );
 };
-
+ 
 export default VehicleCard;
-
+ 
+ 
+ 

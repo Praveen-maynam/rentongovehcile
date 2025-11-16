@@ -16348,7 +16348,6 @@
 //     : ratingDistribution;
 
 //   if (loadingCarData) {
-
 //     return (
 //       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
 //         <div className="text-center space-y-4 p-8">
@@ -17051,7 +17050,6 @@ import Automatic from "../assets/icons/AutomaticLogo.png";
 import Driver from "../assets/icons/DriverLogo.png";
 import Acicon from "../assets/icons/AutomaticLogo.png";
 import Petrol from "../assets/icons/Petrol.png";
-
 interface Review {
   _id: string;
   userId: string;
@@ -17100,7 +17098,6 @@ const BookNow: React.FC = () => {
   const [apiCarData, setApiCarData] = useState<any>(null);
   const [loadingCarData, setLoadingCarData] = useState(true);
   const [carDataError, setCarDataError] = useState("");
-
   const [isDateTimeModalOpen, setIsDateTimeModalOpen] = useState(false);
   const [showContactButtons, setShowContactButtons] = useState(false);
   const [showWaitingPopup, setShowWaitingPopup] = useState(false);
@@ -17889,6 +17886,78 @@ const BookNow: React.FC = () => {
   // ============================================================================
   // DISPLAY CALCULATIONS
   // ============================================================================
+//   const vehicleReviews = getReviewsByVehicleId(currentVehicle?.id || '');
+//   const averageRating = getAverageRating(currentVehicle?.id || '');
+//   const totalReviews = getTotalReviewCount(currentVehicle?.id || '');
+//   const ratingDistribution = getRatingDistribution(currentVehicle?.id || '');
+
+//   const displayReviews = apiReviews.length > 0 ? apiReviews : vehicleReviews;
+  
+//   const displayAverageRating = apiAverageRating > 0 
+//     ? apiAverageRating 
+//     : (apiReviews.length > 0 
+//         ? calculateAverageRating(apiReviews) 
+//         : averageRating);
+  
+//   const displayTotalReviews = apiReviews.length > 0 
+//     ? apiReviews.length 
+//     : totalReviews;
+  
+//   const displayRatingDistribution = apiReviews.length > 0 
+//     ? calculateRatingDistribution(apiReviews) 
+//     : ratingDistribution;
+
+  // ============================================================================
+  // RENDER: LOADING STATES
+  // ============================================================================
+  if (loadingCarData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+        <div className="text-center space-y-4 p-8">
+          <Loader2 className="w-16 h-16 animate-spin text-blue-600 mx-auto" />
+          <p className="text-xl text-gray-700 font-semibold">Loading vehicle details...</p>
+          <p className="text-sm text-gray-500">Please wait while we fetch the car information</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (carDataError && !vehicle) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-pink-50">
+        <div className="text-center space-y-4 p-8 bg-white rounded-2xl shadow-lg max-w-md">
+          <div className="text-6xl">❌</div>
+          <p className="text-xl text-red-600 font-bold">Error Loading Vehicle</p>
+          <p className="text-gray-600">{carDataError}</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:opacity-90 transition font-semibold"
+          >
+            ← Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!vehicle && !apiCarData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center space-y-4 p-8 bg-white rounded-2xl shadow-lg max-w-md">
+          <div className="text-6xl">🚗</div>
+          <p className="text-xl text-gray-700 font-bold">Vehicle Not Found</p>
+          <p className="text-gray-600">The vehicle you're looking for doesn't exist or has been removed.</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:opacity-90 transition font-semibold"
+          >
+            ← Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const vehicleReviews = getReviewsByVehicleId(currentVehicle?.id || '');
   const averageRating = getAverageRating(currentVehicle?.id || '');
   const totalReviews = getTotalReviewCount(currentVehicle?.id || '');
@@ -17910,9 +17979,6 @@ const BookNow: React.FC = () => {
     ? calculateRatingDistribution(apiReviews) 
     : ratingDistribution;
 
-  // ============================================================================
-  // RENDER: LOADING STATES
-  // ============================================================================
   if (loadingCarData) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
@@ -18649,6 +18715,9 @@ const BookNow: React.FC = () => {
         </div>
       )}
     </div>
+
+
+    
   );
 };
 

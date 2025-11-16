@@ -607,7 +607,6 @@ interface Booking {
   status: 'pending' | 'confirmed' | 'rejected';
   createdAt: string;
 }
-
 interface BookingContextType {
   pendingBookings: Booking[];
   showPopup: boolean;
@@ -616,7 +615,6 @@ interface BookingContextType {
   rejectBooking: (bookingId: string) => Promise<void>;
   closePopup: () => void;
 }
-
 // ============================================
 // 2. NOTIFICATION SOUND
 // ============================================
@@ -642,13 +640,11 @@ const playNotificationSound = () => {
 // 3. BOOKING CONTEXT
 // ============================================
 const BookingContext = createContext<BookingContextType | null>(null);
-
 export const useBookings = () => {
   const context = useContext(BookingContext);
   if (!context) throw new Error('useBookings must be used within BookingProvider');
   return context;
 };
-
 // ============================================
 // 4. BOOKING PROVIDER WITH POLLING
 // ============================================
@@ -696,27 +692,23 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setCurrentBooking(newBookings[0]);
         setShowPopup(true);
       }
-
       setPendingBookings(bookings);
       // setPreviousBookingIds(currentIds);
     } catch (error) {
       console.error('Error fetching bookings:', error);
     }
   }, [previousBookingIds]);
-
   // Polling effect
   useEffect(() => {
     fetchPendingBookings(); // Initial fetch
     const interval = setInterval(fetchPendingBookings, 20000); // Poll every 20 seconds
     return () => clearInterval(interval);
   }, [fetchPendingBookings]);
-
   // Accept booking
   const acceptBooking = async (bookingId: string) => {
     try {
       const myHeaders = new Headers();
       myHeaders.append('Authorization', `Bearer ${getAuthToken()}`);
-
       const response = await fetch(
         `http://3.110.122.127:3000/confirmBooking/${bookingId}/conform`,
         {
@@ -739,7 +731,6 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
       alert('Failed to accept booking. Please try again.');
     }
   };
-
   // Reject booking
   const rejectBooking = async (bookingId: string) => {
     try {
@@ -787,7 +778,6 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     </BookingContext.Provider>
   );
 };
-
 // ============================================
 // 5. BOOKING ACCEPTANCE COMPONENT (YOUR EXACT DESIGN)
 // ============================================
@@ -905,7 +895,6 @@ const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
             Reject
           </button>
         </div>
-
         {onClose && (
           <button
             onClick={onClose}
@@ -915,7 +904,6 @@ const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
             Close
           </button>
         )}
-
         <style>{`
           @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.96); }
@@ -930,7 +918,6 @@ const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
     </div>
   );
 };
-
 // ============================================
 // 6. WRAPPER COMPONENT WITH API INTEGRATION
 // ============================================
@@ -938,14 +925,12 @@ const BookingAcceptanceWithAPI: React.FC = () => {
   const { showPopup, currentBooking, acceptBooking, rejectBooking, closePopup } = useBookings();
   const [isAccepting, setIsAccepting] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
-
   const handleAccept = async () => {
     if (!currentBooking) return;
     setIsAccepting(true);
     await acceptBooking(currentBooking._id);
     setIsAccepting(false);
   };
-
   const handleReject = async () => {
     if (!currentBooking) return;
     setIsRejecting(true);
@@ -965,7 +950,6 @@ const BookingAcceptanceWithAPI: React.FC = () => {
     />
   );
 };
-
 // ============================================
 // 7. DEMO RENTAL PAGE
 // ============================================
@@ -1005,7 +989,6 @@ const RentalPage: React.FC = () => {
     </div>
   );
 };
-
 // ============================================
 // 8. DEMO APP (FOR TESTING ONLY)
 // ============================================

@@ -18,7 +18,7 @@ export const vehicles: Vehicle[] = [
 
     image: BlackCar,
 
-    type: "car",
+    type: "Car",
     location: "Kakinada",
     available: true,
       description: "Compact hatchback perfect for city rides."
@@ -34,7 +34,7 @@ export const vehicles: Vehicle[] = [
 
     image: BlackCar,
 
-    type: "car",
+    type: "Car",
     location:  "Hyderabad",
     available: true,
       description: "Compact hatchback perfect for city rides."
@@ -82,7 +82,7 @@ export const vehicles: Vehicle[] = [
 
     image: BlackCar,
 
-    type: "car",
+    type: "Car",
     location:  "Hyderabad",
     available: true,
       description: "Compact hatchback perfect for city rides."
@@ -98,7 +98,7 @@ export const vehicles: Vehicle[] = [
 
     image: BlackCar,
 
-    type: "car",
+    type: "Car",
     location: "Bangalore",
     available: true,
       description: "Compact hatchback perfect for city rides."
@@ -114,7 +114,7 @@ export const vehicles: Vehicle[] = [
 
     image: BlackCar,
 
-    type: "car",
+    type: "Car",
     location: "kakinada",
     available: true,
       description: "Compact hatchback perfect for city rides."
@@ -133,7 +133,7 @@ export const vehicles: Vehicle[] = [
    
     location: "Hyderabad",
     available: true,
-     type: "car",
+     type: "Car",
   },
 
   // {
@@ -203,7 +203,7 @@ export const vehicles: Vehicle[] = [
   rating: 4.6,
   available: true,
   image: Enfied, // ✅ corrected
-  type: "bike",
+  type: "Bike",
     description: "Compact hatchback perfect for city rides."
   },
   {
@@ -217,7 +217,7 @@ export const vehicles: Vehicle[] = [
     rating: 4.4,
     available: true,
     image: yamaha,
-    type: "bike",
+    type: "Bike",
       description: "Compact hatchback perfect for city rides."
   },
   {
@@ -231,7 +231,7 @@ export const vehicles: Vehicle[] = [
     rating: 4.3,
     available: true,
     image: TVS,
-    type: "bike",
+    type: "Bike",
       description: "Compact hatchback perfect for city rides."
   },
   {
@@ -245,7 +245,7 @@ export const vehicles: Vehicle[] = [
     rating: 4.6,
     available: true,
     image: Activa,
-    type: "bike",
+    type: "Bike",
       description: "Compact hatchback perfect for city rides."
   },
 ];

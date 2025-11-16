@@ -296,13 +296,7 @@ const Feedback = () => {
 
     for (let i = 1; i <= 5; i++) {
       if (i <= fullStars) {
-        stars.push(
-          <Star
-            key={i}
-            size={20}
-            className="fill-yellow-400 text-yellow-400"
-          />
-        );
+        stars.push(<Star key={i} size={20} className="fill-yellow-400 text-yellow-400" />);
       } else if (i === fullStars + 1 && hasHalfStar) {
         stars.push(
           <div key={i} className="relative inline-block">
@@ -363,7 +357,7 @@ const Feedback = () => {
         <h1 className="text-xl sm:text-2xl font-semibold mb-2 text-gray-800">
           We value your feedback
         </h1>
-        <p className="text-sm sm:text-base text-gray-600 mb-2">
+        <p className="text-base text-gray-600 mb-2">
           Rate your experience with {vehicleName}
         </p>
         <p className="text-xs text-gray-500 mb-6">
@@ -382,14 +376,11 @@ const Feedback = () => {
         <div className="flex items-center mb-6 justify-start">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
-              key={star}
               type="button"
-              onClick={() => setRating(star)}
-              className={`text-4xl sm:text-5xl ${
-                rating >= star ? "text-yellow-400" : "text-gray-300"
-              } transition-colors mx-0.5 sm:mx-1 hover:scale-110`}
+              className="absolute top-3 right-3 bg-blue-600 text-white w-10 h-10 flex items-center justify-center rounded-full shadow-md hover:bg-blue-700 transition"
+              onClick={() => setIsModalOpen(true)}
             >
-              ★
+              <Edit2 size={18} />
             </button>
           ))}
         </div>
@@ -417,8 +408,8 @@ const Feedback = () => {
 
         <div className="flex justify-center gap-3">
           <button
-            onClick={() => navigate("/notifications")}
-            className="bg-white border-2 border-gray-300 text-gray-700 text-sm font-semibold px-4 py-2 rounded-md hover:bg-gray-50 transition-all"
+            onClick={() => navigate(`/book-now/${vehicleId}`, { state: { vehicleType } })}
+            className="flex-1 bg-white border-2 border-gray-300 text-gray-700 font-semibold px-6 py-3 rounded-lg hover:bg-gray-50 transition-all"
           >
             Cancel
           </button>

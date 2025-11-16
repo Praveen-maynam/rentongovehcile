@@ -1,21 +1,22 @@
 export interface Vehicle {
   id: string;
-  name: string;
+  name?: string; // make optional
+  bikeName?: string; // ✅ add this line
   price: number;
   transmission: string;
   fuel: string;
-  seats?: number;        // ✅ made optional
+  seats?: number;
   location?: string;
   rating: number;
   available?: boolean;
   image: string;
   description?: string;
   model?: string;
-  cc?: string;           // ✅ added for bikes
-  type?: "car" | "bike";
+  cc?: string;
+  type?:"Car"|"Bike"|"Auto";
   contactName?: string;
   contactNumber?: string;
   bikeNumber?: string;
-    // ✅ Add this line:
+   distance: number;
   unavailableDates?: { startDate: string; endDate: string; startTime: string; endTime: string }[];
 }

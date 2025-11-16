@@ -461,10 +461,130 @@
 
 
 
+// import React, { useState, useEffect } from "react";
+// import { X, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+// import apiService from "services/api.service";
+
+// interface ProfileCardProps {
+//   onClose: () => void; // called when user clicks X
+// }
+
+// const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
+//   const [profile, setProfile] = useState({
+//     name: "Manoj kumar",
+//     phone: "+62651561565",
+//     email: "Manojkumar@gmail.com",
+//     image:
+//       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
+//   });
+
+//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const { name, value } = e.target;
+//     setProfile((prev) => ({ ...prev, [name]: value }));
+//   };
+
+//   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const file = e.target.files?.[0];
+//     if (file) {
+//       const imageUrl = URL.createObjectURL(file);
+//       setProfile((prev) => ({ ...prev, image: imageUrl }));
+//     }
+//   };
+
+//   const handleSave = () => {
+//     localStorage.setItem("userProfile", JSON.stringify(profile));
+//     alert("Profile updated successfully!");
+//   };
+
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+//       <div className="bg-white rounded-2xl shadow-md w-[580px] h-[450px] p-6 relative">
+//         {/* Close button */}
+//         <button
+//           onClick={onClose}
+//           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition"
+//         >
+//           <X size={22} />
+//         </button>
+
+//         <div className="flex flex-col items-center mb-6">
+//           <div className="relative">
+//             <img
+//               src={profile.image}
+//               alt="Profile"
+//               className="w-[96px] h-[87px] rounded-lg object-cover border"
+//             />
+//             <label
+//               htmlFor="profilePic"
+//               className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow cursor-pointer"
+//             >
+//               <input
+//                 id="profilePic"
+//                 type="file"
+//                 accept="image/*"
+//                 onChange={handleImageChange}
+//                 className="hidden"
+//               />
+//               <span className="text-gray-600">✎</span>
+//             </label>
+//           </div>
+//         </div>
+
+//         <div className="space-y-3">
+//           <div>
+//             <label className="text-sm text-gray-600">Full Name</label>
+//             <input
+//               type="text"
+//               name="name"
+//               value={profile.name}
+//               onChange={handleChange}
+//               className="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+//             />
+//           </div>
+
+//           <div>
+//             <label className="text-sm text-gray-600">Phone Number</label>
+//             <input
+//               type="tel"
+//               name="phone"
+//               value={profile.phone}
+//               onChange={handleChange}
+//               className="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+//             />
+//           </div>
+
+//           <div>
+//             <label className="text-sm text-gray-600">Email</label>
+//             <input
+//               type="email"
+//               name="email"
+//               value={profile.email}
+//               onChange={handleChange}
+//               className="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+//             />
+//           </div>
+
+//           <button
+//             onClick={handleSave}
+//             className="w-full mt-4 py-2 text-white rounded-lg bg-gradient-to-r from-indigo-700 to-blue-400 hover:opacity-90 transition"
+//           >
+//             Save
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ProfileCard;
+
+
+
+ 
 import React, { useState, useEffect } from "react";
 import { X, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import apiService from "services/api.service";
-
+ 
 interface ProfileCardProps {
   onClose: () => void;
 }
@@ -479,7 +599,18 @@ interface UserProfile {
   longitude?: string;
   fcmToken?: string;
 }
-
+ 
+interface UserProfile {
+  name: string;
+  phone: string;
+  email: string;
+  image: string;
+  googleId?: string;
+  latitude?: string;
+  longitude?: string;
+  fcmToken?: string;
+}
+ 
 const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
   const [profile, setProfile] = useState<UserProfile>({
     name: "",
@@ -500,7 +631,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
     loadProfileFromStorage();
     getCurrentLocation();
   }, []);
-
   const loadProfileFromStorage = () => {
     try {
       const savedProfile = localStorage.getItem("userProfile");
@@ -549,7 +679,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
       }));
       return;
     }
-
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -600,14 +729,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
     }
     return fcmToken;
   };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
     setSaveStatus("idle");
     setErrorMessage("");
   };
-
+ 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -616,45 +744,38 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
         setSaveStatus("error");
         return;
       }
-
       if (!file.type.startsWith("image/")) {
         setErrorMessage("Please upload a valid image file");
         setSaveStatus("error");
         return;
       }
-
       const imageUrl = URL.createObjectURL(file);
       setProfile((prev) => ({ ...prev, image: imageUrl }));
       localStorage.setItem("userProfileImage", imageUrl);
     }
   };
-
   const validateProfile = (): boolean => {
     if (!profile.name.trim()) {
       setErrorMessage("❌ Name is required");
       setSaveStatus("error");
       return false;
     }
-
     if (!profile.phone.trim()) {
       setErrorMessage("❌ Phone number is required");
       setSaveStatus("error");
       return false;
     }
-
     const phoneRegex = /^[+]?[\d\s-()]{10,}$/;
     if (!phoneRegex.test(profile.phone)) {
       setErrorMessage("❌ Invalid phone number (min 10 digits)");
       setSaveStatus("error");
       return false;
     }
-
     if (!profile.email.trim()) {
       setErrorMessage("❌ Email is required");
       setSaveStatus("error");
       return false;
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(profile.email)) {
       setErrorMessage("❌ Invalid email format");
@@ -678,7 +799,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
     const fcmToken = getOrCreateFCMToken();
     const latitude = profile.latitude || "17.512343";
     const longitude = profile.longitude || "78.500667";
-
     console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("🚀 SENDING TO BACKEND - POSTMAN FORMAT");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -693,7 +813,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
       fcmToken,
       platform: "web"
     });
-
     try {
       // Use centralized API service
       const result: any = await apiService.user.register({
@@ -722,7 +841,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
           latitude,
           longitude,
         };
-
         localStorage.setItem("userProfile", JSON.stringify(profileToSave));
         localStorage.setItem("userName", profile.name.trim());
         localStorage.setItem("userEmail", profile.email.trim());
@@ -771,7 +889,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
           latitude,
           longitude,
         };
-
         localStorage.setItem("userProfile", JSON.stringify(profileToSave));
         localStorage.setItem("userName", profile.name.trim());
         localStorage.setItem("userEmail", profile.email.trim());
@@ -809,12 +926,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
         >
           <X size={22} />
         </button>
-
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
           <p className="text-sm text-gray-500 mt-1">Update your personal information</p>
         </div>
-
         <div className="flex flex-col items-center mb-6">
           <div className="relative group">
             <img
@@ -857,7 +972,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
           </div>
           <p className="text-xs text-gray-500 mt-2">📷 Profile photo (saved locally only)</p>
         </div>
-
         <div className="space-y-4">
           <div>
             <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
@@ -873,7 +987,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
               className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
             />
           </div>
-
+ 
           <div>
             <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
               Phone Number <span className="text-red-500">*</span>
@@ -888,7 +1002,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
               className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
             />
           </div>
-
+ 
           <div>
             <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
               Email Address <span className="text-red-500">*</span>
@@ -903,7 +1017,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
               className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
             />
           </div>
-
           {errorMessage && saveStatus === "error" && (
             <div className="flex items-start gap-3 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
               <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
@@ -913,7 +1026,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
               </div>
             </div>
           )}
-
           {saveStatus === "success" && (
             <div className="flex items-start gap-3 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
               <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
@@ -923,7 +1035,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
               </div>
             </div>
           )}
-
           <button
             onClick={handleSave}
             disabled={isLoading}
@@ -942,7 +1053,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
             )}
           </button>
         </div>
-
         <div className="mt-5 pt-4 border-t border-gray-200 text-center space-y-1">
           <p className="text-xs text-gray-600 font-mono">
             Backend: <span className="text-indigo-600 font-semibold">{API_BASE_URL}/register</span>

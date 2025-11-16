@@ -12,7 +12,7 @@
 //   // const { autos } = useListedAutosStore();
 // const {bikes} =useListedBikesStore();
 //   // const myVehicleIds = [...cars.map((c) => c.id), ...autos.map((a) => a.id)];
-// const myVehicleIds=[...cars.map((c) => c.id), ... bikes.map((b)=> b.id)];
+// const myVehicleIds=[...cars.map((c) => c.id), ...bikes.map((b)=> b.id)];
 //   const myListingBookings = bookings.filter((b) =>
 //     myVehicleIds.includes(b.vehicleId)
 //   );

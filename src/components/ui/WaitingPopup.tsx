@@ -78,7 +78,6 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
   const total = resolvedInitial > 0 ? resolvedInitial : 30;
   const progress = Math.max(0, Math.min(1, remainingTime / total));
   const offset = circumference * (1 - progress);
-
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       {/* Backdrop blur */}
@@ -87,7 +86,6 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
         style={{ backdropFilter: "blur(12px)" }}
         onClick={onClose}
       />
-
       {/* Popup card (slide-up style but constrained width for desktop) */}
       <div
         className="relative w-full bg-white rounded-t-3xl shadow-2xl pb-8 pt-6 px-6"
@@ -102,7 +100,6 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
 
         {/* Grey line separator */}
         <div className="w-full h-px bg-gray-300 my-5" />
-
         {/* Progress bars (top mini indicators) */}
         <div className="flex justify-center gap-3 mb-8 px-8">
           {[0, 1, 2, 3].map((i) => (
