@@ -46,50 +46,7 @@ interface ApiCar {
 }
 
 const initialCars: Vehicle[] = [
-  //{
-  //   name: "Hyundai Verna",
-  //   price: "250",
-  //   transmission: "Automatic",
-  //   fuel: "Petrol",
-  //   seats: "5 Seaters",
-  //   location: "Kakinada, Gandhi Nagar near Varnika Function Hall",
-  //   rating: "4.2",
-  //   available: false,
-  //   image: BlackCar,
-  // },
-  // {
-  //   name: "Honda City",
-  //   price: "300",
-  //   transmission: "Manual",
-  //   fuel: "Diesel",
-  //   seats: "5 Seaters",
-  //   location: "Rajahmundry, near RTC Complex",
-  //   rating: "4.5",
-  //   available: true,
-  //   image: BlackCar,
-  // },
-  // {
-  //   name: "Tata Nexon",
-  //   price: "280",
-  //   transmission: "Automatic",
-  //   fuel: "Petrol",
-  //   seats: "5 Seaters",
-  //   location: "Kakinada, Jagannaickpur",
-  //   rating: "4.3",
-  //   available: true,
-  //   image: BlackCar,
-  // },
-  // {
-  //   name: "Maruti Swift",
-  //   price: "220",
-  //   transmission: "Manual",
-  //   fuel: "Petrol",
-  //   seats: "5 Seaters",
-  //   location: "Vijayawada, Benz Circle",
-  //   rating: "4.1",
-  //   available: true,
-  //   image: BlackCar,
-  // },
+  
 ];
 
 const ListedCars: React.FC = () => {
@@ -118,7 +75,7 @@ const ListedCars: React.FC = () => {
         setError("");
 
         // Get userId from environment or localStorage
-        const userId = process.env.REACT_APP_USER_ID || localStorage.getItem('userId') || '68fe269b6f13375a65dc587a';
+        const userId = process.env.REACT_APP_USER_ID || localStorage.getItem('userId') || '68f32259cea8a9fa88029262';
         
         console.log('Fetching cars for userId:', userId);
 
@@ -153,7 +110,7 @@ const ListedCars: React.FC = () => {
       } catch (err: any) {
         console.error("Error fetching my cars:", err);
         setError(err.message || "Failed to fetch your cars. Please try again.");
-      } finally {
+      } finally {        
         setLoading(false);
       }
     };
@@ -292,7 +249,7 @@ const ListedCars: React.FC = () => {
                 } else if (value === "bikes") {
                   navigate("/listed-bikes");
                 }
-                // Stay on current page if "cars" is selected
+           
               }}
             >
               <option value="both">Both </option>
@@ -538,3 +495,6 @@ const ListedCars: React.FC = () => {
 };
 
 export default ListedCars;
+
+
+

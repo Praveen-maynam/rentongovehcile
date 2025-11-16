@@ -3,7 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
-
+import Call from "../components/ui/call";
+import Register  from "./Register";
 /**
  * Single-file Car Listing + Address + Map Picker + GPS tracker
  * - Client-side geocoding: Nominatim (OpenStreetMap) (no API key)
@@ -307,7 +308,7 @@ export default function CarListingSingleFile() {
       if (file) formdata.append("carImages", file);
 
       // POST to your API
-      const res = await fetch("http://52.66.238.227:3000/createCar", {
+      const res = await fetch("http://3.110.122.127:3000/createCar", {
         method: "POST",
         body: formdata,
       });
@@ -419,6 +420,8 @@ export default function CarListingSingleFile() {
             <div className="w-full max-w-5xl h-[80vh] bg-white rounded overflow-hidden shadow-lg flex flex-col">
               <div className="flex items-center gap-3 p-3 border-b">
                 <button onClick={() => setMapOpen(false)} className="px-3 py-1 border rounded">Close</button>
+
+                
                 <div className="text-sm text-gray-700">Click map to place marker, drag marker to refine, or use GPS.</div>
                 <div className="ml-auto flex gap-2">
                   <button onClick={() => {
@@ -433,6 +436,8 @@ export default function CarListingSingleFile() {
                   }} className="px-3 py-1 bg-navy text-white rounded">Use Current Location</button>
                 </div>
               </div>
+
+                 
               <div className="flex-1">
                 <MapContainer center={mapCenter} zoom={14} style={{ height: "100%", width: "100%" }}>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -444,6 +449,7 @@ export default function CarListingSingleFile() {
                   )}
                 </MapContainer>
               </div>
+              
             </div>
           </div>
         )}

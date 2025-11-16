@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://52.66.238.227:3000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://3.110.122.127:3000';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -48,13 +48,11 @@ export const carAPI = {
     return apiClient.get(`/getCarById/${carId}`);
   },
 
-  // Update car by ID
-  updateCarById: async (carId: string, carData: FormData) => {
-    return apiClient.put(`/updateCarById/${carId}`, carData, {
+ updateCarById: async (carId: string, carData: FormData) => {
+  return apiClient.put(`/updateCar/${carId}`, carData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-
   // Delete car by ID
   deleteCarById: async (carId: string) => {
     return apiClient.delete(`/deleteCar/${carId}`);
@@ -73,83 +71,156 @@ export const carAPI = {
   },
 };
 
-// ==================== BIKE APIs ====================
+/// ==================== BIKE APIs ====================
 
 export const bikeAPI = {
-  // Create a new bike
+  // ✅ Create a new bike
   createBike: async (bikeData: FormData) => {
     return apiClient.post('/createBike', bikeData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
 
-  // Get bike by ID
+  // ✅ Get bike by ID
   getBikeById: async (bikeId: string) => {
     return apiClient.get(`/getBikeById/${bikeId}`);
   },
 
-  // Update bike by ID
+  // // ✅ Update bike by ID
+  // updateBikeById: async (bikeId: string, bikeData: FormData) => {
+  //   return apiClient.put(`/updateBikeById/${bikeId}`, bikeData, {
+  //     headers: { 'Content-Type': 'multipart/form-data' },
+  //   });
+  // },
+  // ✅ Update bike by ID - FIXED ENDPOINT
   updateBikeById: async (bikeId: string, bikeData: FormData) => {
-    return apiClient.put(`/updateBikeById/${bikeId}`, bikeData, {
+  return apiClient.put(`/updateBike/${bikeId}`, bikeData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-
-  // Delete bike by ID
+  // ✅ Delete bike by ID
   deleteBikeById: async (bikeId: string) => {
     return apiClient.delete(`/deleteBike/${bikeId}`);
   },
 
-  // Get nearby bikes (location-based)
+  // ✅ Get nearby bikes (location-based)
   getNearbyBikes: async (latitude: number, longitude: number, range?: number) => {
     return apiClient.get('/getNearbyBikes', {
       params: { latitude, longitude, range: range || 5 },
     });
   },
+
+//   // ✅ Get all bikes owned by a specific owner
+//   //    (Fix for getMyVehicles error in ListedBikes.tsx)
+//   getMyVehicles: async (userId: string) => {
+//     return apiClient.get(`/getBikeByOwner/${userId}`);
+//   },
+// };
+
+
+// ✅ CORRECT (matches your backend)
+getMyVehicles: async (userId: string) => {
+  return apiClient.get(`/myVehicles/${userId}`);
+}
 };
+// ==================== REVIEW APIs ====================
 
 // ==================== REVIEW APIs ====================
 
 export const reviewAPI = {
-  // Create a new review
+  // Create a new review - Backend expects application/x-www-form-urlencoded
   createReview: async (reviewData: {
-    carId?: string;
-    vehicleId?: string;
-    vehicleType?: 'car' | 'bike';
-    bikeId?: string;
     userId: string;
+    vehicleId: string;
+    vehicleType: string;
+    bookingId?: string;
     rating: number;
+    
     comment: string;
   }) => {
-    return apiClient.post('/addReview', reviewData);
+    console.log("📝 Creating review with data:", reviewData);
+    
+    // Backend expects URL-encoded format with specific field names
+    const urlencoded = new URLSearchParams();
+urlencoded.append('userId', reviewData.userId);
+urlencoded.append('vechileType', reviewData.vehicleType); // Backend uses 'vechileType'
+urlencoded.append('VechileId', reviewData.vehicleId); // Backend uses 'VechileId'
+urlencoded.append('BookingId', reviewData.bookingId || 'TEMP-BOOKING-ID');
+
+urlencoded.append('review', reviewData.comment);
+urlencoded.append('rating', String(reviewData.rating));
+
+    
+    console.log("📤 URL Encoded payload:", urlencoded.toString());
+    
+    return apiClient.post('/addReview', urlencoded, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
   },
 
-  // Get reviews by car ID
+  // Get reviews for a vehicle - Backend expects GET with query params
+  getReviewsByVehicle: async (vehicleId: string, vehicleType: string) => {
+    console.log("🔍 Fetching reviews for vehicle:", { vehicleId, vehicleType });
+    
+    return apiClient.get('/getReview', {
+      params: {
+        VechileId: vehicleId,  // Backend uses 'VechileId'
+        vechileType: vehicleType, // Backend uses 'vechileType'
+      },
+    });
+  },
+
+  // Get reviews by car ID (legacy endpoint)
   getReviewsByCarId: async (carId: string) => {
     return apiClient.get(`/getReviewById/${carId}`);
   },
 
-  // Get reviews by bike ID
-//   getReviewsByBikeId: async (bikeId: string) => {
-//     return apiClient.get(`/reviews/bike/${bikeId}`);
-//   },
-
-  // Update review by ID
+  // Update review by ID - Backend expects FormData
   updateReviewById: async (reviewId: string, reviewData: {
     rating?: number;
     comment?: string;
+    carId?: string;
+    bikeId?: string;
+    autoId?: string;
   }) => {
-    return apiClient.put(`/updateReview/${reviewId}`, reviewData);
+    console.log("🔄 Updating review:", { reviewId, reviewData });
+    
+    // Backend expects FormData format with specific field names
+    const formData = new FormData();
+    
+    if (reviewData.autoId !== undefined) {
+      formData.append('AutoId', reviewData.autoId || '');
+    }
+    if (reviewData.bikeId !== undefined) {
+      formData.append('BikeId', reviewData.bikeId || '');
+    }
+    if (reviewData.carId !== undefined) {
+      formData.append('CarId', reviewData.carId || '');
+    }
+    if (reviewData.comment !== undefined) {
+      formData.append('reviewText', reviewData.comment); // Backend uses 'reviewText'
+    }
+    if (reviewData.rating !== undefined) {
+      formData.append('rating', String(reviewData.rating));
+    }
+    
+    console.log("📤 FormData payload prepared");
+    
+    return apiClient.put(`/updateReview/${reviewId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   },
 
-  // Get average rating for a vehicle
-  getAverageRating: async (vehicleId: string, vehicleType: 'car' | 'bike') => {
-    return apiClient.get(`/AverageRating/${vehicleType}/${vehicleId}`);
-  },
-
-  // Get user's rating for a vehicle
-  getUserRating: async (userId: string, vehicleId: string) => {
-    return apiClient.get(`/reviews/user/${userId}/vehicle/${vehicleId}`);
+  // Get average rating for a vehicle - Backend expects GET with query params
+  getAverageRating: async (vehicleId: string, vehicleType: string) => {
+    console.log("📊 Fetching average rating:", { vehicleId, vehicleType });
+    
+    return apiClient.get('/getAverageRating', {
+      params: {
+        vechileId: vehicleId,  // Backend uses 'vechileId' (lowercase v)
+        vechileType: vehicleType, // Backend uses 'vechileType'
+      },
+    });
   },
 
   // Delete review by ID
@@ -339,58 +410,124 @@ export const bookingAPI = {
 // ==================== AVAILABILITY APIs ====================
 
 export const availabilityAPI = {
-  // Create unavailable slot
+  // Create unavailable slot (marks vehicle as not available)
   createUnavailability: async (availabilityData: {
-    vehicleId: string;
-    vehicleType: 'car' | 'bike' | 'auto';
-    startDate: string;
-    endDate: string;
-    startTime?: string;
-    endTime?: string;
-    reason?: string;
+    VechileId: string;
+    vechileType: 'Car' | 'Bike' | 'Auto';
+    fromDate: string;
+    toDate: string;
+    fromTime?: string;
+    toTime?: string;
+    isNotAvailable?: boolean;
   }) => {
-    return apiClient.post('/availability', availabilityData);
+    console.log("🚫 Create Unavailability - Input data:", availabilityData);
+    
+    // Backend expects application/x-www-form-urlencoded format
+    const urlencoded = new URLSearchParams();
+    urlencoded.append('VechileId', availabilityData.VechileId);
+    urlencoded.append('vechileType', availabilityData.vechileType);
+    urlencoded.append('fromDate', availabilityData.fromDate);
+    urlencoded.append('toDate', availabilityData.toDate);
+    if (availabilityData.fromTime) urlencoded.append('fromTime', availabilityData.fromTime);
+    if (availabilityData.toTime) urlencoded.append('toTime', availabilityData.toTime);
+    urlencoded.append('isNotAvailable', String(availabilityData.isNotAvailable ?? true));
+    
+    console.log("🚫 Create Unavailability - URL Encoded:", urlencoded.toString());
+    
+    return apiClient.post('/createNotAvailability', urlencoded, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
   },
 
   // Get unavailability by ID
   getUnavailabilityById: async (availabilityId: string) => {
-    return apiClient.get(`/availability/${availabilityId}`);
+    return apiClient.get(`/getNotAvailabilityById/${availabilityId}`);
   },
 
-  // Get vehicle availability
-  getVehicleAvailability: async (vehicleId: string, vehicleType: 'car' | 'bike' | 'auto') => {
-    return apiClient.get(`/availability/vehicle/${vehicleType}/${vehicleId}`);
+  // Get vehicle availability (check if vehicle is available for date range)
+  getVehicleAvailability: async (
+    VechileId: string, 
+    vechileType: 'Car' | 'Bike' | 'Auto',
+    startDate: string,
+    endDate: string
+  ) => {
+    return apiClient.get('/getVehicleAvailability', {
+      params: { 
+        VechileId, 
+        vechileType, 
+        startDate, 
+        endDate 
+      },
+    });
   },
 
   // Update unavailability by ID
-  updateUnavailability: async (availabilityId: string, availabilityData: {
-    startDate?: string;
-    endDate?: string;
-    startTime?: string;
-    endTime?: string;
-    reason?: string;
-  }) => {
-    return apiClient.put(`/availability/${availabilityId}`, availabilityData);
+  updateUnavailability: async (
+    availabilityId: string, 
+    availabilityData: {
+      VechileId?: string;
+      vechileType?: 'Car' | 'Bike' | 'Auto';
+      fromDate?: string;
+      toDate?: string;
+      fromTime?: string;
+      toTime?: string;
+      isNotAvailable?: boolean;
+    }
+  ) => {
+    console.log("🔄 Update Unavailability - Input data:", availabilityData);
+    
+    // Backend expects application/x-www-form-urlencoded format
+    const urlencoded = new URLSearchParams();
+    Object.entries(availabilityData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        urlencoded.append(key, String(value));
+      }
+    });
+    
+    console.log("🔄 Update Unavailability - URL Encoded:", urlencoded.toString());
+    
+    return apiClient.put(`/updateNotAvailability/${availabilityId}`, urlencoded, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
   },
 
   // Delete unavailability by ID
   deleteUnavailability: async (availabilityId: string) => {
-    return apiClient.delete(`/availability/${availabilityId}`);
-  },
-
-  // Check if vehicle is available for specific dates
-  checkAvailability: async (vehicleId: string, startDate: string, endDate: string) => {
-    return apiClient.post('/availability/check', {
-      vehicleId,
-      startDate,
-      endDate,
-    });
+    return apiClient.delete(`/deleteNotAvailability/${availabilityId}`);
   },
 };
 
 // ==================== USER APIs ====================
 
 export const userAPI = {
+  // Register/Update user profile (Backend: /register endpoint)
+  register: async (userData: {
+    googleId: string;
+    name: string;
+    mobilenumber: string;
+    latitude: string;
+    longitude: string;
+    email: string;
+    fcmToken: string;
+    platform: string;
+  }) => {
+    console.log("📝 User Register API - Input data:", userData);
+    
+    // Backend expects application/x-www-form-urlencoded format
+    const urlencoded = new URLSearchParams();
+    Object.entries(userData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        urlencoded.append(key, String(value));
+      }
+    });
+    
+    console.log("📝 User Register API - URL Encoded:", urlencoded.toString());
+    
+    return apiClient.post('/register', urlencoded, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+  },
+
   // Get user profile
   getUserProfile: async (userId: string) => {
     return apiClient.get(`/users/${userId}`);
@@ -400,12 +537,6 @@ export const userAPI = {
   updateUserProfile: async (userId: string, userData: any) => {
     return apiClient.put(`/users/${userId}`, userData);
   },
-
-  // Get user notifications
-  getUserNotifications: async (userId: string) => {
-    return apiClient.get(`/notifications/user/${userId}`);
-  },
-
   // Mark notification as read
   markNotificationRead: async (notificationId: string) => {
     return apiClient.put(`/notifications/${notificationId}/read`);
@@ -423,3 +554,6 @@ const apiService = {
 };
 
 export default apiService;
+
+
+

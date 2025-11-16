@@ -1028,7 +1028,7 @@ const ListBikePage = () => {
     });
 
     try {
-      const response = await fetch("http://52.66.238.227:3000/createBike", {
+      const response = await fetch("http://3.110.122.127:3000/createBike", {
         method: "POST",
         body: formDataToSend,
       });

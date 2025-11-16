@@ -14,10 +14,13 @@ interface PopupChatProps {
   onClose: () => void;
   ownerName?: string;
   ownerAvatar?: string;
+    recipientName: string;     // ✅ ADD THIS
+  recipientImage: string;    // ✅ ADD THIS
 }
 const PopupChat: React.FC<PopupChatProps> = ({
   isOpen,
   onClose,
+  
   ownerName = "Manoj Kumar",
   ownerAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Manoj"
 }) => {

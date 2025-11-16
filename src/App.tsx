@@ -300,6 +300,11 @@
 // };
  
 // export default App;
+
+
+
+
+
 import React from "react";
 import { Routes, Route } from "react-router-dom";
  
@@ -321,7 +326,7 @@ import NotificationPage from "./features/profile/pages/notification";
 import ProfilePage from "./features/profile/pages/profile";
 import MyProfile from "./pages/MyProfile";
 import MyBookings from "./pages/MyBookings";
-import MyListingBookings from "./pages/MyListingBookings";
+// import MyListingBookings from "./pages/MyListingBookings";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AboutUs from "./pages/AboutUs";
 import Help from "./pages/Help";
@@ -333,6 +338,10 @@ import BookingHistory from "./pages/BookingHistory";
 import ListedCars from "./pages/ListedCars";
 import ListedBikes from "./pages/ListedBikes";
 import BikeDetails from "./pages/BikeDetails";
+import Notifications from "pages/Notifications";
+
+// import VehicleReviews from './pages/VehicleReviews';
+
 
 const App: React.FC = () => {
   return (
@@ -372,7 +381,7 @@ const App: React.FC = () => {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/my-profile" element={<MyProfile />} />
         <Route path="/mybookings" element={<MyBookings />} />
-        <Route path="/my-listing-bookings" element={<MyListingBookings />} />
+        {/* <Route path="/my-listing-bookings" element={<MyListingBookings />} /> */}
         
         {/* Notifications & Feedback */}
         <Route path="/notifications" element={<NotificationPage />} />
@@ -386,10 +395,27 @@ const App: React.FC = () => {
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/help" element={<Help />} />
         
+
+<Route path="/feedback" element={<Feedback />} />
+<Route path="/notifications" element={<Notifications />} />
+{/* <Route path="/reviews/:id" element={<VehicleReviews />} /> */}
+
         {/* Calendar */}
         <Route path="/calendar" element={<Calendar onConfirm={() => console.log("Confirmed!")} />} />
         <Route path="/calendar-screen" element={<CalendarScreen />} />
       </Routes>
+
+
+
+
+
+
+
+
+
+
+
+      
     </div>
   );
 };

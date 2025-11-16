@@ -2,13 +2,15 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Booking } from "../types/booking";
  
-// ✅ Centralized type for all possible booking statuses
+// NEW
 export type BookingStatus =
-  | "Booked"
-  | "Cancelled"
-  | "Picked"
-  | "Completed"
-  | "YourNewStatus"; // 👈 Add any new status here
+  | "Booked"      // Maps from "Pending" or "Confirmed"
+  | "Cancelled"   // Maps from "Cancelled" or "Rejected"
+  | "Picked"      // Maps from "Picked"
+  | "Completed";  // Maps from "Completed"
+
+
+  // 👈 Add any new status here
  
 // ✅ Store definition interface
 interface BookingStore {
