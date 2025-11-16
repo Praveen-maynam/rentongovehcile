@@ -299,8 +299,10 @@
 //   );
 // };
  
-// export default App;
-import React from "react";
+// export default App;import React from "react";
+
+
+
 import { Routes, Route } from "react-router-dom";
  
 // Layout
@@ -321,12 +323,13 @@ import NotificationPage from "./features/profile/pages/notification";
 import ProfilePage from "./features/profile/pages/profile";
 import MyProfile from "./pages/MyProfile";
 import MyBookings from "./pages/MyBookings";
-import MyListingBookings from "./pages/MyListingBookings";
+// import MyListingBookings from "./pages/MyListingBookings";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AboutUs from "./pages/AboutUs";
 import Help from "./pages/Help";
 import Feedback from "./pages/Feedback";
 import Calendar from "./pages/Calendar";
+
 import CalendarScreen from "./pages/CalendarScreen";
 import CarDetails from "./pages/CarDetails";
 import BookingHistory from "./pages/BookingHistory";
@@ -356,11 +359,17 @@ const App: React.FC = () => {
         <Route path="/nearby-cars" element={<Nearbycars />} />
         <Route path="/nearby-bikes" element={<NearbyBikes />} />
         
-        {/* Vehicle Details */}
-        <Route path="/vehicle/:id" element={<VehicleDetailsPage />} />
-        <Route path="/car-details" element={<CarDetails />} />
-        <Route path="/bike-details" element={<BikeDetails />} />
-        <Route path="/vehicle-details/:vehicleName" element={<VehicleHistory />} />
+        {/* Vehicle Details - ✅ FIXED: Changed from /vehicle/:id to /vehicle-details/:id */}
+        <Route path="/vehicle-details/:id" element={<VehicleDetailsPage />} />
+        
+        {/* Edit Vehicle Details */}
+        <Route path="/Car-Details/:carId" element={<CarDetails />} />
+
+
+       <Route path="/Bike-Details/:bikeId" element={<BikeDetails />} />
+
+
+        {/* Vehicle History & Booking */}
         <Route path="/vehicle-history/:vehicleName" element={<VehicleHistory />} />
         <Route path="/vehicle-details/:vehicleName/edit/:bookingId" element={<EditCarDetails />} />
         
@@ -372,7 +381,7 @@ const App: React.FC = () => {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/my-profile" element={<MyProfile />} />
         <Route path="/mybookings" element={<MyBookings />} />
-        <Route path="/my-listing-bookings" element={<MyListingBookings />} />
+        {/* <Route path="/my-listing-bookings" element={<MyListingBookings />} /> */}
         
         {/* Notifications & Feedback */}
         <Route path="/notifications" element={<NotificationPage />} />

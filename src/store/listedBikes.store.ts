@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface ListedBike {
   id: string;
   vehicleName: string;
+  vehicleNumber:string;
   farePrice: string;
   transmission?: string;
   fuel?: string;
@@ -46,7 +47,7 @@ export const useListedBikesStore = create<ListedBikesState>()(
           depositMoney: bike.depositMoney || "0",
           transmission: bike.transmission || "Manual",
           fuel: bike.fuel || "Petrol",
-          photos: bike.photos.length ? bike.photos : [],
+          photos: bike.photos?.length ? bike.photos : [],
         };
 
         set((state) => ({
@@ -58,16 +59,22 @@ export const useListedBikesStore = create<ListedBikesState>()(
         set((state) => ({
           bikes: state.bikes.map((bike) =>
             bike.id === id
-              ? { 
-                  ...bike, 
+              ? {
+                  ...bike,
                   ...updatedBike,
-                  drivingLicense: updatedBike.drivingLicense ?? bike.drivingLicense,
+                  drivingLicense:
+                    updatedBike.drivingLicense ?? bike.drivingLicense,
                   aadharCard: updatedBike.aadharCard ?? bike.aadharCard,
-                  depositVehicle: updatedBike.depositVehicle ?? bike.depositVehicle,
+                  depositVehicle:
+                    updatedBike.depositVehicle ?? bike.depositVehicle,
                   depositMoney: updatedBike.depositMoney ?? bike.depositMoney,
-                  transmission: updatedBike.transmission ?? bike.transmission,
+                  transmission:
+                    updatedBike.transmission ?? bike.transmission,
                   fuel: updatedBike.fuel ?? bike.fuel,
-                  photos: updatedBike.photos?.length ? updatedBike.photos : bike.photos
+                  photos:
+                    updatedBike.photos?.length
+                      ? updatedBike.photos
+                      : bike.photos,
                 }
               : bike
           ),
@@ -85,7 +92,15 @@ export const useListedBikesStore = create<ListedBikesState>()(
       },
     }),
     {
-      name: 'listed-bikes-storage', // localStorage key
+      name: 'listed-bikes-storage', // persisted key name
     }
   )
 );
+
+/**
+ * ✅ Helper shortcut — safe for direct import (optional)
+ * Use: import { useListedBikesStore, updateBike } from '../store/listedBikes.store';
+ */
+export const updateBikeInStore = (id: string, data: Partial<ListedBike>) =>
+  useListedBikesStore.getState().updateBike(id, data);
+
