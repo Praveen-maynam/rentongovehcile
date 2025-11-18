@@ -1,6 +1,7 @@
 export interface Vehicle {
   id: string;
   name?: string; // make optional
+  Number?:string;
   bikeName?: string; // ✅ add this line
   price: number;
   transmission: string;

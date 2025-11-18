@@ -11867,1489 +11867,3784 @@
 
 
 
-import React, { useState, useEffect } from "react";
-import {
-  X,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Edit2,
-  Trash2,
-  Check,
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
-  Info,
-} from "lucide-react";
+// import React, { useState, useEffect } from "react";
+// import {
+//   X,
+//   Calendar,
+//   ChevronLeft,
+//   ChevronRight,
+//   Edit2,
+//   Trash2,
+//   Check,
+//   AlertCircle,
+//   ChevronDown,
+//   ChevronUp,
+//   Info,
+// } from "lucide-react";
 
-interface VehicleAvailabilityCalendarProps {
+// interface VehicleAvailabilityCalendarProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   VechileId: string;
+//   vehicleType: "Car" | "Bike" | "Auto";
+//   userId: string;
+//   userRole?: "owner" | "customer";
+//   apiBaseUrl?: string;
+//   editSlotId?: string | null;
+//   onAvailabilityCreated?: (data: any) => void;
+//   onAvailabilityUpdated?: (data: any) => void;
+//   onAvailabilityDeleted?: (id: string) => void;
+//   onConfirm?: (data: { fromDate: Date; toDate: Date; fromTime: string; toTime: string }) => void;
+// }
+
+// interface UnavailableSlot {
+//   id: string; // REAL MongoDB _id from backend
+//   VechileId: string;
+//   vehicleType: string;
+//   userId: string;
+//   dates: Date[];
+//   fromDate: string;
+//   toDate: string;
+//   fromTime: string;
+//   toTime: string;
+//   reason: string;
+//   isNotAvailable: boolean;
+//   _id?: string; // Backup field for MongoDB ID
+// }
+
+// const VehicleAvailabilityCalendar: React.FC<VehicleAvailabilityCalendarProps> = ({
+//   isOpen,
+//   onClose,
+//   VechileId,
+//   vehicleType,
+//   userId,
+//   userRole = "owner",
+//   apiBaseUrl = "http://3.110.122.127:3000",
+//   editSlotId = null,
+//   onAvailabilityCreated,
+//   onAvailabilityUpdated,
+//   onAvailabilityDeleted,
+//   onConfirm,
+// }) => {
+  
+//   const [currentMonth, setCurrentMonth] = useState(new Date());
+//   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
+//   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
+//   const [startTime, setStartTime] = useState("06:00");
+//   const [endTime, setEndTime] = useState("18:00");
+  
+//   // Availability data
+//   const [unavailableDates, setUnavailableDates] = useState<UnavailableSlot[]>([]);
+//   const [bookedDates, setBookedDates] = useState<Date[]>([]);
+  
+//   // UI modes
+//   const [editMode, setEditMode] = useState(false);
+//   const [deleteMode, setDeleteMode] = useState(false);
+//   const [selectedSlotForEdit, setSelectedSlotForEdit] = useState<any>(null);
+  
+//   // Loading & messages
+//   const [loading, setLoading] = useState(false);
+//   const [message, setMessage] = useState({ type: "", text: "" });
+//   const [fadeOpacity, setFadeOpacity] = useState(1);
+  
+//   // Month/Year picker
+//   const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
+
+//   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+//   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+//   const years = Array.from({ length: 15 }, (_, i) => new Date().getFullYear() - 5 + i);
+
+//   // ==========================================
+//   // API LAYER
+//   // ==========================================
+//   const availabilityAPI = {
+//     getVehicleAvailability: async (
+//       vehicleId: string,
+//       vehicleType: string,
+//       startDate: string,
+//       endDate: string
+//     ) => {
+//       console.log("🌐 Fetching availability:", { vehicleId, vehicleType, startDate, endDate });
+
+//       try {
+//         const url = `${apiBaseUrl}/getVehicleAvailability?VechileId=${vehicleId}&vechileType=${vehicleType}&startDate=${startDate}&endDate=${endDate}`;
+//         const response = await fetch(url, {
+//           method: "GET",
+//           headers: { "Content-Type": "application/json" },
+//         });
+
+//         if (!response.ok) {
+//           throw new Error(`HTTP ${response.status}`);
+//         }
+
+//         const result = await response.json();
+//         console.log("✅ Availability response:", result);
+
+//         // Handle multiple response formats
+//         let allSlots: any[] = [];
+        
+//         if (result?.availability && Array.isArray(result.availability)) {
+//           for (const dateEntry of result.availability) {
+//             if (dateEntry.slots && Array.isArray(dateEntry.slots)) {
+//               const slotsWithDate = dateEntry.slots.map((slot: any) => ({
+//                 ...slot,
+//                 date: dateEntry.date,
+//                 dateStatus: dateEntry.status,
+//               }));
+//               allSlots.push(...slotsWithDate);
+//             }
+//           }
+//         } else if (result?.data?.availability && Array.isArray(result.data.availability)) {
+//           for (const dateEntry of result.data.availability) {
+//             if (dateEntry.slots && Array.isArray(dateEntry.slots)) {
+//               const slotsWithDate = dateEntry.slots.map((slot: any) => ({
+//                 ...slot,
+//                 date: dateEntry.date,
+//                 dateStatus: dateEntry.status,
+//               }));
+//               allSlots.push(...slotsWithDate);
+//             }
+//           }
+//         } else if (result?.blockedSlots) {
+//           allSlots = result.blockedSlots;
+//         } else if (result?.data && Array.isArray(result.data)) {
+//           allSlots = result.data;
+//         } else if (Array.isArray(result)) {
+//           allSlots = result;
+//         }
+
+//         console.log(`✅ Total slots loaded: ${allSlots.length}`);
+//         return allSlots;
+//       } catch (error) {
+//         console.error("❌ API ERROR: getVehicleAvailability", error);
+//         return [];
+//       }
+//     },
+
+//     getNotAvailabilityById: async (id: string) => {
+//       console.log("🌐 Fetching slot by ID:", id);
+
+//       try {
+//         const response = await fetch(`${apiBaseUrl}/getNotAvailabilityById/${id}`, {
+//           method: "GET",
+//           headers: { "Content-Type": "application/json" },
+//         });
+
+//         if (!response.ok) {
+//           throw new Error(`HTTP ${response.status}`);
+//         }
+
+//         const result = await response.json();
+//         console.log("✅ Slot data:", result);
+
+//         if (result.success && result.data) return result.data;
+//         if (result.data) return result.data;
+//         if (result._id) return result;
+        
+//         return null;
+//       } catch (error) {
+//         console.error("❌ API ERROR: getNotAvailabilityById", error);
+//         throw error;
+//       }
+//     },
+
+//     createNotAvailability: async (payload: any) => {
+//       console.log("🌐 Creating not-availability:", payload);
+
+//       try {
+//         const formData = new URLSearchParams();
+//         formData.append("userId", payload.userId);
+//         formData.append("vechileType", payload.vechileType);
+//         formData.append("VechileId", payload.VechileId);
+//         formData.append("fromDate", payload.fromDate);
+//         formData.append("toDate", payload.toDate);
+//         formData.append("fromTime", payload.fromTime);
+//         formData.append("toTime", payload.toTime);
+//         formData.append("isNotAvailable", String(payload.isNotAvailable));
+
+//         const response = await fetch(`${apiBaseUrl}/createNotAvailability`, {
+//           method: "POST",
+//           headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//           body: formData.toString(),
+//         });
+
+//         if (!response.ok) {
+//           throw new Error(`HTTP ${response.status}`);
+//         }
+
+//         const result = await response.json();
+//         console.log("✅ Created:", result);
+
+//         return { success: true, data: result.data || result };
+//       } catch (error) {
+//         console.error("❌ API ERROR: createNotAvailability", error);
+//         throw error;
+//       }
+//     },
+
+//     updateNotAvailability: async (id: string, payload: any) => {
+//       console.log("🌐 Updating not-availability:", { id, payload });
+
+//       try {
+//         const formData = new URLSearchParams();
+//         if (payload.userId) formData.append("userId", payload.userId);
+//         formData.append("vechileType", payload.vechileType);
+//         formData.append("VechileId", payload.VechileId);
+//         formData.append("fromDate", payload.fromDate);
+//         formData.append("toDate", payload.toDate);
+//         formData.append("fromTime", payload.fromTime);
+//         formData.append("toTime", payload.toTime);
+//         formData.append("isNotAvailable", String(payload.isNotAvailable));
+
+//         const response = await fetch(`${apiBaseUrl}/updateNotAvailability/${id}`, {
+//           method: "PUT",
+//           headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//           body: formData.toString(),
+//         });
+
+//         if (!response.ok) {
+//           throw new Error(`HTTP ${response.status}`);
+//         }
+
+//         const result = await response.json();
+//         console.log("✅ Updated:", result);
+
+//         return { success: true, data: result.data || result };
+//       } catch (error) {
+//         console.error("❌ API ERROR: updateNotAvailability", error);
+//         throw error;
+//       }
+//     },
+
+//     deleteNotAvailability: async (id: string) => {
+//       console.log("🌐 Deleting not-availability:", id);
+
+//       try {
+//         const response = await fetch(`${apiBaseUrl}/deleteNotAvailability/${id}`, {
+//           method: "DELETE",
+//           headers: { "Content-Type": "application/json" },
+//         });
+
+//         if (!response.ok) {
+//           throw new Error(`HTTP ${response.status}`);
+//         }
+
+//         const result = await response.json();
+//         console.log("✅ Deleted:", result);
+
+//         return { success: true, data: result };
+//       } catch (error) {
+//         console.error("❌ API ERROR: deleteNotAvailability", error);
+//         throw error;
+//       }
+//     },
+//   };
+
+//   // ==========================================
+//   // UTILITY FUNCTIONS
+//   // ==========================================
+//   const formatDateForAPI = (date: Date | null): string => {
+//     if (!date) return "";
+//     const year = date.getFullYear();
+//     const month = String(date.getMonth() + 1).padStart(2, "0");
+//     const day = String(date.getDate()).padStart(2, "0");
+//     return `${year}-${month}-${day}`;
+//   };
+
+//   const formatDateForDisplay = (date: Date | null): string => {
+//     if (!date) return "Select Date";
+//     return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+//   };
+
+//   const formatTimeForAPI = (time: string): string => {
+//     const [hours, minutes] = time.split(":");
+//     return `${hours}.${minutes}`;
+//   };
+
+//   const showMessage = (type: string, text: string) => {
+//     setMessage({ type, text });
+//     setTimeout(() => setMessage({ type: "", text: "" }), 4000);
+//   };
+
+//   const isPastDate = (date: Date): boolean => {
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0);
+//     const checkDate = new Date(date);
+//     checkDate.setHours(0, 0, 0, 0);
+//     return checkDate < today;
+//   };
+
+//   const getDateRangeArray = (startDateStr: string, endDateStr: string): Date[] => {
+//     const dates: Date[] = [];
+//     const start = new Date(startDateStr + "T00:00:00");
+//     const end = new Date(endDateStr + "T00:00:00");
+//     const current = new Date(start);
+
+//     while (current <= end) {
+//       dates.push(new Date(current));
+//       current.setDate(current.getDate() + 1);
+//     }
+
+//     return dates;
+//   };
+
+//   const isDateUnavailable = (date: Date): boolean => {
+//     const dateStr = formatDateForAPI(date);
+
+//     // Check booked dates
+//     const booked = bookedDates.some((bd) => formatDateForAPI(bd) === dateStr);
+//     if (booked) return true;
+
+//     // Check unavailable slots
+//     return unavailableDates.some((slot) =>
+//       slot.dates.some((d) => formatDateForAPI(d) === dateStr)
+//     );
+//   };
+
+//   const getUnavailableSlotForDate = (date: Date): UnavailableSlot | null => {
+//     const normalized = new Date(date).setHours(0, 0, 0, 0);
+//     return (
+//       unavailableDates.find((slot) => {
+//         const from = new Date(slot.fromDate).setHours(0, 0, 0, 0);
+//         const to = new Date(slot.toDate).setHours(0, 0, 0, 0);
+//         return normalized >= from && normalized <= to;
+//       }) || null
+//     );
+//   };
+
+//   const checkRangeHasUnavailableDates = (startDate: Date, endDate: Date): boolean => {
+//     const dates = getDateRangeArray(formatDateForAPI(startDate), formatDateForAPI(endDate));
+//     return dates.some((date) => isDateUnavailable(date));
+//   };
+
+//   const isDateSelected = (date: Date): boolean => {
+//     return (
+//       (selectedStartDate &&
+//         date.getDate() === selectedStartDate.getDate() &&
+//         date.getMonth() === selectedStartDate.getMonth() &&
+//         date.getFullYear() === selectedStartDate.getFullYear()) ||
+//       false
+//     );
+//   };
+
+//   const isDateInRange = (date: Date): boolean => {
+//     if (!selectedStartDate || !selectedEndDate) return false;
+//     const start = new Date(selectedStartDate.setHours(0, 0, 0, 0));
+//     const end = new Date(selectedEndDate.setHours(0, 0, 0, 0));
+//     const d = new Date(date.setHours(0, 0, 0, 0));
+//     return d > start && d < end;
+//   };
+
+//   const isDateStartOrEnd = (date: Date): boolean => {
+//     if (!selectedStartDate && !selectedEndDate) return false;
+//     const d = new Date(date.setHours(0, 0, 0, 0));
+//     const isStart =
+//       selectedStartDate && d.getTime() === new Date(selectedStartDate.setHours(0, 0, 0, 0)).getTime();
+//     const isEnd = selectedEndDate && d.getTime() === new Date(selectedEndDate.setHours(0, 0, 0, 0)).getTime();
+//     return !!(isStart || isEnd);
+//   };
+
+//   // ==========================================
+//   // DATA LOADING
+//   // ==========================================
+//   const fetchAvailabilityData = async () => {
+//     if (!VechileId) return;
+//     setLoading(true);
+
+//     try {
+//       const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+//       const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+//       const startDate = formatDateForAPI(startOfMonth);
+//       const endDate = formatDateForAPI(endOfMonth);
+
+//       console.log("📅 Fetching month:", { startDate, endDate });
+
+//       const result = await fetch(
+//         `${apiBaseUrl}/getVehicleAvailability?VechileId=${VechileId}&vechileType=${vehicleType}&startDate=${startDate}&endDate=${endDate}`,
+//         {
+//           method: "GET",
+//           headers: { "Content-Type": "application/json" },
+//         }
+//       );
+
+//       if (!result.ok) {
+//         throw new Error(`HTTP ${result.status}`);
+//       }
+
+//       const response = await result.json();
+//       console.log("✅ Raw API Response:", response);
+
+//       // ⭐ STEP 1: Extract REAL MongoDB IDs from backend response
+//       let allSlots: any[] = [];
+      
+//       // Handle response format: {"availability": [{_id, fromDate, toDate, ...}]}
+//       if (response?.availability && Array.isArray(response.availability)) {
+//         console.log("📊 Processing availability array format...");
+//         allSlots = response.availability.map((item: any) => ({
+//           _id: item._id || item.id, // ⭐ CAPTURE REAL MONGODB ID
+//           id: item._id || item.id,   // ⭐ USE AS PRIMARY ID
+//           VechileId: item.VechileId || item.vehicleId || item.vechileId,
+//           vehicleType: item.vechileType || item.vehicleType,
+//           userId: item.userId,
+//           fromDate: item.fromDate,
+//           toDate: item.toDate,
+//           fromTime: item.fromTime || "00:00",
+//           toTime: item.toTime || "23:59",
+//           isNotAvailable: item.isNotAvailable,
+//           isBooked: item.isBooked,
+//           reason: item.reason || "Owner unavailable",
+//           status: item.status,
+//           slotStatus: item.slotStatus,
+//           type: item.type,
+//           bookingId: item.bookingId,
+//           booking_id: item.booking_id,
+//         }));
+//       } else if (response?.data?.availability && Array.isArray(response.data.availability)) {
+//         console.log("📊 Processing data.availability format...");
+//         allSlots = response.data.availability.map((item: any) => ({
+//           _id: item._id || item.id,
+//           id: item._id || item.id,
+//           VechileId: item.VechileId || item.vehicleId || item.vechileId,
+//           vehicleType: item.vechileType || item.vehicleType,
+//           userId: item.userId,
+//           fromDate: item.fromDate,
+//           toDate: item.toDate,
+//           fromTime: item.fromTime || "00:00",
+//           toTime: item.toTime || "23:59",
+//           isNotAvailable: item.isNotAvailable,
+//           isBooked: item.isBooked,
+//           reason: item.reason || "Owner unavailable",
+//           status: item.status,
+//           slotStatus: item.slotStatus,
+//           type: item.type,
+//           bookingId: item.bookingId,
+//           booking_id: item.booking_id,
+//         }));
+//       } else if (response?.blockedSlots && Array.isArray(response.blockedSlots)) {
+//         console.log("📊 Processing blockedSlots format...");
+//         allSlots = response.blockedSlots.map((item: any) => ({
+//           _id: item._id || item.id,
+//           id: item._id || item.id,
+//           VechileId: item.VechileId || item.vehicleId || item.vechileId,
+//           vehicleType: item.vechileType || item.vehicleType,
+//           userId: item.userId,
+//           fromDate: item.fromDate,
+//           toDate: item.toDate,
+//           fromTime: item.fromTime || "00:00",
+//           toTime: item.toTime || "23:59",
+//           isNotAvailable: item.isNotAvailable,
+//           isBooked: item.isBooked,
+//           reason: item.reason || "Owner unavailable",
+//         }));
+//       } else if (response?.data && Array.isArray(response.data)) {
+//         console.log("📊 Processing data array format...");
+//         allSlots = response.data.map((item: any) => ({
+//           _id: item._id || item.id,
+//           id: item._id || item.id,
+//           VechileId: item.VechileId || item.vehicleId || item.vechileId,
+//           vehicleType: item.vechileType || item.vehicleType,
+//           userId: item.userId,
+//           fromDate: item.fromDate,
+//           toDate: item.toDate,
+//           fromTime: item.fromTime || "00:00",
+//           toTime: item.toTime || "23:59",
+//           isNotAvailable: item.isNotAvailable,
+//           isBooked: item.isBooked,
+//           reason: item.reason || "Owner unavailable",
+//         }));
+//       } else if (Array.isArray(response)) {
+//         console.log("📊 Processing direct array format...");
+//         allSlots = response.map((item: any) => ({
+//           _id: item._id || item.id,
+//           id: item._id || item.id,
+//           VechileId: item.VechileId || item.vehicleId || item.vechileId,
+//           vehicleType: item.vechileType || item.vehicleType,
+//           userId: item.userId,
+//           fromDate: item.fromDate,
+//           toDate: item.toDate,
+//           fromTime: item.fromTime || "00:00",
+//           toTime: item.toTime || "23:59",
+//           isNotAvailable: item.isNotAvailable,
+//           isBooked: item.isBooked,
+//           reason: item.reason || "Owner unavailable",
+//         }));
+//       }
+
+//       console.log(`✅ Total slots loaded: ${allSlots.length}`);
+//       console.log("🔍 Slots with IDs:", allSlots.map(s => ({ id: s.id, _id: s._id, from: s.fromDate, to: s.toDate })));
+
+//       const unavailable: UnavailableSlot[] = [];
+//       const booked: Date[] = [];
+
+//       for (const slot of allSlots) {
+//         // Filter by vehicle ID
+//         const slotVehicleId = slot.VechileId || slot.vehicleId || slot.vechileId || slot.VehicleId;
+//         if (slotVehicleId && String(slotVehicleId) !== String(VechileId)) {
+//           console.log(`⏭️ Skipping slot for different vehicle: ${slotVehicleId}`);
+//           continue;
+//         }
+
+//         // ⭐ VERIFY WE HAVE REAL MONGODB ID
+//         const realMongoId = slot._id || slot.id;
+//         if (!realMongoId || realMongoId.includes('-') || realMongoId.includes(':')) {
+//           console.warn("⚠️ WARNING: Fake ID detected, slot may not be updatable:", realMongoId);
+//         } else {
+//           console.log("✅ Valid MongoDB ID:", realMongoId);
+//         }
+
+//         // Determine slot type
+//         const isBookedSlot =
+//           slot.isBooked === true ||
+//           slot.isBooked === "true" ||
+//           !!slot.bookingId ||
+//           !!slot.booking_id ||
+//           (slot.status && String(slot.status).toLowerCase() === "booked") ||
+//           (slot.slotStatus && String(slot.slotStatus).toLowerCase() === "booked") ||
+//           (slot.type && String(slot.type).toLowerCase() === "booked");
+
+//         const isUnavailableSlot =
+//           slot.isNotAvailable === true ||
+//           slot.isNotAvailable === "true" ||
+//           (slot.status && String(slot.status).toLowerCase() === "notavailable") ||
+//           (slot.slotStatus && String(slot.slotStatus).toLowerCase() === "notavailable") ||
+//           (slot.type && String(slot.type).toLowerCase() === "notavailable") ||
+//           (slot.reason && String(slot.reason).toLowerCase().includes("not available"));
+
+//         // Build date range
+//         let dates: Date[] = [];
+//         try {
+//           const from = slot.fromDate;
+//           const to = slot.toDate;
+
+//           if (!from) {
+//             console.warn("⚠️ Slot missing fromDate:", slot);
+//             continue;
+//           }
+
+//           if (from === to || !to) {
+//             dates = [new Date(from + "T00:00:00")];
+//           } else {
+//             dates = getDateRangeArray(from, to);
+//           }
+//         } catch (err) {
+//           console.error("❌ Error building dates:", err);
+//           continue;
+//         }
+
+//         if (isBookedSlot) {
+//           booked.push(...dates);
+//           console.log("✅ Added booked slot:", { id: slot.id, from: slot.fromDate, to: slot.toDate });
+//         } else if (isUnavailableSlot) {
+//           unavailable.push({
+//             id: slot._id || slot.id, // ⭐ STORE REAL MONGODB ID
+//             _id: slot._id || slot.id, // ⭐ BACKUP FIELD
+//             VechileId: slot.VechileId || VechileId,
+//             vehicleType: slot.vehicleType || vehicleType,
+//             userId: slot.userId || userId,
+//             dates,
+//             fromDate: slot.fromDate,
+//             toDate: slot.toDate,
+//             fromTime: slot.fromTime || "00:00",
+//             toTime: slot.toTime || "23:59",
+//             reason: slot.reason || "Owner unavailable",
+//             isNotAvailable: true,
+//           });
+//           console.log("✅ Added unavailable slot:", { id: slot._id || slot.id, from: slot.fromDate, to: slot.toDate });
+//         }
+//       }
+
+//       console.log("✅ Final processed:", { unavailable: unavailable.length, booked: booked.length });
+//       console.log("🔍 Unavailable slot IDs:", unavailable.map(u => u.id));
+
+//       setUnavailableDates(unavailable);
+//       setBookedDates(booked);
+
+//       if (unavailable.length > 0 || booked.length > 0) {
+//         showMessage("success", `✅ Loaded ${unavailable.length + booked.length} slot(s)`);
+//       }
+//     } catch (error) {
+//       console.error("❌ Error fetching availability:", error);
+//       setUnavailableDates([]);
+//       setBookedDates([]);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const loadSlotForEditing = async (slotId: string) => {
+//     if (!slotId) return;
+//     setLoading(true);
+
+//     try {
+//       console.log("🔍 Loading slot for editing, ID:", slotId);
+//       const response = await availabilityAPI.getNotAvailabilityById(slotId);
+//       console.log("📝 Loaded slot data:", response);
+
+//       if (response) {
+//         const fromDate = new Date(response.fromDate);
+//         const toDate = new Date(response.toDate);
+
+//         // ⭐ STEP 2: Store REAL MongoDB ID when editing
+//         const realId = response._id || response.id || slotId;
+//         console.log("✅ Using MongoDB ID for editing:", realId);
+
+//         setSelectedStartDate(fromDate);
+//         setSelectedEndDate(toDate);
+//         setStartTime(response.fromTime || "06:00");
+//         setEndTime(response.toTime || "18:00");
+//         setSelectedSlotForEdit({
+//           id: realId, // ⭐ REAL MONGODB ID
+//           _id: realId, // ⭐ BACKUP
+//           VechileId: response.VechileId || VechileId,
+//           vehicleType: response.vechileType || vehicleType,
+//           userId: response.userId || userId,
+//           fromDate: response.fromDate,
+//           toDate: response.toDate,
+//           fromTime: response.fromTime,
+//           toTime: response.toTime,
+//         });
+//         setEditMode(true);
+//         setCurrentMonth(fromDate);
+//         showMessage("info", "✏️ Edit mode active");
+//       }
+//     } catch (error) {
+//       console.error("❌ Error loading slot:", error);
+//       showMessage("error", "Failed to load slot for editing");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // ==========================================
+//   // EFFECTS
+//   // ==========================================
+//   useEffect(() => {
+//     if (isOpen && editSlotId && userRole === "owner") {
+//       loadSlotForEditing(editSlotId);
+//     }
+//   }, [editSlotId, isOpen]);
+
+//   useEffect(() => {
+//     if (isOpen && VechileId) {
+//       fetchAvailabilityData();
+//     }
+//   }, [isOpen, VechileId, vehicleType, currentMonth]);
+
+//   useEffect(() => {
+//     if (!isOpen) {
+//       // Reset on close
+//       setEditMode(false);
+//       setDeleteMode(false);
+//       setSelectedStartDate(null);
+//       setSelectedEndDate(null);
+//       setSelectedSlotForEdit(null);
+//       setShowMonthYearPicker(false);
+//     }
+//   }, [isOpen]);
+
+//   // ==========================================
+//   // EVENT HANDLERS
+//   // ==========================================
+//   const handleDateClick = (date: Date) => {
+//     if (isPastDate(date)) return;
+
+//     const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+//     // Customer mode: prevent selecting unavailable dates
+//     if (userRole === "customer" && isDateUnavailable(normalizedDate)) {
+//       const slot = getUnavailableSlotForDate(normalizedDate);
+//       const reason = slot ? slot.reason : "Not available";
+//       showMessage("error", `❌ Date unavailable: ${reason}`);
+//       return;
+//     }
+
+//     // Owner edit mode: select start/end dates
+//     if (userRole === "owner" && editMode) {
+//       setFadeOpacity(0.6);
+
+//       if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+//         setSelectedStartDate(normalizedDate);
+//         setSelectedEndDate(null);
+//       } else {
+//         let from = selectedStartDate;
+//         let to = normalizedDate;
+
+//         if (normalizedDate < selectedStartDate) {
+//           from = normalizedDate;
+//           to = selectedStartDate;
+//         }
+
+//         setSelectedStartDate(from);
+//         setSelectedEndDate(to);
+//       }
+
+//       setTimeout(() => setFadeOpacity(1), 120);
+//       return;
+//     }
+
+//     // Owner delete mode: delete clicked slot
+//     if (userRole === "owner" && deleteMode) {
+//       const slot = getUnavailableSlotForDate(normalizedDate);
+//       if (slot) {
+//         handleDeleteSlot(slot);
+//       } else {
+//         showMessage("error", "❌ No slot found for this date");
+//       }
+//       return;
+//     }
+
+//     // Owner normal mode: clicking unavailable date opens it for editing
+//     if (userRole === "owner" && !editMode && !deleteMode) {
+//       const slot = getUnavailableSlotForDate(normalizedDate);
+//       if (slot) {
+//         console.log("✏️ Opening slot for editing:", slot);
+//         console.log("🔍 Slot ID:", slot.id || slot._id);
+        
+//         setSelectedStartDate(new Date(slot.fromDate));
+//         setSelectedEndDate(new Date(slot.toDate));
+//         setStartTime(slot.fromTime);
+//         setEndTime(slot.toTime);
+//         setSelectedSlotForEdit({
+//           id: slot._id || slot.id, // ⭐ USE REAL MONGODB ID
+//           _id: slot._id || slot.id,
+//           VechileId: slot.VechileId,
+//           vehicleType: slot.vehicleType,
+//           userId: slot.userId,
+//           fromDate: slot.fromDate,
+//           toDate: slot.toDate,
+//           fromTime: slot.fromTime,
+//           toTime: slot.toTime,
+//         });
+//         setEditMode(true);
+//         showMessage("info", "✏️ Edit mode - select new dates or click Confirm to save");
+//         return;
+//       }
+//     }
+
+//     // Default selection (customer or owner normal mode)
+//     setFadeOpacity(0.6);
+
+//     if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+//       setSelectedStartDate(normalizedDate);
+//       setSelectedEndDate(null);
+//     } else {
+//       let from = selectedStartDate;
+//       let to = normalizedDate;
+
+//       if (normalizedDate < selectedStartDate) {
+//         from = normalizedDate;
+//         to = selectedStartDate;
+//       }
+
+//       // Customer: check range for unavailable dates
+//       if (userRole === "customer") {
+//         const hasUnavailable = checkRangeHasUnavailableDates(from, to);
+//         if (hasUnavailable) {
+//           showMessage("error", "❌ Range contains unavailable dates");
+//           setSelectedStartDate(null);
+//           setSelectedEndDate(null);
+//           setTimeout(() => setFadeOpacity(1), 120);
+//           return;
+//         }
+//       }
+
+//       setSelectedStartDate(from);
+//       setSelectedEndDate(to);
+//     }
+
+//     setTimeout(() => setFadeOpacity(1), 120);
+//   };
+
+//   const handleEditIconPress = () => {
+//     if (editMode && selectedStartDate && selectedEndDate) {
+//       handleSaveEdit();
+//     } else {
+//       setEditMode(true);
+//       setDeleteMode(false);
+//       setSelectedStartDate(null);
+//       setSelectedEndDate(null);
+//       setSelectedSlotForEdit(null);
+//       showMessage("info", "✏️ Edit mode - select dates to mark as unavailable");
+//     }
+//   };
+
+//   const handleConfirmButton = async () => {
+//     if (!selectedStartDate || !selectedEndDate) {
+//       showMessage("error", "⚠️ Please select both start and end dates");
+//       return;
+//     }
+
+//     if (userRole === "customer") {
+//       // Customer: Just pass the data to parent for next step
+//       if (onConfirm) {
+//         onConfirm({
+//           fromDate: selectedStartDate,
+//           toDate: selectedEndDate,
+//           fromTime: startTime,
+//           toTime: endTime,
+//         });
+//         showMessage("success", "✅ Dates confirmed! Proceeding to next step...");
+//       }
+//     } else {
+//       // Owner: Save to backend
+//       await handleSaveEdit();
+//     }
+//   };
+
+//   const handleSaveEdit = async () => {
+//     if (!selectedStartDate || !selectedEndDate) {
+//       showMessage("error", "⚠️ Please select both start and end dates");
+//       return;
+//     }
+
+//     setFadeOpacity(0.6);
+//     setLoading(true);
+
+//     try {
+//       const fromDateStr = formatDateForAPI(selectedStartDate);
+//       const toDateStr = formatDateForAPI(selectedEndDate);
+
+//       console.log("💾 Saving:", { fromDateStr, toDateStr });
+
+//       let response;
+
+//       if (selectedSlotForEdit && selectedSlotForEdit.id) {
+//         // ⭐ STEP 3: UPDATE with REAL MongoDB ID
+//         const realId = selectedSlotForEdit._id || selectedSlotForEdit.id;
+//         console.log("📤 Updating slot with MongoDB ID:", realId);
+        
+//         // Validate ID is not fake
+//         if (realId.includes('-') || realId.includes(':')) {
+//           throw new Error("❌ Invalid MongoDB ID format. Cannot update with fake ID.");
+//         }
+
+//         response = await availabilityAPI.updateNotAvailability(realId, {
+//           userId: selectedSlotForEdit.userId || userId,
+//           VechileId: selectedSlotForEdit.VechileId || VechileId,
+//           vechileType: selectedSlotForEdit.vehicleType || vehicleType,
+//           fromDate: fromDateStr,
+//           toDate: toDateStr,
+//           fromTime: formatTimeForAPI(startTime),
+//           toTime: formatTimeForAPI(endTime),
+//           isNotAvailable: true,
+//         });
+
+//         console.log("✅ Update response:", response);
+
+//         if (response && response.success) {
+//           onAvailabilityUpdated && onAvailabilityUpdated(response.data || response);
+//           showMessage("success", "✅ Dates updated successfully");
+//         } else {
+//           throw new Error(response?.message || "Update failed");
+//         }
+//       } else {
+//         // CREATE new slot
+//         console.log("📤 Creating new slot");
+        
+//         response = await availabilityAPI.createNotAvailability({
+//           userId: userId,
+//           VechileId: VechileId,
+//           vechileType: vehicleType,
+//           fromDate: fromDateStr,
+//           toDate: toDateStr,
+//           fromTime: formatTimeForAPI(startTime),
+//           toTime: formatTimeForAPI(endTime),
+//           isNotAvailable: true,
+//         });
+
+//         console.log("✅ Create response:", response);
+
+//         if (response && response.success) {
+//           onAvailabilityCreated && onAvailabilityCreated(response.data || response);
+//           showMessage("success", "✅ Dates blocked successfully");
+//         } else {
+//           throw new Error(response?.message || "Create failed");
+//         }
+//       }
+
+//       if (response && response.success) {
+//         console.log("✅ Save successful");
+
+//         // Clear selections and exit edit mode FIRST
+//         setEditMode(false);
+//         setSelectedStartDate(null);
+//         setSelectedEndDate(null);
+//         setSelectedSlotForEdit(null);
+
+//         // Then refresh calendar to get updated data with real IDs
+//         await fetchAvailabilityData();
+//       } else {
+//         showMessage("error", "❌ Failed to save changes");
+//       }
+//     } catch (err: any) {
+//       console.error("❌ Save error:", err);
+//       showMessage("error", `❌ ${err.message || "Failed to save changes"}`);
+//     } finally {
+//       setLoading(false);
+//       setFadeOpacity(1);
+//     }
+//   };
+
+//   const handleDeleteIconPress = () => {
+//     if (deleteMode) {
+//       setDeleteMode(false);
+//       showMessage("info", "Delete mode disabled");
+//     } else {
+//       setDeleteMode(true);
+//       setEditMode(false);
+//       setSelectedStartDate(null);
+//       setSelectedEndDate(null);
+//       setSelectedSlotForEdit(null);
+//       showMessage("warning", "🗑️ Delete mode - tap any unavailable date to delete");
+//     }
+//   };
+
+//   const handleDeleteSlot = async (slot: UnavailableSlot) => {
+//     if (!slot || !slot.id) {
+//       showMessage("error", "❌ No slot found to delete");
+//       return;
+//     }
+
+//     // ⭐ STEP 4: Validate real MongoDB ID before delete
+//     const realId = slot._id || slot.id;
+//     console.log("🗑️ Attempting to delete slot with ID:", realId);
+
+//     if (realId.includes('-') || realId.includes(':')) {
+//       showMessage("error", "❌ Cannot delete: Invalid MongoDB ID format");
+//       console.error("❌ Fake ID detected:", realId);
+//       return;
+//     }
+
+//     if (
+//       !window.confirm(
+//         `🗑️ Delete unavailable period from ${slot.fromDate} to ${slot.toDate}?\n\nThis cannot be undone.`
+//       )
+//     ) {
+//       return;
+//     }
+
+//     setFadeOpacity(0.6);
+//     setLoading(true);
+
+//     try {
+//       console.log("📤 Deleting with MongoDB ID:", realId);
+//       const response = await availabilityAPI.deleteNotAvailability(realId);
+
+//       if (response && response.success) {
+//         console.log("✅ Delete successful");
+//         await fetchAvailabilityData();
+//         onAvailabilityDeleted && onAvailabilityDeleted(realId);
+//         setDeleteMode(false);
+//         showMessage("success", "✅ Slot deleted successfully");
+//       } else {
+//     throw new Error(response?.data?.message || "Delete failed");
+
+//       }
+//     } catch (err: any) {
+//       console.error("❌ Delete error:", err);
+//       showMessage("error", `❌ ${err.message || "Failed to delete slot"}`);
+//     } finally {
+//       setLoading(false);
+//       setFadeOpacity(1);
+//     }
+//   };
+
+//   const handleMonthYearSelect = (monthIndex: number, year: number) => {
+//     setCurrentMonth(new Date(year, monthIndex, 1));
+//     setShowMonthYearPicker(false);
+//   };
+
+//   // ==========================================
+//   // CALENDAR RENDERING
+//   // ==========================================
+//   const generateCalendarDays = () => {
+//     const year = currentMonth.getFullYear();
+//     const month = currentMonth.getMonth();
+//     const firstDay = new Date(year, month, 1);
+//     const startDate = new Date(firstDay);
+//     const dayOfWeek = firstDay.getDay();
+//     const adjustment = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+//     startDate.setDate(firstDay.getDate() - adjustment);
+
+//     const days: JSX.Element[] = [];
+//     for (let i = 0; i < 42; i++) {
+//       const date = new Date(startDate);
+//       date.setDate(startDate.getDate() + i);
+//       days.push(renderDay(date, i));
+//     }
+
+//     return days;
+//   };
+
+//   const renderDay = (date: Date, index: number) => {
+//     const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
+//     const isSelected = isDateSelected(date);
+//     const isStartOrEnd = isDateStartOrEnd(date);
+//     const isInRange = isDateInRange(date);
+//     const isUnavail = isDateUnavailable(date);
+//     const isPast = isPastDate(date);
+//     const showAsEditing = editMode && (isStartOrEnd || isInRange);
+//     const showAsDeleteTarget = deleteMode && isUnavail && !isPast && isCurrentMonth;
+
+//     let bgClass = "bg-white hover:bg-gray-100";
+//     let textClass = "text-gray-700";
+//     let borderClass = "border border-transparent";
+//     let showStrikeLine = false;
+
+//     if (isPast) {
+//       bgClass = "bg-gray-50";
+//       textClass = "text-gray-300";
+//     } else if (showAsEditing && isStartOrEnd) {
+//       bgClass = "bg-orange-500";
+//       textClass = "text-white font-bold";
+//     } else if (showAsEditing && isInRange) {
+//       bgClass = "bg-orange-100";
+//       textClass = "text-orange-900 font-semibold";
+//     } else if (showAsDeleteTarget) {
+//       bgClass = "bg-red-50";
+//       borderClass = "border-2 border-red-300";
+//       textClass = "text-red-800 font-bold";
+//     } else if (!showAsEditing && isStartOrEnd) {
+//       bgClass = "bg-black";
+//       textClass = "text-white font-bold";
+//     } else if (!showAsEditing && isInRange) {
+//       bgClass = "bg-gray-200";
+//       textClass = "text-gray-800 font-medium";
+//     } else if (isUnavail) {
+//       bgClass = "bg-red-50";
+//       borderClass = "border-2 border-red-200";
+//       textClass = "text-red-700 font-medium";
+//       showStrikeLine = true;
+//     }
+
+//     if (!isCurrentMonth) {
+//       textClass = "text-gray-300";
+//     }
+
+//     return (
+//       <button
+//         key={index}
+//         onClick={() => isCurrentMonth && !isPast && handleDateClick(date)}
+//         disabled={isPast || (userRole === "customer" && isUnavail)}
+//         className={`relative h-10 w-full rounded-md transition-all ${bgClass} ${textClass} ${borderClass} ${
+//           isPast || (userRole === "customer" && isUnavail) ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+//         }`}
+//       >
+//         <span className="relative z-10">{date.getDate()}</span>
+
+//         {/* Strike-through line for unavailable dates */}
+//         {showStrikeLine && isCurrentMonth && (
+//           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+//             <div className="w-4/5 h-0.5 bg-red-600 transform rotate-45" />
+//             <div className="w-4/5 h-0.5 bg-red-600 transform -rotate-45 absolute" />
+//           </div>
+//         )}
+
+//         {/* Delete indicator */}
+//         {showAsDeleteTarget && (
+//           <div className="absolute -top-1 -right-1 z-30">
+//             <Trash2 size={12} className="text-red-600" />
+//           </div>
+//         )}
+//       </button>
+//     );
+//   };
+
+//   const generateTimeOptions = () => {
+//     const options: { value: string; label: string }[] = [];
+//     for (let h = 0; h < 24; h++) {
+//       for (let m = 0; m < 60; m += 30) {
+//         const hour = h.toString().padStart(2, "0");
+//         const minute = m.toString().padStart(2, "0");
+//         const time = `${hour}:${minute}`;
+//         const period = h >= 12 ? "PM" : "AM";
+//         const displayHour = h % 12 || 12;
+//         options.push({
+//           value: time,
+//           label: `${displayHour}:${minute} ${period}`,
+//         });
+//       }
+//     }
+//     return options;
+//   };
+
+//   const timeOptions = generateTimeOptions();
+
+//   // ==========================================
+//   // MAIN RENDER
+//   // ==========================================
+//   if (!isOpen) return null;
+
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+//       <div
+//         className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-y-auto"
+//         style={{ opacity: fadeOpacity, transition: "opacity 0.2s" }}
+//       >
+//         {/* Header */}
+//         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
+//           <div className="flex items-center gap-4">
+//             <h2 className="text-2xl font-bold text-gray-900">
+//               {userRole === "owner" ? "Manage Vehicle Availability" : "Select Booking Dates"}
+//             </h2>
+//             <div className="flex items-center gap-2">
+//               {userRole === "owner" && (
+//                 <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold rounded-full">
+//                   Owner Mode
+//                 </span>
+//               )}
+//               {userRole === "customer" && (
+//                 <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
+//                   Customer View
+//                 </span>
+//               )}
+//               {editMode && (
+//                 <span className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
+//                   Editing
+//                 </span>
+//               )}
+//               {deleteMode && (
+//                 <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+//                   Delete Mode
+//                 </span>
+//               )}
+//             </div>
+//           </div>
+
+//           <button
+//             onClick={onClose}
+//             className="p-2 rounded-lg hover:bg-gray-100 transition"
+//             disabled={loading}
+//           >
+//             <X size={20} />
+//           </button>
+//         </div>
+
+//         {/* Edit Mode Banner */}
+//         {editMode && userRole === "owner" && (
+//           <div className="mx-6 mt-4 p-4 bg-orange-50 border-l-4 border-orange-500 rounded-lg flex items-center gap-3">
+//             <Edit2 size={20} className="text-orange-600 flex-shrink-0" />
+//             <p className="text-sm text-orange-800 font-medium">
+//               Select dates to mark as not available. Tap the ✓ icon to save changes.
+//             </p>
+//           </div>
+//         )}
+
+//         {/* Delete Mode Banner */}
+//         {deleteMode && userRole === "owner" && (
+//           <div className="mx-6 mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg flex items-center gap-3">
+//             <Trash2 size={20} className="text-red-600 flex-shrink-0" />
+//             <p className="text-sm text-red-800 font-medium">
+//               Tap any not-available date to delete it.
+//             </p>
+//           </div>
+//         )}
+
+//         {/* Customer Info Banner */}
+//         {userRole === "customer" && (unavailableDates.length > 0 || bookedDates.length > 0) && (
+//           <div className="mx-6 mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg flex items-center gap-3">
+//             <Info size={20} className="text-blue-600 flex-shrink-0" />
+//             <p className="text-sm text-blue-800 font-medium">
+//               Red crossed dates are not available for booking.
+//             </p>
+//           </div>
+//         )}
+
+//         {/* Message Display */}
+//         {message.text && (
+//           <div className="mx-6 mt-4">
+//             <div
+//               className={`p-4 rounded-lg font-medium flex items-center gap-3 ${
+//                 message.type === "success"
+//                   ? "bg-green-50 text-green-800 border-2 border-green-300"
+//                   : message.type === "error"
+//                   ? "bg-red-50 text-red-800 border-2 border-red-300"
+//                   : message.type === "warning"
+//                   ? "bg-yellow-50 text-yellow-800 border-2 border-yellow-300"
+//                   : "bg-blue-50 text-blue-800 border-2 border-blue-300"
+//               }`}
+//             >
+//               {message.type === "success" && <Check size={20} />}
+//               {message.type === "error" && <AlertCircle size={20} />}
+//               {message.type === "warning" && <AlertCircle size={20} />}
+//               {message.type === "info" && <Calendar size={20} />}
+//               <span>{message.text}</span>
+//             </div>
+//           </div>
+//         )}
+
+//         {/* Loading Overlay */}
+//         {loading && (
+//           <div className="mx-6 mt-4 p-4 bg-gray-50 rounded-lg flex items-center justify-center gap-3">
+//             <div className="animate-spin w-5 h-5 border-3 border-blue-500 border-t-transparent rounded-full" />
+//             <span className="text-gray-700 font-medium">Processing...</span>
+//           </div>
+//         )}
+
+//         <div className="p-6">
+//           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+//             {/* Calendar Section */}
+//             <div className="lg:col-span-2 space-y-4">
+//               {/* Date Display */}
+//               <div className="grid grid-cols-2 gap-4">
+//                 <div className="border-2 border-gray-200 rounded-lg p-4 bg-white">
+//                   <div className="flex items-center gap-2 mb-2">
+//                     <Calendar size={16} className="text-gray-500" />
+//                     <label className="text-sm font-medium text-gray-700">From Date</label>
+//                   </div>
+//                   <div className="text-lg font-bold text-gray-900">
+//                     {selectedStartDate ? formatDateForDisplay(selectedStartDate) : "Select"}
+//                   </div>
+//                 </div>
+
+//                 <div className="border-2 border-gray-200 rounded-lg p-4 bg-white">
+//                   <div className="flex items-center gap-2 mb-2">
+//                     <Calendar size={16} className="text-gray-500" />
+//                     <label className="text-sm font-medium text-gray-700">To Date</label>
+//                   </div>
+//                   <div className="text-lg font-bold text-gray-900">
+//                     {selectedEndDate ? formatDateForDisplay(selectedEndDate) : "Select"}
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Calendar */}
+//               <div className="border-2 border-gray-200 rounded-xl p-5 bg-white shadow-sm">
+//                 {/* Month Header */}
+//                 <div className="flex items-center justify-between mb-4">
+//                   <button
+//                     onClick={() =>
+//                       setCurrentMonth(
+//                         new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
+//                       )
+//                     }
+//                     className="p-2 hover:bg-gray-100 rounded-lg transition"
+//                     disabled={loading}
+//                   >
+//                     <ChevronLeft size={24} />
+//                   </button>
+
+//                   <div className="flex flex-col items-center">
+//                     <button
+//                       onClick={() => setShowMonthYearPicker(!showMonthYearPicker)}
+//                       className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg transition"
+//                     >
+//                       <span className="font-bold text-xl">
+//                         {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+//                       </span>
+//                       {showMonthYearPicker ? (
+//                         <ChevronUp size={16} />
+//                       ) : (
+//                         <ChevronDown size={16} />
+//                       )}
+//                     </button>
+
+//                     {/* Month/Year Picker */}
+//                     {showMonthYearPicker && (
+//                       <div className="mt-2 p-4 bg-gray-50 rounded-lg shadow-lg w-64">
+//                         <div className="mb-3">
+//                           <div className="grid grid-cols-4 gap-2">
+//                             {monthNames.map((m, i) => (
+//                               <button
+//                                 key={m}
+//                                 onClick={() => handleMonthYearSelect(i, currentMonth.getFullYear())}
+//                                 className={`px-2 py-1 rounded text-xs font-medium transition ${
+//                                   currentMonth.getMonth() === i
+//                                     ? "bg-blue-500 text-white"
+//                                     : "bg-white hover:bg-gray-200"
+//                                 }`}
+//                               >
+//                                 {m}
+//                               </button>
+//                             ))}
+//                           </div>
+//                         </div>
+//                         <div className="grid grid-cols-3 gap-2">
+//                           {years.map((y) => (
+//                             <button
+//                               key={y}
+//                               onClick={() => handleMonthYearSelect(currentMonth.getMonth(), y)}
+//                               className={`px-2 py-1 rounded text-xs font-medium transition ${
+//                                 currentMonth.getFullYear() === y
+//                                   ? "bg-blue-500 text-white"
+//                                   : "bg-white hover:bg-gray-200"
+//                               }`}
+//                             >
+//                               {y}
+//                             </button>
+//                           ))}
+//                         </div>
+//                       </div>
+//                     )}
+//                   </div>
+
+//                   {/* Owner Control Icons */}
+//                   {userRole === "owner" && (
+//                     <div className="flex items-center gap-2">
+//                       <button
+//                         onClick={handleEditIconPress}
+//                         className={`p-2 rounded-lg transition ${
+//                           editMode
+//                             ? "bg-green-100 hover:bg-green-200"
+//                             : "bg-gray-100 hover:bg-gray-200"
+//                         }`}
+//                         title={editMode ? "Save changes" : "Edit availability"}
+//                         disabled={loading}
+//                       >
+//                         {editMode ? (
+//                           <Check size={24} className="text-green-600" />
+//                         ) : (
+//                           <Edit2 size={24} className="text-blue-600" />
+//                         )}
+//                       </button>
+//                       <button
+//                         onClick={handleDeleteIconPress}
+//                         className={`p-2 rounded-lg transition ${
+//                           deleteMode
+//                             ? "bg-red-100 hover:bg-red-200"
+//                             : "bg-gray-100 hover:bg-gray-200"
+//                         }`}
+//                         title={deleteMode ? "Exit delete mode" : "Delete availability"}
+//                         disabled={loading}
+//                       >
+//                         <Trash2 size={24} className={deleteMode ? "text-red-600" : "text-gray-600"} />
+//                       </button>
+//                     </div>
+//                   )}
+
+//                   <button
+//                     onClick={() =>
+//                       setCurrentMonth(
+//                         new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
+//                       )
+//                     }
+//                     className="p-2 hover:bg-gray-100 rounded-lg transition"
+//                     disabled={loading}
+//                   >
+//                     <ChevronRight size={24} />
+//                   </button>
+//                 </div>
+
+//                 {/* Week Days */}
+//                 <div className="grid grid-cols-7 gap-2 mb-2">
+//                   {weekDays.map((day) => (
+//                     <div key={day} className="text-center text-sm font-bold text-gray-600">
+//                       {day}
+//                     </div>
+//                   ))}
+//                 </div>
+
+//                 {/* Calendar Grid */}
+//                 <div className="grid grid-cols-7 gap-2">{generateCalendarDays()}</div>
+
+//                 {/* Legend */}
+//                 <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t">
+//                   <div className="flex items-center gap-2">
+//                     <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded" />
+//                     <span className="text-xs text-gray-600">Available</span>
+//                   </div>
+//                   <div className="flex items-center gap-2">
+//                     <div className="w-4 h-4 bg-red-50 border-2 border-red-200 rounded" />
+//                     <span className="text-xs text-gray-600">
+//                       {userRole === "owner" ? "Unavailable/Booked" : "Not Available"}
+//                     </span>
+//                   </div>
+//                   <div className="flex items-center gap-2">
+//                     <div className="w-4 h-4 bg-black rounded" />
+//                     <span className="text-xs text-gray-600">
+//                       {editMode ? "Editing" : "Selected"}
+//                     </span>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Time & Actions Section */}
+//             <div className="space-y-4">
+//               {/* Start Time */}
+//               <div>
+//                 <label className="text-sm font-medium text-gray-700 mb-2 block">Start Time</label>
+//                 <select
+//                   value={startTime}
+//                   onChange={(e) => setStartTime(e.target.value)}
+//                   className="w-full p-3 border-2 border-gray-300 rounded-lg font-semibold focus:border-blue-500 focus:outline-none"
+//                   disabled={loading}
+//                 >
+//                   {timeOptions.map((time) => (
+//                     <option key={time.value} value={time.value}>
+//                       {time.label}
+//                     </option>
+//                   ))}
+//                 </select>
+//               </div>
+
+//               {/* End Time */}
+//               <div>
+//                 <label className="text-sm font-medium text-gray-700 mb-2 block">End Time</label>
+//                 <select
+//                   value={endTime}
+//                   onChange={(e) => setEndTime(e.target.value)}
+//                   className="w-full p-3 border-2 border-gray-300 rounded-lg font-semibold focus:border-blue-500 focus:outline-none"
+//                   disabled={loading}
+//                 >
+//                   {timeOptions.map((time) => (
+//                     <option key={time.value} value={time.value}>
+//                       {time.label}
+//                     </option>
+//                   ))}
+//                 </select>
+//               </div>
+
+//               {/* Summary */}
+//               {selectedStartDate && selectedEndDate && (
+//                 <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-lg">
+//                   <p className="text-sm font-bold text-green-900 mb-2">
+//                     {editMode ? "Editing Dates" : "Selected Dates"}
+//                   </p>
+//                   <p className="text-xs text-green-800">
+//                     From: {formatDateForAPI(selectedStartDate)}
+//                   </p>
+//                   <p className="text-xs text-green-800">To: {formatDateForAPI(selectedEndDate)}</p>
+//                   {editMode && (
+//                     <p className="text-xs text-green-700 mt-2 italic">Tap ✓ icon to save changes</p>
+//                   )}
+//                 </div>
+//               )}
+
+//               {/* Data Info */}
+//               {(unavailableDates.length > 0 || bookedDates.length > 0) && !loading && (
+//                 <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+//                   <div className="flex items-center gap-2 mb-1">
+//                     <Check size={16} className="text-blue-600" />
+//                     <p className="text-sm font-bold text-blue-900">Calendar Data Loaded</p>
+//                   </div>
+//                   <p className="text-xs text-blue-800">
+//                     {unavailableDates.length + bookedDates.length} slot(s) from database
+//                   </p>
+//                 </div>
+//               )}
+
+//               {/* Confirm Button */}
+//               <button
+//                 onClick={handleConfirmButton}
+//                 disabled={!selectedStartDate || !selectedEndDate || loading}
+//                 className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-lg font-bold text-lg transition shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+//               >
+//                 {loading ? (
+//                   <>
+//                     <div className="animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full" />
+//                     {userRole === "owner" ? "Saving..." : "Processing..."}
+//                   </>
+//                 ) : (
+//                   <>
+//                     <Check size={20} />
+//                     {userRole === "owner" 
+//                       ? (editMode ? "Confirm & Save Changes" : "Confirm & Save Dates")
+//                       : "Confirm & Continue"}
+//                   </>
+//                 )}
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default VehicleAvailabilityCalendar;
+
+
+
+
+
+
+
+
+
+
+// import React, { useState } from 'react';
+// import {
+//   X, Calendar, ChevronLeft, ChevronRight,
+//   Edit2, Trash2, Check, AlertCircle, Clock
+// } from "lucide-react";
+
+// interface AvailabilityDateTimeProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   VechileId: string;
+//   vehicleType: "Car" | "Bike" | "Auto";
+//   userId: string;
+// }
+
+// interface TimeSlot {
+//   hour: number;
+//   period: 'AM' | 'PM';
+// }
+
+// interface AvailabilityItem {
+//   id: string;
+//   startDate: Date;
+//   endDate: Date;
+//   startTime: TimeSlot;
+//   endTime: TimeSlot;
+//   status: string;
+// }
+
+// const AvailabilityDateTime: React.FC<AvailabilityDateTimeProps> = ({ 
+//   isOpen, 
+//   onClose, 
+//   VechileId, 
+//   vehicleType, 
+//   userId 
+// }) => {
+//   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
+//   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
+//   const [startTime, setStartTime] = useState<TimeSlot>({ hour: 9, period: 'AM' });
+//   const [endTime, setEndTime] = useState<TimeSlot>({ hour: 6, period: 'PM' });
+//   const [currentMonth, setCurrentMonth] = useState(new Date());
+//   const [availabilities, setAvailabilities] = useState<AvailabilityItem[]>([]);
+//   const [showStartTime, setShowStartTime] = useState(false);
+//   const [showEndTime, setShowEndTime] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState<string | null>(null);
+//   const [success, setSuccess] = useState<string | null>(null);
+
+//   // ============ UTILITY FUNCTIONS ============
+  
+//   const daysInMonth = (date: Date) => {
+//     const year = date.getFullYear();
+//     const month = date.getMonth();
+//     const firstDay = new Date(year, month, 1);
+//     const lastDay = new Date(year, month + 1, 0);
+//     const daysArray = [];
+    
+//     const startPadding = firstDay.getDay();
+//     for (let i = 0; i < startPadding; i++) {
+//       daysArray.push(null);
+//     }
+    
+//     for (let i = 1; i <= lastDay.getDate(); i++) {
+//       daysArray.push(new Date(year, month, i));
+//     }
+    
+//     return daysArray;
+//   };
+
+//   const formatDate = (date: Date) => {
+//     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+//   };
+
+//   const formatTime = (time: TimeSlot) => {
+//     return `${time.hour.toString().padStart(2, '0')} ${time.period}`;
+//   };
+
+//   const formatDateForBackend = (date: Date): string => {
+//     return date.toISOString().split('T')[0];
+//   };
+
+//   const formatTimeForBackend = (time: TimeSlot): string => {
+//     let hour24 = time.hour;
+//     if (time.period === 'PM' && time.hour !== 12) {
+//       hour24 = time.hour + 12;
+//     } else if (time.period === 'AM' && time.hour === 12) {
+//       hour24 = 0;
+//     }
+//     return `${hour24}.00`;
+//   };
+
+//   // Check if a date is unavailable
+//   const isDateUnavailable = (date: Date) => {
+//     return availabilities.some(item => {
+//       const checkDate = new Date(date);
+//       checkDate.setHours(0, 0, 0, 0);
+//       const start = new Date(item.startDate);
+//       start.setHours(0, 0, 0, 0);
+//       const end = new Date(item.endDate);
+//       end.setHours(0, 0, 0, 0);
+//       return checkDate >= start && checkDate <= end;
+//     });
+//   };
+
+//   // ============ API CALL - CREATE UNAVAILABILITY ============
+
+//   const createUnavailability = async () => {
+//     if (!selectedStartDate || !selectedEndDate) {
+//       setError('Please select both start and end dates');
+//       setTimeout(() => setError(null), 3000);
+//       return;
+//     }
+
+//     setLoading(true);
+//     setError(null);
+
+//     try {
+//       // Simulating API call
+//       console.log("🚫 Creating Unavailability:", {
+//         userId,
+//         VechileId,
+//         vehicleType,
+//         fromDate: formatDateForBackend(selectedStartDate),
+//         toDate: formatDateForBackend(selectedEndDate),
+//         fromTime: formatTimeForBackend(startTime),
+//         toTime: formatTimeForBackend(endTime),
+//       });
+
+//       // Simulate API delay
+//       await new Promise(resolve => setTimeout(resolve, 1000));
+
+//       const newItem: AvailabilityItem = {
+//         id: Date.now().toString(),
+//         startDate: selectedStartDate,
+//         endDate: selectedEndDate,
+//         startTime,
+//         endTime,
+//         status: 'Unavailable'
+//       };
+
+//       setAvailabilities([...availabilities, newItem]);
+      
+//       setSuccess('Unavailability added successfully!');
+//       setTimeout(() => setSuccess(null), 3000);
+      
+//       resetForm();
+//     } catch (err: any) {
+//       console.error("❌ Create Error:", err);
+//       setError(err.message || 'Failed to create unavailability');
+//       setTimeout(() => setError(null), 5000);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // ============ FORM HANDLERS ============
+
+//   const resetForm = () => {
+//     setSelectedStartDate(null);
+//     setSelectedEndDate(null);
+//     setStartTime({ hour: 9, period: 'AM' });
+//     setEndTime({ hour: 6, period: 'PM' });
+//   };
+
+//   const handleConfirm = async () => {
+//     await createUnavailability();
+//   };
+
+//   const handleDelete = (id: string) => {
+//     setAvailabilities(availabilities.filter(item => item.id !== id));
+//     setSuccess('Unavailability deleted!');
+//     setTimeout(() => setSuccess(null), 3000);
+//   };
+
+//   const isDateSelected = (date: Date) => {
+//     if (!selectedStartDate) return false;
+//     if (!selectedEndDate) {
+//       return date.getTime() === selectedStartDate.getTime();
+//     }
+//     return date >= selectedStartDate && date <= selectedEndDate;
+//   };
+
+//   const handleDateClick = (date: Date) => {
+//     if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+//       setSelectedStartDate(date);
+//       setSelectedEndDate(null);
+//     } else {
+//       if (date >= selectedStartDate) {
+//         setSelectedEndDate(date);
+//       } else {
+//         setSelectedStartDate(date);
+//         setSelectedEndDate(null);
+//       }
+//     }
+//   };
+
+//   const generateTimeOptions = () => {
+//     const times = [];
+//     for (let i = 1; i <= 12; i++) {
+//       times.push({ hour: i, period: 'AM' as 'AM' | 'PM' });
+//     }
+//     for (let i = 1; i <= 12; i++) {
+//       times.push({ hour: i, period: 'PM' as 'AM' | 'PM' });
+//     }
+//     return times;
+//   };
+
+//   const days = daysInMonth(currentMonth);
+//   const monthYear = currentMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+//   if (!isOpen) return null;
+
+//   return (
+//     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+//       <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto">
+//         {/* Success Toast */}
+//         {success && (
+//           <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+//             <div className="w-5 h-5 rounded-full bg-white text-green-500 flex items-center justify-center font-bold">✓</div>
+//             <span>{success}</span>
+//           </div>
+//         )}
+
+//         {/* Error Toast */}
+//         {error && (
+//           <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+//             <AlertCircle className="w-5 h-5" />
+//             <span>{error}</span>
+//           </div>
+//         )}
+
+//         {/* Loading Overlay */}
+//         {loading && (
+//           <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+//             <div className="bg-white rounded-lg p-6 shadow-xl">
+//               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#001F67] mx-auto"></div>
+//               <p className="mt-4 text-gray-700 font-medium">Creating unavailability...</p>
+//             </div>
+//           </div>
+//         )}
+
+//         {/* Header */}
+//         <div className="flex items-center justify-between p-6 border-b border-gray-200">
+//           <div className="flex items-center gap-3">
+//             <div className="w-12 h-12 bg-[#001F67] rounded-lg flex items-center justify-center">
+//               <Calendar className="w-6 h-6 text-white" />
+//             </div>
+//             <div>
+//               <h1 className="text-2xl font-semibold text-gray-900">Add Unavailability Date & Time</h1>
+//               <p className="text-sm text-gray-500">Manage your vehicle availability</p>
+//             </div>
+//           </div>
+//           <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+//             <X className="w-5 h-5 text-gray-500" />
+//           </button>
+//         </div>
+
+//         {/* Modal Content */}
+//         <div className="p-6">
+//           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+//             {/* Left Side - Date Selection */}
+//             <div>
+//               <div className="grid grid-cols-2 gap-4 mb-6">
+//                 <div>
+//                   <label className="block text-xs font-medium text-[#6C6C6C] mb-2">Start Date</label>
+//                   <div className="h-14 border border-[#E5E5E5] rounded-lg flex items-center justify-center bg-[#F4F4F4] text-sm font-medium text-gray-900">
+//                     {selectedStartDate ? formatDate(selectedStartDate) : 'Select'}
+//                   </div>
+//                 </div>
+//                 <div>
+//                   <label className="block text-xs font-medium text-[#6C6C6C] mb-2">End Date</label>
+//                   <div className="h-14 border border-[#E5E5E5] rounded-lg flex items-center justify-center bg-[#F4F4F4] text-sm font-medium text-gray-900">
+//                     {selectedEndDate ? formatDate(selectedEndDate) : 'Select'}
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Calendar */}
+//               <div className="bg-white border border-[#E5E5E5] rounded-xl p-4">
+//                 <div className="flex items-center justify-between mb-4">
+//                   <button
+//                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+//                     className="p-1 hover:bg-gray-100 rounded"
+//                   >
+//                     <ChevronLeft className="w-5 h-5" />
+//                   </button>
+//                   <span className="text-sm font-medium text-gray-900">{monthYear}</span>
+//                   <button
+//                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+//                     className="p-1 hover:bg-gray-100 rounded"
+//                   >
+//                     <ChevronRight className="w-5 h-5" />
+//                   </button>
+//                 </div>
+
+//                 <div className="grid grid-cols-7 gap-2 mb-2">
+//                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+//                     <div key={day} className="text-center text-xs font-medium text-[#6C6C6C] py-2">
+//                       {day}
+//                     </div>
+//                   ))}
+//                 </div>
+
+//                 <div className="grid grid-cols-7 gap-2">
+//                   {days.map((day, index) => {
+//                     const unavailable = day && isDateUnavailable(day);
+//                     const selected = day && isDateSelected(day);
+                    
+//                     return (
+//                       <button
+//                         key={index}
+//                         onClick={() => day && handleDateClick(day)}
+//                         disabled={!day}
+//                         className={`
+//                           aspect-square rounded-lg text-sm font-medium transition-all relative
+//                           ${!day ? 'invisible' : ''}
+//                           ${selected 
+//                             ? 'bg-[#001F67] text-white' 
+//                             : unavailable
+//                             ? 'bg-red-100 text-red-700 border-2 border-red-300'
+//                             : 'bg-white text-gray-900 hover:bg-[#E8F0FF] border border-[#E5E5E5]'}
+//                           disabled:text-[#C7C7C7] disabled:cursor-not-allowed
+//                         `}
+//                       >
+//                         {day?.getDate()}
+//                         {unavailable && !selected && (
+//                           <div className="absolute inset-0 flex items-center justify-center">
+//                             <div className="w-1 h-full bg-red-400 transform rotate-45"></div>
+//                           </div>
+//                         )}
+//                       </button>
+//                     );
+//                   })}
+//                 </div>
+//               </div>
+
+//               <div className="mt-4">
+//                 <select className="w-full h-12 px-4 border border-[#E5E5E5] rounded-lg bg-[#FFE5E5] text-red-700 font-medium text-sm" disabled>
+//                   <option>Unavailable</option>
+//                 </select>
+//               </div>
+//             </div>
+
+//             {/* Right Side - Time Selection */}
+//             <div>
+//               <h3 className="text-base font-semibold text-gray-900 mb-4">Select Time</h3>
+              
+//               <div className="grid grid-cols-2 gap-4 mb-6">
+//                 {/* Start Time */}
+//                 <div className="relative">
+//                   <label className="block text-xs font-medium text-[#6C6C6C] mb-2">Start Time</label>
+//                   <button
+//                     onClick={() => {
+//                       setShowStartTime(!showStartTime);
+//                       setShowEndTime(false);
+//                     }}
+//                     className="w-full h-14 border border-[#E5E5E5] rounded-lg flex items-center justify-center bg-white hover:bg-[#E9ECF9] transition-colors"
+//                   >
+//                     <span className="text-base font-semibold text-gray-900">{formatTime(startTime)}</span>
+//                   </button>
+//                   {showStartTime && (
+//                     <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E5E5E5] rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
+//                       {generateTimeOptions().map((time, idx) => (
+//                         <button
+//                           key={idx}
+//                           onClick={() => {
+//                             setStartTime(time);
+//                             setShowStartTime(false);
+//                           }}
+//                           className="w-full px-4 py-2 text-sm text-left hover:bg-[#E9ECF9] transition-colors"
+//                         >
+//                           {formatTime(time)}
+//                         </button>
+//                       ))}
+//                     </div>
+//                   )}
+//                 </div>
+
+//                 {/* End Time */}
+//                 <div className="relative">
+//                   <label className="block text-xs font-medium text-[#6C6C6C] mb-2">End Time</label>
+//                   <button
+//                     onClick={() => {
+//                       setShowEndTime(!showEndTime);
+//                       setShowStartTime(false);
+//                     }}
+//                     className="w-full h-14 border border-[#E5E5E5] rounded-lg flex items-center justify-center bg-white hover:bg-[#E9ECF9] transition-colors"
+//                   >
+//                     <span className="text-base font-semibold text-gray-900">{formatTime(endTime)}</span>
+//                   </button>
+//                   {showEndTime && (
+//                     <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E5E5E5] rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
+//                       {generateTimeOptions().map((time, idx) => (
+//                         <button
+//                           key={idx}
+//                           onClick={() => {
+//                             setEndTime(time);
+//                             setShowEndTime(false);
+//                           }}
+//                           className="w-full px-4 py-2 text-sm text-left hover:bg-[#E9ECF9] transition-colors"
+//                         >
+//                           {formatTime(time)}
+//                         </button>
+//                       ))}
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+
+//               {/* Time Slots Preview */}
+//               <div className="bg-[#F8F9FA] rounded-lg p-4 border border-[#E5E5E5] mb-6">
+//                 <p className="text-xs font-medium text-[#6C6C6C] mb-3">Unavailable Time Slot</p>
+//                 <div className="space-y-2">
+//                   <div className="text-sm text-gray-700">
+//                     <span className="font-medium">{formatTime(startTime)}</span>
+//                     <span className="mx-2 text-gray-400">→</span>
+//                     <span className="font-medium">{formatTime(endTime)}</span>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Unavailable Dates List */}
+//               {availabilities.length > 0 && (
+//                 <div className="mb-6">
+//                   <h3 className="text-sm font-semibold text-gray-900 mb-3">Unavailable Dates</h3>
+//                   <div className="space-y-2 max-h-48 overflow-y-auto">
+//                     {availabilities.map((item) => (
+//                       <div key={item.id} className="bg-red-50 rounded-lg p-3 border border-red-200">
+//                         <div className="flex items-center justify-between">
+//                           <div className="flex-1">
+//                             <div className="flex items-center gap-2 text-xs text-gray-700 mb-1">
+//                               <Calendar className="w-3 h-3 text-red-600" />
+//                               <span className="font-medium">{formatDate(item.startDate)}</span>
+//                               <span className="text-gray-400">→</span>
+//                               <span className="font-medium">{formatDate(item.endDate)}</span>
+//                             </div>
+//                             <div className="flex items-center gap-2 text-xs text-gray-600">
+//                               <Clock className="w-3 h-3 text-red-600" />
+//                               <span>{formatTime(item.startTime)} → {formatTime(item.endTime)}</span>
+//                             </div>
+//                           </div>
+//                           <button
+//                             onClick={() => handleDelete(item.id)}
+//                             className="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-all"
+//                           >
+//                             <Trash2 className="w-4 h-4" />
+//                           </button>
+//                         </div>
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </div>
+//               )}
+
+//               {/* Info Box */}
+//               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+//                 <div className="flex gap-3">
+//                   <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+//                   <div className="text-sm text-blue-800">
+//                     <p className="font-medium mb-1">About Unavailability</p>
+//                     <p className="text-xs">This will mark your vehicle as unavailable for the selected dates and times. Customers won't be able to book during this period.</p>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Confirm Button */}
+//           <button
+//             onClick={handleConfirm}
+//             disabled={!selectedStartDate || !selectedEndDate || loading}
+//             className="w-full h-12 mt-6 bg-gradient-to-r from-[#001F67] to-[#3474FF] text-white rounded-lg font-medium hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg"
+//           >
+//             {loading ? 'Creating...' : 'Confirm Unavailability'}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AvailabilityDateTime;
+
+
+
+
+
+
+// import React, { useState, useEffect, useCallback } from 'react';
+// import {
+//   X, Calendar, ChevronLeft, ChevronRight, Edit2, Trash2, 
+//   AlertCircle, Clock, Loader2, RefreshCw, Check, Ban
+// } from "lucide-react";
+
+// // ============ TYPE DEFINITIONS ============
+
+// interface CalendarProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   vehicleId: string;
+//   vehicleType: "Car" | "Bike" | "Auto";
+//   userId: string;
+//   userRole: "owner" | "customer";
+//   onBookingComplete?: (startDate: Date, endDate: Date) => void;
+// }
+
+// interface TimeSlot {
+//   hour: number;
+//   period: 'AM' | 'PM';
+// }
+
+// interface UnavailableSlot {
+//   id: string;
+//   dates: Date[];
+//   fromDate: string;
+//   toDate: string;
+//   reason: string;
+// }
+
+// interface AvailabilityBlock {
+//   _id: string;
+//   startDate: Date;
+//   endDate: Date;
+//   startTime: TimeSlot;
+//   endTime: TimeSlot;
+//   type: "NotAvailable" | "Booked";
+//   isHistorical?: boolean;
+// }
+
+// // ============ MAIN COMPONENT ============
+
+// const AvailabilityDateTime: React.FC<CalendarProps> = ({ 
+//   isOpen, 
+//   onClose, 
+//   vehicleId, 
+//   vehicleType, 
+//   userId,
+//   userRole,
+//   onBookingComplete
+// }) => {
+  
+//   // ============ STATE MANAGEMENT ============
+  
+//   // Form States
+//   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
+//   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
+//   const [startTime, setStartTime] = useState<TimeSlot>({ hour: 9, period: 'AM' });
+//   const [endTime, setEndTime] = useState<TimeSlot>({ hour: 6, period: 'PM' });
+//   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+//   // UI States
+//   const [showStartTime, setShowStartTime] = useState(false);
+//   const [showEndTime, setShowEndTime] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState<string | null>(null);
+//   const [success, setSuccess] = useState<string | null>(null);
+//   const [syncing, setSyncing] = useState(false);
+
+//   // Data States
+//   const [unavailableDates, setUnavailableDates] = useState<UnavailableSlot[]>([]);
+//   const [bookedDates, setBookedDates] = useState<Date[]>([]);
+//   const [availabilityBlocks, setAvailabilityBlocks] = useState<AvailabilityBlock[]>([]);
+
+//   // Edit/Delete Mode States
+//   const [editMode, setEditMode] = useState(false);
+//   const [deleteMode, setDeleteMode] = useState(false);
+//   const [selectedSlotForEdit, setSelectedSlotForEdit] = useState<UnavailableSlot | null>(null);
+
+//   // Auto-sync
+//   const [autoSync, setAutoSync] = useState(true);
+//   const [lastSyncTime, setLastSyncTime] = useState<Date>(new Date());
+
+//   // ============ UTILITY FUNCTIONS ============
+
+//   const formatDateForBackend = (date: Date): string => {
+//     const year = date.getFullYear();
+//     const month = String(date.getMonth() + 1).padStart(2, '0');
+//     const day = String(date.getDate()).padStart(2, '0');
+//     return `${year}-${month}-${day}`;
+//   };
+
+//   const formatDateDisplay = (date: Date): string => {
+//     return date.toLocaleDateString('en-US', { 
+//       month: 'short', 
+//       day: 'numeric', 
+//       year: 'numeric' 
+//     });
+//   };
+
+//   const formatTime = (time: TimeSlot): string => {
+//     return `${time.hour.toString().padStart(2, '0')} ${time.period}`;
+//   };
+
+//   const parseTimeFromBackend = (timeStr: string): TimeSlot => {
+//     const hour24 = parseFloat(timeStr);
+//     let hour = hour24;
+//     let period: 'AM' | 'PM' = 'AM';
+
+//     if (hour24 === 0) {
+//       hour = 12;
+//       period = 'AM';
+//     } else if (hour24 < 12) {
+//       hour = hour24;
+//       period = 'AM';
+//     } else if (hour24 === 12) {
+//       hour = 12;
+//       period = 'PM';
+//     } else {
+//       hour = hour24 - 12;
+//       period = 'PM';
+//     }
+
+//     return { hour: Math.floor(hour), period };
+//   };
+
+//   const formatTimeForBackend = (time: TimeSlot): string => {
+//     let hour24 = time.hour;
+//     if (time.period === 'PM' && time.hour !== 12) {
+//       hour24 = time.hour + 12;
+//     } else if (time.period === 'AM' && time.hour === 12) {
+//       hour24 = 0;
+//     }
+//     return `${hour24}.00`;
+//   };
+
+//   const isDateInPast = (date: Date): boolean => {
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0);
+//     const checkDate = new Date(date);
+//     checkDate.setHours(0, 0, 0, 0);
+//     return checkDate < today;
+//   };
+
+//   const getDateRangeArray = (startDateStr: string, endDateStr: string): Date[] => {
+//     const dates: Date[] = [];
+//     const start = new Date(startDateStr + 'T00:00:00');
+//     const end = new Date(endDateStr + 'T00:00:00');
+//     const current = new Date(start);
+    
+//     while (current <= end) {
+//       dates.push(new Date(current));
+//       current.setDate(current.getDate() + 1);
+//     }
+    
+//     return dates;
+//   };
+
+//   // ============ API INTEGRATION ============
+// const fetchVehicleAvailability = useCallback(async (silent = false) => {
+//   if (!vehicleId) return;
+
+//   if (!silent) setSyncing(true);
+
+//   try {
+//     const url = `http://3.110.122.127:3000/getVehicleAvailability?VechileId=${vehicleId}&vechileType=${vehicleType}`;
+
+//     console.log("📡 Fetching:", url);
+
+//     const response = await fetch(url, {
+//       method: "GET",
+//       redirect: "follow"
+//     });
+
+//     const data = await response.json();
+//     console.log("📊 API Response:", data);
+
+//     if (data.success || data.availability) {
+//       parseAndCategorizeAvailability(data.availability || []);
+//       setLastSyncTime(new Date());
+//       console.log("✅ Calendar synced successfully");
+//     } else {
+//       console.log("⚠ No availability data returned");
+//     }
+
+//   } catch (err) {
+//     console.error("❌ Sync failed:", err);
+
+//     if (!silent) {
+//       setError("Failed to sync calendar");
+//       setTimeout(() => setError(null), 3000);
+//     }
+
+//   } finally {
+//     if (!silent) setSyncing(false);
+//   }
+
+// }, [vehicleId, vehicleType]);
+
+
+//   const parseAndCategorizeAvailability = (data: any[]) => {
+//     const unavailable: UnavailableSlot[] = [];
+//     const booked: Date[] = [];
+//     const blocks: AvailabilityBlock[] = [];
+
+//     console.log('🔄 Processing availability data:', data.length, 'days');
+
+//     data.forEach(day => {
+//       const dayDate = day.date.split('T')[0];
+//       const isPast = isDateInPast(new Date(dayDate));
+
+//       day.slots?.forEach((slot: any) => {
+//         const slotId = slot._id || slot.id || `${dayDate}-${slot.fromTime}`;
+//         const isBookedSlot = 
+//           slot.type === "Booked" ||
+//           slot.status?.toLowerCase() === 'booked' ||
+//           slot.isBooked === true;
+
+//         const isUnavailableSlot = 
+//           slot.type === "NotAvailable" ||
+//           slot.status?.toLowerCase() === 'notavailable' ||
+//           slot.isNotAvailable === true;
+
+//         // Build date range for this slot
+//         let dates: Date[] = [];
+//         try {
+//           const from = slot.fromDate || dayDate;
+//           const to = slot.toDate || dayDate;
+          
+//           if (from === to) {
+//             dates = [new Date(from + 'T00:00:00')];
+//           } else {
+//             dates = getDateRangeArray(from, to);
+//           }
+//         } catch (err) {
+//           console.error('Error building dates:', err);
+//           return;
+//         }
+
+//         if (isBookedSlot && !isPast) {
+//           booked.push(...dates);
+//           console.log('📅 Booked:', dayDate);
+          
+//           blocks.push({
+//             _id: slotId,
+//             startDate: new Date(slot.fromDate || dayDate),
+//             endDate: new Date(slot.toDate || dayDate),
+//             startTime: parseTimeFromBackend(slot.fromTime),
+//             endTime: parseTimeFromBackend(slot.toTime),
+//             type: "Booked",
+//             isHistorical: isPast
+//           });
+//         } else if (isUnavailableSlot && !isPast) {
+//           unavailable.push({
+//             id: slotId,
+//             dates,
+//             fromDate: slot.fromDate || dayDate,
+//             toDate: slot.toDate || dayDate,
+//             reason: slot.reason || 'Owner unavailable'
+//           });
+//           console.log('🚫 Unavailable:', dayDate);
+          
+//           blocks.push({
+//             _id: slotId,
+//             startDate: new Date(slot.fromDate || dayDate),
+//             endDate: new Date(slot.toDate || dayDate),
+//             startTime: parseTimeFromBackend(slot.fromTime),
+//             endTime: parseTimeFromBackend(slot.toTime),
+//             type: "NotAvailable",
+//             isHistorical: isPast
+//           });
+//         }
+//       });
+//     });
+
+//     setUnavailableDates(unavailable);
+//     setBookedDates(booked);
+//     setAvailabilityBlocks(blocks);
+
+//     console.log('📊 Summary:', {
+//       unavailable: unavailable.length,
+//       booked: booked.length,
+//       blocks: blocks.length
+//     });
+//   };
+
+//   const safeCreateNotAvailability = async (payload: any) => {
+//     try {
+//       console.log('📤 Creating availability:', payload);
+      
+//       const urlencoded = new URLSearchParams();
+//       Object.keys(payload).forEach(key => {
+//         urlencoded.append(key, String(payload[key]));
+//       });
+
+//       const response = await fetch(
+//         "http://3.110.122.127:3000/createNotAvailability",
+//         {
+//           method: "POST",
+//           headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//           body: urlencoded,
+//           redirect: "follow"
+//         }
+//       );
+
+//       const result = await response.json();
+//       console.log('📥 Create response:', result);
+      
+//       return result.success ? { success: true, data: result } : { success: false, message: result.message };
+//     } catch (err: any) {
+//       console.error('❌ Create failed:', err);
+//       return { success: false, message: err.message || 'Create failed' };
+//     }
+//   };
+
+//   const safeUpdateNotAvailability = async (notAvailabilityId: string, payload: any) => {
+//   try {
+//     console.log("📤 Updating availability:", notAvailabilityId, payload);
+
+//     // Convert payload into x-www-form-urlencoded
+//     const urlencoded = new URLSearchParams();
+//     for (const key in payload) {
+//       if (payload[key] !== undefined && payload[key] !== null) {
+//         urlencoded.append(key, String(payload[key]));
+//       }
+//     }
+
+//     const response = await fetch(
+//       `http://3.110.122.127:3000/updateNotAvailability/${notAvailabilityId}`,
+//       {
+//         method: "PUT",
+//         headers: {
+//           "Content-Type": "application/x-www-form-urlencoded",
+//         },
+//         body: urlencoded,
+//         redirect: "follow",
+//       }
+//     );
+
+//     const result = await response.json();
+//     console.log("📥 Update response:", result);
+
+//     if (result.success) {
+//       return { success: true, data: result };
+//     }
+
+//     return { success: false, message: result.message || "Update failed" };
+//   } catch (err: any) {
+//     console.error("❌ Update failed:", err);
+//     return { success: false, message: err.message || "Update failed" };
+//   }
+// };
+
+
+//   const safeDeleteNotAvailability = async (id: string) => {
+//     try {
+//       console.log('📤 Deleting availability:', id);
+      
+//       const response = await fetch(
+//         `http://3.110.122.127:3000/deleteNotAvailability/${id}`,
+//         { method: "DELETE", redirect: "follow" }
+//       );
+
+//       const result = await response.json();
+//       console.log('📥 Delete response:', result);
+      
+//       return { success: true };
+//     } catch (err: any) {
+//       console.error('❌ Delete failed:', err);
+//       return { success: false, message: err.message || 'Delete failed' };
+//     }
+//   };
+
+//   // ============ CALENDAR LOGIC ============
+
+//   const isDateUnavailable = (date: Date): boolean => {
+//     const dateStr = formatDateForBackend(date);
+    
+//     const isBooked = bookedDates.some(bd => formatDateForBackend(bd) === dateStr);
+//     if (isBooked) return true;
+    
+//     if (editMode && selectedSlotForEdit) {
+//       const isInEditSlot = unavailableDates
+//         .find(s => s.id === selectedSlotForEdit.id)
+//         ?.dates.some(d => formatDateForBackend(d) === dateStr);
+//       if (isInEditSlot) return false;
+//     }
+    
+//     return unavailableDates.some(slot => 
+//       slot.dates.some(d => formatDateForBackend(d) === dateStr)
+//     );
+//   };
+
+//   const getUnavailableSlotForDate = (date: Date): UnavailableSlot | null => {
+//     const normalized = new Date(date).setHours(0, 0, 0, 0);
+    
+//     return unavailableDates.find(slot => {
+//       const from = new Date(slot.fromDate).setHours(0, 0, 0, 0);
+//       const to = new Date(slot.toDate).setHours(0, 0, 0, 0);
+//       return normalized >= from && normalized <= to;
+//     }) || null;
+//   };
+
+//   const isDateSelected = (date: Date): boolean => {
+//     if (!selectedStartDate) return false;
+//     const dateStr = date.toDateString();
+//     const startStr = selectedStartDate.toDateString();
+//     if (!selectedEndDate) return dateStr === startStr;
+    
+//     const checkDate = new Date(date).setHours(0, 0, 0, 0);
+//     const start = new Date(selectedStartDate).setHours(0, 0, 0, 0);
+//     const end = new Date(selectedEndDate).setHours(0, 0, 0, 0);
+//     return checkDate >= start && checkDate <= end;
+//   };
+
+//   const isDateInRange = (date: Date): boolean => {
+//     if (!selectedStartDate || !selectedEndDate) return false;
+//     const checkDate = new Date(date).setHours(0, 0, 0, 0);
+//     const start = new Date(selectedStartDate).setHours(0, 0, 0, 0);
+//     const end = new Date(selectedEndDate).setHours(0, 0, 0, 0);
+//     return checkDate > start && checkDate < end;
+//   };
+
+//   const getDateStatus = (date: Date): 'past' | 'unavailable' | 'booked' | 'selected' | 'available' => {
+//     if (isDateInPast(date)) return 'past';
+//     if (isDateSelected(date)) return 'selected';
+    
+//     const dateStr = formatDateForBackend(date);
+//     const isBooked = bookedDates.some(bd => formatDateForBackend(bd) === dateStr);
+//     if (isBooked) return 'booked';
+    
+//     if (isDateUnavailable(date)) return 'unavailable';
+//     return 'available';
+//   };
+
+//   const handleEdit = (block: AvailabilityBlock) => {
+//     setSelectedStartDate(block.startDate);
+//     setSelectedEndDate(block.endDate);
+//     setStartTime(block.startTime);
+//     setEndTime(block.endTime);
+//     setEditMode(true);
+//     setDeleteMode(false);
+    
+//     const slot = unavailableDates.find(s => s.id === block._id);
+//     if (slot) {
+//       setSelectedSlotForEdit(slot);
+//     }
+//   };
+
+//   const deleteNotAvailability = async (blockId: string) => {
+//     if (!window.confirm('Are you sure you want to delete this unavailable period?')) return;
+
+//     setLoading(true);
+//     try {
+//       const response = await safeDeleteNotAvailability(blockId);
+      
+//       if (response.success) {
+//         setSuccess('✅ Deleted successfully!');
+//         setTimeout(() => setSuccess(null), 3000);
+//         await fetchVehicleAvailability();
+//       } else {
+//         setError(response.message || 'Failed to delete');
+//         setTimeout(() => setError(null), 3000);
+//       }
+//     } catch (err) {
+//       console.error('Error deleting:', err);
+//       setError('Failed to delete');
+//       setTimeout(() => setError(null), 3000);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleDateClick = (date: Date) => {
+//     const isPast = isDateInPast(date);
+//     const isUnavail = isDateUnavailable(date);
+
+//     if (isPast) return;
+
+//     if (userRole === "customer" && isUnavail) {
+//       const slot = getUnavailableSlotForDate(date);
+//       setError(slot ? `Unavailable: ${slot.reason}` : "This date is unavailable");
+//       setTimeout(() => setError(null), 2000);
+//       return;
+//     }
+
+//     if (userRole === "owner" && deleteMode && isUnavail) {
+//       const slot = getUnavailableSlotForDate(date);
+//       if (slot) {
+//         handleDeleteSlot(slot);
+//       }
+//       return;
+//     }
+
+//     if (userRole === "owner" && editMode) {
+//       if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+//         setSelectedStartDate(date);
+//         setSelectedEndDate(null);
+//       } else {
+//         const from = date < selectedStartDate ? date : selectedStartDate;
+//         const to = date < selectedStartDate ? selectedStartDate : date;
+//         setSelectedStartDate(from);
+//         setSelectedEndDate(to);
+//       }
+//       return;
+//     }
+
+//     if (userRole === "owner" && !editMode && !deleteMode && isUnavail) {
+//       const slot = getUnavailableSlotForDate(date);
+//       if (slot) {
+//         setSelectedStartDate(new Date(slot.fromDate));
+//         setSelectedEndDate(new Date(slot.toDate));
+//         setSelectedSlotForEdit(slot);
+//         setEditMode(true);
+//         return;
+//       }
+//     }
+
+//     if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+//       setSelectedStartDate(date);
+//       setSelectedEndDate(null);
+//     } else {
+//       const from = date < selectedStartDate ? date : selectedStartDate;
+//       const to = date < selectedStartDate ? selectedStartDate : date;
+//       setSelectedStartDate(from);
+//       setSelectedEndDate(to);
+//     }
+//   };
+
+//   const handleEditIconPress = () => {
+//     if (editMode && selectedStartDate && selectedEndDate) {
+//       handleSaveEdit();
+//     } else {
+//       setEditMode(true);
+//       setDeleteMode(false);
+//       setSelectedStartDate(null);
+//       setSelectedEndDate(null);
+//       setSelectedSlotForEdit(null);
+//     }
+//   };
+
+//   const handleSaveEdit = async () => {
+//     if (!selectedStartDate || !selectedEndDate) {
+//       setError('Please select both start and end dates');
+//       setTimeout(() => setError(null), 3000);
+//       return;
+//     }
+
+//     setLoading(true);
+
+//     try {
+//       const fromDateStr = formatDateForBackend(selectedStartDate);
+//       const toDateStr = formatDateForBackend(selectedEndDate);
+      
+//       const payload = {
+//         userId: userId,
+//         VechileId: vehicleId,
+//         vechileType: vehicleType,
+//         fromDate: fromDateStr,
+//         toDate: toDateStr,
+//         fromTime: '12:00 AM',
+//         toTime: '11:59 PM',
+//         isNotAvailable: true,
+//       };
+
+//       let response;
+
+//       if (selectedSlotForEdit?.id) {
+//         response = await safeUpdateNotAvailability(selectedSlotForEdit.id, payload);
+//       } else {
+//         response = await safeCreateNotAvailability({
+//           ...payload,
+//           reason: 'Owner unavailable'
+//         });
+//       }
+
+//       if (response.success) {
+//         setSuccess(selectedSlotForEdit ? '✅ Updated successfully!' : '✅ Created successfully!');
+//         setTimeout(() => setSuccess(null), 3000);
+        
+//         setEditMode(false);
+//         setSelectedStartDate(null);
+//         setSelectedEndDate(null);
+//         setSelectedSlotForEdit(null);
+        
+//         await fetchVehicleAvailability();
+//       } else {
+//         setError(response.message || 'Failed to save changes');
+//         setTimeout(() => setError(null), 3000);
+//       }
+//     } catch (err: any) {
+//       console.error('Error saving:', err);
+//       setError('Failed to save changes');
+//       setTimeout(() => setError(null), 3000);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleDeleteIconPress = () => {
+//     if (deleteMode) {
+//       setDeleteMode(false);
+//     } else {
+//       setDeleteMode(true);
+//       setEditMode(false);
+//       setSelectedStartDate(null);
+//       setSelectedEndDate(null);
+//       setSelectedSlotForEdit(null);
+//     }
+//   };
+
+//   const handleDeleteSlot = async (slot: UnavailableSlot) => {
+//     if (!slot.id) {
+//       setError('No slot ID found');
+//       setTimeout(() => setError(null), 2000);
+//       return;
+//     }
+
+//     if (!window.confirm(`Delete unavailable period from ${slot.fromDate} to ${slot.toDate}?`)) return;
+
+//     setLoading(true);
+
+//     try {
+//       const response = await safeDeleteNotAvailability(slot.id);
+      
+//       if (response.success) {
+//         setSuccess('✅ Deleted successfully!');
+//         setTimeout(() => setSuccess(null), 3000);
+//         setDeleteMode(false);
+//         await fetchVehicleAvailability();
+//       } else {
+//         setError(response.message || 'Failed to delete');
+//         setTimeout(() => setError(null), 3000);
+//       }
+//     } catch (err) {
+//       console.error('Error deleting:', err);
+//       setError('Failed to delete');
+//       setTimeout(() => setError(null), 3000);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleConfirm = async () => {
+//     if (editMode) {
+//       await handleSaveEdit();
+//     } else {
+//       if (userRole === "owner") {
+//         await handleSaveEdit();
+//       } else if (onBookingComplete && selectedStartDate && selectedEndDate) {
+//         onBookingComplete(selectedStartDate, selectedEndDate);
+//       }
+//     }
+//   };
+
+//   const resetForm = () => {
+//     setSelectedStartDate(null);
+//     setSelectedEndDate(null);
+//     setStartTime({ hour: 9, period: 'AM' });
+//     setEndTime({ hour: 6, period: 'PM' });
+//     setEditMode(false);
+//     setDeleteMode(false);
+//     setSelectedSlotForEdit(null);
+//   };
+
+//   // ============ CALENDAR RENDERING ============
+
+//   const daysInMonth = (date: Date) => {
+//     const year = date.getFullYear();
+//     const month = date.getMonth();
+//     const firstDay = new Date(year, month, 1);
+//     const lastDay = new Date(year, month + 1, 0);
+//     const daysArray: (Date | null)[] = [];
+    
+//     const startPadding = firstDay.getDay();
+//     for (let i = 0; i < startPadding; i++) {
+//       daysArray.push(null);
+//     }
+    
+//     for (let i = 1; i <= lastDay.getDate(); i++) {
+//       daysArray.push(new Date(year, month, i));
+//     }
+    
+//     return daysArray;
+//   };
+
+//   const generateTimeOptions = (): TimeSlot[] => {
+//     const times: TimeSlot[] = [];
+//     for (let i = 1; i <= 12; i++) {
+//       times.push({ hour: i, period: 'AM' });
+//     }
+//     for (let i = 1; i <= 12; i++) {
+//       times.push({ hour: i, period: 'PM' });
+//     }
+//     return times;
+//   };
+
+//   // ============ AUTO-SYNC ============
+
+//   useEffect(() => {
+//     if (!isOpen || !autoSync) return;
+
+//     const interval = setInterval(() => {
+//       fetchVehicleAvailability(true);
+//     }, 5000);
+
+//     return () => clearInterval(interval);
+//   }, [isOpen, autoSync, fetchVehicleAvailability]);
+
+//   useEffect(() => {
+//     if (isOpen && vehicleId) {
+//       fetchVehicleAvailability();
+//     }
+//   }, [isOpen, vehicleId, fetchVehicleAvailability]);
+
+//   // ============ RENDER ============
+
+//   if (!isOpen) return null;
+
+//   const days = daysInMonth(currentMonth);
+//   const monthYear = currentMonth.toLocaleDateString('en-US', { 
+//     month: 'long', 
+//     year: 'numeric' 
+//   });
+
+//   return (
+//     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999] p-4">
+//       <div className="bg-white w-full max-w-6xl rounded-2xl shadow-2xl max-h-[95vh] overflow-y-auto">
+        
+//         {/* Success Toast */}
+//         {success && (
+//           <div className="fixed top-4 right-4 z-[10000] bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+//             <Check className="w-6 h-6" />
+//             <span className="font-medium">{success}</span>
+//           </div>
+//         )}
+
+//         {/* Error Toast */}
+//         {error && (
+//           <div className="fixed top-4 right-4 z-[10000] bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+//             <AlertCircle className="w-6 h-6" />
+//             <span className="font-medium">{error}</span>
+//           </div>
+//         )}
+
+//         {/* Loading Overlay */}
+//         {loading && (
+//           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[10001]">
+//             <div className="bg-white rounded-2xl p-8 shadow-2xl">
+//               <Loader2 className="w-16 h-16 animate-spin text-[#001F67] mx-auto" />
+//               <p className="mt-6 text-gray-700 font-semibold text-lg">Processing...</p>
+//             </div>
+//           </div>
+//         )}
+
+//         {/* Header */}
+//         <div className="bg-gradient-to-r from-[#001F67] to-[#3474FF] text-white p-6 rounded-t-2xl">
+//           <div className="flex items-center justify-between">
+//             <div className="flex items-center gap-4">
+//               <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur">
+//                 <Calendar className="w-7 h-7" />
+//               </div>
+//               <div>
+//                 <h1 className="text-2xl font-bold">
+//                   {userRole === "owner" ? "Owner Calendar" : "Customer Booking"}
+//                 </h1>
+//                 <p className="text-white/80 text-sm mt-1">
+//                   {userRole === "owner" 
+//                     ? "Manage vehicle availability" 
+//                     : "Select dates to book this vehicle"}
+//                 </p>
+//               </div>
+//             </div>
+//             <div className="flex items-center gap-3">
+//               {userRole === "owner" && (
+//                 <div className="flex items-center gap-2 mr-3">
+//                   {editMode && (
+//                     <span className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
+//                       Editing
+//                     </span>
+//                   )}
+//                   {deleteMode && (
+//                     <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+//                       Delete Mode
+//                     </span>
+//                   )}
+//                 </div>
+//               )}
+//               <button
+//                 onClick={() => fetchVehicleAvailability()}
+//                 disabled={syncing}
+//                 className="p-2.5 bg-white/20 hover:bg-white/30 rounded-lg transition-all backdrop-blur"
+//                 title="Refresh calendar"
+//               >
+//                 <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+//               </button>
+//               <button 
+//                 onClick={onClose} 
+//                 className="p-2.5 bg-white/20 hover:bg-white/30 rounded-lg transition-all backdrop-blur"
+//               >
+//                 <X className="w-5 h-5" />
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Mode Banners */}
+//         {editMode && userRole === "owner" && (
+//           <div className="mx-6 mt-4 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-lg">
+//             <div className="flex items-center gap-2">
+//               <Edit2 className="w-5 h-5 text-orange-600" />
+//               <p className="text-sm text-orange-800 font-medium">
+//                 Select dates to mark as not available. Click ✓ to save.
+//               </p>
+//             </div>
+//           </div>
+//         )}
+
+//         {deleteMode && userRole === "owner" && (
+//           <div className="mx-6 mt-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+//             <div className="flex items-center gap-2">
+//               <Trash2 className="w-5 h-5 text-red-600" />
+//               <p className="text-sm text-red-800 font-medium">
+//                 Click any unavailable date to delete it.
+//               </p>
+//             </div>
+//           </div>
+//         )}
+
+//         {userRole === "customer" && (unavailableDates.length > 0 || bookedDates.length > 0) && (
+//           <div className="mx-6 mt-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+//             <div className="flex items-center gap-2">
+//               <AlertCircle className="w-5 h-5 text-blue-600" />
+//               <p className="text-sm text-blue-800 font-medium">
+//                 Red crossed dates are not available for booking
+//               </p>
+//             </div>
+//           </div>
+//         )}
+
+//         {/* Main Content */}
+//         <div className="p-6">
+//           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+//             {/* Calendar Section */}
+//             <div className="lg:col-span-2">
+              
+//               {/* Selected Dates Display */}
+//               <div className="grid grid-cols-2 gap-4 mb-6">
+//                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
+//                   <label className="block text-xs font-semibold text-blue-600 mb-2 uppercase tracking-wide">
+//                     Start Date
+//                   </label>
+//                   <p className="text-lg font-bold text-gray-900">
+//                     {selectedStartDate ? formatDateDisplay(selectedStartDate) : 'Select a date'}
+//                   </p>
+//                 </div>
+//                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-4">
+//                   <label className="block text-xs font-semibold text-purple-600 mb-2 uppercase tracking-wide">
+//                     End Date
+//                   </label>
+//                   <p className="text-lg font-bold text-gray-900">
+//                     {selectedEndDate ? formatDateDisplay(selectedEndDate) : 'Select a date'}
+//                   </p>
+//                 </div>
+//               </div>
+
+//               {/* Month Navigation */}
+//               <div className="flex items-center justify-between mb-6">
+//                 <button
+//                   onClick={() => {
+//                     const prev = new Date(currentMonth);
+//                     prev.setMonth(prev.getMonth() - 1);
+//                     setCurrentMonth(prev);
+//                   }}
+//                   className="p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all shadow-sm"
+//                 >
+//                   <ChevronLeft className="w-5 h-5 text-gray-700" />
+//                 </button>
+//                 <h2 className="text-xl font-bold text-gray-900">{monthYear}</h2>
+//                 <button
+//                   onClick={() => {
+//                     const next = new Date(currentMonth);
+//                     next.setMonth(next.getMonth() + 1);
+//                     setCurrentMonth(next);
+//                   }}
+//                   className="p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all shadow-sm"
+//                 >
+//                   <ChevronRight className="w-5 h-5 text-gray-700" />
+//                 </button>
+//               </div>
+
+//               {/* Calendar Grid */}
+//               <div className="bg-white border-2 border-gray-200 rounded-xl p-4 shadow-sm">
+//                 {/* Day Headers */}
+//                 <div className="grid grid-cols-7 gap-2 mb-3">
+//                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+//                     <div key={day} className="text-center font-bold text-sm text-gray-600 py-2">
+//                       {day}
+//                     </div>
+//                   ))}
+//                 </div>
+
+//                 {/* Calendar Days */}
+//                 <div className="grid grid-cols-7 gap-2">
+//                   {days.map((day, index) => {
+//                     if (!day) return <div key={index} className="invisible" />;
+
+//                     const status = getDateStatus(day);
+//                     const selected = isDateSelected(day);
+                         
+//                     let bgClass = 'bg-white hover:bg-blue-50 border border-gray-200';
+//                     let textClass = 'text-gray-900 font-semibold';
+//                     let cursorClass = 'cursor-pointer';
+//                     let overlayIcon = null;
+
+//                     if (status === 'past') {
+//                       bgClass = 'bg-gray-100 border border-gray-200';
+//                       textClass = 'text-gray-400';
+//                       cursorClass = 'cursor-not-allowed';
+//                     } else if (status === 'booked') {
+//                       bgClass = 'bg-orange-100 border-2 border-orange-400';
+//                       textClass = 'text-orange-900 font-bold';
+//                       overlayIcon = <Ban className="w-6 h-6 text-orange-600 absolute inset-0 m-auto" />;
+//                       if (userRole === 'customer') cursorClass = 'cursor-not-allowed';
+//                     } else if (status === 'unavailable') {
+//                       bgClass = 'bg-red-100 border-2 border-red-400';
+//                       textClass = 'text-red-900 font-bold';
+//                       overlayIcon = <X className="w-6 h-6 text-red-600 absolute inset-0 m-auto" />;
+//                       if (userRole === 'customer') cursorClass = 'cursor-not-allowed';
+//                       if (deleteMode) {
+//                         bgClass = 'bg-red-200 border-2 border-red-600';
+//                         cursorClass = 'cursor-pointer hover:scale-105';
+//                       }
+//                     } else if (selected) {
+//                       bgClass = 'bg-gradient-to-br from-blue-500 to-indigo-600 border-2 border-blue-700';
+//                       textClass = 'text-white font-bold';
+//                     } else if (isDateInRange(day)) {
+//                       bgClass = 'bg-blue-100 border-2 border-blue-300';
+//                       textClass = 'text-blue-900 font-bold';
+//                     }
+
+//                     return (
+//                       <button
+//                         key={index}
+//                         onClick={() => handleDateClick(day)}
+//                         disabled={status === 'past'}
+//                         className={`
+//                           relative h-14 rounded-xl transition-all shadow-sm
+//                           ${bgClass} ${cursorClass}
+//                           ${selected ? 'scale-105 shadow-lg' : ''}
+//                           disabled:cursor-not-allowed
+//                         `}
+//                       >
+//                         <span className={`relative z-10 ${textClass}`}>
+//                           {day.getDate()}
+//                         </span>
+//                         {overlayIcon}
+//                       </button>
+//                     );
+//                   })}
+//                 </div>
+//               </div>
+
+//               {/* Owner Action Buttons */}
+//               {userRole === "owner" && (
+//                 <div className="flex gap-3 mt-6">
+//                   <button
+//                     onClick={handleEditIconPress}
+//                     className={`
+//                       flex-1 h-12 rounded-xl font-bold transition-all shadow-md
+//                       ${editMode 
+//                         ? 'bg-green-500 text-white hover:bg-green-600' 
+//                         : 'bg-blue-500 text-white hover:bg-blue-600'}
+//                     `}
+//                   >
+//                     {editMode ? (
+//                       <span className="flex items-center justify-center gap-2">
+//                         <Check className="w-5 h-5" />
+//                         Save Changes
+//                       </span>
+//                     ) : (
+//                       <span className="flex items-center justify-center gap-2">
+//                         <Edit2 className="w-5 h-5" />
+//                         Edit Mode
+//                       </span>
+//                     )}
+//                   </button>
+//                   <button
+//                     onClick={handleDeleteIconPress}
+//                     className={`
+//                       flex-1 h-12 rounded-xl font-bold transition-all shadow-md
+//                       ${deleteMode 
+//                         ? 'bg-gray-500 text-white hover:bg-gray-600' 
+//                         : 'bg-red-500 text-white hover:bg-red-600'}
+//                     `}
+//                   >
+//                     <span className="flex items-center justify-center gap-2">
+//                       <Trash2 className="w-5 h-5" />
+//                       {deleteMode ? 'Exit Delete' : 'Delete Mode'}
+//                     </span>
+//                   </button>
+//                 </div>
+//               )}
+//             </div>
+
+//             {/* Time & Blocks Section */}
+//             <div className="space-y-6">
+              
+//               {/* Time Selection */}
+//               <div>
+//                 <h3 className="text-lg font-bold text-gray-900 mb-4">Select Time</h3>
+                
+//                 <div className="grid grid-cols-2 gap-3">
+//                   {/* Start Time */}
+//                   <div className="relative">
+//                     <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+//                       Start Time
+//                     </label>
+//                     <button
+//                       onClick={() => {
+//                         if (userRole === "owner") {
+//                           setShowStartTime(!showStartTime);
+//                           setShowEndTime(false);
+//                         }
+//                       }}
+//                       disabled={userRole === "customer"}
+//                       className="w-full h-12 border-2 border-gray-300 rounded-xl flex items-center justify-center bg-white hover:bg-blue-50 hover:border-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300"
+//                     >
+//                       <Clock className="w-4 h-4 mr-2 text-gray-600" />
+//                       <span className="text-sm font-bold text-gray-900">{formatTime(startTime)}</span>
+//                     </button>
+//                     {showStartTime && userRole === "owner" && (
+//                       <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-300 rounded-xl shadow-2xl max-h-56 overflow-y-auto z-20">
+//                         {generateTimeOptions().map((time, idx) => (
+//                           <button
+//                             key={idx}
+//                             onClick={() => {
+//                               setStartTime(time);
+//                               setShowStartTime(false);
+//                             }}
+//                             className="w-full px-4 py-3 text-sm text-left hover:bg-blue-50 font-medium text-gray-900 border-b last:border-b-0"
+//                           >
+//                             {formatTime(time)}
+//                           </button>
+//                         ))}
+//                       </div>
+//                     )}
+//                   </div>
+
+//                   {/* End Time */}
+//                   <div className="relative">
+//                     <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+//                       End Time
+//                     </label>
+//                     <button
+//                       onClick={() => {
+//                         if (userRole === "owner") {
+//                           setShowEndTime(!showEndTime);
+//                           setShowStartTime(false);
+//                         }
+//                       }}
+//                       disabled={userRole === "customer"}
+//                       className="w-full h-12 border-2 border-gray-300 rounded-xl flex items-center justify-center bg-white hover:bg-blue-50 hover:border-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300"
+//                     >
+//                       <Clock className="w-4 h-4 mr-2 text-gray-600" />
+//                       <span className="text-sm font-bold text-gray-900">{formatTime(endTime)}</span>
+//                     </button>
+//                     {showEndTime && userRole === "owner" && (
+//                       <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-300 rounded-xl shadow-2xl max-h-56 overflow-y-auto z-20">
+//                         {generateTimeOptions().map((time, idx) => (
+//                           <button
+//                             key={idx}
+//                             onClick={() => {
+//                               setEndTime(time);
+//                               setShowEndTime(false);
+//                             }}
+//                             className="w-full px-4 py-3 text-sm text-left hover:bg-blue-50 font-medium text-gray-900 border-b last:border-b-0"
+//                           >
+//                             {formatTime(time)}
+//                           </button>
+//                         ))}
+//                       </div>
+//                     )}
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Unavailability Blocks List */}
+//               {userRole === "owner" && availabilityBlocks.length > 0 && (
+//                 <div>
+//                   <h3 className="text-lg font-bold text-gray-900 mb-4">
+//                     Unavailable Periods ({availabilityBlocks.filter(b => !b.isHistorical).length})
+//                   </h3>
+//                   <div className="space-y-3 max-h-96 overflow-y-auto">
+//                     {availabilityBlocks
+//                       .filter(block => !block.isHistorical)
+//                       .map((block) => (
+//                         <div 
+//                           key={block._id} 
+//                           className={`
+//                             ${block.type === 'Booked' 
+//                               ? 'bg-orange-50 border-2 border-orange-300' 
+//                               : 'bg-red-50 border-2 border-red-300'
+//                             } rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow
+//                           `}
+//                         >
+//                           <div className="flex items-start justify-between gap-3">
+//                             <div className="flex-1 min-w-0">
+                              
+//                               {/* Dates */}
+//                               <div className="flex items-center gap-2 text-sm text-gray-800 mb-2">
+//                                 <Calendar
+//                                   className={`w-4 h-4 flex-shrink-0 ${
+//                                     block.type === "Booked" ? "text-orange-600" : "text-red-600"
+//                                   }`}
+//                                 />
+//                                 <span className="font-bold truncate">
+//                                   {formatDateDisplay(block.startDate)}
+//                                 </span>
+//                                 <span className="text-gray-400 font-bold">→</span>
+//                                 <span className="font-bold truncate">
+//                                   {formatDateDisplay(block.endDate)}
+//                                 </span>
+//                               </div>
+
+//                               {/* Time */}
+//                               <div className="flex items-center gap-2 text-sm text-gray-700 mb-3">
+//                                 <Clock
+//                                   className={`w-4 h-4 flex-shrink-0 ${
+//                                     block.type === "Booked" ? "text-orange-600" : "text-red-600"
+//                                   }`}
+//                                 />
+//                                 <span className="font-semibold">
+//                                   {formatTime(block.startTime)} → {formatTime(block.endTime)}
+//                                 </span>
+//                               </div>
+
+//                               {/* Type Badge */}
+//                               <span
+//                                 className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-full ${
+//                                   block.type === "Booked"
+//                                     ? "bg-orange-200 text-orange-900"
+//                                     : "bg-red-200 text-red-900"
+//                                 }`}
+//                               >
+//                                 {block.type === "Booked" ? (
+//                                   <>
+//                                     <Clock className="w-3 h-3" />
+//                                     Booked
+//                                   </>
+//                                 ) : (
+//                                   <>
+//                                     <Ban className="w-3 h-3" />
+//                                     Not Available
+//                                   </>
+//                                 )}
+//                               </span>
+//                             </div>
+
+//                             {/* Actions (Only for Not Available) */}
+//                             {block.type !== "Booked" && (
+//                               <div className="flex gap-2">
+//                                 <button
+//                                   onClick={() => handleEdit(block)}
+//                                   className="p-2.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 hover:scale-105 transition-all shadow-sm"
+//                                   title="Edit this period"
+//                                 >
+//                                   <Edit2 className="w-4 h-4" />
+//                                 </button>
+//                                 <button
+//                                   onClick={() => deleteNotAvailability(block._id)}
+//                                   className="p-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 hover:scale-105 transition-all shadow-sm"
+//                                   title="Delete this period"
+//                                 >
+//                                   <Trash2 className="w-4 h-4" />
+//                                 </button>
+//                               </div>
+//                             )}
+//                           </div>
+//                         </div>
+//                       ))}
+//                   </div>
+//                 </div>
+//               )}
+
+//               {/* Info Box */}
+//               <div className={`
+//                 ${userRole === "owner" ? 'bg-blue-50 border-blue-300' : 'bg-purple-50 border-purple-300'}
+//                 border-2 rounded-xl p-4 shadow-sm
+//               `}>
+//                 <div className="flex gap-3">
+//                   <AlertCircle className={`
+//                     w-6 h-6 flex-shrink-0 mt-0.5
+//                     ${userRole === "owner" ? 'text-blue-600' : 'text-purple-600'}
+//                   `} />
+//                   <div className="text-sm">
+//                     <p className={`font-bold mb-2 text-base ${
+//                       userRole === "owner" ? 'text-blue-900' : 'text-purple-900'
+//                     }`}>
+//                       {userRole === "owner" ? "Owner Mode" : "Customer Mode"}
+//                     </p>
+//                     <p className={`text-xs leading-relaxed ${
+//                       userRole === "owner" ? 'text-blue-800' : 'text-purple-800'
+//                     }`}>
+//                       {userRole === "owner" 
+//                         ? "Block dates to prevent customer bookings. Booked periods (orange) cannot be edited or deleted. All changes sync live to customer calendars automatically."
+//                         : "Red dates are owner-blocked. Orange dates are booked by others. Only available (white) dates can be selected. Your selection syncs in real-time."}
+//                     </p>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Auto-Sync Status */}
+//               <div className="flex items-center justify-between text-xs bg-gray-50 rounded-lg p-3 border border-gray-200">
+//                 <div className="flex items-center gap-2">
+//                   <div className={`w-2.5 h-2.5 rounded-full ${
+//                     syncing ? 'bg-blue-500 animate-pulse' : 'bg-green-500'
+//                   }`}></div>
+//                   <span className="font-semibold text-gray-700">
+//                     {syncing ? 'Syncing...' : 'Live Sync Active'}
+//                   </span>
+//                   <span className="text-gray-500">
+//                     • Last: {lastSyncTime.toLocaleTimeString()}
+//                   </span>
+//                 </div>
+//                 <button
+//                   onClick={() => setAutoSync(!autoSync)}
+//                   className={`
+//                     px-3 py-1.5 rounded-lg font-semibold transition-all
+//                     ${autoSync 
+//                       ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+//                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
+//                   `}
+//                 >
+//                   {autoSync ? 'On' : 'Off'}
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Action Buttons */}
+//           <div className="mt-6">
+//             {userRole === "owner" && (
+//               <div className="flex gap-3">
+//                 {editMode && (
+//                   <button
+//                     onClick={resetForm}
+//                     className="flex-1 h-14 bg-gray-200 text-gray-800 rounded-xl font-bold hover:bg-gray-300 hover:scale-[1.02] transition-all shadow-md"
+//                   >
+//                     Cancel Edit
+//                   </button>
+//                 )}
+//                 <button
+//                   onClick={handleConfirm}
+//                   disabled={!selectedStartDate || !selectedEndDate || loading}
+//                   className="flex-1 h-14 bg-gradient-to-r from-[#001F67] to-[#3474FF] text-white rounded-xl font-bold hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg"
+//                 >
+//                   {loading ? (
+//                     <span className="flex items-center justify-center gap-2">
+//                       <Loader2 className="w-5 h-5 animate-spin" />
+//                       Processing...
+//                     </span>
+//                   ) : editMode ? (
+//                     'Update Unavailability'
+//                   ) : (
+//                     'Confirm Unavailability'
+//                   )}
+//                 </button>
+//               </div>
+//             )}
+
+//             {userRole === "customer" && (
+//               <button
+//                 onClick={handleConfirm}
+//                 disabled={!selectedStartDate || !selectedEndDate || loading}
+//                 className="w-full h-14 bg-gradient-to-r from-[#001F67] to-[#3474FF] text-white rounded-xl font-bold hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg"
+//               >
+//                 {loading ? (
+//                   <span className="flex items-center justify-center gap-2">
+//                     <Loader2 className="w-5 h-5 animate-spin" />
+//                     Processing...
+//                   </span>
+//                 ) : (
+//                   'Proceed to Booking'
+//                 )}
+//               </button>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AvailabilityDateTime;
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState } from 'react';
+import {
+  X, Calendar, ChevronLeft, ChevronRight,
+  Edit2, Trash2, Check, AlertCircle, Clock
+} from "lucide-react";
+import { availabilityAPI } from "../services/api.service";
+
+interface AvailabilityDateTimeProps {
   isOpen: boolean;
   onClose: () => void;
-  VechileId: string;
+  vehicleId: string;   // ← FIXED
   vehicleType: "Car" | "Bike" | "Auto";
   userId: string;
-  userRole?: "owner" | "customer";
-  apiBaseUrl?: string;
-  editSlotId?: string | null;
-  onAvailabilityCreated?: (data: any) => void;
-  onAvailabilityUpdated?: (data: any) => void;
-  onAvailabilityDeleted?: (id: string) => void;
-  onConfirm?: (data: { fromDate: Date; toDate: Date; fromTime: string; toTime: string }) => void;
 }
 
-interface UnavailableSlot {
-  id: string; // REAL MongoDB _id from backend
-  VechileId: string;
-  vehicleType: string;
-  userId: string;
-  dates: Date[];
-  fromDate: string;
-  toDate: string;
-  fromTime: string;
-  toTime: string;
-  reason: string;
-  isNotAvailable: boolean;
-  _id?: string; // Backup field for MongoDB ID
+ 
+interface TimeSlot {
+  hour: number;
+  period: 'AM' | 'PM';
 }
-
-const VehicleAvailabilityCalendar: React.FC<VehicleAvailabilityCalendarProps> = ({
+ 
+interface AvailabilityItem {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  startTime: TimeSlot;
+  endTime: TimeSlot;
+  status: string;
+}
+ 
+const AvailabilityDateTime: React.FC<AvailabilityDateTimeProps> = ({
   isOpen,
   onClose,
-  VechileId,
+  vehicleId,
   vehicleType,
-  userId,
-  userRole = "owner",
-  apiBaseUrl = "http://3.110.122.127:3000",
-  editSlotId = null,
-  onAvailabilityCreated,
-  onAvailabilityUpdated,
-  onAvailabilityDeleted,
-  onConfirm,
+  userId
 }) => {
-  
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+
   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
-  const [startTime, setStartTime] = useState("06:00");
-  const [endTime, setEndTime] = useState("18:00");
-  
-  // Availability data
-  const [unavailableDates, setUnavailableDates] = useState<UnavailableSlot[]>([]);
-  const [bookedDates, setBookedDates] = useState<Date[]>([]);
-  
-  // UI modes
-  const [editMode, setEditMode] = useState(false);
-  const [deleteMode, setDeleteMode] = useState(false);
-  const [selectedSlotForEdit, setSelectedSlotForEdit] = useState<any>(null);
-  
-  // Loading & messages
+  const [startTime, setStartTime] = useState<TimeSlot>({ hour: 9, period: 'AM' });
+  const [endTime, setEndTime] = useState<TimeSlot>({ hour: 6, period: 'PM' });
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [availabilities, setAvailabilities] = useState<AvailabilityItem[]>([]);
+  const [showStartTime, setShowStartTime] = useState(false);
+  const [showEndTime, setShowEndTime] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
-  const [fadeOpacity, setFadeOpacity] = useState(1);
-  
-  // Month/Year picker
-  const [showMonthYearPicker, setShowMonthYearPicker] = useState(false);
-
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const years = Array.from({ length: 15 }, (_, i) => new Date().getFullYear() - 5 + i);
-
-  // ==========================================
-  // API LAYER
-  // ==========================================
-  const availabilityAPI = {
-    getVehicleAvailability: async (
-      vehicleId: string,
-      vehicleType: string,
-      startDate: string,
-      endDate: string
-    ) => {
-      console.log("🌐 Fetching availability:", { vehicleId, vehicleType, startDate, endDate });
-
-      try {
-        const url = `${apiBaseUrl}/getVehicleAvailability?VechileId=${vehicleId}&vechileType=${vehicleType}&startDate=${startDate}&endDate=${endDate}`;
-        const response = await fetch(url, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("✅ Availability response:", result);
-
-        // Handle multiple response formats
-        let allSlots: any[] = [];
-        
-        if (result?.availability && Array.isArray(result.availability)) {
-          for (const dateEntry of result.availability) {
-            if (dateEntry.slots && Array.isArray(dateEntry.slots)) {
-              const slotsWithDate = dateEntry.slots.map((slot: any) => ({
-                ...slot,
-                date: dateEntry.date,
-                dateStatus: dateEntry.status,
-              }));
-              allSlots.push(...slotsWithDate);
-            }
-          }
-        } else if (result?.data?.availability && Array.isArray(result.data.availability)) {
-          for (const dateEntry of result.data.availability) {
-            if (dateEntry.slots && Array.isArray(dateEntry.slots)) {
-              const slotsWithDate = dateEntry.slots.map((slot: any) => ({
-                ...slot,
-                date: dateEntry.date,
-                dateStatus: dateEntry.status,
-              }));
-              allSlots.push(...slotsWithDate);
-            }
-          }
-        } else if (result?.blockedSlots) {
-          allSlots = result.blockedSlots;
-        } else if (result?.data && Array.isArray(result.data)) {
-          allSlots = result.data;
-        } else if (Array.isArray(result)) {
-          allSlots = result;
-        }
-
-        console.log(`✅ Total slots loaded: ${allSlots.length}`);
-        return allSlots;
-      } catch (error) {
-        console.error("❌ API ERROR: getVehicleAvailability", error);
-        return [];
-      }
-    },
-
-    getNotAvailabilityById: async (id: string) => {
-      console.log("🌐 Fetching slot by ID:", id);
-
-      try {
-        const response = await fetch(`${apiBaseUrl}/getNotAvailabilityById/${id}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("✅ Slot data:", result);
-
-        if (result.success && result.data) return result.data;
-        if (result.data) return result.data;
-        if (result._id) return result;
-        
-        return null;
-      } catch (error) {
-        console.error("❌ API ERROR: getNotAvailabilityById", error);
-        throw error;
-      }
-    },
-
-    createNotAvailability: async (payload: any) => {
-      console.log("🌐 Creating not-availability:", payload);
-
-      try {
-        const formData = new URLSearchParams();
-        formData.append("userId", payload.userId);
-        formData.append("vechileType", payload.vechileType);
-        formData.append("VechileId", payload.VechileId);
-        formData.append("fromDate", payload.fromDate);
-        formData.append("toDate", payload.toDate);
-        formData.append("fromTime", payload.fromTime);
-        formData.append("toTime", payload.toTime);
-        formData.append("isNotAvailable", String(payload.isNotAvailable));
-
-        const response = await fetch(`${apiBaseUrl}/createNotAvailability`, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formData.toString(),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("✅ Created:", result);
-
-        return { success: true, data: result.data || result };
-      } catch (error) {
-        console.error("❌ API ERROR: createNotAvailability", error);
-        throw error;
-      }
-    },
-
-    updateNotAvailability: async (id: string, payload: any) => {
-      console.log("🌐 Updating not-availability:", { id, payload });
-
-      try {
-        const formData = new URLSearchParams();
-        if (payload.userId) formData.append("userId", payload.userId);
-        formData.append("vechileType", payload.vechileType);
-        formData.append("VechileId", payload.VechileId);
-        formData.append("fromDate", payload.fromDate);
-        formData.append("toDate", payload.toDate);
-        formData.append("fromTime", payload.fromTime);
-        formData.append("toTime", payload.toTime);
-        formData.append("isNotAvailable", String(payload.isNotAvailable));
-
-        const response = await fetch(`${apiBaseUrl}/updateNotAvailability/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formData.toString(),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("✅ Updated:", result);
-
-        return { success: true, data: result.data || result };
-      } catch (error) {
-        console.error("❌ API ERROR: updateNotAvailability", error);
-        throw error;
-      }
-    },
-
-    deleteNotAvailability: async (id: string) => {
-      console.log("🌐 Deleting not-availability:", id);
-
-      try {
-        const response = await fetch(`${apiBaseUrl}/deleteNotAvailability/${id}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("✅ Deleted:", result);
-
-        return { success: true, data: result };
-      } catch (error) {
-        console.error("❌ API ERROR: deleteNotAvailability", error);
-        throw error;
-      }
-    },
-  };
-
-  // ==========================================
-  // UTILITY FUNCTIONS
-  // ==========================================
-  const formatDateForAPI = (date: Date | null): string => {
-    if (!date) return "";
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+ 
+  // ============ UTILITY FUNCTIONS ============
+ 
+  const daysInMonth = (date: Date) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  const formatDateForDisplay = (date: Date | null): string => {
-    if (!date) return "Select Date";
-    return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-  };
-
-  const formatTimeForAPI = (time: string): string => {
-    const [hours, minutes] = time.split(":");
-    return `${hours}.${minutes}`;
-  };
-
-  const showMessage = (type: string, text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage({ type: "", text: "" }), 4000);
-  };
-
-  const isPastDate = (date: Date): boolean => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0);
-    return checkDate < today;
-  };
-
-  const getDateRangeArray = (startDateStr: string, endDateStr: string): Date[] => {
-    const dates: Date[] = [];
-    const start = new Date(startDateStr + "T00:00:00");
-    const end = new Date(endDateStr + "T00:00:00");
-    const current = new Date(start);
-
-    while (current <= end) {
-      dates.push(new Date(current));
-      current.setDate(current.getDate() + 1);
-    }
-
-    return dates;
-  };
-
-  const isDateUnavailable = (date: Date): boolean => {
-    const dateStr = formatDateForAPI(date);
-
-    // Check booked dates
-    const booked = bookedDates.some((bd) => formatDateForAPI(bd) === dateStr);
-    if (booked) return true;
-
-    // Check unavailable slots
-    return unavailableDates.some((slot) =>
-      slot.dates.some((d) => formatDateForAPI(d) === dateStr)
-    );
-  };
-
-  const getUnavailableSlotForDate = (date: Date): UnavailableSlot | null => {
-    const normalized = new Date(date).setHours(0, 0, 0, 0);
-    return (
-      unavailableDates.find((slot) => {
-        const from = new Date(slot.fromDate).setHours(0, 0, 0, 0);
-        const to = new Date(slot.toDate).setHours(0, 0, 0, 0);
-        return normalized >= from && normalized <= to;
-      }) || null
-    );
-  };
-
-  const checkRangeHasUnavailableDates = (startDate: Date, endDate: Date): boolean => {
-    const dates = getDateRangeArray(formatDateForAPI(startDate), formatDateForAPI(endDate));
-    return dates.some((date) => isDateUnavailable(date));
-  };
-
-  const isDateSelected = (date: Date): boolean => {
-    return (
-      (selectedStartDate &&
-        date.getDate() === selectedStartDate.getDate() &&
-        date.getMonth() === selectedStartDate.getMonth() &&
-        date.getFullYear() === selectedStartDate.getFullYear()) ||
-      false
-    );
-  };
-
-  const isDateInRange = (date: Date): boolean => {
-    if (!selectedStartDate || !selectedEndDate) return false;
-    const start = new Date(selectedStartDate.setHours(0, 0, 0, 0));
-    const end = new Date(selectedEndDate.setHours(0, 0, 0, 0));
-    const d = new Date(date.setHours(0, 0, 0, 0));
-    return d > start && d < end;
-  };
-
-  const isDateStartOrEnd = (date: Date): boolean => {
-    if (!selectedStartDate && !selectedEndDate) return false;
-    const d = new Date(date.setHours(0, 0, 0, 0));
-    const isStart =
-      selectedStartDate && d.getTime() === new Date(selectedStartDate.setHours(0, 0, 0, 0)).getTime();
-    const isEnd = selectedEndDate && d.getTime() === new Date(selectedEndDate.setHours(0, 0, 0, 0)).getTime();
-    return !!(isStart || isEnd);
-  };
-
-  // ==========================================
-  // DATA LOADING
-  // ==========================================
-  const fetchAvailabilityData = async () => {
-    if (!VechileId) return;
-    setLoading(true);
-
-    try {
-      const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-      const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-      const startDate = formatDateForAPI(startOfMonth);
-      const endDate = formatDateForAPI(endOfMonth);
-
-      console.log("📅 Fetching month:", { startDate, endDate });
-
-      const result = await fetch(
-        `${apiBaseUrl}/getVehicleAvailability?VechileId=${VechileId}&vechileType=${vehicleType}&startDate=${startDate}&endDate=${endDate}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      if (!result.ok) {
-        throw new Error(`HTTP ${result.status}`);
-      }
-
-      const response = await result.json();
-      console.log("✅ Raw API Response:", response);
-
-      // ⭐ STEP 1: Extract REAL MongoDB IDs from backend response
-      let allSlots: any[] = [];
-      
-      // Handle response format: {"availability": [{_id, fromDate, toDate, ...}]}
-      if (response?.availability && Array.isArray(response.availability)) {
-        console.log("📊 Processing availability array format...");
-        allSlots = response.availability.map((item: any) => ({
-          _id: item._id || item.id, // ⭐ CAPTURE REAL MONGODB ID
-          id: item._id || item.id,   // ⭐ USE AS PRIMARY ID
-          VechileId: item.VechileId || item.vehicleId || item.vechileId,
-          vehicleType: item.vechileType || item.vehicleType,
-          userId: item.userId,
-          fromDate: item.fromDate,
-          toDate: item.toDate,
-          fromTime: item.fromTime || "00:00",
-          toTime: item.toTime || "23:59",
-          isNotAvailable: item.isNotAvailable,
-          isBooked: item.isBooked,
-          reason: item.reason || "Owner unavailable",
-          status: item.status,
-          slotStatus: item.slotStatus,
-          type: item.type,
-          bookingId: item.bookingId,
-          booking_id: item.booking_id,
-        }));
-      } else if (response?.data?.availability && Array.isArray(response.data.availability)) {
-        console.log("📊 Processing data.availability format...");
-        allSlots = response.data.availability.map((item: any) => ({
-          _id: item._id || item.id,
-          id: item._id || item.id,
-          VechileId: item.VechileId || item.vehicleId || item.vechileId,
-          vehicleType: item.vechileType || item.vehicleType,
-          userId: item.userId,
-          fromDate: item.fromDate,
-          toDate: item.toDate,
-          fromTime: item.fromTime || "00:00",
-          toTime: item.toTime || "23:59",
-          isNotAvailable: item.isNotAvailable,
-          isBooked: item.isBooked,
-          reason: item.reason || "Owner unavailable",
-          status: item.status,
-          slotStatus: item.slotStatus,
-          type: item.type,
-          bookingId: item.bookingId,
-          booking_id: item.booking_id,
-        }));
-      } else if (response?.blockedSlots && Array.isArray(response.blockedSlots)) {
-        console.log("📊 Processing blockedSlots format...");
-        allSlots = response.blockedSlots.map((item: any) => ({
-          _id: item._id || item.id,
-          id: item._id || item.id,
-          VechileId: item.VechileId || item.vehicleId || item.vechileId,
-          vehicleType: item.vechileType || item.vehicleType,
-          userId: item.userId,
-          fromDate: item.fromDate,
-          toDate: item.toDate,
-          fromTime: item.fromTime || "00:00",
-          toTime: item.toTime || "23:59",
-          isNotAvailable: item.isNotAvailable,
-          isBooked: item.isBooked,
-          reason: item.reason || "Owner unavailable",
-        }));
-      } else if (response?.data && Array.isArray(response.data)) {
-        console.log("📊 Processing data array format...");
-        allSlots = response.data.map((item: any) => ({
-          _id: item._id || item.id,
-          id: item._id || item.id,
-          VechileId: item.VechileId || item.vehicleId || item.vechileId,
-          vehicleType: item.vechileType || item.vehicleType,
-          userId: item.userId,
-          fromDate: item.fromDate,
-          toDate: item.toDate,
-          fromTime: item.fromTime || "00:00",
-          toTime: item.toTime || "23:59",
-          isNotAvailable: item.isNotAvailable,
-          isBooked: item.isBooked,
-          reason: item.reason || "Owner unavailable",
-        }));
-      } else if (Array.isArray(response)) {
-        console.log("📊 Processing direct array format...");
-        allSlots = response.map((item: any) => ({
-          _id: item._id || item.id,
-          id: item._id || item.id,
-          VechileId: item.VechileId || item.vehicleId || item.vechileId,
-          vehicleType: item.vechileType || item.vehicleType,
-          userId: item.userId,
-          fromDate: item.fromDate,
-          toDate: item.toDate,
-          fromTime: item.fromTime || "00:00",
-          toTime: item.toTime || "23:59",
-          isNotAvailable: item.isNotAvailable,
-          isBooked: item.isBooked,
-          reason: item.reason || "Owner unavailable",
-        }));
-      }
-
-      console.log(`✅ Total slots loaded: ${allSlots.length}`);
-      console.log("🔍 Slots with IDs:", allSlots.map(s => ({ id: s.id, _id: s._id, from: s.fromDate, to: s.toDate })));
-
-      const unavailable: UnavailableSlot[] = [];
-      const booked: Date[] = [];
-
-      for (const slot of allSlots) {
-        // Filter by vehicle ID
-        const slotVehicleId = slot.VechileId || slot.vehicleId || slot.vechileId || slot.VehicleId;
-        if (slotVehicleId && String(slotVehicleId) !== String(VechileId)) {
-          console.log(`⏭️ Skipping slot for different vehicle: ${slotVehicleId}`);
-          continue;
-        }
-
-        // ⭐ VERIFY WE HAVE REAL MONGODB ID
-        const realMongoId = slot._id || slot.id;
-        if (!realMongoId || realMongoId.includes('-') || realMongoId.includes(':')) {
-          console.warn("⚠️ WARNING: Fake ID detected, slot may not be updatable:", realMongoId);
-        } else {
-          console.log("✅ Valid MongoDB ID:", realMongoId);
-        }
-
-        // Determine slot type
-        const isBookedSlot =
-          slot.isBooked === true ||
-          slot.isBooked === "true" ||
-          !!slot.bookingId ||
-          !!slot.booking_id ||
-          (slot.status && String(slot.status).toLowerCase() === "booked") ||
-          (slot.slotStatus && String(slot.slotStatus).toLowerCase() === "booked") ||
-          (slot.type && String(slot.type).toLowerCase() === "booked");
-
-        const isUnavailableSlot =
-          slot.isNotAvailable === true ||
-          slot.isNotAvailable === "true" ||
-          (slot.status && String(slot.status).toLowerCase() === "notavailable") ||
-          (slot.slotStatus && String(slot.slotStatus).toLowerCase() === "notavailable") ||
-          (slot.type && String(slot.type).toLowerCase() === "notavailable") ||
-          (slot.reason && String(slot.reason).toLowerCase().includes("not available"));
-
-        // Build date range
-        let dates: Date[] = [];
-        try {
-          const from = slot.fromDate;
-          const to = slot.toDate;
-
-          if (!from) {
-            console.warn("⚠️ Slot missing fromDate:", slot);
-            continue;
-          }
-
-          if (from === to || !to) {
-            dates = [new Date(from + "T00:00:00")];
-          } else {
-            dates = getDateRangeArray(from, to);
-          }
-        } catch (err) {
-          console.error("❌ Error building dates:", err);
-          continue;
-        }
-
-        if (isBookedSlot) {
-          booked.push(...dates);
-          console.log("✅ Added booked slot:", { id: slot.id, from: slot.fromDate, to: slot.toDate });
-        } else if (isUnavailableSlot) {
-          unavailable.push({
-            id: slot._id || slot.id, // ⭐ STORE REAL MONGODB ID
-            _id: slot._id || slot.id, // ⭐ BACKUP FIELD
-            VechileId: slot.VechileId || VechileId,
-            vehicleType: slot.vehicleType || vehicleType,
-            userId: slot.userId || userId,
-            dates,
-            fromDate: slot.fromDate,
-            toDate: slot.toDate,
-            fromTime: slot.fromTime || "00:00",
-            toTime: slot.toTime || "23:59",
-            reason: slot.reason || "Owner unavailable",
-            isNotAvailable: true,
-          });
-          console.log("✅ Added unavailable slot:", { id: slot._id || slot.id, from: slot.fromDate, to: slot.toDate });
-        }
-      }
-
-      console.log("✅ Final processed:", { unavailable: unavailable.length, booked: booked.length });
-      console.log("🔍 Unavailable slot IDs:", unavailable.map(u => u.id));
-
-      setUnavailableDates(unavailable);
-      setBookedDates(booked);
-
-      if (unavailable.length > 0 || booked.length > 0) {
-        showMessage("success", `✅ Loaded ${unavailable.length + booked.length} slot(s)`);
-      }
-    } catch (error) {
-      console.error("❌ Error fetching availability:", error);
-      setUnavailableDates([]);
-      setBookedDates([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadSlotForEditing = async (slotId: string) => {
-    if (!slotId) return;
-    setLoading(true);
-
-    try {
-      console.log("🔍 Loading slot for editing, ID:", slotId);
-      const response = await availabilityAPI.getNotAvailabilityById(slotId);
-      console.log("📝 Loaded slot data:", response);
-
-      if (response) {
-        const fromDate = new Date(response.fromDate);
-        const toDate = new Date(response.toDate);
-
-        // ⭐ STEP 2: Store REAL MongoDB ID when editing
-        const realId = response._id || response.id || slotId;
-        console.log("✅ Using MongoDB ID for editing:", realId);
-
-        setSelectedStartDate(fromDate);
-        setSelectedEndDate(toDate);
-        setStartTime(response.fromTime || "06:00");
-        setEndTime(response.toTime || "18:00");
-        setSelectedSlotForEdit({
-          id: realId, // ⭐ REAL MONGODB ID
-          _id: realId, // ⭐ BACKUP
-          VechileId: response.VechileId || VechileId,
-          vehicleType: response.vechileType || vehicleType,
-          userId: response.userId || userId,
-          fromDate: response.fromDate,
-          toDate: response.toDate,
-          fromTime: response.fromTime,
-          toTime: response.toTime,
-        });
-        setEditMode(true);
-        setCurrentMonth(fromDate);
-        showMessage("info", "✏️ Edit mode active");
-      }
-    } catch (error) {
-      console.error("❌ Error loading slot:", error);
-      showMessage("error", "Failed to load slot for editing");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ==========================================
-  // EFFECTS
-  // ==========================================
-  useEffect(() => {
-    if (isOpen && editSlotId && userRole === "owner") {
-      loadSlotForEditing(editSlotId);
-    }
-  }, [editSlotId, isOpen]);
-
-  useEffect(() => {
-    if (isOpen && VechileId) {
-      fetchAvailabilityData();
-    }
-  }, [isOpen, VechileId, vehicleType, currentMonth]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      // Reset on close
-      setEditMode(false);
-      setDeleteMode(false);
-      setSelectedStartDate(null);
-      setSelectedEndDate(null);
-      setSelectedSlotForEdit(null);
-      setShowMonthYearPicker(false);
-    }
-  }, [isOpen]);
-
-  // ==========================================
-  // EVENT HANDLERS
-  // ==========================================
-  const handleDateClick = (date: Date) => {
-    if (isPastDate(date)) return;
-
-    const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-    // Customer mode: prevent selecting unavailable dates
-    if (userRole === "customer" && isDateUnavailable(normalizedDate)) {
-      const slot = getUnavailableSlotForDate(normalizedDate);
-      const reason = slot ? slot.reason : "Not available";
-      showMessage("error", `❌ Date unavailable: ${reason}`);
-      return;
-    }
-
-    // Owner edit mode: select start/end dates
-    if (userRole === "owner" && editMode) {
-      setFadeOpacity(0.6);
-
-      if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
-        setSelectedStartDate(normalizedDate);
-        setSelectedEndDate(null);
-      } else {
-        let from = selectedStartDate;
-        let to = normalizedDate;
-
-        if (normalizedDate < selectedStartDate) {
-          from = normalizedDate;
-          to = selectedStartDate;
-        }
-
-        setSelectedStartDate(from);
-        setSelectedEndDate(to);
-      }
-
-      setTimeout(() => setFadeOpacity(1), 120);
-      return;
-    }
-
-    // Owner delete mode: delete clicked slot
-    if (userRole === "owner" && deleteMode) {
-      const slot = getUnavailableSlotForDate(normalizedDate);
-      if (slot) {
-        handleDeleteSlot(slot);
-      } else {
-        showMessage("error", "❌ No slot found for this date");
-      }
-      return;
-    }
-
-    // Owner normal mode: clicking unavailable date opens it for editing
-    if (userRole === "owner" && !editMode && !deleteMode) {
-      const slot = getUnavailableSlotForDate(normalizedDate);
-      if (slot) {
-        console.log("✏️ Opening slot for editing:", slot);
-        console.log("🔍 Slot ID:", slot.id || slot._id);
-        
-        setSelectedStartDate(new Date(slot.fromDate));
-        setSelectedEndDate(new Date(slot.toDate));
-        setStartTime(slot.fromTime);
-        setEndTime(slot.toTime);
-        setSelectedSlotForEdit({
-          id: slot._id || slot.id, // ⭐ USE REAL MONGODB ID
-          _id: slot._id || slot.id,
-          VechileId: slot.VechileId,
-          vehicleType: slot.vehicleType,
-          userId: slot.userId,
-          fromDate: slot.fromDate,
-          toDate: slot.toDate,
-          fromTime: slot.fromTime,
-          toTime: slot.toTime,
-        });
-        setEditMode(true);
-        showMessage("info", "✏️ Edit mode - select new dates or click Confirm to save");
-        return;
-      }
-    }
-
-    // Default selection (customer or owner normal mode)
-    setFadeOpacity(0.6);
-
-    if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
-      setSelectedStartDate(normalizedDate);
-      setSelectedEndDate(null);
-    } else {
-      let from = selectedStartDate;
-      let to = normalizedDate;
-
-      if (normalizedDate < selectedStartDate) {
-        from = normalizedDate;
-        to = selectedStartDate;
-      }
-
-      // Customer: check range for unavailable dates
-      if (userRole === "customer") {
-        const hasUnavailable = checkRangeHasUnavailableDates(from, to);
-        if (hasUnavailable) {
-          showMessage("error", "❌ Range contains unavailable dates");
-          setSelectedStartDate(null);
-          setSelectedEndDate(null);
-          setTimeout(() => setFadeOpacity(1), 120);
-          return;
-        }
-      }
-
-      setSelectedStartDate(from);
-      setSelectedEndDate(to);
-    }
-
-    setTimeout(() => setFadeOpacity(1), 120);
-  };
-
-  const handleEditIconPress = () => {
-    if (editMode && selectedStartDate && selectedEndDate) {
-      handleSaveEdit();
-    } else {
-      setEditMode(true);
-      setDeleteMode(false);
-      setSelectedStartDate(null);
-      setSelectedEndDate(null);
-      setSelectedSlotForEdit(null);
-      showMessage("info", "✏️ Edit mode - select dates to mark as unavailable");
-    }
-  };
-
-  const handleConfirmButton = async () => {
-    if (!selectedStartDate || !selectedEndDate) {
-      showMessage("error", "⚠️ Please select both start and end dates");
-      return;
-    }
-
-    if (userRole === "customer") {
-      // Customer: Just pass the data to parent for next step
-      if (onConfirm) {
-        onConfirm({
-          fromDate: selectedStartDate,
-          toDate: selectedEndDate,
-          fromTime: startTime,
-          toTime: endTime,
-        });
-        showMessage("success", "✅ Dates confirmed! Proceeding to next step...");
-      }
-    } else {
-      // Owner: Save to backend
-      await handleSaveEdit();
-    }
-  };
-
-  const handleSaveEdit = async () => {
-    if (!selectedStartDate || !selectedEndDate) {
-      showMessage("error", "⚠️ Please select both start and end dates");
-      return;
-    }
-
-    setFadeOpacity(0.6);
-    setLoading(true);
-
-    try {
-      const fromDateStr = formatDateForAPI(selectedStartDate);
-      const toDateStr = formatDateForAPI(selectedEndDate);
-
-      console.log("💾 Saving:", { fromDateStr, toDateStr });
-
-      let response;
-
-      if (selectedSlotForEdit && selectedSlotForEdit.id) {
-        // ⭐ STEP 3: UPDATE with REAL MongoDB ID
-        const realId = selectedSlotForEdit._id || selectedSlotForEdit.id;
-        console.log("📤 Updating slot with MongoDB ID:", realId);
-        
-        // Validate ID is not fake
-        if (realId.includes('-') || realId.includes(':')) {
-          throw new Error("❌ Invalid MongoDB ID format. Cannot update with fake ID.");
-        }
-
-        response = await availabilityAPI.updateNotAvailability(realId, {
-          userId: selectedSlotForEdit.userId || userId,
-          VechileId: selectedSlotForEdit.VechileId || VechileId,
-          vechileType: selectedSlotForEdit.vehicleType || vehicleType,
-          fromDate: fromDateStr,
-          toDate: toDateStr,
-          fromTime: formatTimeForAPI(startTime),
-          toTime: formatTimeForAPI(endTime),
-          isNotAvailable: true,
-        });
-
-        console.log("✅ Update response:", response);
-
-        if (response && response.success) {
-          onAvailabilityUpdated && onAvailabilityUpdated(response.data || response);
-          showMessage("success", "✅ Dates updated successfully");
-        } else {
-          throw new Error(response?.message || "Update failed");
-        }
-      } else {
-        // CREATE new slot
-        console.log("📤 Creating new slot");
-        
-        response = await availabilityAPI.createNotAvailability({
-          userId: userId,
-          VechileId: VechileId,
-          vechileType: vehicleType,
-          fromDate: fromDateStr,
-          toDate: toDateStr,
-          fromTime: formatTimeForAPI(startTime),
-          toTime: formatTimeForAPI(endTime),
-          isNotAvailable: true,
-        });
-
-        console.log("✅ Create response:", response);
-
-        if (response && response.success) {
-          onAvailabilityCreated && onAvailabilityCreated(response.data || response);
-          showMessage("success", "✅ Dates blocked successfully");
-        } else {
-          throw new Error(response?.message || "Create failed");
-        }
-      }
-
-      if (response && response.success) {
-        console.log("✅ Save successful");
-
-        // Clear selections and exit edit mode FIRST
-        setEditMode(false);
-        setSelectedStartDate(null);
-        setSelectedEndDate(null);
-        setSelectedSlotForEdit(null);
-
-        // Then refresh calendar to get updated data with real IDs
-        await fetchAvailabilityData();
-      } else {
-        showMessage("error", "❌ Failed to save changes");
-      }
-    } catch (err: any) {
-      console.error("❌ Save error:", err);
-      showMessage("error", `❌ ${err.message || "Failed to save changes"}`);
-    } finally {
-      setLoading(false);
-      setFadeOpacity(1);
-    }
-  };
-
-  const handleDeleteIconPress = () => {
-    if (deleteMode) {
-      setDeleteMode(false);
-      showMessage("info", "Delete mode disabled");
-    } else {
-      setDeleteMode(true);
-      setEditMode(false);
-      setSelectedStartDate(null);
-      setSelectedEndDate(null);
-      setSelectedSlotForEdit(null);
-      showMessage("warning", "🗑️ Delete mode - tap any unavailable date to delete");
-    }
-  };
-
-  const handleDeleteSlot = async (slot: UnavailableSlot) => {
-    if (!slot || !slot.id) {
-      showMessage("error", "❌ No slot found to delete");
-      return;
-    }
-
-    // ⭐ STEP 4: Validate real MongoDB ID before delete
-    const realId = slot._id || slot.id;
-    console.log("🗑️ Attempting to delete slot with ID:", realId);
-
-    if (realId.includes('-') || realId.includes(':')) {
-      showMessage("error", "❌ Cannot delete: Invalid MongoDB ID format");
-      console.error("❌ Fake ID detected:", realId);
-      return;
-    }
-
-    if (
-      !window.confirm(
-        `🗑️ Delete unavailable period from ${slot.fromDate} to ${slot.toDate}?\n\nThis cannot be undone.`
-      )
-    ) {
-      return;
-    }
-
-    setFadeOpacity(0.6);
-    setLoading(true);
-
-    try {
-      console.log("📤 Deleting with MongoDB ID:", realId);
-      const response = await availabilityAPI.deleteNotAvailability(realId);
-
-      if (response && response.success) {
-        console.log("✅ Delete successful");
-        await fetchAvailabilityData();
-        onAvailabilityDeleted && onAvailabilityDeleted(realId);
-        setDeleteMode(false);
-        showMessage("success", "✅ Slot deleted successfully");
-      } else {
-    throw new Error(response?.data?.message || "Delete failed");
-
-      }
-    } catch (err: any) {
-      console.error("❌ Delete error:", err);
-      showMessage("error", `❌ ${err.message || "Failed to delete slot"}`);
-    } finally {
-      setLoading(false);
-      setFadeOpacity(1);
-    }
-  };
-
-  const handleMonthYearSelect = (monthIndex: number, year: number) => {
-    setCurrentMonth(new Date(year, monthIndex, 1));
-    setShowMonthYearPicker(false);
-  };
-
-  // ==========================================
-  // CALENDAR RENDERING
-  // ==========================================
-  const generateCalendarDays = () => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
+    const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
-    const startDate = new Date(firstDay);
-    const dayOfWeek = firstDay.getDay();
-    const adjustment = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    startDate.setDate(firstDay.getDate() - adjustment);
-
-    const days: JSX.Element[] = [];
-    for (let i = 0; i < 42; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      days.push(renderDay(date, i));
+    const lastDay = new Date(year, month + 1, 0);
+    const daysArray = [];
+   
+    const startPadding = firstDay.getDay();
+    for (let i = 0; i < startPadding; i++) {
+      daysArray.push(null);
     }
-
-    return days;
+   
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      daysArray.push(new Date(year, month, i));
+    }
+   
+    return daysArray;
   };
-
-  const renderDay = (date: Date, index: number) => {
-    const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
-    const isSelected = isDateSelected(date);
-    const isStartOrEnd = isDateStartOrEnd(date);
-    const isInRange = isDateInRange(date);
-    const isUnavail = isDateUnavailable(date);
-    const isPast = isPastDate(date);
-    const showAsEditing = editMode && (isStartOrEnd || isInRange);
-    const showAsDeleteTarget = deleteMode && isUnavail && !isPast && isCurrentMonth;
-
-    let bgClass = "bg-white hover:bg-gray-100";
-    let textClass = "text-gray-700";
-    let borderClass = "border border-transparent";
-    let showStrikeLine = false;
-
-    if (isPast) {
-      bgClass = "bg-gray-50";
-      textClass = "text-gray-300";
-    } else if (showAsEditing && isStartOrEnd) {
-      bgClass = "bg-orange-500";
-      textClass = "text-white font-bold";
-    } else if (showAsEditing && isInRange) {
-      bgClass = "bg-orange-100";
-      textClass = "text-orange-900 font-semibold";
-    } else if (showAsDeleteTarget) {
-      bgClass = "bg-red-50";
-      borderClass = "border-2 border-red-300";
-      textClass = "text-red-800 font-bold";
-    } else if (!showAsEditing && isStartOrEnd) {
-      bgClass = "bg-black";
-      textClass = "text-white font-bold";
-    } else if (!showAsEditing && isInRange) {
-      bgClass = "bg-gray-200";
-      textClass = "text-gray-800 font-medium";
-    } else if (isUnavail) {
-      bgClass = "bg-red-50";
-      borderClass = "border-2 border-red-200";
-      textClass = "text-red-700 font-medium";
-      showStrikeLine = true;
-    }
-
-    if (!isCurrentMonth) {
-      textClass = "text-gray-300";
-    }
-
-    return (
-      <button
-        key={index}
-        onClick={() => isCurrentMonth && !isPast && handleDateClick(date)}
-        disabled={isPast || (userRole === "customer" && isUnavail)}
-        className={`relative h-10 w-full rounded-md transition-all ${bgClass} ${textClass} ${borderClass} ${
-          isPast || (userRole === "customer" && isUnavail) ? "cursor-not-allowed opacity-50" : "cursor-pointer"
-        }`}
-      >
-        <span className="relative z-10">{date.getDate()}</span>
-
-        {/* Strike-through line for unavailable dates */}
-        {showStrikeLine && isCurrentMonth && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-            <div className="w-4/5 h-0.5 bg-red-600 transform rotate-45" />
-            <div className="w-4/5 h-0.5 bg-red-600 transform -rotate-45 absolute" />
-          </div>
-        )}
-
-        {/* Delete indicator */}
-        {showAsDeleteTarget && (
-          <div className="absolute -top-1 -right-1 z-30">
-            <Trash2 size={12} className="text-red-600" />
-          </div>
-        )}
-      </button>
-    );
+ 
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
+ 
+  const formatTime = (time: TimeSlot) => {
+    return `${time.hour.toString().padStart(2, '0')} ${time.period}`;
+  };
+ 
+  const formatDateForBackend = (date: Date): string => {
+    return date.toISOString().split('T')[0];
+  };
+ 
+  const formatTimeForBackend = (time: TimeSlot): string => {
+    let hour24 = time.hour;
+    if (time.period === 'PM' && time.hour !== 12) {
+      hour24 = time.hour + 12;
+    } else if (time.period === 'AM' && time.hour === 12) {
+      hour24 = 0;
+    }
+    return `${hour24}.00`;
+  };
+ 
+  // Check if a date is unavailable
+  const isDateUnavailable = (date: Date) => {
+    return availabilities.some(item => {
+      const checkDate = new Date(date);
+      checkDate.setHours(0, 0, 0, 0);
+      const start = new Date(item.startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(item.endDate);
+      end.setHours(0, 0, 0, 0);
+      return checkDate >= start && checkDate <= end;
+    });
+  };
+ 
+  const createUnavailability = async () => {
+  if (!selectedStartDate || !selectedEndDate) {
+    setError("Please select both start and end dates");
+    setTimeout(() => setError(null), 3000);
+    return;
+  }
 
-  const generateTimeOptions = () => {
-    const options: { value: string; label: string }[] = [];
-    for (let h = 0; h < 24; h++) {
-      for (let m = 0; m < 60; m += 30) {
-        const hour = h.toString().padStart(2, "0");
-        const minute = m.toString().padStart(2, "0");
-        const time = `${hour}:${minute}`;
-        const period = h >= 12 ? "PM" : "AM";
-        const displayHour = h % 12 || 12;
-        options.push({
-          value: time,
-          label: `${displayHour}:${minute} ${period}`,
-        });
+  setLoading(true);
+  setError(null);
+
+  try {
+    const payload = {
+      userId,
+      VechileId: vehicleId,
+      vechileType: vehicleType,
+      fromDate: formatDateForBackend(selectedStartDate),
+      toDate: formatDateForBackend(selectedEndDate),
+      fromTime: formatTimeForBackend(startTime),
+      toTime: formatTimeForBackend(endTime),
+      isNotAvailable: true,
+    };
+
+    console.log("📤 API Payload:", payload);
+
+    const result = await availabilityAPI.createUnavailability(payload);
+
+    console.log("✅ RESPONSE:", result);
+
+    // Add to UI list
+    const newItem: AvailabilityItem = {
+      id: Date.now().toString(),
+      startDate: selectedStartDate,
+      endDate: selectedEndDate,
+      startTime,
+      endTime,
+      status: "Unavailable",
+    };
+
+    setAvailabilities([...availabilities, newItem]);
+
+    setSuccess("Unavailability added successfully!");
+    setTimeout(() => setSuccess(null), 3000);
+
+    resetForm();
+  } catch (err: any) {
+    console.error("❌ Error:", err);
+    setError(err.message || "API failed");
+    setTimeout(() => setError(null), 4000);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+ 
+  // ============ FORM HANDLERS ============
+ 
+  const resetForm = () => {
+    setSelectedStartDate(null);
+    setSelectedEndDate(null);
+    setStartTime({ hour: 9, period: 'AM' });
+    setEndTime({ hour: 6, period: 'PM' });
+  };
+ 
+  const handleConfirm = async () => {
+    await createUnavailability();
+  };
+ 
+  const handleDelete = (id: string) => {
+    setAvailabilities(availabilities.filter(item => item.id !== id));
+    setSuccess('Unavailability deleted!');
+    setTimeout(() => setSuccess(null), 3000);
+  };
+ 
+  const isDateSelected = (date: Date) => {
+    if (!selectedStartDate) return false;
+    if (!selectedEndDate) {
+      return date.getTime() === selectedStartDate.getTime();
+    }
+    return date >= selectedStartDate && date <= selectedEndDate;
+  };
+ 
+  const handleDateClick = (date: Date) => {
+    if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+      setSelectedStartDate(date);
+      setSelectedEndDate(null);
+    } else {
+      if (date >= selectedStartDate) {
+        setSelectedEndDate(date);
+      } else {
+        setSelectedStartDate(date);
+        setSelectedEndDate(null);
       }
     }
-    return options;
   };
-
-  const timeOptions = generateTimeOptions();
-
-  // ==========================================
-  // MAIN RENDER
-  // ==========================================
+ 
+  const generateTimeOptions = () => {
+    const times = [];
+    for (let i = 1; i <= 12; i++) {
+      times.push({ hour: i, period: 'AM' as 'AM' | 'PM' });
+    }
+    for (let i = 1; i <= 12; i++) {
+      times.push({ hour: i, period: 'PM' as 'AM' | 'PM' });
+    }
+    return times;
+  };
+ 
+  const days = daysInMonth(currentMonth);
+  const monthYear = currentMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+ 
   if (!isOpen) return null;
-
+ 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-y-auto"
-        style={{ opacity: fadeOpacity, transition: "opacity 0.2s" }}
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {userRole === "owner" ? "Manage Vehicle Availability" : "Select Booking Dates"}
-            </h2>
-            <div className="flex items-center gap-2">
-              {userRole === "owner" && (
-                <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold rounded-full">
-                  Owner Mode
-                </span>
-              )}
-              {userRole === "customer" && (
-                <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
-                  Customer View
-                </span>
-              )}
-              {editMode && (
-                <span className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
-                  Editing
-                </span>
-              )}
-              {deleteMode && (
-                <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
-                  Delete Mode
-                </span>
-              )}
-            </div>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 transition"
-            disabled={loading}
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Edit Mode Banner */}
-        {editMode && userRole === "owner" && (
-          <div className="mx-6 mt-4 p-4 bg-orange-50 border-l-4 border-orange-500 rounded-lg flex items-center gap-3">
-            <Edit2 size={20} className="text-orange-600 flex-shrink-0" />
-            <p className="text-sm text-orange-800 font-medium">
-              Select dates to mark as not available. Tap the ✓ icon to save changes.
-            </p>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+      <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto">
+        {/* Success Toast */}
+        {success && (
+          <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full bg-white text-green-500 flex items-center justify-center font-bold">✓</div>
+            <span>{success}</span>
           </div>
         )}
-
-        {/* Delete Mode Banner */}
-        {deleteMode && userRole === "owner" && (
-          <div className="mx-6 mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg flex items-center gap-3">
-            <Trash2 size={20} className="text-red-600 flex-shrink-0" />
-            <p className="text-sm text-red-800 font-medium">
-              Tap any not-available date to delete it.
-            </p>
+ 
+        {/* Error Toast */}
+        {error && (
+          <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" />
+            <span>{error}</span>
           </div>
         )}
-
-        {/* Customer Info Banner */}
-        {userRole === "customer" && (unavailableDates.length > 0 || bookedDates.length > 0) && (
-          <div className="mx-6 mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg flex items-center gap-3">
-            <Info size={20} className="text-blue-600 flex-shrink-0" />
-            <p className="text-sm text-blue-800 font-medium">
-              Red crossed dates are not available for booking.
-            </p>
-          </div>
-        )}
-
-        {/* Message Display */}
-        {message.text && (
-          <div className="mx-6 mt-4">
-            <div
-              className={`p-4 rounded-lg font-medium flex items-center gap-3 ${
-                message.type === "success"
-                  ? "bg-green-50 text-green-800 border-2 border-green-300"
-                  : message.type === "error"
-                  ? "bg-red-50 text-red-800 border-2 border-red-300"
-                  : message.type === "warning"
-                  ? "bg-yellow-50 text-yellow-800 border-2 border-yellow-300"
-                  : "bg-blue-50 text-blue-800 border-2 border-blue-300"
-              }`}
-            >
-              {message.type === "success" && <Check size={20} />}
-              {message.type === "error" && <AlertCircle size={20} />}
-              {message.type === "warning" && <AlertCircle size={20} />}
-              {message.type === "info" && <Calendar size={20} />}
-              <span>{message.text}</span>
-            </div>
-          </div>
-        )}
-
+ 
         {/* Loading Overlay */}
         {loading && (
-          <div className="mx-6 mt-4 p-4 bg-gray-50 rounded-lg flex items-center justify-center gap-3">
-            <div className="animate-spin w-5 h-5 border-3 border-blue-500 border-t-transparent rounded-full" />
-            <span className="text-gray-700 font-medium">Processing...</span>
+          <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 shadow-xl">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#001F67] mx-auto"></div>
+              <p className="mt-4 text-gray-700 font-medium">Creating unavailability...</p>
+            </div>
           </div>
         )}
-
+ 
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-[#001F67] rounded-lg flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900">Add Unavailability Date & Time</h1>
+              <p className="text-sm text-gray-500">Manage your vehicle availability</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+ 
+        {/* Modal Content */}
         <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Calendar Section */}
-            <div className="lg:col-span-2 space-y-4">
-              {/* Date Display */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="border-2 border-gray-200 rounded-lg p-4 bg-white">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar size={16} className="text-gray-500" />
-                    <label className="text-sm font-medium text-gray-700">From Date</label>
-                  </div>
-                  <div className="text-lg font-bold text-gray-900">
-                    {selectedStartDate ? formatDateForDisplay(selectedStartDate) : "Select"}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Side - Date Selection */}
+            <div>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-xs font-medium text-[#6C6C6C] mb-2">Start Date</label>
+                  <div className="h-14 border border-[#E5E5E5] rounded-lg flex items-center justify-center bg-[#F4F4F4] text-sm font-medium text-gray-900">
+                    {selectedStartDate ? formatDate(selectedStartDate) : 'Select'}
                   </div>
                 </div>
-
-                <div className="border-2 border-gray-200 rounded-lg p-4 bg-white">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar size={16} className="text-gray-500" />
-                    <label className="text-sm font-medium text-gray-700">To Date</label>
-                  </div>
-                  <div className="text-lg font-bold text-gray-900">
-                    {selectedEndDate ? formatDateForDisplay(selectedEndDate) : "Select"}
+                <div>
+                  <label className="block text-xs font-medium text-[#6C6C6C] mb-2">End Date</label>
+                  <div className="h-14 border border-[#E5E5E5] rounded-lg flex items-center justify-center bg-[#F4F4F4] text-sm font-medium text-gray-900">
+                    {selectedEndDate ? formatDate(selectedEndDate) : 'Select'}
                   </div>
                 </div>
               </div>
-
+ 
               {/* Calendar */}
-              <div className="border-2 border-gray-200 rounded-xl p-5 bg-white shadow-sm">
-                {/* Month Header */}
+              <div className="bg-white border border-[#E5E5E5] rounded-xl p-4">
                 <div className="flex items-center justify-between mb-4">
                   <button
-                    onClick={() =>
-                      setCurrentMonth(
-                        new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
-                      )
-                    }
-                    className="p-2 hover:bg-gray-100 rounded-lg transition"
-                    disabled={loading}
+                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+                    className="p-1 hover:bg-gray-100 rounded"
                   >
-                    <ChevronLeft size={24} />
+                    <ChevronLeft className="w-5 h-5" />
                   </button>
-
-                  <div className="flex flex-col items-center">
-                    <button
-                      onClick={() => setShowMonthYearPicker(!showMonthYearPicker)}
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg transition"
-                    >
-                      <span className="font-bold text-xl">
-                        {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-                      </span>
-                      {showMonthYearPicker ? (
-                        <ChevronUp size={16} />
-                      ) : (
-                        <ChevronDown size={16} />
-                      )}
-                    </button>
-
-                    {/* Month/Year Picker */}
-                    {showMonthYearPicker && (
-                      <div className="mt-2 p-4 bg-gray-50 rounded-lg shadow-lg w-64">
-                        <div className="mb-3">
-                          <div className="grid grid-cols-4 gap-2">
-                            {monthNames.map((m, i) => (
-                              <button
-                                key={m}
-                                onClick={() => handleMonthYearSelect(i, currentMonth.getFullYear())}
-                                className={`px-2 py-1 rounded text-xs font-medium transition ${
-                                  currentMonth.getMonth() === i
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-white hover:bg-gray-200"
-                                }`}
-                              >
-                                {m}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          {years.map((y) => (
-                            <button
-                              key={y}
-                              onClick={() => handleMonthYearSelect(currentMonth.getMonth(), y)}
-                              className={`px-2 py-1 rounded text-xs font-medium transition ${
-                                currentMonth.getFullYear() === y
-                                  ? "bg-blue-500 text-white"
-                                  : "bg-white hover:bg-gray-200"
-                              }`}
-                            >
-                              {y}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Owner Control Icons */}
-                  {userRole === "owner" && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleEditIconPress}
-                        className={`p-2 rounded-lg transition ${
-                          editMode
-                            ? "bg-green-100 hover:bg-green-200"
-                            : "bg-gray-100 hover:bg-gray-200"
-                        }`}
-                        title={editMode ? "Save changes" : "Edit availability"}
-                        disabled={loading}
-                      >
-                        {editMode ? (
-                          <Check size={24} className="text-green-600" />
-                        ) : (
-                          <Edit2 size={24} className="text-blue-600" />
-                        )}
-                      </button>
-                      <button
-                        onClick={handleDeleteIconPress}
-                        className={`p-2 rounded-lg transition ${
-                          deleteMode
-                            ? "bg-red-100 hover:bg-red-200"
-                            : "bg-gray-100 hover:bg-gray-200"
-                        }`}
-                        title={deleteMode ? "Exit delete mode" : "Delete availability"}
-                        disabled={loading}
-                      >
-                        <Trash2 size={24} className={deleteMode ? "text-red-600" : "text-gray-600"} />
-                      </button>
-                    </div>
-                  )}
-
+                  <span className="text-sm font-medium text-gray-900">{monthYear}</span>
                   <button
-                    onClick={() =>
-                      setCurrentMonth(
-                        new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
-                      )
-                    }
-                    className="p-2 hover:bg-gray-100 rounded-lg transition"
-                    disabled={loading}
+                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+                    className="p-1 hover:bg-gray-100 rounded"
                   >
-                    <ChevronRight size={24} />
+                    <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
-
-                {/* Week Days */}
+ 
                 <div className="grid grid-cols-7 gap-2 mb-2">
-                  {weekDays.map((day) => (
-                    <div key={day} className="text-center text-sm font-bold text-gray-600">
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                    <div key={day} className="text-center text-xs font-medium text-[#6C6C6C] py-2">
                       {day}
                     </div>
                   ))}
                 </div>
-
-                {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-2">{generateCalendarDays()}</div>
-
-                {/* Legend */}
-                <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded" />
-                    <span className="text-xs text-gray-600">Available</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-red-50 border-2 border-red-200 rounded" />
-                    <span className="text-xs text-gray-600">
-                      {userRole === "owner" ? "Unavailable/Booked" : "Not Available"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-black rounded" />
-                    <span className="text-xs text-gray-600">
-                      {editMode ? "Editing" : "Selected"}
-                    </span>
-                  </div>
+ 
+                <div className="grid grid-cols-7 gap-2">
+                  {days.map((day, index) => {
+                    const unavailable = day && isDateUnavailable(day);
+                    const selected = day && isDateSelected(day);
+                   
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => day && handleDateClick(day)}
+                        disabled={!day}
+                        className={`
+                          aspect-square rounded-lg text-sm font-medium transition-all relative
+                          ${!day ? 'invisible' : ''}
+                          ${selected
+                            ? 'bg-[#001F67] text-white'
+                            : unavailable
+                            ? 'bg-red-100 text-red-700 border-2 border-red-300'
+                            : 'bg-white text-gray-900 hover:bg-[#E8F0FF] border border-[#E5E5E5]'}
+                          disabled:text-[#C7C7C7] disabled:cursor-not-allowed
+                        `}
+                      >
+                        {day?.getDate()}
+                        {unavailable && !selected && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-1 h-full bg-red-400 transform rotate-45"></div>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+ 
+              <div className="mt-4">
+                <select className="w-full h-12 px-4 border border-[#E5E5E5] rounded-lg bg-[#FFE5E5] text-red-700 font-medium text-sm" disabled>
+                  <option>Unavailable</option>
+                </select>
+              </div>
             </div>
-
-            {/* Time & Actions Section */}
-            <div className="space-y-4">
-              {/* Start Time */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Start Time</label>
-                <select
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full p-3 border-2 border-gray-300 rounded-lg font-semibold focus:border-blue-500 focus:outline-none"
-                  disabled={loading}
-                >
-                  {timeOptions.map((time) => (
-                    <option key={time.value} value={time.value}>
-                      {time.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* End Time */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">End Time</label>
-                <select
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="w-full p-3 border-2 border-gray-300 rounded-lg font-semibold focus:border-blue-500 focus:outline-none"
-                  disabled={loading}
-                >
-                  {timeOptions.map((time) => (
-                    <option key={time.value} value={time.value}>
-                      {time.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Summary */}
-              {selectedStartDate && selectedEndDate && (
-                <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-lg">
-                  <p className="text-sm font-bold text-green-900 mb-2">
-                    {editMode ? "Editing Dates" : "Selected Dates"}
-                  </p>
-                  <p className="text-xs text-green-800">
-                    From: {formatDateForAPI(selectedStartDate)}
-                  </p>
-                  <p className="text-xs text-green-800">To: {formatDateForAPI(selectedEndDate)}</p>
-                  {editMode && (
-                    <p className="text-xs text-green-700 mt-2 italic">Tap ✓ icon to save changes</p>
+ 
+            {/* Right Side - Time Selection */}
+            <div>
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Select Time</h3>
+             
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {/* Start Time */}
+                <div className="relative">
+                  <label className="block text-xs font-medium text-[#6C6C6C] mb-2">Start Time</label>
+                  <button
+                    onClick={() => {
+                      setShowStartTime(!showStartTime);
+                      setShowEndTime(false);
+                    }}
+                    className="w-full h-14 border border-[#E5E5E5] rounded-lg flex items-center justify-center bg-white hover:bg-[#E9ECF9] transition-colors"
+                  >
+                    <span className="text-base font-semibold text-gray-900">{formatTime(startTime)}</span>
+                  </button>
+                  {showStartTime && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E5E5E5] rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
+                      {generateTimeOptions().map((time, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setStartTime(time);
+                            setShowStartTime(false);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-left hover:bg-[#E9ECF9] transition-colors"
+                        >
+                          {formatTime(time)}
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
-              )}
-
-              {/* Data Info */}
-              {(unavailableDates.length > 0 || bookedDates.length > 0) && !loading && (
-                <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Check size={16} className="text-blue-600" />
-                    <p className="text-sm font-bold text-blue-900">Calendar Data Loaded</p>
+ 
+                {/* End Time */}
+                <div className="relative">
+                  <label className="block text-xs font-medium text-[#6C6C6C] mb-2">End Time</label>
+                  <button
+                    onClick={() => {
+                      setShowEndTime(!showEndTime);
+                      setShowStartTime(false);
+                    }}
+                    className="w-full h-14 border border-[#E5E5E5] rounded-lg flex items-center justify-center bg-white hover:bg-[#E9ECF9] transition-colors"
+                  >
+                    <span className="text-base font-semibold text-gray-900">{formatTime(endTime)}</span>
+                  </button>
+                  {showEndTime && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E5E5E5] rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
+                      {generateTimeOptions().map((time, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setEndTime(time);
+                            setShowEndTime(false);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-left hover:bg-[#E9ECF9] transition-colors"
+                        >
+                          {formatTime(time)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+ 
+              {/* Time Slots Preview */}
+              <div className="bg-[#F8F9FA] rounded-lg p-4 border border-[#E5E5E5] mb-6">
+                <p className="text-xs font-medium text-[#6C6C6C] mb-3">Unavailable Time Slot</p>
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">{formatTime(startTime)}</span>
+                    <span className="mx-2 text-gray-400">→</span>
+                    <span className="font-medium">{formatTime(endTime)}</span>
                   </div>
-                  <p className="text-xs text-blue-800">
-                    {unavailableDates.length + bookedDates.length} slot(s) from database
-                  </p>
+                </div>
+              </div>
+ 
+              {/* Unavailable Dates List */}
+              {availabilities.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Unavailable Dates</h3>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {availabilities.map((item) => (
+                      <div key={item.id} className="bg-red-50 rounded-lg p-3 border border-red-200">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 text-xs text-gray-700 mb-1">
+                              <Calendar className="w-3 h-3 text-red-600" />
+                              <span className="font-medium">{formatDate(item.startDate)}</span>
+                              <span className="text-gray-400">→</span>
+                              <span className="font-medium">{formatDate(item.endDate)}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <Clock className="w-3 h-3 text-red-600" />
+                              <span>{formatTime(item.startTime)} → {formatTime(item.endTime)}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-all"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-
-              {/* Confirm Button */}
-              <button
-                onClick={handleConfirmButton}
-                disabled={!selectedStartDate || !selectedEndDate || loading}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-lg font-bold text-lg transition shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full" />
-                    {userRole === "owner" ? "Saving..." : "Processing..."}
-                  </>
-                ) : (
-                  <>
-                    <Check size={20} />
-                    {userRole === "owner" 
-                      ? (editMode ? "Confirm & Save Changes" : "Confirm & Save Dates")
-                      : "Confirm & Continue"}
-                  </>
-                )}
-              </button>
+ 
+              {/* Info Box */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex gap-3">
+                  <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium mb-1">About Unavailability</p>
+                    <p className="text-xs">This will mark your vehicle as unavailable for the selected dates and times. Customers won't be able to book during this period.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+ 
+          {/* Confirm Button */}
+          <button
+            onClick={handleConfirm}
+            disabled={!selectedStartDate || !selectedEndDate || loading}
+            className="w-full h-12 mt-6 bg-gradient-to-r from-[#001F67] to-[#3474FF] text-white rounded-lg font-medium hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg"
+          >
+            {loading ? 'Creating...' : 'Confirm Unavailability'}
+          </button>
         </div>
       </div>
     </div>
   );
 };
-
-export default VehicleAvailabilityCalendar;
+ 
+export default AvailabilityDateTime;
+ 

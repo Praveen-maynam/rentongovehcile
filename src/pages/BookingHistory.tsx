@@ -1044,11 +1044,21 @@
 // };
 
 // export default VehicleHistory;
- import React, { useState, useEffect } from "react";
+
+
+
+
+
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import PopupChat from "../components/ui/PopupChat";
 import apiService from "../services/api.service";
+import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
+import Petrol from "../assets/icons/Petrol.png";
+import Location from "../assets/icons/Location.png";
+import seats from "../assets/icons/seats.jpeg";
+import AClogo from "../assets/icons/ac.png";
 
 interface VehicleData {
   _id: string;
@@ -1201,16 +1211,44 @@ const BookingDetail: React.FC = () => {
       </div>
     );
   }
-
+      
+  // ✅ CONSOLIDATED: Single declaration of all display variables
   const isCar = vehicleType === "car" || !!vehicleData.CarName || !!vehicleData.carName || !!vehicleData.carImages;
-  const vehicleImages = isCar ? vehicleData.carImages || [] : vehicleData.bikeImages || [];
+  
+  let vehicleImages = (isCar ? vehicleData.carImages : vehicleData.bikeImages) || [];
+  vehicleImages = vehicleImages.filter((img) => img && img.trim() !== "" && img !== "undefined");
+
+  const carDummyImages = [
+    "https://rukminim2.flixcart.com/image/480/480/jvtujrk0/vehicle-pull-along/r/j/f/dummy-miniature-car-toy-golden-feather-original-imafe8rh66whjcgv.jpeg?q=90",
+    "https://rukminim2.flixcart.com/image/480/480/jvtujrk0/vehicle-pull-along/7/t/u/dummy-car-miniature-toy-golden-feather-original-imafe9s8wtk5g8hj.jpeg?q=90"
+  ];
+
+  const bikeDummyImages = [
+    "https://w7.pngwing.com/pngs/579/51/png-transparent-computer-icons-motorcycle-bicycle-motorcycle-logo-black-silhouette.png",
+    "https://w1.pngwing.com/pngs/381/835/png-transparent-yamaha-logo-car-decal-motorcycle-sticker-sport-bike-yamaha-yzfr1-bicycle-thumbnail.png"
+  ];
+
+  const dummyImages = isCar ? carDummyImages : bikeDummyImages;
+
+  if (vehicleImages.length === 0) {
+    vehicleImages = dummyImages;
+  }
+
+  const carouselImages = [...vehicleImages];
+  while (carouselImages.length < 3) {
+    carouselImages.push(dummyImages[carouselImages.length % dummyImages.length]);
+  }
+
   const displayName = isCar
     ? vehicleData.CarName || vehicleData.carName || passedBooking?.vehicleName || "Unknown Vehicle"
     : vehicleData.bikeName || passedBooking?.vehicleName || "Unknown Bike";
+  
   const displayModel = isCar ? vehicleData.CarModel || "N/A" : vehicleData.bikeModel || "N/A";
+  
   const displayPrice = isCar
     ? vehicleData.RentPerHour || passedBooking?.price || 0
     : vehicleData.pricePerKm || passedBooking?.price || 0;
+  
   const priceUnit = isCar ? "/hr" : "/km";
 
   return (
@@ -1247,28 +1285,54 @@ const BookingDetail: React.FC = () => {
         </div>
 
         <div className="flex flex-col ml-0 md:ml-6 mt-6 md:mt-0 flex-1">
-          <h1 className="text-3xl font-semibold">{displayName}</h1>
-          <p className="text-sm text-gray-500 mt-1">{displayModel}</p>
+          <h1 
+            className="text-[32px] font-bold text-[#000000] leading-tight cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all"
+            style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}
+          >
+            {displayName}
+          </h1>
 
-          <div className="flex items-baseline mt-2">
-            <span className="text-3xl font-bold text-blue-600">₹{displayPrice}</span>
+          {/* <p className="text-sm text-gray-500 mt-1">{displayModel}</p> */}
+
+          <div className="flex items-baseline mt-2  cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2">
+            <span className="text-[32px] font-bold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
+              ₹{displayPrice}
+            </span>
             <span className="text-gray-500 ml-2 text-sm">{priceUnit}</span>
           </div>
 
-          <div className="flex items-center mt-4 border border-gray-300 rounded-xl overflow-hidden">
+          <div className="flex items-center mt-4 border border-gray-300 rounded-xl overflow-hidden cursor-pointer hover:border-[#0066FF] hover:border-2">
             {isCar ? (
               <>
-                <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                  🚗 <p className="text-sm text-gray-700">{vehicleData.transmissionType || "Manual"}</p>
+                <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                  <img src={AutomaticLogo} className="w-6 h-6 mb-1.5" alt="transmission" />
+                  <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    {vehicleData.transmissionType || "Manual"}
+                  </span>
                 </div>
-                <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                  👥 <p className="text-sm text-gray-700">{vehicleData.Carseater || "5"} Seater</p>
+                <div className="w-[1px] h-12 bg-[#E5E5E5]"></div>
+                
+                <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                  <img src={seats} className="w-6 h-6 mb-1.5" alt="seats" />
+                  <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    {vehicleData.Carseater || "5"} Seaters
+                  </span>
                 </div>
-                <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                  ⛽ <p className="text-sm text-gray-700">{vehicleData.fuelType || "Petrol"}</p>
+                <div className="w-[1px] h-12 bg-[#E5E5E5]"></div>
+                
+                <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                  <img src={Petrol} className="w-6 h-6 mb-1.5" alt="fuel" />
+                  <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    {vehicleData.fuelType || "Petrol"}
+                  </span>
                 </div>
-                <div className="flex flex-col items-center px-4 py-3">
-                  ❄️ <p className="text-sm text-gray-700">{vehicleData.Ac_available ? "AC" : "Non-AC"}</p>
+                <div className="w-[1px] h-12 bg-[#E5E5E5]"></div>
+                
+                <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                  <img src={AClogo} className="w-6 h-6 mb-1.5" alt="ac" />
+                  <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    {vehicleData.Ac_available ? "AC" : "Non-AC"}
+                  </span>
                 </div>
               </>
             ) : (
@@ -1276,8 +1340,10 @@ const BookingDetail: React.FC = () => {
                 <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
                   🏍️ <p className="text-sm text-gray-700">Bike</p>
                 </div>
-                <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                  ⛽ <p className="text-sm text-gray-700">Petrol</p>
+                <div className="w-[1px] h-12 bg-[#E5E5E5]"></div>
+                <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                  <img src={Petrol} className="w-6 h-6 mb-1.5" alt="fuel" />
+                  <span className="text-[13px] text-[#333333] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>Petrol</span>
                 </div>
                 <div className="flex flex-col items-center px-4 py-3">
                   📍 <p className="text-sm text-gray-700">{vehicleData.pickupCity || "N/A"}</p>
@@ -1286,13 +1352,15 @@ const BookingDetail: React.FC = () => {
             )}
           </div>
 
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold mb-2">Description</h2>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              {vehicleData.description || "No description available"}
-            </p>
-          </div>
-
+            {/* Description Card */}
+              <div className="border border-[#E5E5E5] rounded-[10px] p-4 bg-white mb-4 cursor-pointer hover:border-[#0066FF] hover:border-2 transition-all duration-200 w-full max-w-full">
+                <h2 className="text-[18px] font-bold text-[#000000] mb-2 cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
+                  Description
+                </h2>
+                <p className="text-[#666666] text-[14px] leading-[1.6] min-h-[40px] break-words whitespace-normal overflow-hidden" style={{ fontFamily: 'Inter, sans-serif', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                  {vehicleData.description || "No description available"}
+                </p>
+              </div>
           <div className="mt-6 flex gap-3">
             <button
               onClick={() => setIsChatOpen(true)}
@@ -1309,6 +1377,7 @@ const BookingDetail: React.FC = () => {
             </button>
           </div>
 
+          {/* Uncomment when PopupChat is ready */}
           {/* <PopupChat
             isOpen={isChatOpen}
             onClose={() => setIsChatOpen(false)}

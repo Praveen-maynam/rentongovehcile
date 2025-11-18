@@ -1,18 +1,17 @@
-
-
 // import React, { useEffect, useState } from "react";
 // import { useParams, useLocation, useNavigate } from "react-router-dom";
 // import apiService from "../services/api.service";
-// import Enfield from "../assets/images/Enfield.png"; // Update with your bike image path
-// import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
+// import Enfield from "../assets/images/Enfield.png";
 // import DriverLogo from "../assets/icons/DriverLogo.png";
+// import Petrol from "../assets/icons/Petrol.png";
+// import Location from "../assets/icons/Location.png";
+// import BikeCC from "../assets/icons/BikeCC.png";
+// import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 
 // interface VehicleDetails {
 //   name: string;
 //   price: string | number;
 //   rating: string;
-//   transmission: string;
-//   fuel: string;
 //   image: string;
 //   email: string;
 //   city?: string;
@@ -21,7 +20,10 @@
 //   doorName?: string;
 //   id?: string;
 //   bikenumber?: string;
-//   BikeNumber?:string;
+//   BikeNumber?: string;
+//   engineCapacity?: string;
+//   transmission?: string;
+//   fuel?: string;
 //   isAvailable?: boolean;
 //   requireDrivingLicense?: boolean;
 //   requireAadharCard?: boolean;
@@ -29,7 +31,7 @@
 //   state?: string;
 //   country?: string;
 //   userId?: string;
-//  BikeModel?: string;
+//   BikeModel?: string;
 //   contactName: string;
 //   contactNumber: string;
 //   description: string;
@@ -37,13 +39,12 @@
 
 // const defaultVehicle: VehicleDetails = {
 //   name: "Royal Enfield Classic 350",
-//     BikeModel: "BS6",
-
-//   // bikeNumber: "AP23456789",
-//   price: "10",
-//   rating: "4.5",
+//   BikeModel: "BS6",
+//   engineCapacity: "350",
 //   transmission: "Manual",
 //   fuel: "Petrol",
+//   price: "10",
+//   rating: "4.5",
 //   image: Enfield,
 //   description: "Well-maintained bike for rent",
 //   contactName: "Owner Name",
@@ -61,11 +62,8 @@
 //   const location = useLocation();
 //   const navigate = useNavigate();
 
-//   console.log("🏍️ Bike ID from URL:", bikeId);
+//   const { bikeData, openEditForm } = (location && (location as any).state) || {};
 
-
-//     const { bikeData, openEditForm } = (location && (location as any).state) || {};
-//   // Type extension for image support
 //   type VehicleWithImage = VehicleDetails & {
 //     bikeImages?: File | string;
 //   };
@@ -83,9 +81,7 @@
 //   const [preview, setPreview] = useState<string | null>(null);
 //   const [additionalImages, setAdditionalImages] = useState<File[]>([]);
 //   const [manualUserId, setManualUserId] = useState<string>("");
-
-//   // Alias for consistency with existing code
-
+  // const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
 //   useEffect(() => {
 //     if (bikeId && !bikeData) {
@@ -98,7 +94,6 @@
 //       setEditOpen(true);
 //     }
 
-//     // Auto-load userId from localStorage
 //     const storedUserId = localStorage.getItem('userId');
 //     if (storedUserId && !manualUserId) {
 //       console.log("✅ Auto-loaded userId from localStorage:", storedUserId);
@@ -134,13 +129,15 @@
     
 //     const mapped: VehicleDetails = {
 //       ...defaultVehicle,
-//       name: `${bike.bikeName || bike.name || ""} ${bike.BikeModel || bike.model || ""}`.trim(),
-//       bikenumber: bike.bikeNumber || bike.bikeNumber || "",
+//       name: `${bike.bikeName || bike.name || ""} ${bike.bikeModel || bike.BikeModel || bike.model || ""}`.trim(),
+//       bikenumber: bike.bikeNumber || "",
+//       BikeNumber: bike.bikeNumber || "",
 //       BikeModel: bike.bikeModel || bike.model || "",
-//       price: bike.RentPerKM ?? bike.price ?? defaultVehicle.price,
+//       engineCapacity: bike.bikeEngine || bike.engineCapacity || "350",
+//       transmission: bike.transmission || bike.Transmission || "Manual",
+//       fuel: bike.fuel || bike.fuelType || bike.Fuel || "Petrol",
+//       price: bike.pricePerKm ?? bike.price ?? defaultVehicle.price,
 //       rating: bike.rating?.toString?.() || defaultVehicle.rating,
-//       // transmission: bike.transmissionType || bike.transmission || defaultVehicle.transmission,
-//       // fuel: bike.fuelType || bike.fuel || defaultVehicle.fuel,
 //       image: bike.bikeImages?.[0] || bike.image || defaultVehicle.image,
 //       description: bike.description || defaultVehicle.description,
 //       contactName: bike.contactName || defaultVehicle.contactName,
@@ -148,7 +145,7 @@
 //       email: bike.email || defaultVehicle.email,
 //       id: bike._id || bike.id || undefined,
 //       userId: bike.userId || bike.user_id || undefined,
-//       isAvailable: bike.isAvailable !== false,
+//       isAvailable: bike.Available !== false && bike.isAvailable !== false,
 //       city: bike.pickupCity || bike.city || "",
 //       street: bike.pickupArea || bike.street || "",
 //       pincode: bike.pickupCityPinCode || bike.pincode || "",
@@ -197,283 +194,250 @@
 //     }
 //   };
 
-
-  
-//     // const handleAdditionalImagesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     //   const files = event.target.files;
-//     //   if (files) {
-//     //     const newImages = Array.from(files).slice(0, 4 - additionalImages.length);
-//     //     console.log("📸 Selected additional images:", newImages.length);
-//     //     setAdditionalImages((prev) => [...prev, ...newImages]);
-//     //   }
-//     // };
 //   const removeAdditionalImage = (index: number) => {
 //     console.log("🗑️ Removing additional image at index:", index);
 //     setAdditionalImages((prev) => prev.filter((_, i) => i !== index));
 //   };
 
-//   const debugFormData = (formData: FormData) => {
-//     console.log("📦 FormData contents:");
-//     for (const key of Array.from(formData.keys())) {
-//       const value = formData.get(key);
-//       if (value instanceof File) {
-//         console.log(`  ${key}:`, { name: value.name, size: value.size, type: value.type });
-//       } else {
-//         console.log(`  ${key}:`, value);
-//       }
-//     }
-//   };
 //   const handleSave = async () => {
-//   const vehicleId = editVehicle.id || bikeId;
+//     const vehicleId = editVehicle.id || bikeId;
 
-//   if (!vehicleId) {
-//     alert("❌ Bike ID missing — cannot update.");
-//     return;
-//   }
+//     if (!vehicleId) {
+//       alert("❌ Bike ID missing — cannot update.");
+//       return;
+//     }
 
-//   // Validate required fields
-//   const trimmedName = editVehicle.name?.trim();
-//   const trimmedPrice = (editVehicle.price ?? "").toString().trim();
+//     const trimmedName = editVehicle.name?.trim();
+//     const trimmedPrice = (editVehicle.price ?? "").toString().trim();
 
-//   if (!trimmedName) {
-//     alert("❌ Bike name is required");
-//     return;
-//   }
-  
-//   if (!trimmedPrice || trimmedPrice === "0" || Number(trimmedPrice) <= 0) {
-//     alert("❌ Valid price is required (must be greater than 0)");
-//     return;
-//   }
-
-//   setIsLoading(true);
-
-//   try {
-//     const formdata = new FormData();
-//     // Get userId
-//     let userId = manualUserId || localStorage.getItem('userId') || editVehicle.userId;
+//     if (!trimmedName) {
+//       alert("❌ Bike name is required");
+//       return;
+//     }
     
-//     if (!userId) {
-//       // Try parsing stored user objects
-//       const possibleKeys = ["user", "userData", "currentUser", "authUser", "userInfo"];
+//     if (!trimmedPrice || trimmedPrice === "0" || Number(trimmedPrice) <= 0) {
+//       alert("❌ Valid price is required (must be greater than 0)");
+//       return;
+//     }
+
+//     setIsLoading(true);
+
+//     try {
+//       let userId = manualUserId || localStorage.getItem('userId') || editVehicle.userId;
       
-//       for (const key of possibleKeys) {
-//         const stored = localStorage.getItem(key);
-//         if (stored) {
-//           console.log(`🔍 Checking localStorage.${key}:`, stored);
-//           try {
-//             const parsed = JSON.parse(stored);
-//             userId = parsed._id || parsed.id || parsed.userId || parsed.user_id || parsed.uid;
-//             if (userId) {
-//               console.log(`✅ Retrieved userId from localStorage.${key}:`, userId);
-//               setManualUserId(userId);
-//               break;
-//             }
-//           } catch (e) {
-//             if (stored && stored.length >= 10 && /^[a-f0-9]+$/i.test(stored)) {
-//               userId = stored;
-//               console.log(`✅ Retrieved userId directly from localStorage.${key}:`, userId);
-//               setManualUserId(userId);
-//               break;
+//       if (!userId) {
+//         const possibleKeys = ["user", "userData", "currentUser", "authUser", "userInfo"];
+        
+//         for (const key of possibleKeys) {
+//           const stored = localStorage.getItem(key);
+//           if (stored) {
+//             try {
+//               const parsed = JSON.parse(stored);
+//               userId = parsed._id || parsed.id || parsed.userId || parsed.user_id || parsed.uid;
+//               if (userId) {
+//                 console.log(`✅ Retrieved userId from localStorage.${key}:`, userId);
+//                 setManualUserId(userId);
+//                 break;
+//               }
+//             } catch (e) {
+//               if (stored && stored.length >= 10 && /^[a-f0-9]+$/i.test(stored)) {
+//                 userId = stored;
+//                 console.log(`✅ Retrieved userId directly from localStorage.${key}:`, userId);
+//                 setManualUserId(userId);
+//                 break;
+//               }
 //             }
 //           }
 //         }
 //       }
-//     }
 
-//     if (!userId) {
-//       console.error("❌ userId not found in any location");
-//        console.log("🔍 Available localStorage keys:", Object.keys(localStorage));
-//       alert("❌ User ID is missing. Please enter it manually in the form.");
-//       return;
-//     }
+//       if (!userId) {
+//         console.error("❌ userId not found");
+//         alert("❌ User ID is missing. Please enter it manually in the form.");
+//         return;
+//       }
 
-//     console.log("✅ Using userId:", userId);
-    
-//     // Split full name into bikeName and bikeModel
-//     const nameParts = trimmedName.split(" ");
-//     const bikeName = nameParts[0] || trimmedName;
-//     const bikeModel = nameParts.slice(1).join(" ") || editVehicle.BikeModel || "";
-//       console.log("📝 Preparing form data...");
+//       console.log("✅ Using userId:", userId);
+      
+//       const nameParts = trimmedName.split(" ");
+//       const bikeName = nameParts[0] || trimmedName;
+//       const bikeModel = nameParts.slice(1).join(" ") || editVehicle.BikeModel || "";
+
+//       console.log("📝 Preparing request...");
 //       console.log("  bikeName:", bikeName);
 //       console.log("  bikeModel:", bikeModel);
-//     console.log("📝 Preparing data for API call...");
+//       console.log("  engineCapacity:", editVehicle.engineCapacity);
 
-   
-// console.log("🚀 Sending data:", Object.fromEntries(formdata.entries()));
-// // --- Ensure both vehicleId and userId are sent explicitly ---
-// if (vehicleId) {
-//   formdata.append("_id", vehicleId); // or "carId" depending on your backend schema
-//   console.log("✅ Attached vehicleId:", vehicleId);
-// }
+//       const customHeaders: Record<string, string> = {
+//         userId: userId,
+//         bikeName: bikeName,
+//         bikeModel: bikeModel,
+//         // Bike number is not sent - it's read-only and displayed only
+//         pricePerKm: trimmedPrice,
+//         description: editVehicle.description || "",
+//         contactName: editVehicle.contactName,
+//         contactNumber: editVehicle.contactNumber,
+//         latitude: "17.443649",
+//         longitude: "78.445824",
+//         InsuranceNo: "0987654321",
+//       };
 
-// if (manualUserId || originalVehicle.userId) {
-//   formdata.append("userId", (manualUserId || originalVehicle.userId)!.toString());
-//   console.log("✅ Attached userId:", manualUserId || originalVehicle.userId);
-// } else {
-//   console.warn("⚠️ No valid userId found — manual entry required.");
-// }
+//       if (editVehicle.engineCapacity) {
+//         customHeaders.bikeEngine = editVehicle.engineCapacity;
+//       }
 
+//       if (editVehicle.transmission) {
+//         customHeaders.transmission = editVehicle.transmission;
+//       }
 
-//     // Add all fields that will be converted to headers
-//     formdata.append("userId", userId);
-//     formdata.append("bikeName", bikeName);
-//     formdata.append("bikeModel", bikeModel);
-//     formdata.append("bikeNumber", editVehicle.BikeNumber || "");
-//     formdata.append("pricePerKm", trimmedPrice);
-//     formdata.append("description", editVehicle.description || "");
-//     formdata.append("contactName", editVehicle.contactName);
-//     formdata.append("contactNumber", editVehicle.contactNumber);
-//     // formdata.append("fuelType", editVehicle.fuel.toLowerCase());
-//     // formdata.append("transmissionType", editVehicle.transmission.toLowerCase());
+//       if (editVehicle.fuel) {
+//         customHeaders.fuel = editVehicle.fuel;
+//       }
 
-//     // Address fields (exact field names from your Postman example)
-//     if (editVehicle.city) formdata.append("pickupCity", editVehicle.city);
-//     if (editVehicle.street) formdata.append("pickupArea", editVehicle.street);
-//     if (editVehicle.pincode) formdata.append("pickupCityPinCode", editVehicle.pincode);
-//     if (editVehicle.state) formdata.append("pickupCityState", editVehicle.state);
-//     if (editVehicle.country) formdata.append("pickupCityCountry", editVehicle.country);
+//       if (editVehicle.city) customHeaders.pickupCity = editVehicle.city;
+//       if (editVehicle.street) customHeaders.pickupArea = editVehicle.street;
+//       if (editVehicle.pincode) customHeaders.pickupCityPinCode = editVehicle.pincode;
+//       if (editVehicle.state) customHeaders.pickupCityState = editVehicle.state;
+//       if (editVehicle.country) customHeaders.pickupCityCountry = editVehicle.country;
 
-//     // // Coordinates
-//     // formdata.append("latitude", "17.443649");
-//     // formdata.append("longitude", "78.445824");
+//       if (editVehicle.requireDrivingLicense) {
+//         customHeaders.drivingLicenseRequired = "true";
+//       }
+//       if (editVehicle.requireAadharCard) {
+//         customHeaders.AadharCardRequired = "true";
+//       }
+//       if (editVehicle.depositMoney && editVehicle.depositMoney !== "0") {
+//         customHeaders.DepositAmount = editVehicle.depositMoney;
+//       }
 
-//     // Insurance
-//     formdata.append("InsuranceNo", "0987654321");
-
-//     // Document requirements
-//     if (editVehicle.requireDrivingLicense) {
-//       formdata.append("drivingLicenseRequired", "true");
-//     }
-//     if (editVehicle.requireAadharCard) {
-//       formdata.append("AadharCardRequired", "true");
-//     }
-//     if (editVehicle.depositMoney && editVehicle.depositMoney !== "0") {
-//       formdata.append("DepositAmount", editVehicle.depositMoney);
-//     }
-// // ✅ Main image upload
-// if (bikeImage instanceof File) {
-//   formdata.append("carImages", bikeImage);
-//   console.log("📸 Added main image:", bikeImage.name);
-// } else if (typeof editVehicle.image === "string" && editVehicle.image.startsWith("blob:") === false) {
-//   console.log("ℹ️ Using existing image URL (not uploading again)");
-// } else {
-//   console.warn("⚠️ No main image selected or existing image found");
-// }
-
-
-
+//       const formdata = new FormData();
+      
+//       if (bikeImage instanceof File) {
+//         formdata.append("bikeImages", bikeImage);
+//         console.log("📸 Added main image:", bikeImage.name);
+//       }
       
 //       if (additionalImages.length > 0) {
 //         additionalImages.forEach((img, index) => {
-//           formdata.append("carImages", img);
+//           formdata.append("bikeImages", img);
 //           console.log(`📸 Adding additional image ${index + 1}:`, img.name);
 //         });
 //       }
-// console.log("🚀 Sending data:", Object.fromEntries(formdata.entries()));
-//       console.log("👤 Using userId:", userId);
-      
-//       debugFormData(formdata);
-//     // Make the API call
-//     const response = await apiService.bike.updateBikeById(vehicleId, formdata);
-//     const result = response.data || response;
 
-//     console.log("📥 API Response:", result);
+//       console.log("🚀 Sending update request for bike ID:", vehicleId);
+//       console.log("📦 Custom Headers:", customHeaders);
 
-//     if (result?.message?.toLowerCase().includes("updated") || result?.success) {
-//       alert("✅ Bike updated successfully!");
-//       console.log("🎉 Updated bike data:", result.bike);
-      
-//       // Refresh the bike data
-//       if (result.bike) {
-//         mapBikeData(result.bike);
+//       const response = await apiService.bike.updateBikeById(vehicleId, formdata, customHeaders);
+//       const result = response.data || response;
+
+//       console.log("📥 API Response:", result);
+
+//       if (result?.message?.toLowerCase().includes("updated") || result?.success || result?.bike) {
+//         alert("✅ Bike updated successfully!");
+//         console.log("🎉 Updated bike data:", result.bike);
+        
+//         if (result.bike) {
+//           mapBikeData(result.bike);
+//         } else {
+//           await fetchBikeDetails(vehicleId);
+//         }
+        
+//         setBikeImage(null);
+//         setAdditionalImages([]);
+        
+//         navigate("/listed", { state: { refresh: true } });
 //       } else {
-//         await fetchBikeDetails(vehicleId);
+//         throw new Error(result?.message || "Update failed - no success confirmation received");
 //       }
+//     } catch (error: any) {
+//       console.error("❌ Update Error:", error);
+//       console.error("❌ Error Response:", error.response?.data);
       
-//       // Clear uploaded images (they weren't sent anyway)
-//       setBikeImage(null);
-//       setAdditionalImages([]);
-//         // ✅ Navigate to listed page
-//   navigate("/listed", { state: { refresh: true } });
-//     } else {
-//       throw new Error(result?.message || "Update failed - no success confirmation received");
-//     }
-//   } catch (error: any) {
-//     console.error("❌ Update Error:", error);
-//     console.error("❌ Error Response:", error.response?.data);
-    
-//     const errorMsg = error.response?.data?.message || 
-//                     error.response?.data?.error || 
-//                     error.message || 
-//                     "Unknown error occurred";
-    
-//     const errorDetails = error.response?.data?.details || "";
-    
-//     // // Get userId from the same sources as before
-//     // const currentUserId = manualUserId || localStorage.getItem('userId') || editVehicle.userId || 'Not found';
-    
+//       const errorMsg = error.response?.data?.message || 
+//                       error.response?.data?.error || 
+//                       error.message || 
+//                       "Unknown error occurred";
+      
+//       const errorDetails = error.response?.data?.details || "";
+      
 //       alert(
-//         `❌ Failed to update car:\n\n${errorMsg}\n${errorDetails ? '\n' + errorDetails : ''}\n\n` +
+//         `❌ Failed to update bike:\n\n${errorMsg}\n${errorDetails ? '\n' + errorDetails : ''}\n\n` +
 //         `Please check:\n` +
-//         `• User ID is correct and matches the car owner\n` +
 //         `• All required fields are filled\n` +
-//         `• You have permission to edit this car\n` +
+//         `• You have permission to edit this bike\n` +
 //         `• Image files are not too large (< 5MB each)`
 //       );
-//   } finally {
-//     setIsLoading(false);
-//   }
-// };
-
-// const handleDelete = async () => {
-//   const vehicleId = editVehicle.id || bikeId;
-  
-//   if (!vehicleId) {
-//     alert("❌ Vehicle ID missing — cannot delete.");
-//     return;
-//   }
-
-//   if (!window.confirm(`⚠️ Are you sure you want to delete "${editVehicle.name}"?\n\nThis action cannot be undone.`)) {
-//     return;
-//   }
-
-//   setIsLoading(true);
-
-//   try {
-//     console.log("🗑️ Deleting bike with ID:", vehicleId);
-    
-//     const response = await apiService.bike.deleteBikeById(vehicleId);
-//     console.log("✅ Delete Response:", response);
-
-//     const data = response.data || response;
-
-//     if (data?.message?.toLowerCase().includes("deleted") || data?.success) {
-//       alert("✅ Bike deleted successfully!");
-//       navigate("/listed", { state: { refresh: true } });
-//     } else {
-//       throw new Error(data?.message || "Delete failed");
+//     } finally {
+//       setIsLoading(false);
 //     }
-//   } catch (error: any) {
-//     console.error("❌ Delete Bike Error:", error);
-//     const errorMsg = error.response?.data?.message || error.message || "Unknown error";
-//     alert(`❌ Failed to delete bike: ${errorMsg}`);
-//   } finally {
-//     setIsLoading(false);
-//   }
-// };
+//   };
+
+//   const handleDelete = async () => {
+//     const vehicleId = editVehicle.id || bikeId;
+    
+//     if (!vehicleId) {
+//       alert("❌ Vehicle ID missing — cannot delete.");
+//       return;
+//     }
+
+//     if (!window.confirm(`⚠️ Are you sure you want to delete "${editVehicle.name}"?\n\nThis action cannot be undone.`)) {
+//       return;
+//     }
+
+//     setIsLoading(true);
+
+//     try {
+//       console.log("🗑️ Deleting bike with ID:", vehicleId);
+      
+//       const response = await apiService.bike.deleteBikeById(vehicleId);
+//       console.log("✅ Delete Response:", response);
+
+//       const data = response.data || response;
+
+//       if (data?.message?.toLowerCase().includes("deleted") || data?.success) {
+//         alert("✅ Bike deleted successfully!");
+//         navigate("/listed", { state: { refresh: true } });
+//       } else {
+//         throw new Error(data?.message || "Delete failed");
+//       }
+//     } catch (error: any) {
+//       console.error("❌ Delete Bike Error:", error);
+//       const errorMsg = error.response?.data?.message || error.message || "Unknown error";
+//       alert(`❌ Failed to delete bike: ${errorMsg}`);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
 //   if (isFetching) {
-//     return (
-//       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-//         <div className="bg-white p-6 rounded-lg shadow-xl">
-//           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-//           <p className="mt-4 text-gray-700 font-medium">Loading bike details...</p>
-//         </div>
-//       </div>
-//     );
-//   }
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+  //       <div className="bg-white p-6 rounded-lg shadow-xl">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+  //         <p className="mt-4 text-gray-700 font-medium">Loading bike details...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  // const dummyImages = [
+  //   "https://imgd.aeplcdn.com/664x374/n/cw/ec/1/versions/royalenfield-classic-350-single-channel-abs-alloy1708490929186.jpg?q=80",
+  //   "https://imgd.aeplcdn.com/664x374/n/cw/ec/128413/hunter-350-right-front-three-quarter-5.jpeg?isig=0&q=80",
+  //   "https://imgd.aeplcdn.com/664x374/n/cw/ec/141113/interceptor-650-right-front-three-quarter-3.jpeg?isig=0&q=80"
+  // ];
+
+  // const realImages = additionalImages.length > 0 
+  //   ? [preview || editVehicle.image || Enfield, ...additionalImages.map(img => URL.createObjectURL(img))]
+  //   : [preview || editVehicle.image || Enfield];
+  
+  // const carouselImages = [...realImages];
+  // while (carouselImages.length < 4) {
+  //   carouselImages.push(dummyImages[carouselImages.length - 1] || dummyImages[0]);
+  // }
+  // carouselImages.splice(4);
 
 //   return (
-//     <div className="min-h-screen bg-gray-50 px-4 py-6">
+//     <div className="min-h-screen bg-white px-4 sm:px-6 py-6 sm:py-10">
 //       {isLoading && (
 //         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
 //           <div className="bg-white p-6 rounded-lg shadow-xl">
@@ -483,99 +447,134 @@
 //         </div>
 //       )}
 
-//       <div className="max-w-[1228px] mx-auto flex flex-col md:flex-row gap-10">
-//         {/* Left: Vehicle info */}
-//         <div className="flex-1 bg-white p-6 rounded-2xl shadow-lg">
-//           <div className="flex flex-col md:flex-row gap-6">
-//             <div className="relative w-full md:w-[420px] h-[320px] rounded-xl overflow-hidden shadow-md">
+      // <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-8">
+        // <div className="flex-1 bg-white">
+          // <div className="flex flex-col md:flex-row gap-6 mb-6">
+//             {/* Image Card with Carousel */}
+            // <div className="relative w-350px md:w-[420px] h-[300px] flex-shrink-0 cursor-pointer rounded-[10px] overflow-hidden border-2 border-transparent hover:border-[#0066FF] transition-all duration-200">
 //               <img
-//                 src={preview || editVehicle.image || Enfield}
-//                 alt={editVehicle.name}
-//                 className="w-full h-full object-cover"
-//               />
-//               <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold ${
-//                 editVehicle.isAvailable 
-//                   ? "bg-green-100 text-green-800" 
-//                   : "bg-gray-100 text-gray-800"
-//               }`}>
-//                 ● {editVehicle.isAvailable ? "Available" : "Not Available"}
-//               </div>
-//             </div>
+              //   src={carouselImages[currentImageIndex]}
+              //   alt={editVehicle.name}
+              //   className="w-full h-full object-cover"
+              // />
 
-//             <div className="flex-1">
-//               <div className="flex items-center justify-between">
-//                 <h1 className="text-3xl font-semibold">{editVehicle.name}</h1>
-//                 <div className="bg-yellow-100 px-3 py-1 rounded-md">
-//                   <span className="text-sm font-semibold text-yellow-800">★ {editVehicle.rating}</span>
-//                 </div>
-//               </div>
-              
-//               {editVehicle.BikeNumber && (
-//                 <div className="mt-2">
-//                   <p className="text-lg text-gray-600 font-medium">{editVehicle.BikeNumber}</p>
-//                 </div>
-//               )}
+            //   <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1.5">
+            //     {carouselImages.map((_, idx) => (
+            //       <button
+            //         key={idx}
+            //         onClick={() => setCurrentImageIndex(idx)}
+            //         className={`h-2 rounded-full transition-all ${
+            //           idx === currentImageIndex 
+            //             ? "bg-[#0066FF] w-6" 
+            //             : "bg-white/60 w-2"
+            //         }`}
+            //       />
+            //     ))}
+            //   </div>
+            // </div>
 
-//               {editVehicle.BikeModel && (
-//                 <div className="mt-1">
-//                   <p className="text-md text-gray-500">Model: {editVehicle.BikeModel}</p>
-//                 </div>
-//               )}
-
-//               <div className="flex items-baseline mt-2">
-//                 <span className="text-3xl font-bold">₹{editVehicle.price}</span>
-//                 <span className="text-gray-500 ml-2 text-sm">/km</span>
-//               </div>
-// {/* 
-//               <div className="flex items-center mt-6 border border-gray-300 rounded-xl overflow-hidden">
-//                 <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-//                   <img src={AutomaticLogo} alt="Transmission" className="w-6 h-6 mb-1" />
-//                   <p className="text-sm text-gray-700">{editVehicle.transmission}</p>
-//                 </div>
-//                 <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-//                   ⛽
-//                   <p className="text-sm text-gray-700">{editVehicle.fuel}</p>
-//                 </div>
-//               </div> */}
-
-//               <div className="mt-6">
-//                 <h2 className="text-xl font-semibold mb-2">Description</h2>
-//                 <p className="text-gray-600 text-sm leading-relaxed">{editVehicle.description}</p>
-//               </div>
-
-//               {editVehicle.street && editVehicle.city && (
-//                 <div className="mt-4">
-//                   <h3 className="text-sm font-semibold text-gray-700 mb-1">Pickup Location</h3>
-//                   <p className="text-sm text-gray-600">
-//                     📍 {editVehicle.street}, {editVehicle.city}
-//                     {editVehicle.pincode && ` - ${editVehicle.pincode}`}
-//                     {editVehicle.state && `, ${editVehicle.state}`}
+//             {/* Right Side */}
+            // <div className="flex-1 min-w-0">
+              // <div className="flex items-start justify-between gap-4 mb-1">
+                // <h1 
+                //   className="text-[32px] font-bold text-[#000000] leading-tight cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all"
+                //   style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}
+                // >
+//                   {editVehicle.name}
+//                 </h1>
+//                 {editVehicle.BikeNumber && (
+//                   <p className="text-[16px] text-[#666666] mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     {editVehicle.BikeNumber}
 //                   </p>
+//                 )}
+//                 <div className="bg-[#FFF9E6] px-2.5 py-1 rounded-md flex items-center gap-1 flex-shrink-0">
+//                   <span className="text-[#FFB800] text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>★</span>
+//                   <span className="text-sm font-semibold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif' }}>{editVehicle.rating}</span>
 //                 </div>
-//               )}
-//             </div>
-//           </div>
-//         </div>
+//               </div>
 
-//         {/* Right: Edit Form */}
+//               <div className="flex items-baseline gap-1 mb-3 w-fit cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all">
+//                 <span className="text-[32px] font-bold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>₹{editVehicle.price}</span>
+//                 <span className="text-base text-[#666666]" style={{ fontFamily: 'Inter, sans-serif' }}>/km</span>
+//               </div>
+
+              // {/* Features Section - Like Car */}
+              // <div className="border border-[#E5E5E5] rounded-[10px] overflow-hidden bg-white mb-4 cursor-pointer hover:border-[#0066FF] hover:border-2 transition-all duration-200">
+              //   <div className="flex items-center gap-0">
+              //     {/* Engine Capacity */}
+              //     <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+              //       <img src={BikeCC} className="w-6 h-6 mb-1.5" alt="engine" />
+              //       <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+              //         {editVehicle.engineCapacity} CC
+              //       </span>
+              //     </div>
+                  
+          //         <div className="w-[1px] h-12 bg-[#E5E5E5]"></div>
+                  
+          //         {/* Transmission */}
+          //         <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+          //           <img src={AutomaticLogo} className="w-6 h-6 mb-1.5" alt="transmission" />
+          //           <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+          //             {editVehicle.transmission}
+          //           </span>
+          //         </div>
+                  
+          //         <div className="w-[1px] h-12 bg-[#E5E5E5]"></div>
+                  
+          //         {/* Fuel */}
+          //         <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+          //           <img src={Petrol} className="w-6 h-6 mb-1.5" alt="fuel" />
+          //           <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+          //             {editVehicle.fuel}
+          //           </span>
+          //         </div>
+          //       </div>
+          //     </div>
+
+          //     <div className="border border-[#E5E5E5] rounded-[10px] p-4 bg-white mb-4 cursor-pointer hover:border-[#0066FF] hover:border-2 transition-all duration-200">
+          //       <h2 className="text-[18px] font-bold text-[#000000] mb-2 cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
+          //         Description
+          //       </h2>
+          //       <p className="text-[#666666] text-[14px] leading-[1.6] min-h-[40px]" style={{ fontFamily: 'Inter, sans-serif' }}>
+          //         {editVehicle.description}
+          //       </p>
+          //     </div>
+          //   </div>
+          // </div>
+
+        //   {editVehicle.street && editVehicle.city && (
+        //     <div className="flex items-start gap-2">
+        //       <img src={Location} className="w-5 h-5 mt-0.5" alt="location" />
+        //       <span className="text-[14px] text-[#666666]" style={{ fontFamily: 'Inter, sans-serif' }}>
+        //         {editVehicle.street}, {editVehicle.city}
+        //         {editVehicle.pincode && `, ${editVehicle.pincode}`}
+        //       </span>
+        //     </div>
+        //   )}
+        // </div>
+        
 //         <aside className="md:w-[380px]">
-//           <div className="sticky top-6 bg-white p-6 rounded-2xl shadow-lg">
-//             <div className="flex items-center justify-between mb-4">
-//               <h2 className="text-2xl font-semibold">Edit Bike Details</h2>
+//           <div className="sticky top-6 bg-white p-6 rounded-[12px] shadow-lg border border-[#E5E5E5]">
+//             <div className="flex items-center justify-between mb-6">
+//               <h2 className="text-[18px] font-semibold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+//                 Edit Bike Details
+//               </h2>
 //               <button
 //                 onClick={() => setEditOpen((s) => !s)}
-//                 className="text-sm text-gray-500 hover:text-gray-700"
+//                 className="text-[14px] text-[#0066FF] hover:text-[#0052CC] font-medium"
 //                 type="button"
+//                 style={{ fontFamily: 'Inter, sans-serif' }}
 //               >
 //                 {editOpen ? "Hide" : "Show"}
 //               </button>
 //             </div>
 
 //             {editOpen && (
-//               <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-//                 {/* Availability Toggle */}
-//                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-//                   <label className="text-gray-700 font-medium">Available for Rent</label>
+//               <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#E5E5E5 transparent' }}>
+//                 <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
+//                   <label className="text-[14px] font-medium text-[#333333]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+//                     Available
+//                   </label>
 //                   <label className="relative inline-flex items-center cursor-pointer">
 //                     <input
 //                       type="checkbox"
@@ -584,194 +583,206 @@
 //                       onChange={handleChange}
 //                       className="sr-only peer"
 //                     />
-//                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+//                     <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
 //                   </label>
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Bike Name *</label>
-//                   <input
-//                     name="name"
-//                     value={editVehicle.name}
-//                     onChange={handleChange}
-//                     placeholder="e.g., Royal Enfield Classic 350"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//                     required
-//                   />
-//                 </div>
-
-//                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Bike Model</label>
-//                   <input
-//                     name="Model"
-//                     value={editVehicle.BikeModel}
-//                     onChange={handleChange}
-//                     placeholder="e.g., BS6"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//                   />
-//                 </div>
-
-//                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Bike Number</label>
-//                   <input
-//                     name="bikeNumber"
-//                     value={editVehicle.BikeNumber}
-//                     onChange={handleChange}
-//                     placeholder="e.g., AP16EH9394"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//                   />
-//                 </div>
-
-//                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Description</label>
+//                   <label className="block text-[14px] font-medium text-[#333333] mb-2" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+//                     Description
+//                   </label>
 //                   <textarea
 //                     name="description"
 //                     value={editVehicle.description}
 //                     onChange={handleChange}
-//                     placeholder="Describe your bike..."
-//                     className="w-full border border-gray-300 rounded-lg p-2 h-24 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     placeholder="Bike Description"
+//                     className="w-full border border-[#E5E5E5] rounded-[8px] p-3 h-24 resize-none text-[14px] text-[#666666] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400 }}
 //                   />
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Price per KM *</label>
+//                   <label className="block text-[14px] font-medium text-[#000000] mb-2" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+//                     Bike Name
+//                   </label>
 //                   <input
-//                     type="number"
-//                     name="price"
-//                     value={editVehicle.price}
+//                     type="text"
+//                     name="name"
+//                     value={editVehicle.name}
 //                     onChange={handleChange}
-//                     placeholder="10"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//                     min="1"
-//                     required
+//                     placeholder="Royal Enfield Classic 350"
+//                     className="w-full border border-[#E5E5E5] rounded-[8px] p-3 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                   />
 //                 </div>
 
-//                 {/* <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Transmission</label>
+//                 <div className="bg-[#F8F9FA] p-4 rounded-[8px] border border-[#E5E5E5]">
+//                   <h3 className="text-[14px] font-semibold text-[#000000] mb-3" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+//                     Price
+//                   </h3>
+//                   <div className="flex items-center gap-3">
+//                     <div className="flex-1">
+//                       <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                         Rent Price (per km)
+//                       </label>
+//                       <div className="flex items-center gap-2">
+//                         <div className="relative flex-1">
+//                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]" style={{ fontFamily: 'Inter, sans-serif' }}>₹</span>
+//                           <input
+//                             type="number"
+//                             name="price"
+//                             value={editVehicle.price}
+//                             onChange={handleChange}
+//                             placeholder="10"
+//                             className="w-full border border-[#E5E5E5] rounded-[8px] pl-7 pr-3 py-2 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+//                             style={{ fontFamily: 'Inter, sans-serif' }}
+//                             min="1"
+//                             required
+//                           />
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Engine Capacity (CC)
+//                   </label>
+//                   <input
+//                     type="text"
+//                     name="engineCapacity"
+//                     value={editVehicle.engineCapacity}
+//                     onChange={handleChange}
+//                     placeholder="350"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
+//                   />
+//                 </div>
+
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Transmission
+//                   </label>
 //                   <select
 //                     name="transmission"
 //                     value={editVehicle.transmission}
 //                     onChange={handleChange}
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                   >
 //                     <option value="Manual">Manual</option>
 //                     <option value="Automatic">Automatic</option>
+//                     <option value="Semi-Automatic">Semi-Automatic</option>
 //                   </select>
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Fuel Type</label>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Fuel Type
+//                   </label>
 //                   <select
 //                     name="fuel"
 //                     value={editVehicle.fuel}
 //                     onChange={handleChange}
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                   >
 //                     <option value="Petrol">Petrol</option>
 //                     <option value="Diesel">Diesel</option>
 //                     <option value="Electric">Electric</option>
+//                     <option value="Hybrid">Hybrid</option>
 //                   </select>
-//                 </div> */}
+//                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Contact Name</label>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Contact Name
+//                   </label>
 //                   <input
 //                     name="contactName"
 //                     value={editVehicle.contactName}
 //                     onChange={handleChange}
 //                     placeholder="John Doe"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                   />
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Contact Number</label>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Contact Number
+//                   </label>
 //                   <input
 //                     name="contactNumber"
 //                     value={editVehicle.contactNumber}
 //                     onChange={handleChange}
 //                     placeholder="9876543210"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                   />
-//                 </div>
-
-//                 {/* Manual User ID Input */}
-//                 <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-//                   <label className="block text-gray-700 font-medium mb-2">
-//                     User ID (Owner) *
-//                     <span className="text-xs text-gray-500 ml-2">Required for updates</span>
-//                   </label>
-//                   <input
-//                     type="text"
-//                     value={manualUserId}
-//                     onChange={(e) => setManualUserId(e.target.value)}
-//                     placeholder="Enter your User ID (e.g., 68f32259cea8a9fa88029262)"
-//                     className="w-full border border-yellow-300 rounded-lg p-2 font-mono text-sm focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-//                   />
-//                   <p className="text-xs text-gray-600 mt-1">
-//                     💡 This is your account ID. Check browser console or localStorage for stored IDs.
-//                   </p>
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">City</label>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     City
+//                   </label>
 //                   <input
 //                     name="city"
 //                     value={editVehicle.city}
 //                     onChange={handleChange}
 //                     placeholder="Hyderabad"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                   />
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Street/Area</label>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Street/Area
+//                   </label>
 //                   <input
 //                     name="street"
 //                     value={editVehicle.street}
 //                     onChange={handleChange}
 //                     placeholder="Banjara Hills"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                   />
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Pincode</label>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Pincode
+//                   </label>
 //                   <input
 //                     name="pincode"
 //                     value={editVehicle.pincode}
 //                     onChange={handleChange}
-//                     placeholder="500034"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     placeholder="500033"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                   />
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">State</label>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     State
+//                   </label>
 //                   <input
 //                     name="state"
 //                     value={editVehicle.state}
 //                     onChange={handleChange}
 //                     placeholder="Telangana"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                   />
 //                 </div>
 
-//                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Country</label>
-//                   <input
-//                     name="country"
-//                     value={editVehicle.country}
-//                     onChange={handleChange}
-//                     placeholder="India"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//                   />
-//                 </div>
-
-//                 {/* Required Documents */}
 //                 <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
-//                   <p className="text-sm font-semibold text-gray-700 mb-2">Required Documents</p>
+//                   <p className="text-sm font-semibold text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Required Documents
+//                   </p>
 //                   <label className="flex items-center space-x-2">
 //                     <input
 //                       type="checkbox"
@@ -780,7 +791,9 @@
 //                       onChange={handleChange}
 //                       className="rounded"
 //                     />
-//                     <span className="text-sm text-gray-700">Require Driving License</span>
+//                     <span className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                       Require Driving License
+//                     </span>
 //                   </label>
 //                   <label className="flex items-center space-x-2">
 //                     <input
@@ -790,32 +803,43 @@
 //                       onChange={handleChange}
 //                       className="rounded"
 //                     />
-//                     <span className="text-sm text-gray-700">Require Aadhar Card</span>
+//                     <span className="text-sm text-gray-700" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                       Require Aadhar Card
+//                     </span>
 //                   </label>
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Deposit Amount (₹)</label>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Deposit Amount (₹)
+//                   </label>
 //                   <input
 //                     type="number"
 //                     name="depositMoney"
 //                     value={editVehicle.depositMoney}
 //                     onChange={handleChange}
 //                     placeholder="3000"
-//                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                     min="0"
 //                   />
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">Main Bike Image</label>
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                     Main Bike Image
+//                   </label>
 //                   <div className="w-full h-[180px] border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center relative bg-gray-50 hover:bg-gray-100 transition">
 //                     {preview ? (
 //                       <img src={preview} alt="Bike Preview" className="w-full h-full object-cover rounded-md" />
 //                     ) : (
 //                       <div className="text-center">
-//                         <p className="text-gray-500">📷 Click to upload bike photo</p>
-//                         <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
+//                         <p className="text-gray-500 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                           📷 Click to upload bike photo
+//                         </p>
+//                         <p className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+//                           PNG, JPG up to 5MB
+//                         </p>
 //                       </div>
 //                     )}
 //                     <input
@@ -828,7 +852,7 @@
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-gray-700 font-medium mb-2">
+//                   <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
 //                     Additional Images (Max 4)
 //                     {additionalImages.length > 0 && (
 //                       <span className="text-xs text-gray-500 ml-2">
@@ -841,7 +865,8 @@
 //                       type="file"
 //                       accept="image/*"
 //                       multiple
-//                       className="w-full"
+//                       className="w-full text-sm"
+//                       style={{ fontFamily: 'Inter, sans-serif' }}
 //                       onChange={handleAdditionalImagesChange}
 //                       disabled={additionalImages.length >= 4}
 //                     />
@@ -872,7 +897,8 @@
 //                   <button
 //                     onClick={handleSave}
 //                     disabled={isLoading}
-//                     className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+//                     className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
+//                     style={{ fontFamily: 'Inter, sans-serif' }}
 //                     type="button"
 //                   >
 //                     {isLoading ? "Saving..." : "💾 Save Changes"}
@@ -880,7 +906,7 @@
 //                   <button
 //                     onClick={handleDelete}
 //                     disabled={isLoading}
-//                     className="px-4 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+//                     className="px-4 bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
 //                     type="button"
 //                   >
 //                     🗑️
@@ -902,371 +928,6 @@
 
 
 
- 
-// // import React, { useEffect, useState } from "react";
-// // import { useNavigate, useLocation } from "react-router-dom";
-// // import { Loader2 } from "lucide-react";
-// // import apiService from "../services/api.service";
- 
-// // const { bike: bikeAPI, availability: availabilityAPI } = apiService;
- 
-// // interface BikeDetails {
-// //   _id?: string;
-// //   userId?: string;
-// //   bikeNumber?: string;
-// //   bikeName?: string;
-// //   bikeModel?: string;
-// //   description?: string;
-// //   pricePerKm?: number | string;
-// //   contactNumber?: string;
-// //   contactName?: string;
-// //   latitude?: string;
-// //   longitude?: string;
-// //   pickupArea?: string;
-// //   pickupCity?: string;
-// //   pickupCityPinCode?: string;
-// //   pickupCityState?: string;
-// //   pickupCityCountry?: string;
-// //   InsuranceNo?: string;
-// //   bikeImages?: string | string[];
-// //   isNotAvailable?: boolean;
-// // }
- 
-// // const defaultBike: BikeDetails = {
-// //   bikeName: "",
-// //   bikeModel: "",
-// //   pricePerKm: 0,
-// //   description: "",
-// //   contactName: "",
-// //   contactNumber: "",
-// //   bikeNumber: "",
-// //   pickupArea: "",
-// //   pickupCity: "",
-// //   pickupCityPinCode: "",
-// //   pickupCityState: "",
-// //   pickupCityCountry: "India",
-// //   latitude: "",
-// //   longitude: "",
-// //   InsuranceNo: "",
-// //   bikeImages: "",
-// //   isNotAvailable: false,
-// // };
- 
-// // const BikeDetails: React.FC = () => {
-// //   const navigate = useNavigate();
-// //   const location = useLocation();
-// //   const { bikeData } = (location.state as any) || {};
- 
-// //   const [bike, setBike] = useState<BikeDetails>(defaultBike);
-// //   const [price, setPrice] = useState("");
-// //   const [bikeImage, setBikeImage] = useState<File | null>(null);
-// //   const [preview, setPreview] = useState<string | null>(null);
-// //   const [isLoading, setIsLoading] = useState(false);
-// //   const [availabilityLoading, setAvailabilityLoading] = useState(false);
-// //   const [isAvailable, setIsAvailable] = useState(true);
- 
-// //   const FIXED_USER_ID = "68f32259cea8a9fa88029262";
- 
-// //   useEffect(() => {
-// //     if (bikeData) {
-// //       const mapped: BikeDetails = {
-// //         _id: bikeData._id || bikeData.id,
-// //         userId: bikeData.userId || FIXED_USER_ID,
-// //         bikeNumber: bikeData.bikeNumber || "",
-// //         bikeName: bikeData.bikeName || "",
-// //         bikeModel: bikeData.bikeModel || "",
-// //         description: bikeData.description || "",
-// //         pricePerKm: bikeData.pricePerKm || bikeData.price || 0,
-// //         contactNumber: bikeData.contactNumber || "",
-// //         contactName: bikeData.contactName || "",
-// //         latitude: bikeData.latitude || "",
-// //         longitude: bikeData.longitude || "",
-// //         pickupArea: bikeData.pickupArea || "",
-// //         pickupCity: bikeData.pickupCity || "",
-// //         pickupCityPinCode: bikeData.pickupCityPinCode || "",
-// //         pickupCityState: bikeData.pickupCityState || "",
-// //         pickupCityCountry: bikeData.pickupCityCountry || "India",
-// //         InsuranceNo: bikeData.InsuranceNo || "",
-// //         bikeImages:
-// //           bikeData.bikeImages?.[0] ||
-// //           bikeData.image ||
-// //           bikeData.photos?.[0] ||
-// //           "",
-// //         isNotAvailable: bikeData.isNotAvailable || false,
-// //       };
- 
-// //       setBike(mapped);
-// //       setPrice(mapped.pricePerKm?.toString() || "0");
-// //       setPreview(
-// //         typeof mapped.bikeImages === "string"
-// //           ? mapped.bikeImages
-// //           : mapped.bikeImages?.[0] || null
-// //       );
-// //       setIsAvailable(!mapped.isNotAvailable);
-// //     }
-// //   }, [bikeData]);
- 
-// //   const handleChange = (
-// //     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-// //   ) => {
-// //     const { name, value } = e.target;
-// //     setBike((prev) => ({ ...prev, [name]: value }));
-// //   };
- 
-// //   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-// //     const file = event.target.files?.[0];
-// //     if (file) {
-// //       setBikeImage(file);
-// //       setPreview(URL.createObjectURL(file));
-// //     }
-// //   };
- 
-// //   const handleSave = async () => {
-// //     if (!bike._id) return alert("❌ No Bike ID found. Cannot update.");
- 
-// //     setIsLoading(true);
-// //     try {
-// //       const formData = new FormData();
-// //       formData.append("userId", FIXED_USER_ID);
-// //       formData.append("bikeNumber", bike.bikeNumber || "");
-// //       formData.append("bikeName", bike.bikeName || "");
-// //       formData.append("bikeModel", bike.bikeModel || "");
-// //       formData.append("description", bike.description || "");
-// //       formData.append("pricePerKm", price || "0");
-// //       formData.append("contactNumber", bike.contactNumber || "");
-// //       formData.append("contactName", bike.contactName || "");
-// //       formData.append("latitude", bike.latitude || "");
-// //       formData.append("longitude", bike.longitude || "");
-// //       formData.append("pickupArea", bike.pickupArea || "");
-// //       formData.append("pickupCity", bike.pickupCity || "");
-// //       formData.append("pickupCityPinCode", bike.pickupCityPinCode || "");
-// //       formData.append("pickupCityState", bike.pickupCityState || "");
-// //       formData.append("pickupCityCountry", bike.pickupCityCountry || "India");
-// //       formData.append("InsuranceNo", bike.InsuranceNo || "");
- 
-// //       if (bikeImage) formData.append("bikeImages", bikeImage);
- 
-// //       const response: any = await bikeAPI.updateBikeById(bike._id, formData);
-     
-// //       console.log("📦 Update response:", response);
-     
-// //       const updatedBike = response?.bike || response?.data?.bike || response;
- 
-// //       if (updatedBike && updatedBike._id) {
-// //         setBike(updatedBike);
-// //         setPrice(updatedBike.pricePerKm?.toString() || "0");
-       
-// //         if (updatedBike.bikeImages && updatedBike.bikeImages.length > 0) {
-// //           setPreview(updatedBike.bikeImages[0]);
-// //         }
-       
-// //         alert("✅ Bike updated successfully!");
- 
-// //         navigate("/listed-bikes", {
-// //           state: { refresh: true, updatedBike, timestamp: Date.now() },
-// //         });
-// //       } else {
-// //         throw new Error("Invalid response structure from server");
-// //       }
-// //     } catch (error: any) {
-// //       console.error("Error updating bike:", error);
-// //       alert(`❌ Error updating bike: ${error.message || "Unknown error"}`);
-// //     } finally {
-// //       setIsLoading(false);
-// //     }
-// //   };
- 
-// //   const handleDelete = async () => {
-// //     if (!bike._id) return alert("❌ No Bike ID found. Cannot delete.");
-// //     if (!window.confirm("Are you sure you want to delete this bike?")) return;
- 
-// //     setIsLoading(true);
-// //     try {
-// //       await bikeAPI.deleteBikeById(bike._id);
-// //       alert("✅ Bike deleted successfully!");
-// //       navigate("/listed-bikes", { state: { refresh: true }, replace: true });
-// //     } catch (error: any) {
-// //       console.error("Error deleting bike:", error);
-// //       alert(`❌ Error deleting bike: ${error.message || "Unknown error"}`);
-// //     } finally {
-// //       setIsLoading(false);
-// //     }
-// //   };
- 
-// //   // const handleAvailabilityToggle = async () => {
-// //   //   if (!bike._id) return alert("❌ No Bike ID found.");
- 
-// //   //   setAvailabilityLoading(true);
-// //   //   try {
-// //   //     if (isAvailable) {
-// //   //       await availabilityAPI.createUnavailability({
-// //   //         VechileId: bike._id,
-// //   //         vechileType: "Bike",
-// //   //         fromDate: new Date().toISOString().split("T")[0],
-// //   //         toDate: new Date().toISOString().split("T")[0],
-// //   //         fromTime: "00:00",
-// //   //         toTime: "23:59",
-// //   //         isNotAvailable: true,
-// //   //       });
-// //   //     } else {
-// //   //       await availabilityAPI.updateUnavailability(bike._id, {
-// //   //         VechileId: bike._id,
-// //   //         vechileType: "Bike",
-// //   //         isNotAvailable: false,
-// //   //       });
-// //   //     }
- 
-// //   //     setIsAvailable(!isAvailable);
-// //   //     alert(
-// //   //       isAvailable
-// //   //         ? "🚫 Bike marked as Not Available"
-// //   //         : "✅ Bike marked as Available"
-// //   //     );
-// //   //   } catch (error) {
-// //   //     console.error("Availability toggle error:", error);
-// //   //     alert("❌ Failed to update availability status.");
-// //   //   } finally {
-// //   //     setAvailabilityLoading(false);
-// //   //   }
-// //   // };
- 
-// //   return (
-// //     <div className="min-h-screen bg-gray-50 px-4 py-6">
-// //       <div className="max-w-[1228px] mx-auto flex flex-col md:flex-row gap-10">
-// //         <div className="flex-1 bg-white p-6 rounded-2xl shadow-lg">
-// //           <div className="flex flex-col md:flex-row gap-6">
-// //             <div className="relative w-full md:w-[420px] h-[320px] rounded-xl overflow-hidden bg-gray-100">
-// //               {preview ? (
-// //                 <img
-// //                   src={preview}
-// //                   alt={bike.bikeName}
-// //                   className="w-full h-full object-cover"
-// //                 />
-// //               ) : (
-// //                 <div className="flex items-center justify-center h-full text-gray-400">
-// //                   No image available
-// //                 </div>
-// //               )}
-// //             </div>
- 
-// //             <div className="flex-1">
-// //               <h1 className="text-3xl font-semibold">{bike.bikeName}</h1>
-// //               <p className="text-lg text-gray-700 mt-2">
-// //                 ₹{price || bike.pricePerKm}/km
-// //               </p>
-// //               <p className="text-sm text-gray-600 mt-4">{bike.description}</p>
-// //             </div>
-// //           </div>
-// //         </div>
- 
-// //         <aside className="md:w-[380px]">
-// //           <div className="bg-white p-6 rounded-2xl shadow-lg space-y-4">
-// //             <div className="flex items-center justify-between mb-4">
-// //               <h2 className="text-2xl font-semibold">Edit Bike Details</h2>
-// //               {/* <button
-// //                 onClick={handleAvailabilityToggle}
-// //                 disabled={availabilityLoading}
-// //                 className={`px-4 py-2 rounded-full text-white font-medium transition ${
-// //                   isAvailable
-// //                     ? "bg-green-600 hover:bg-green-700"
-// //                     : "bg-red-500 hover:bg-red-600"
-// //                 }`}
-// //               >
-// //                 {availabilityLoading ? (
-// //                   <Loader2 className="animate-spin w-5 h-5" />
-// //                 ) : isAvailable ? (
-// //                   "Available"
-// //                 ) : (
-// //                   "Not Available"
-// //                 )}
-// //               </button> */}
-// //             </div>
- 
-// //             <input
-// //               name="bikeName"
-// //               value={bike.bikeName}
-// //               onChange={handleChange}
-// //               placeholder="Bike Name"
-// //               className="w-full border border-gray-300 p-2 rounded"
-// //             />
-// //             <input
-// //               name="bikeNumber"
-// //               value={bike.bikeNumber}
-// //               onChange={handleChange}
-// //               placeholder="Bike Number"
-// //               className="w-full border border-gray-300 p-2 rounded"
-// //             />
-// //             <input
-// //               name="bikeModel"
-// //               value={bike.bikeModel}
-// //               onChange={handleChange}
-// //               placeholder="Bike Model"
-// //               className="w-full border border-gray-300 p-2 rounded"
-// //             />
-// //             <textarea
-// //               name="description"
-// //               value={bike.description}
-// //               onChange={handleChange}
-// //               placeholder="Description"
-// //               className="w-full border border-gray-300 p-2 rounded"
-// //             />
-// //             <input
-// //               type="number"
-// //               value={price}
-// //               onChange={(e) => setPrice(e.target.value)}
-// //               placeholder="Price per KM"
-// //               className="w-full border border-gray-300 p-2 rounded"
-// //             />
-// //             <input
-// //               name="contactName"
-// //               value={bike.contactName}
-// //               onChange={handleChange}
-// //               placeholder="Owner Name"
-// //               className="w-full border border-gray-300 p-2 rounded"
-// //             />
-// //             <input
-// //               name="contactNumber"
-// //               value={bike.contactNumber}
-// //               onChange={handleChange}
-// //               placeholder="Contact Number"
-// //               className="w-full border border-gray-300 p-2 rounded"
-// //             />
- 
-// //             <div>
-// //               <label className="text-gray-600 text-sm">Upload Image</label>
-// //               <input
-// //                 type="file"
-// //                 accept="image/*"
-// //                 onChange={handleImageChange}
-// //                 className="w-full border border-gray-300 p-2 rounded"
-// //               />
-// //             </div>
- 
-// //             <div className="flex gap-3 pt-3">
-// //               <button
-// //                 onClick={handleSave}
-// //                 disabled={isLoading}
-// //                 className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-// //               >
-// //                 {isLoading ? "Saving..." : "Save Changes"}
-// //               </button>
-// //               <button
-// //                 onClick={handleDelete}
-// //                 disabled={isLoading}
-// //                 className="flex-1 border border-red-500 text-red-500 py-2 rounded-lg hover:bg-red-50"
-// //               >
-// //                 {isLoading ? "Deleting..." : "Delete"}
-// //               </button>
-// //             </div>
-// //           </div>
-// //         </aside>
-// //       </div>
-// //     </div>
-// //   );
-// // };
- 
-// // export default BikeDetails;
- 
 
 
 import React, { useEffect, useState } from "react";

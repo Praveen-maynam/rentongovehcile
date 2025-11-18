@@ -1079,13 +1079,9 @@
  
 // export default MyBookings;
 
-
-
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, RefreshCw, X } from "lucide-react";
+import { Calendar, Clock, RefreshCw, X, AlertCircle } from "lucide-react";
 import { useBookingStore } from "../store/booking.store";
 import { Booking } from "../types/booking";
 import Auto from "../assets/images/Auto.png";
@@ -1101,7 +1097,6 @@ const mapVehicleType = (type: string | undefined): VehicleType => {
   return "Car";
 };
 
-// ✅ FIXED: Match the actual API response structure
 interface ApiBookingResponse {
   booking: {
     _id: string;
@@ -1141,17 +1136,9 @@ interface ApiBookingResponse {
   reviews: any[];
 }
 
-interface GetBookingsResponse {
-  success?: boolean;
-  message?: string;
-  count?: number;
-  data: ApiBookingResponse[]; // ✅ Changed from bookings to data
-}
-
 const MyBookings: React.FC = () => {
   const navigate = useNavigate();
   const { bookings, setBookings } = useBookingStore();
-  const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [apiError, setApiError] = useState<string>("");
@@ -1166,28 +1153,33 @@ const MyBookings: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const fetchUserBookings = async (silent = false, retryCount = 0) => {
+  const fetchUserBookings = async (silent = false) => {
     if (!silent) setIsLoadingBookings(true);
     setIsRefreshing(true);
     setApiError("");
 
-    const MAX_RETRIES = 2;
-    const RETRY_DELAY = 1000;
-    
     try {
       const userId = localStorage.getItem("userId") || "690308d03a633b650dbc7e61";
       console.log("🔍 Fetching bookings for user:", userId);
       
+      // Call API
       const response = await apiService.booking.getAllBookings(userId);
       console.log("📦 Raw API Response:", response);
 
-      // ✅ FIXED: Handle the actual API response structure
-      const bookingsData: ApiBookingResponse[] = response.data || response;
+      // Handle different response structures
+      let bookingsData: ApiBookingResponse[] = [];
+      
+      if (response?.data) {
+        bookingsData = Array.isArray(response.data) ? response.data : [];
+      } else if (Array.isArray(response)) {
+        bookingsData = response;
+      } else if (response?.bookings) {
+        bookingsData = Array.isArray(response.bookings) ? response.bookings : [];
+      }
       
       console.log("📦 Extracted bookings data:", bookingsData);
 
       if (bookingsData && bookingsData.length > 0) {
-        // ✅ Cache the full API response for later use
         setBookingsDataCache(bookingsData);
         
         const convertedBookings: Booking[] = bookingsData.map((item) => {
@@ -1197,12 +1189,13 @@ const MyBookings: React.FC = () => {
           console.log("🚗 Processing booking:", {
             bookingId: apiBooking._id,
             vehicleId: apiBooking.VechileId,
-            vehicle: vehicle
+            vehicle: vehicle,
+            status: apiBooking.status
           });
 
           const newStatus = mapApiStatus(apiBooking.status);
           
-          // Check if booking was rejected
+          // Check for rejection modal
           const existingBooking = bookings.find((b) => b.id === apiBooking._id);
           if (
             existingBooking &&
@@ -1214,17 +1207,27 @@ const MyBookings: React.FC = () => {
             setShowRejectionModal(true);
           }
 
-          // ✅ Use vehicle data from the response
+          // Extract vehicle name with fallbacks
           const vehicleName = 
             vehicle?.CarName || 
             vehicle?.carName || 
             vehicle?.bikeName || 
             `${apiBooking.vechileType} Vehicle`;
           
+          // Extract vehicle image with fallbacks
           const vehicleImage = 
             (vehicle?.carImages && vehicle.carImages[0]) ||
             (vehicle?.bikeImages && vehicle.bikeImages[0]) ||
             Auto;
+
+          // Calculate price with fallbacks
+          const price = 
+            Number(apiBooking.pricePerKm) ||
+            Number(apiBooking.pricePerHour) ||
+            Number(apiBooking.pricePerDay) ||
+            (apiBooking.totalPrice && apiBooking.totalHours 
+              ? Number(apiBooking.totalPrice) / Number(apiBooking.totalHours) 
+              : 0);
 
           return {
             id: apiBooking._id,
@@ -1233,37 +1236,33 @@ const MyBookings: React.FC = () => {
             vehicleImage: vehicleImage,
             vehicleType: mapVehicleType(apiBooking.vechileType),
             customerName: apiBooking.contactName,
-            bookingDate: new Date(apiBooking.createdAt || apiBooking.FromDate).toLocaleDateString(),
-            bookingTime: new Date(apiBooking.createdAt || apiBooking.FromDate).toLocaleTimeString(),
+            contactNumber: apiBooking.contactNumber,
+            bookingDate: formatApiDate(apiBooking.createdAt || apiBooking.FromDate),
+            bookingTime: formatApiTime(apiBooking.FromTime),
             startDate: formatApiDate(apiBooking.FromDate),
             startTime: formatApiTime(apiBooking.FromTime),
             endDate: formatApiDate(apiBooking.ToDate),
             endTime: formatApiTime(apiBooking.ToTime),
             modelNo: apiBooking._id.slice(0, 10).toUpperCase(),
             status: newStatus,
-            price:
-              Number(apiBooking.pricePerHour) ||
-              Number(apiBooking.pricePerKm) ||
-              Number(apiBooking.pricePerDay) ||
-              (Number(apiBooking.totalPrice) / Number(apiBooking.totalHours)) ||
-              0,
+            price: price,
           };
         });
 
         console.log("✅ Converted bookings:", convertedBookings);
         setBookings(convertedBookings);
         setLastSyncTime(new Date());
+        setApiError("");
       } else {
-        setApiError("No bookings found.");
+        console.log("📭 No bookings found");
+        setBookings([]);
+        setApiError("");
       }
     } catch (error: any) {
       console.error("❌ Error fetching bookings:", error);
-      
-      if (retryCount < MAX_RETRIES) {
-        await new Promise((res) => setTimeout(res, RETRY_DELAY * Math.pow(2, retryCount)));
-        return fetchUserBookings(silent, retryCount + 1);
-      }
-      setApiError(error.message || "Unable to fetch bookings.");
+      const errorMessage = error.response?.data?.message || error.message || "Failed to load bookings";
+      setApiError(errorMessage);
+      setBookings([]);
     } finally {
       setIsLoadingBookings(false);
       setIsRefreshing(false);
@@ -1291,7 +1290,7 @@ const MyBookings: React.FC = () => {
     try {
       const date = new Date(dateStr.trim());
       return !isNaN(date.getTime())
-        ? date.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })
+        ? date.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
         : dateStr;
     } catch {
       return dateStr;
@@ -1300,12 +1299,13 @@ const MyBookings: React.FC = () => {
 
   const formatApiTime = (timeStr: string): string => {
     try {
+      // Handle "HH.MM" format
       const [hours, minutes] = timeStr.split(".");
       const hour = parseInt(hours);
       const min = minutes || "00";
       const period = hour >= 12 ? "PM" : "AM";
       const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-      return `${displayHour}:${min} ${period}`;
+      return `${displayHour.toString().padStart(2, '0')}:${min} ${period}`;
     } catch {
       return timeStr;
     }
@@ -1321,7 +1321,6 @@ const MyBookings: React.FC = () => {
 
     const type = booking.vehicleType.toLowerCase();
 
-    // ✅ Find the full vehicle data from the bookingsData cache
     const bookingResponse = bookingsDataCache.find(
       item => item.booking._id === booking.id
     );
@@ -1337,7 +1336,6 @@ const MyBookings: React.FC = () => {
     });
 
     try {
-      // ✅ Navigate to booking detail with FULL vehicle data
       navigate(`/booking-detail/${booking.vehicleId}`, {
         state: { 
           booking, 
@@ -1364,34 +1362,35 @@ const MyBookings: React.FC = () => {
 
   const handleRefresh = () => fetchUserBookings();
 
- 
-
-  const getStatusBadge = (status: string, isRejected = false) => {
-    const base = "inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm";
-    if (isRejected || status === "Cancelled")
-      return <div className={`${base} bg-red-100 text-red-700`}>❌ Rejected</div>;
+  const getStatusBadge = (status: string) => {
+    if (status === "Cancelled")
+      return <span className="px-3 py-1.5 rounded-md font-medium text-xs bg-red-50 text-red-600">Not Booked</span>;
     if (status === "Booked")
-      return <div className={`${base} bg-green-100 text-green-700`}>✅ Confirmed</div>;
+      return <span className="px-3 py-1.5 rounded-md font-medium text-xs bg-green-50 text-green-600">Confirmed</span>;
     if (status === "Picked")
-      return <div className={`${base} bg-yellow-100 text-yellow-700`}>🚗 Picked</div>;
+      return <span className="px-3 py-1.5 rounded-md font-medium text-xs bg-yellow-50 text-yellow-600">Picked</span>;
     if (status === "Completed")
-      return <div className={`${base} bg-blue-100 text-blue-700`}>✔️ Completed</div>;
-    return <div className={`${base} bg-gray-100 text-gray-700`}>{status}</div>;
+      return <span className="px-3 py-1.5 rounded-md font-medium text-xs bg-blue-50 text-blue-600">Completed</span>;
+    return <span className="px-3 py-1.5 rounded-md font-medium text-xs bg-gray-50 text-gray-600">{status}</span>;
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
-        <div className="w-full px-4 py-4 flex items-center justify-between">
+      <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">My Bookings</h1>
-            {lastSyncTime && <p className="text-xs text-gray-500">Last updated: {lastSyncTime.toLocaleTimeString()}</p>}
+            <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+            {lastSyncTime && (
+              <p className="text-xs text-gray-500 mt-1">
+                Last updated: {lastSyncTime.toLocaleTimeString()}
+              </p>
+            )}
           </div>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
+            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 font-medium shadow-sm"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
             <span>{isRefreshing ? "Syncing..." : "Refresh"}</span>
@@ -1399,94 +1398,163 @@ const MyBookings: React.FC = () => {
         </div>
       </div>
 
-      {/* Loading */}
-      {isLoadingBookings && (
-        <div className="flex items-center justify-center py-12 text-gray-600">Loading your bookings...</div>
-      )}
-
       {/* Error Message */}
       {apiError && !isLoadingBookings && (
-        <div className="max-w-4xl mx-auto mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {apiError}
+        <div className="max-w-7xl mx-auto px-8 py-4">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-red-900 mb-1">Failed to load bookings</h3>
+              <p className="text-sm text-red-700">{apiError}</p>
+              <button 
+                onClick={handleRefresh}
+                className="mt-3 text-sm font-medium text-red-600 hover:text-red-700 underline"
+              >
+                Try again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading */}
+      {isLoadingBookings && (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-600 font-medium">Loading your bookings...</p>
+          </div>
         </div>
       )}
 
       {/* Bookings List */}
       {!isLoadingBookings && (
-        <div className="max-w-4xl ml-0 p-4 space-y-3">
+        <div className="max-w-7xl mx-auto px-8 py-8">
           {bookings.length ? (
-            bookings.map((booking) => (
-              <div
-                key={booking.id}
-                onClick={() => handleBookingClick(booking)}
-                style={{ width: "1200px", height: "290px" }}
-                className={`bg-white rounded-lg overflow-hidden flex cursor-pointer transition ${
-                  selectedBooking === booking.id ? "ring-2 ring-blue-500 shadow-lg" : "shadow hover:shadow-md"
-                }`}
-              >
-                <div className="flex gap-4 p-4">
-                  <img
-                    src={booking.vehicleImage || Auto}
-                    alt={booking.vehicleName}
-                    style={{ width: "277px", height: "290px" }}
-                    className="object-cover rounded-lg"
-                    onError={(e) => {
-                      e.currentTarget.src = Auto;
-                    }}
-                  />
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">{booking.vehicleName}</h3>
-                        <p className="text-lg font-semibold text-blue-600 mt-1">₹{booking.price}/hr</p>
+            <div className="space-y-5">
+              {bookings.map((booking) => (
+                <div
+                  key={booking.id}
+                  onClick={() => handleBookingClick(booking)}
+                  className="bg-white cursor-pointer transition-all hover:border-blue-500 border border-gray-200 overflow-hidden rounded-xl shadow-sm"
+                >
+                  <div className="flex">
+                    {/* Vehicle Image */}
+                                <div className="relative w-250px md:w-[420px] h-[250px] flex-shrink-0 cursor-pointer rounded-[10px] overflow-hidden border-2 border-transparent hover:border-[#0066FF] transition-all duration-200">
+                      <img
+                        src={booking.vehicleImage || Auto}
+                        alt={booking.vehicleName}
+                                               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 rounded-2xl"
+                        // style={{ height: '270px' }}
+                        onError={(e) => {
+                          e.currentTarget.src = Auto;
+                        }}
+                      />
+                    </div>
+{/* Content Card */}
+                    <div className="flex-1 p-6 bg-white relative">
+                      {/* Vehicle Name and Price */}
+                      <div className="mb-3">
+                        <h3 className="text-xl font-bold text-gray-900 mb-1">
+                          {booking.vehicleName}
+                        </h3>
+                        <p className="text-lg font-semibold text-blue-600">
+                          ₹{booking.price.toFixed(0)}<span className="text-sm text-gray-500">/km</span>
+                        </p>
                       </div>
-                      <div className="text-right text-sm text-gray-500">
-                        <p className="uppercase">Booking ID</p>
-                        <p className="font-bold text-gray-900">{(booking.id || "N/A").slice(0, 12)}</p>
+
+                      {/* Mobile Number */}
+                      <div className="mb-4">
+                        <span className="text-xs text-gray-500 font-medium">Mobile No: </span>
+                        <span className="text-sm font-bold text-gray-900">{booking.contactNumber}</span>
+                      </div>
+
+                      {/* Date Row */}
+                      <div className="flex items-center gap-6 mb-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-500">From:</span>
+                          <span className="text-sm font-semibold text-gray-900">{booking.startDate}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-500">To:</span>
+                          <span className="text-sm font-semibold text-gray-900">{booking.endDate}</span>
+                        </div>
+                      </div>
+
+                      {/* Time Row */}
+                      <div className="flex items-center gap-6 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-500">From:</span>
+                          <span className="text-sm font-semibold text-gray-900">{booking.startTime}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-500">To:</span>
+                          <span className="text-sm font-semibold text-gray-900">{booking.endTime}</span>
+                        </div>
+                      </div>
+
+                      {/* Status Badge - Below dates/times */}
+                      <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                        <span className="text-xs text-gray-500 font-medium">Status:</span>
+                        {getStatusBadge(booking.status)}
                       </div>
                     </div>
-                    <div className="mb-4">{getStatusBadge(booking.status, booking.status === "Cancelled")}</div>
-                    <div className="bg-gray-50 rounded-lg p-3 mb-3 grid grid-cols-2 gap-3">
-                      <div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                          <Calendar className="w-3 h-3" /> From Date
+                      {/* Date Row
+                      <div className="flex items-center gap-6 mb-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-500">From:</span>
+                          <span className="text-sm font-semibold text-gray-900">{booking.startDate}</span>
                         </div>
-                        <p className="text-sm font-semibold">{booking.startDate}</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                          <Calendar className="w-3 h-3" /> To Date
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-500">To:</span>
+                          <span className="text-sm font-semibold text-gray-900">{booking.endDate}</span>
                         </div>
-                        <p className="text-sm font-semibold">{booking.endDate}</p>
-                      </div>
-                    </div>
-                    <div className="bg-blue-50 rounded-lg p-3 grid grid-cols-2 gap-3">
-                      <div>
-                        <div className="flex items-center gap-2 text-xs text-blue-600 mb-1">
-                          <Clock className="w-3 h-3" /> From Time
+                      </div> */}
+
+                      {/* Time Row */}
+                      {/* <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-500">From:</span>
+                          <span className="text-sm font-semibold text-gray-900">{booking.startTime}</span>
                         </div>
-                        <p className="text-sm font-semibold">{booking.startTime}</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 text-xs text-blue-600 mb-1">
-                          <Clock className="w-3 h-3" /> To Time
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-500">To:</span>
+                          <span className="text-sm font-semibold text-gray-900">{booking.endTime}</span>
                         </div>
-                        <p className="text-sm font-semibold">{booking.endTime}</p>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
+                  //   </div>
+                  // </div> */}
+             </div>
+             </div>
+              ))}
+            </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">No bookings found. Start by booking a vehicle!</p>
-              <button
-                onClick={() => navigate("/rental")}
-                className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white px-6 py-3 rounded-lg font-semibold"
-              >
-                Browse Vehicles
-              </button>
+            <div className="text-center py-20">
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Calendar className="w-12 h-12 text-gray-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  No bookings yet
+                </h3>
+                <p className="text-gray-600 mb-8 text-lg">
+                  Start by booking a vehicle to see your reservations here
+                </p>
+                <button
+                  onClick={() => navigate("/rental")}
+                  className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white px-10 py-4 rounded-xl font-bold hover:shadow-xl transition-all text-lg"
+                >
+                  Browse Vehicles
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -1495,43 +1563,43 @@ const MyBookings: React.FC = () => {
       {/* Rejection Modal */}
       {showRejectionModal && rejectedBooking && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+          <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl">
             <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
-                <X className="w-12 h-12 text-red-500" />
+              <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center">
+                <X className="w-14 h-14 text-red-500" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-center mb-3">Booking Rejected</h2>
-            <p className="text-gray-600 text-center mb-6">
+            <h2 className="text-3xl font-bold text-center mb-4">Booking Rejected</h2>
+            <p className="text-gray-600 text-center mb-6 text-lg">
               The owner rejected your booking for the <strong>{rejectedBooking.vechileType}</strong>.
             </p>
-            <div className="bg-gray-50 rounded-lg p-4 mb-6 text-sm text-gray-700">
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">Booking ID:</span>
-                <span>{rejectedBooking._id.slice(0, 10)}</span>
+            <div className="bg-gray-50 rounded-xl p-5 mb-6 text-sm text-gray-700 border border-gray-200">
+              <div className="flex justify-between mb-3">
+                <span className="font-semibold">Booking ID:</span>
+                <span className="font-medium">{rejectedBooking._id.slice(0, 10)}</span>
               </div>
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">Date:</span>
-                <span>{formatApiDate(rejectedBooking.FromDate)}</span>
+              <div className="flex justify-between mb-3">
+                <span className="font-semibold">Date:</span>
+                <span className="font-medium">{formatApiDate(rejectedBooking.FromDate)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Time:</span>
-                <span>{formatApiTime(rejectedBooking.FromTime)}</span>
+                <span className="font-semibold">Time:</span>
+                <span className="font-medium">{formatApiTime(rejectedBooking.FromTime)}</span>
               </div>
             </div>
             {rejectedBooking.rejectionReason && (
-              <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm font-medium text-yellow-900 mb-1">Reason:</p>
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                <p className="text-sm font-bold text-yellow-900 mb-2">Reason:</p>
                 <p className="text-sm text-yellow-800">{rejectedBooking.rejectionReason}</p>
               </div>
             )}
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 onClick={() => {
                   setShowRejectionModal(false);
                   setRejectedBooking(null);
                 }}
-                className="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-200"
+                className="flex-1 bg-gray-100 text-gray-800 font-bold py-3.5 px-6 rounded-xl hover:bg-gray-200 transition-all"
               >
                 Close
               </button>
@@ -1541,7 +1609,7 @@ const MyBookings: React.FC = () => {
                   setRejectedBooking(null);
                   navigate("/rental");
                 }}
-                className="flex-1 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-semibold py-3 px-6 rounded-lg"
+                className="flex-1 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-bold py-3.5 px-6 rounded-xl hover:shadow-xl transition-all"
               >
                 Find Another Vehicle
               </button>

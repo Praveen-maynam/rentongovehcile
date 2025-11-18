@@ -1,6 +1,3 @@
-
-
-
 import React, { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { MapPin, Navigation, Loader, Plus, X } from "lucide-react";
@@ -93,6 +90,7 @@ const ListBikePage = () => {
     bikeName: "",
     bikeModel: "",
     bikeNumber: "",
+    bikeEngine: "",
     fuel: "Petrol",
     transmission: "Manual",
     pricePerKm: "",
@@ -121,6 +119,7 @@ const ListBikePage = () => {
       { name: "bikeName", label: "Bike Name", type: "text", required: true, placeholder: "Royal Enfield Classic" },
       { name: "bikeModel", label: "Bike Model", type: "text", required: true, placeholder: "BS4" },
       { name: "bikeNumber", label: "Bike Number", type: "text", required: true, placeholder: "AP12AB1234" },
+      { name: "bikeEngine", label: "Engine Capacity (CC)", type: "text", required: true, placeholder: "350" },
       { name: "kmDriven", label: "KM Driven", type: "text", required: true, placeholder: "15000" },
       { 
         name: "fuel", 
@@ -341,6 +340,11 @@ const ListBikePage = () => {
       return;
     }
 
+    if (!formData.bikeEngine) {
+      alert("Please enter the engine capacity");
+      return;
+    }
+
     if (!formData.pricePerKm || parseFloat(formData.pricePerKm) <= 0) {
       alert("Please enter a valid price per km");
       return;
@@ -381,6 +385,7 @@ const ListBikePage = () => {
     formDataToSend.append("bikeName", formData.bikeName.trim());
     formDataToSend.append("bikeModel", formData.bikeModel.trim());
     formDataToSend.append("bikeNumber", formData.bikeNumber.trim().toUpperCase());
+    formDataToSend.append("bikeEngine", formData.bikeEngine.trim());
     formDataToSend.append("fuel", formData.fuel);
     formDataToSend.append("transmission", formData.transmission);
     formDataToSend.append("pricePerKm", formData.pricePerKm);

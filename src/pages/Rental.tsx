@@ -139,7 +139,12 @@ import Filter from "../assets/icons/FilterLogo.png";
 import NearbyCars from "./NearByCars";
 import NearbyBikes from "./NearByBikes";
  import { useNavigate } from "react-router-dom";
- 
+ import Call from "../components/ui/Call";
+ import Chat from "../components/ui/PopupChat";
+import Register from "./Register"
+
+
+
 const Rental: React.FC = (FeedbackModal) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const navigate = useNavigate();
@@ -241,6 +246,25 @@ const Rental: React.FC = (FeedbackModal) => {
     </button>
   </div>
   <NearbyBikes limit={4} />
+
+<Register/>
+
+
+
+
+  <Chat
+
+  userId="690c9b5ce524c979c761040c"
+
+  receiverId="690c9fb0e524c979c76104c9"
+
+  bookingId="690ca08de524c979c76104d6"
+
+  apiUrl="http://3.110.122.127:3000"
+
+/>
+ 
+ <Call userId="691559e006702f6b9f7955fd" receiverId="690c9b5ce524c979c761040c" />
 </div>
 
 

@@ -1,11 +1,13 @@
-
-
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import apiService from "../services/api.service";
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
+import Petrol from "../assets/icons/Petrol.png";
+import Location from "../assets/icons/Location.png";
+import seats from "../assets/icons/seats.jpeg";
+import AClogo from "../assets/icons/ac.png";
 
 interface VehicleDetails {
   name: string;
@@ -22,7 +24,6 @@ interface VehicleDetails {
   pincode?: string;
   doorName?: string;
   id?: string;
-  carNumber?: string;
   isAvailable?: boolean;
   requireDrivingLicense?: boolean;
   requireAadharCard?: boolean;
@@ -39,6 +40,7 @@ interface VehicleDetails {
 const defaultVehicle: VehicleDetails = {
   name: "Hyundai Verna",
   CarModel: "Thar",
+  CarNumber: "",
   price: "250",
   rating: "4.2",
   transmission: "Automatic",
@@ -80,8 +82,9 @@ const CarDetails: React.FC = () => {
   const [carImage, setCarImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [additionalImages, setAdditionalImages] = useState<File[]>([]);
-     const [manualUserId, setManualUserId] = useState<string>("");
-   
+  const [manualUserId, setManualUserId] = useState<string>("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   useEffect(() => {
     if (carId && !carData) {
       fetchCarDetails(carId);
@@ -93,13 +96,12 @@ const CarDetails: React.FC = () => {
       setEditOpen(true);
     }
   
-       const storedUserId = localStorage.getItem('userId');
+    const storedUserId = localStorage.getItem('userId');
     if (storedUserId && !manualUserId) {
       console.log("✅ Auto-loaded userId from localStorage:", storedUserId);
       setManualUserId(storedUserId);
     }
-  },  [carId, carData, openEditForm]);
-
+  }, [carId, carData, openEditForm]);
 
   const fetchCarDetails = async (id: string) => {
     try {
@@ -130,7 +132,7 @@ const CarDetails: React.FC = () => {
     const mapped: VehicleDetails = {
       ...defaultVehicle,
       name: `${car.CarName || car.name || ""} ${car.CarModel || car.model || ""}`.trim(),
-      carNumber: car.CarNumber || car.carNumber || "",
+      CarNumber: car.CarNumber || car.carNumber || "",
       price: car.RentPerHour ?? car.price ?? defaultVehicle.price,
       CarModel: car.CarModel || defaultVehicle.CarModel,
       rating: car.rating?.toString?.() || defaultVehicle.rating,
@@ -146,12 +148,13 @@ const CarDetails: React.FC = () => {
       id: car._id || car.id || undefined,
       userId: car.userId || car.user_id || undefined,
       isAvailable: car.Available !== false && car.isAvailable !== false,
-      city: car.pickupCity || car.city || "",
-      street: car.pickupArea || car.street || "",
-      pincode: car.pickupCityPinCode || car.pincode || "",
-      state: car.pickupCityState || car.state || "",
-      requireDrivingLicense: car.drivingLicenseRequired === "true" || car.drivingLicenseRequired === true,
-      requireAadharCard: car.AadharCardRequired === "true" || car.AadharCardRequired === true,
+      city: car.pickupCity || "",
+      street: car.pickupArea || "",
+      pincode: car.pickupCityPinCode || "",
+      state: car.pickupCityState || "",
+      doorName: car.doorName || "",
+      requireDrivingLicense: car.drivingLicenseRequired === true,
+      requireAadharCard: car.AadharCardRequired === true,
       depositMoney: car.DepositAmount?.toString() || "",
     };
     
@@ -206,10 +209,9 @@ const CarDetails: React.FC = () => {
       return;
     }
 
-    // Validate required fields
     const trimmedName = editVehicle.name?.trim();
     const trimmedPrice = (editVehicle.price ?? "").toString().trim();
-
+    
     if (!trimmedName) {
       alert("❌ Vehicle name is required");
       return;
@@ -220,11 +222,21 @@ const CarDetails: React.FC = () => {
       return;
     }
 
+    // Validate contact number
+    if (!editVehicle.contactNumber || editVehicle.contactNumber.trim().length < 10) {
+      alert("❌ Valid contact number is required (minimum 10 digits)");
+      return;
+    }
+
+    // Validate contact name
+    if (!editVehicle.contactName || editVehicle.contactName.trim().length < 2) {
+      alert("❌ Contact name is required");
+      return;
+    }
+
     setIsLoading(true);
 
-  
-       try {
-      // Get userId
+    try {
       let userId = manualUserId || localStorage.getItem('userId') || editVehicle.userId;
       
       if (!userId) {
@@ -260,28 +272,36 @@ const CarDetails: React.FC = () => {
       }
 
       console.log("✅ Using userId:", userId);
-      // Split full name into CarName and CarModel
+
       const nameParts = trimmedName.split(" ");
       const CarName = nameParts[0] || trimmedName;
       const CarModel = nameParts.slice(1).join(" ") || editVehicle.CarModel || "";
-
+       
       console.log("📝 Preparing form data...");
       console.log("  CarName:", CarName);
       console.log("  CarModel:", CarModel);
-
-      // Create FormData
+      
       const formdata = new FormData();
 
-      // ✅ Add fields - NO userId needed (like bike update)
-      formdata.append("CarName", CarName);
-      formdata.append("CarModel", CarModel);
-      formdata.append("CarNumber", editVehicle.carNumber || "");
+      // ============================================
+      // REQUIRED FIELDS - EXACT BACKEND FIELD NAMES
+      // ============================================
       
-      // Parse seats number
+      // User & Car Identity
+     // User & Car Identity
+      formdata.append("userId", userId);
+      formdata.append("CarName", CarName);
+      formdata.append("CarModel", CarModel || "Standard");
+      
+      // Car Number is optional - only append if provided
+      if (editVehicle.CarNumber && editVehicle.CarNumber.trim()) {
+        formdata.append("CarNumber", editVehicle.CarNumber.trim());
+      }
+      
+      // Car Specifications
       const seatsValue = (editVehicle.seats ?? "5").toString().replace(/[^\d]/g, "") || "5";
       formdata.append("Carseater", seatsValue);
       
-      // Lowercase for fuel and transmission
       const fuelType = editVehicle.fuel.toLowerCase();
       const transmissionType = editVehicle.transmission.toLowerCase();
       
@@ -289,7 +309,7 @@ const CarDetails: React.FC = () => {
       formdata.append("transmissionType", transmissionType);
       formdata.append("Ac_available", editVehicle.ac?.toLowerCase() === "ac" ? "true" : "false");
       
-      // Price fields
+      // Pricing
       const rentPerHour = trimmedPrice;
       const rentPerDay = (Number(rentPerHour) * 24).toString();
       
@@ -299,36 +319,56 @@ const CarDetails: React.FC = () => {
       console.log("  RentPerHour:", rentPerHour);
       console.log("  RentPerDay:", rentPerDay);
       
-      // Other required fields
+      // Contact & Description
       formdata.append("description", editVehicle.description || "No description provided");
-      formdata.append("contactName", editVehicle.contactName);
-      formdata.append("contactNumber", editVehicle.contactNumber);
+      formdata.append("contactName", editVehicle.contactName.trim());
+      formdata.append("contactNumber", editVehicle.contactNumber.trim());
+      
+      // Additional Car Details
       formdata.append("gps", "false");
       formdata.append("kmDriven", "50000");
-      formdata.append("isAvailable", editVehicle.isAvailable ? "true" : "false");
+      formdata.append("Available", editVehicle.isAvailable ? "true" : "false");
 
-      // Address fields (if provided)
-      if (editVehicle.city) formdata.append("pickupCity", editVehicle.city);
-      if (editVehicle.street) formdata.append("pickupArea", editVehicle.street);
-      if (editVehicle.pincode) formdata.append("pickupCityPinCode", editVehicle.pincode);
-      if (editVehicle.state) formdata.append("pickupCityState", editVehicle.state);
-
-      // Coordinates (required by backend)
-      formdata.append("pickupLatitude", "17.4889");
-      formdata.append("pickupLongitude", "78.4603");
-
-      // Document requirements
-      if (editVehicle.requireDrivingLicense) {
-        formdata.append("drivingLicenseRequired", "true");
+      // ============================================
+      // LOCATION FIELDS - EXACT BACKEND FIELD NAMES
+      // ============================================
+      const hasLocation = editVehicle.city || editVehicle.street || editVehicle.pincode || editVehicle.state;
+      
+      if (hasLocation) {
+        formdata.append("pickupCity", editVehicle.city || "");
+        formdata.append("pickupArea", editVehicle.street || "");
+        formdata.append("pickupCityPinCode", editVehicle.pincode || "");
+        formdata.append("pickupCityState", editVehicle.state || "");
+        formdata.append("pickupCityCountry", "india");
+        formdata.append("pickupLatitude", "17.4889");
+        formdata.append("pickupLongitude", "78.4603");
+        
+        console.log("📍 Location data:");
+        console.log("  City:", editVehicle.city);
+        console.log("  Area:", editVehicle.street);
+        console.log("  Pincode:", editVehicle.pincode);
+        console.log("  State:", editVehicle.state);
       }
-      if (editVehicle.requireAadharCard) {
-        formdata.append("AadharCardRequired", "true");
-      }
-      if (editVehicle.depositMoney && editVehicle.depositMoney !== "0") {
+
+      // ============================================
+      // DOCUMENT REQUIREMENTS - EXACT BACKEND FIELD NAMES
+      // ============================================
+      formdata.append("drivingLicenseRequired", editVehicle.requireDrivingLicense ? "true" : "false");
+      formdata.append("AadharCardRequired", editVehicle.requireAadharCard ? "true" : "false");
+      
+      // ============================================
+      // DEPOSIT - EXACT BACKEND FIELD NAMES
+      // ============================================
+      if (editVehicle.depositMoney && editVehicle.depositMoney !== "0" && Number(editVehicle.depositMoney) > 0) {
         formdata.append("DepositAmount", editVehicle.depositMoney);
+        formdata.append("DepositVehicle", "true");
+      } else {
+        formdata.append("DepositVehicle", "false");
       }
 
-      // ✅ Images - use "carImages" field name
+      // ============================================
+      // IMAGES - EXACT BACKEND FIELD NAME
+      // ============================================
       if (carImage instanceof File) {
         formdata.append("carImages", carImage);
         console.log("📸 Added main image:", carImage.name);
@@ -342,19 +382,15 @@ const CarDetails: React.FC = () => {
       }
 
       console.log("🚀 Sending update request for car ID:", vehicleId);
-      
-      // Log FormData contents
-      console.log("📦 FormData contents:");
-      for (const key of Array.from(formdata.keys())) {
-        const value = formdata.get(key);
+      console.log("📦 Complete FormData:");
+      for (const [key, value] of formdata.entries()) {
         if (value instanceof File) {
-          console.log(`  ${key}:`, { name: value.name, size: value.size, type: value.type });
+          console.log(`  ${key}:`, { name: value.name, size: value.size });
         } else {
           console.log(`  ${key}:`, value);
         }
       }
-
-      // Make the API call
+      
       const response = await apiService.car.updateCarById(vehicleId, formdata);
       const result = response.data || response;
 
@@ -364,18 +400,15 @@ const CarDetails: React.FC = () => {
         alert("✅ Car updated successfully!");
         console.log("🎉 Updated car data:", result.car);
         
-        // Refresh the car data
         if (result.car) {
           mapCarData(result.car);
         } else {
           await fetchCarDetails(vehicleId);
         }
         
-        // Clear uploaded images
         setCarImage(null);
         setAdditionalImages([]);
         
-        // Navigate to listed page
         navigate("/listed", { state: { refresh: true } });
       } else {
         throw new Error(result?.message || "Update failed - no success confirmation received");
@@ -395,6 +428,7 @@ const CarDetails: React.FC = () => {
         `❌ Failed to update car:\n\n${errorMsg}\n${errorDetails ? '\n' + errorDetails : ''}\n\n` +
         `Please check:\n` +
         `• All required fields are filled\n` +
+        `• Contact number is valid (10+ digits)\n` +
         `• You have permission to edit this car\n` +
         `• Image files are not too large (< 5MB each)`
       );
@@ -441,10 +475,9 @@ const CarDetails: React.FC = () => {
   };
 
   if (isFetching) {
-   
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg shadow-xl">
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="bg-white p-6 rounded-lg">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-700 font-medium">Loading car details...</p>
         </div>
@@ -452,9 +485,24 @@ const CarDetails: React.FC = () => {
     );
   }
 
-  return (
-  <div className="min-h-screen bg-gray-50 px-3 sm:px-4 py-4 sm:py-6">
+  const dummyImages = [
+    "https://cdn.dribbble.com/userupload/12782640/file/still-4ccacf0cb57a6e151a66ce55882ecd57.gif?resize=400x0",
+    "https://img.freepik.com/premium-psd/luxury-car-transparent-background_574412-4171.jpg?semt=ais_incoming&w=740&q=80",
+    "https://rukminim2.flixcart.com/image/480/480/jvtujrk0/vehicle-pull-along/7/t/u/dummy-car-miniature-toy-golden-feather-original-imafe9s8wtk5g8hj.jpeg?q=90"
+  ];
 
+  const realImages = additionalImages.length > 0 
+    ? [preview || editVehicle.image || BlackCar, ...additionalImages.map(img => URL.createObjectURL(img))]
+    : [preview || editVehicle.image || BlackCar];
+  
+  const carouselImages = [...realImages];
+  while (carouselImages.length < 4) {
+    carouselImages.push(dummyImages[carouselImages.length - 1] || dummyImages[0]);
+  }
+  carouselImages.splice(4);
+
+  return (
+    <div className="min-h-screen bg-white px-4 sm:px-6 py-6 sm:py-10">
       {isLoading && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-xl">
@@ -464,109 +512,141 @@ const CarDetails: React.FC = () => {
         </div>
       )}
 
-     <div className="max-w-[1228px] mx-auto flex flex-col lg:flex-row gap-6 sm:gap-10">
-
-        {/* Left: Vehicle info */}
-        <div className="flex-1 bg-white p-6 rounded-2xl shadow-lg">
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="relative w-full h-[220px] sm:h-[280px] md:h-[320px] rounded-xl">
-
+      <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-8">
+        <div className="flex-1 bg-white">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            <div className="relative w-300px md:w-[420px] h-[300px] flex-shrink-0 cursor-pointer rounded-[10px] overflow-hidden border-2 border-transparent hover:border-[#0066FF] transition-all duration-200">
               <img
-                src={preview || editVehicle.image || BlackCar}
+                src={carouselImages[currentImageIndex]}
                 alt={editVehicle.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-all duration-500"
               />
-              <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold ${
-                editVehicle.isAvailable 
-                  ? "bg-green-100 text-green-800" 
-                  : "bg-gray-100 text-gray-800"
-              }`}>
-                ● {editVehicle.isAvailable ? "Available" : "Not Available"}
+
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1.5">
+                {carouselImages.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentImageIndex(idx)}
+                    className={`h-2 rounded-full transition-all ${
+                      idx === currentImageIndex 
+                        ? "bg-[#0066FF] w-6" 
+                        : "bg-white/60 w-2"
+                    }`}
+                  />
+                ))}
               </div>
             </div>
 
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-semibold">{editVehicle.name}</h1>
-                <div className="bg-yellow-100 px-3 py-1 rounded-md">
-                  <span className="text-sm font-semibold text-yellow-800">★ {editVehicle.rating}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-4 mb-1">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h1 
+                      className="text-[32px] font-bold text-[#000000] leading-tight cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all"
+                      style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}
+                    >
+                      {editVehicle.name}
+                    </h1>
+                    {editVehicle.isAvailable && (
+                      <span className="px-3 py-1 bg-[#10B981] text-white text-[12px] font-semibold rounded-full" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Available
+                      </span>
+                    )}
+                  </div>
+                  {editVehicle.CarNumber && (
+                    <p className="text-[16px] text-[#666666] mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {editVehicle.CarNumber}
+                    </p>
+                  )}
                 </div>
-              </div>
-              
-              {editVehicle.carNumber && (
-                <div className="mt-2">
-                  <p className="text-lg text-gray-600 font-medium">{editVehicle.carNumber}</p>
-                </div>
-              )}
-
-              {editVehicle.CarModel && (
-                <div className="mt-1">
-                  <p className="text-md text-gray-500">Model: {editVehicle.CarModel}</p>
-                </div>
-              )}
-
-              <div className="flex items-baseline mt-2">
-                <span className="text-3xl font-bold">₹{editVehicle.price}</span>
-                <span className="text-gray-500 ml-2 text-sm">/hr</span>
-              </div>
-
-              <div className="flex items-center mt-6 border border-gray-300 rounded-xl overflow-hidden">
-                <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                  <img src={AutomaticLogo} alt="Auto" className="w-6 h-6 mb-1" />
-                  <p className="text-sm text-gray-700">{editVehicle.transmission}</p>
-                </div>
-                <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                  <img src={DriverLogo} alt="Seats" className="w-6 h-6 mb-1" />
-                  <p className="text-sm text-gray-700">{editVehicle.seats} Seats</p>
-                </div>
-                <div className="flex flex-col items-center px-4 py-3 border-r border-gray-300">
-                  ⛽
-                  <p className="text-sm text-gray-700">{editVehicle.fuel}</p>
-                </div>
-                <div className="flex flex-col items-center px-4 py-3">
-                  ❄️
-                  <p className="text-sm text-gray-700">{editVehicle.ac}</p>
+                <div className="bg-[#FFF9E6] px-2.5 py-1 rounded-md flex items-center gap-1 flex-shrink-0">
+                  <span className="text-[#FFB800] text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>★</span>
+                  <span className="text-sm font-semibold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif' }}>{editVehicle.rating}</span>
                 </div>
               </div>
 
-              <div className="mt-6">
-                <h2 className="text-xl font-semibold mb-2">Description</h2>
-                <p className="text-gray-600 text-sm leading-relaxed">{editVehicle.description}</p>
+              <div className="flex items-baseline gap-1 mb-3 w-fit cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all">
+                <span className="text-[32px] font-bold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>₹{editVehicle.price}</span>
+                <span className="text-base text-[#666666]" style={{ fontFamily: 'Inter, sans-serif' }}>/hr</span>
               </div>
 
-              {editVehicle.street && editVehicle.city && (
-                <div className="mt-4">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Pickup Location</h3>
-                  <p className="text-sm text-gray-600">
-                    📍 {editVehicle.street}, {editVehicle.city}
-                    {editVehicle.pincode && ` - ${editVehicle.pincode}`}
-                  </p>
+              <div className="border border-[#E5E5E5] rounded-[10px] overflow-hidden bg-white mb-4 cursor-pointer hover:border-[#0066FF] hover:border-2 transition-all duration-200">
+                <div className="flex items-center gap-0">
+                  <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                    <img src={AutomaticLogo} className="w-6 h-6 mb-1.5" alt="transmission" />
+                    <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {editVehicle.transmission}
+                    </span>
+                  </div>
+                  
+                  <div className="w-[1px] h-12 bg-[#E5E5E5]"></div>
+                  
+                  <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                    <img src={seats} className="w-6 h-6 mb-1.5" alt="seats" />
+                    <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {editVehicle.seats} Seaters
+                    </span>
+                  </div>
+                  
+                  <div className="w-[1px] h-12 bg-[#E5E5E5]"></div>
+                  
+                  <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                    <img src={Petrol} className="w-6 h-6 mb-1.5" alt="fuel" />
+                    <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {editVehicle.fuel}
+                    </span>
+                  </div>
+                  
+                  <div className="w-[1px] h-12 bg-[#E5E5E5]"></div>
+                  
+                  <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                    <img src={AClogo} className="w-6 h-6 mb-1.5" alt="ac" />
+                    <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {editVehicle.ac}
+                    </span>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              <div className="border border-[#E5E5E5] rounded-[10px] p-4 bg-white mb-4 cursor-pointer hover:border-[#0066FF] hover:border-2 transition-all duration-200 w-full">
+                <h2 className="text-[18px] font-bold text-[#000000] mb-2 cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
+                  Description
+                </h2>
+                <p className="text-[#666666] text-[14px] leading-[1.6] min-h-[40px] break-words overflow-wrap-anywhere" style={{ fontFamily: 'Inter, sans-serif', wordBreak: 'break-word' }}>
+                  {editVehicle.description}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right: Edit Form */}
+          {editVehicle.street && editVehicle.city && (
+            <div className="flex items-start gap-2">
+              <img src={Location} className="w-5 h-5 mt-0.5" alt="location" />
+              <span className="text-[14px] text-[#666666]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                {editVehicle.street}, {editVehicle.city}
+                {editVehicle.pincode && `, ${editVehicle.pincode}`}
+              </span>
+            </div>
+          )}
+        </div>
+        
+        {/* EDIT FORM - FIGMA DESIGN */}
         <aside className="md:w-[380px]">
-          <div className="sticky top-6 bg-white p-6 rounded-2xl shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-semibold">Edit Car Details</h2>
-              <button
-                onClick={() => setEditOpen((s) => !s)}
-                className="text-sm text-gray-500 hover:text-gray-700"
-                type="button"
-              >
-                {editOpen ? "Hide" : "Show"}
-              </button>
+          <div className="sticky top-6 bg-white p-6 rounded-[12px] shadow-lg border border-[#E5E5E5]">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-[20px] font-semibold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+                Edit Car Details
+              </h2>
             </div>
 
             {editOpen && (
-             <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-
-                {/* Availability Toggle */}
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <label className="text-gray-700 font-medium">Available for Rent</label>
+              <div className="space-y-5 max-h-[70vh] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#E5E5E5 transparent' }}>
+                
+                {/* Available Toggle */}
+                <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
+                  <label className="text-[14px] font-medium text-[#333333]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+                    Available
+                  </label>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -575,89 +655,105 @@ const CarDetails: React.FC = () => {
                       onChange={handleChange}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
                   </label>
                 </div>
 
+                {/* Description */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Vehicle Name *</label>
-                  <input
-                    name="name"
-                    value={editVehicle.name}
-                    onChange={handleChange}
-                    placeholder="e.g., Hyundai Verna"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Vehicle Model</label>
-                  <input
-                    name="CarModel"
-                    value={editVehicle.CarModel}
-                    onChange={handleChange}
-                    placeholder="e.g., Verna"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Vehicle Number</label>
-                  <input
-                    name="carNumber"
-                    value={editVehicle.carNumber}
-                    onChange={handleChange}
-                    placeholder="e.g., AP16DH4271"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Description</label>
+                  <label className="block text-[14px] font-medium text-[#000000] mb-2" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+                    Description
+                  </label>
                   <textarea
                     name="description"
                     value={editVehicle.description}
                     onChange={handleChange}
-                    placeholder="Describe your vehicle..."
-                    className="w-full border border-gray-300 rounded-lg p-2 h-24 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Car Description"
+                    className="w-full border border-[#E5E5E5] rounded-[8px] p-3 h-20 resize-none text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Price per Hour *</label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={editVehicle.price}
-                    onChange={handleChange}
-                    placeholder="250"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    min="1"
-                    required
-                  />
+                {/* AC Available Toggle */}
+                <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
+                  <label className="text-[14px] font-medium text-[#333333]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+                    AC Available
+                  </label>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="ac"
+                      checked={editVehicle.ac?.toLowerCase() === "ac"}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setEditVehicle((prev) => ({ ...prev, ac: checked ? "AC" : "Non-AC" }));
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
+                  </label>
                 </div>
 
+                {/* Price Section */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Transmission</label>
+                  <label className="block text-[14px] font-medium text-[#000000] mb-2" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+                    Price
+                  </label>
+                  <div className="space-y-2">
+                    <label className="block text-[13px] text-[#666666]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      Rent Price (per hour / per DAY)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]" style={{ fontFamily: 'Inter, sans-serif' }}>₹</span>
+                        <input
+                          type="number"
+                          name="price"
+                          value={editVehicle.price}
+                          onChange={handleChange}
+                          placeholder="250"
+                          className="w-full border border-[#E5E5E5] rounded-[8px] pl-7 pr-3 py-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                          style={{ fontFamily: 'Inter, sans-serif' }}
+                          min="1"
+                          required
+                        />
+                      </div>
+                      <select className="border border-[#E5E5E5] rounded-[8px] px-3 py-2.5 text-[14px] text-[#333333] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        <option>Hour</option>
+                        <option>Day</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Transmission */}
+                <div>
+                  <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Transmission
+                  </label>
                   <select
                     name="transmission"
                     value={editVehicle.transmission}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     <option value="Automatic">Automatic</option>
                     <option value="Manual">Manual</option>
                   </select>
                 </div>
 
+                {/* Fuel Type */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Fuel Type</label>
+                  <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Fuel Type
+                  </label>
                   <select
                     name="fuel"
                     value={editVehicle.fuel}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     <option value="Petrol">Petrol</option>
                     <option value="Diesel">Diesel</option>
@@ -666,232 +762,295 @@ const CarDetails: React.FC = () => {
                   </select>
                 </div>
 
+                {/* Seats */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Seating Capacity</label>
+                  <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Seating Capacity
+                  </label>
                   <input
                     type="number"
                     name="seats"
                     value={editVehicle.seats.toString().replace(/[^\d]/g, '')}
                     onChange={handleChange}
                     placeholder="5"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                     min="1"
                     max="20"
                   />
                 </div>
 
+                {/* Your Contact Information */}
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Air Conditioning</label>
-                  <select
-                    name="ac"
-                    value={editVehicle.ac}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <h3 className="text-[14px] font-semibold text-[#000000] mb-3" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+                    Your Contact Information
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Name
+                      </label>
+                      <input
+                        name="contactName"
+                        value={editVehicle.contactName}
+                        onChange={handleChange}
+                        placeholder="Manoj Kumar"
+                        className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Contact Number
+                      </label>
+                      <input
+                        name="contactNumber"
+                        value={editVehicle.contactNumber}
+                        onChange={handleChange}
+                        placeholder="1234567898"
+                        className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Customer Required Documents */}
+                <div>
+                  <h3 className="text-[14px] font-semibold text-[#000000] mb-3" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+                    Customer Required Documents
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
+                      <label className="text-[13px] text-[#333333]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Driving License
+                      </label>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="requireDrivingLicense"
+                          checked={editVehicle.requireDrivingLicense}
+                          onChange={handleChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
+                      </label>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
+                      <label className="text-[13px] text-[#333333]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Aadhar Card
+                      </label>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="requireAadharCard"
+                          checked={editVehicle.requireAadharCard}
+                          onChange={handleChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Deposit Vehicle */}
+                <div>
+                  <h3 className="text-[14px] font-semibold text-[#000000] mb-3" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+                    Deposit Vehicle
+                  </h3>
+                  <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
+                    <label className="text-[13px] text-[#333333]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      Or
+                    </label>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={false}
+                        readOnly
+                      />
+                      <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
+                    </label>
+                  </div>
+                  <div className="mt-3">
+                    <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      Deposit Money
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]" style={{ fontFamily: 'Inter, sans-serif' }}>₹</span>
+                      <input
+                        type="number"
+                        name="depositMoney"
+                        value={editVehicle.depositMoney}
+                        onChange={handleChange}
+                        placeholder="16300"
+                        className="w-full border border-[#E5E5E5] rounded-[8px] pl-7 pr-3 py-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vehicle Pickup Address */}
+                <div>
+                  <h3 className="text-[14px] font-semibold text-[#000000] mb-3" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+                    Vehicle Pickup Address
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Place
+                      </label>
+                      <input
+                        name="doorName"
+                        value={editVehicle.doorName}
+                        onChange={handleChange}
+                        placeholder="Door Name"
+                        className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        City
+                      </label>
+                      <input
+                        name="city"
+                        value={editVehicle.city}
+                        onChange={handleChange}
+                        placeholder="Hyderabad"
+                        className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        State
+                      </label>
+                      <input
+                        name="state"
+                        value={editVehicle.state}
+                        onChange={handleChange}
+                        placeholder="Telangana"
+                        className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Pincode
+                      </label>
+                      <input
+                        name="pincode"
+                        value={editVehicle.pincode}
+                        onChange={handleChange}
+                        placeholder="500064"
+                        className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-[#666666] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Street
+                      </label>
+                      <input
+                        name="street"
+                        value={editVehicle.street}
+                        onChange={handleChange}
+                        placeholder="Gachibowli"
+                        className="w-full border border-[#E5E5E5] rounded-[8px] p-2.5 text-[14px] text-[#333333] placeholder-[#999999] focus:ring-2 focus:ring-[#0066FF] focus:border-transparent"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add Photos */}
+                <div>
+                  <button
+                    onClick={() => document.getElementById('main-image-upload')?.click()}
+                    className="w-full border-2 border-dashed border-[#E5E5E5] rounded-[8px] p-6 flex flex-col items-center justify-center hover:border-[#0066FF] transition-all bg-[#F8F9FA]"
+                    type="button"
                   >
-                    <option value="AC">AC</option>
-                    <option value="Non-AC">Non-AC</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Contact Name</label>
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm">
+                      <span className="text-2xl">📷</span>
+                    </div>
+                    <p className="text-[14px] font-medium text-[#333333] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      Add photos
+                    </p>
+                    <p className="text-[12px] text-[#999999] text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      Please, first Choose your car image will add supporting pictures to verify your details
+                    </p>
+                  </button>
                   <input
-                    name="contactName"
-                    value={editVehicle.contactName}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    id="main-image-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCarImageChange}
                   />
+                  
+                  {preview && (
+                    <div className="mt-3 relative">
+                      <img src={preview} alt="Preview" className="w-full h-40 object-cover rounded-[8px]" />
+                    </div>
+                  )}
+
+                  {additionalImages.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 mt-3">
+                      {additionalImages.map((img, idx) => (
+                        <div key={idx} className="relative group">
+                          <img
+                            src={URL.createObjectURL(img)}
+                            alt={`Additional ${idx + 1}`}
+                            className="w-full h-20 object-cover rounded-[8px]"
+                          />
+                          <button
+                            onClick={() => removeAdditionalImage(idx)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 transition"
+                            type="button"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {additionalImages.length < 4 && (
+                    <div className="mt-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="w-full text-sm"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                        onChange={handleAdditionalImagesChange}
+                      />
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Contact Number</label>
-                  <input
-                    name="contactNumber"
-                    value={editVehicle.contactNumber}
-                    onChange={handleChange}
-                    placeholder="9876543210"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Manual User ID Input
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <label className="block text-gray-700 font-medium mb-2">
-                    User ID (Owner) *
-                    <span className="text-xs text-gray-500 ml-2">Required for updates</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={manualUserId}
-                    onChange={(e) => setManualUserId(e.target.value)}
-                    placeholder="Enter your User ID"
-                    className="w-full border border-yellow-300 rounded-lg p-2 font-mono text-sm focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                  />
-                  <p className="text-xs text-gray-600 mt-1">
-                    💡 This is your account ID from localStorage
-                  </p>
-                </div> */}
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">City</label>
-                  <input
-                    name="city"
-                    value={editVehicle.city}
-                    onChange={handleChange}
-                    placeholder="Hyderabad"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Street/Area</label>
-                  <input
-                    name="street"
-                    value={editVehicle.street}
-                    onChange={handleChange}
-                    placeholder="Jubilee Hills"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Pincode</label>
-                  <input
-                    name="pincode"
-                    value={editVehicle.pincode}
-                    onChange={handleChange}
-                    placeholder="500033"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">State</label>
-                  <input
-                    name="state"
-                    value={editVehicle.state}
-                    onChange={handleChange}
-                    placeholder="Telangana"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Required Documents */}
-                <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">Required Documents</p>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      name="requireDrivingLicense"
-                      checked={editVehicle.requireDrivingLicense}
-                      onChange={handleChange}
-                      className="rounded"
-                    />
-                    <span className="text-sm text-gray-700">Require Driving License</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      name="requireAadharCard"
-                      checked={editVehicle.requireAadharCard}
-                      onChange={handleChange}
-                      className="rounded"
-                    />
-                    <span className="text-sm text-gray-700">Require Aadhar Card</span>
-                  </label>
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Deposit Amount (₹)</label>
-                  <input
-                    type="number"
-                    name="depositMoney"
-                    value={editVehicle.depositMoney}
-                    onChange={handleChange}
-                    placeholder="5000"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    min="0"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Main Car Image</label>
-                  <div className="w-full h-[180px] border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center relative bg-gray-50 hover:bg-gray-100 transition">
-                    {preview ? (
-                      <img src={preview} alt="Car Preview" className="w-full h-full object-cover rounded-md" />
-                    ) : (
-                      <div className="text-center">
-                        <p className="text-gray-500">📷 Click to upload car photo</p>
-                        <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
-                      </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={handleCarImageChange}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Additional Images (Max 4)
-                    {additionalImages.length > 0 && (
-                      <span className="text-xs text-gray-500 ml-2">
-                        ({additionalImages.length}/4)
-                      </span>
-                    )}
-                  </label>
-                  <div className="w-full border-2 border-dashed border-gray-300 rounded-md p-4 bg-gray-50">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="w-full"
-                      onChange={handleAdditionalImagesChange}
-                      disabled={additionalImages.length >= 4}
-                    />
-                    {additionalImages.length > 0 && (
-                      <div className="grid grid-cols-2 gap-2 mt-3">
-                        {additionalImages.map((img, idx) => (
-                          <div key={idx} className="relative group">
-                            <img
-                              src={URL.createObjectURL(img)}
-                              alt={`Additional ${idx + 1}`}
-                              className="w-full h-20 object-cover rounded"
-                            />
-                            <button
-                              onClick={() => removeAdditionalImage(idx)}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition"
-                              type="button"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-4 border-t">
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleSave}
                     disabled={isLoading}
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                    className="flex-1 bg-[#0066FF] text-white py-3 rounded-[8px] hover:bg-[#0052CC] transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-[14px]"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                     type="button"
                   >
-                    {isLoading ? "Saving..." : "💾 Save Changes"}
+                    {isLoading ? "Saving..." : "Save Changes"}
                   </button>
                   <button
                     onClick={handleDelete}
                     disabled={isLoading}
-                    className="px-4 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                    className="px-6 bg-[#DC2626] text-white py-3 rounded-[8px] hover:bg-[#B91C1C] transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-[14px]"
                     type="button"
                   >
-                    🗑️
+                    Delete
                   </button>
                 </div>
               </div>
@@ -900,12 +1059,7 @@ const CarDetails: React.FC = () => {
         </aside>
       </div>
     </div>
-  
   );
 };
 
 export default CarDetails;
-
-
-
-

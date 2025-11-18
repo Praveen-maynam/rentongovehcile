@@ -11,6 +11,7 @@ import { useListedBikesStore } from "../store/listedBikes.store";
 interface VehicleDetails {
   id?: string;
   name: string;
+  number:string;
   price: string;
   transmission: string;
   seats: string;
@@ -38,6 +39,7 @@ interface VehicleDetails {
 const defaultVehicle: VehicleDetails = {
   id: undefined,
   name: "Hyundai Verna",
+  number:"Ap234",
   price: "250",
   transmission: "Automatic",
   seats: "5 Seaters",
@@ -87,6 +89,7 @@ const EditCarDetails: React.FC = () => {
       return {
         id: car.id,
         name: car.carName,
+        number: car.carNumber,
         price: car.rentPrice,
         transmission: car.transmission,
         seats: "5 Seaters",
