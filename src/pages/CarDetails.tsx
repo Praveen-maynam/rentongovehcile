@@ -486,9 +486,9 @@ const CarDetails: React.FC = () => {
   }
 
   const dummyImages = [
-    "https://cdn.dribbble.com/userupload/12782640/file/still-4ccacf0cb57a6e151a66ce55882ecd57.gif?resize=400x0",
-    "https://img.freepik.com/premium-psd/luxury-car-transparent-background_574412-4171.jpg?semt=ais_incoming&w=740&q=80",
-    "https://rukminim2.flixcart.com/image/480/480/jvtujrk0/vehicle-pull-along/7/t/u/dummy-car-miniature-toy-golden-feather-original-imafe9s8wtk5g8hj.jpeg?q=90"
+    "https://e7.pngegg.com/pngimages/768/421/png-clipart-car-computer-icons-sedan-auto-detailing-auto-driving-rectangle-thumbnail.png",
+    "https://e7.pngegg.com/pngimages/768/421/png-clipart-car-computer-icons-sedan-auto-detailing-auto-driving-rectangle-thumbnail.png",
+    "https://e7.pngegg.com/pngimages/768/421/png-clipart-car-computer-icons-sedan-auto-detailing-auto-driving-rectangle-thumbnail.png"
   ];
 
   const realImages = additionalImages.length > 0 

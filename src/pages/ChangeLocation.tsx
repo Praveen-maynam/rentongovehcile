@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMap } from "react-leaflet";
@@ -126,15 +125,44 @@ export default function SearchMapWithSave({
 
   const handleUseCurrent = () => {
     if (!navigator.geolocation) return alert("Geolocation not supported");
+    setLoading(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         setMarkerPos([lat, lon]);
         setMapCenter([lat, lon]);
-        reverseGeocode(lat, lon);
+        
+        // Reverse geocode to get address and update search bar
+        try {
+          const url = new URL("https://nominatim.openstreetmap.org/reverse");
+          url.searchParams.set("lat", String(lat));
+          url.searchParams.set("lon", String(lon));
+          url.searchParams.set("format", "json");
+          url.searchParams.set("addressdetails", "1");
+          const res = await fetch(url.toString(), {
+            headers: { "User-Agent": "CarRentalApp/1.0" },
+          });
+          const data = await res.json();
+          const addr = data.display_name;
+          
+          // Update all states including the search query
+          setAddress(addr);
+          setQuery(addr); // This will display the location in the search bar
+          setCity(data.address?.city || data.address?.state || data.address?.country || "");
+          setSuggestions([]); // Clear any existing suggestions
+        } catch (error) {
+          console.error("Reverse geocoding failed:", error);
+          // Fallback to just coordinates if reverse geocoding fails
+          setQuery(`${lat.toFixed(6)}, ${lon.toFixed(6)}`);
+        } finally {
+          setLoading(false);
+        }
       },
-      (err) => alert(err.message),
+      (err) => {
+        alert(err.message);
+        setLoading(false);
+      },
       { enableHighAccuracy: true }
     );
   };
@@ -149,7 +177,7 @@ export default function SearchMapWithSave({
     setLocationWithCoordinates(city, { latitude: lat, longitude: lon }, "India");
     onSaveLocation?.(city, lat, lon);
     // Optionally show a toast or notification here
-    navigate("/", { replace: true }); // Go to home/navbar page and close this page
+    navigate("/rental", { replace: true }); // Go to home/navbar page and close this page
   };
 
   const onMarkerDragEnd = (e: L.DragEndEvent) => {
@@ -168,18 +196,27 @@ export default function SearchMapWithSave({
     return null;
   }
 
+
+
+
+
+
+
+
+  
+
   return (
-    <div className="flex flex-col md:flex-row items-start gap-4 p-4">
+    <div className="flex flex-col md:flex-row items-start gap-10 p-4 ml-10">
       {/* Left: Map */}
       <div
         className="border rounded-lg overflow-hidden shadow"
-        style={{ width: 50, height: 50, minWidth: 400, minHeight: 400 }}
+        style={{ width: 50, height: 50, minWidth: 700, minHeight: 500 }}
       >
         <MapContainer
           center={mapCenter}
           zoom={14}
           scrollWheelZoom
-          style={{ width: 50, height:50, minWidth: 400, minHeight: 400 }}
+          style={{ width: 50, height:50, minWidth: 700, minHeight: 500 }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

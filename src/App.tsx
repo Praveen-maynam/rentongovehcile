@@ -332,16 +332,37 @@ import BikeDetails from "./pages/BikeDetails";
 import ListedCars from "./pages/ListedCars";
 import ListedBikes from "./pages/ListedBikes";
 import BookingDetail from "pages/BookingHistory";
+import Register from "pages/Register";
+import { useLocation } from "react-router-dom";
+// import OwnerDashboard from "pages/OwnerDashboard";
+// import { BookingProvider } from "./components/ui/BookingAcceptance";
+// import BookingAcceptanceWithAPI from "./components/ui/BookingAcceptanceWrapper";
+
 const App: React.FC = () => {
+
+  const location = useLocation();
+
+  // Pages where navbar should NOT show
+  const hideNavbarPaths = ["/",  "/register"];
+
+  const hideNavbar = hideNavbarPaths.includes(location.pathname);
+
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      <Navbar />
+    // <BookingProvider>
+      <div className="min-h-screen bg-[#f8fafc]">
+     
+
+      {!hideNavbar && <Navbar />}
+   
 
       <Routes>
         {/* Home & Rental */}
-        <Route path="/" element={<Rental />} />
+        <Route path="/" element={<Register />} />
+        <Route path="/register" element={<Register />} />
+      
+        {/* <Route path="/" element={<Rental />} /> */}
         <Route path="/rental" element={<Rental />} />
-
+{/* <Route path="/owner-dashboard" element={<OwnerDashboard />} /> */}
         {/* List Vehicles */}
         <Route path="/list-car" element={<ListCarPage />} />
         <Route path="/list-bike" element={<ListBikePage />} />
@@ -390,7 +411,11 @@ const App: React.FC = () => {
         <Route path="/calendar" element={<Calendar onConfirm={() => console.log("Confirmed!")} />} />
         <Route path="/calendar-screen" element={<CalendarScreen />} />
       </Routes>
+      
+      {/* Global Booking Acceptance Modal */}
+      {/* <BookingAcceptanceWithAPI /> */}
     </div>
+    // </BookingProvider>
   );
 };
  

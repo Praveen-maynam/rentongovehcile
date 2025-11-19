@@ -197,7 +197,9 @@ import React, { useState } from "react";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 import { getFcmToken } from "../lib/fcm";
-import { platform } from "os";
+import { useNavigate } from "react-router-dom";
+import google from "../assets/icons/google.png"
+import  login from "../assets/icons/login.png"
 interface GoogleUser {
   name: string;
   email: string;
@@ -209,6 +211,7 @@ interface GoogleUser {
 
 const GoogleLoginButton: React.FC = () => {
   const [user, setUser] = useState<GoogleUser | null>(null);
+  const navigate = useNavigate();
 
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
@@ -240,18 +243,113 @@ const GoogleLoginButton: React.FC = () => {
        
       };
       console.log("Payload sent to backend:", payload);
-      const res =
-      await fetch("http://3.110.122.127:3000/register", {
+      
+      const res = await fetch("http://3.110.122.127:3000/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),   
-       
+        body: JSON.stringify(payload),
       });
-           const text = await res.text();
-      console.log("📥 Backend Response:", text);
-      if (!res.ok) throw new Error(`Backend error: ${text}`);
+      
+//       const responseData = await res.json();
+//       console.log("📥 Backend Response:", responseData);
+      
+//       if (!res.ok) {
+//         throw new Error(`Backend error: ${responseData.message || JSON.stringify(responseData)}`);
+//       }
 
-      setUser({ ...payload });
+//       // ✅ Enhanced userId extraction with fallback to googleId
+//       const userId = responseData._id;
+      
+//       console.log("🔍 Extracted userId:", userId);
+      
+//       if (!userId) {
+//         console.warn("⚠️ No userId found, using googleId as fallback");
+//       }
+//        else {
+//   console.log("🔍 Extracted userId from backend:", userId);
+// }
+
+//       // ✅ Comprehensive localStorage storage (matching other components)
+//       const finalUserId = userId || user.uid;
+//       const userDataToStore = {
+//         name: loggedInUser.name,
+//         email: loggedInUser.email,
+//         googleId: user.uid,
+//         fcmToken: loggedInUser.fcmToken,
+//         userId: finalUserId,
+//       };
+      
+//       // Store in multiple formats for compatibility across the app
+//       localStorage.setItem("userId", finalUserId);
+//       localStorage.setItem("googleId", user.uid);
+//       localStorage.setItem("userName", loggedInUser.name);
+//       localStorage.setItem("userEmail", loggedInUser.email);
+//       localStorage.setItem("contactName", loggedInUser.name);
+//       localStorage.setItem("fcmToken", loggedInUser.fcmToken || "");
+//       localStorage.setItem("userProfile", JSON.stringify(userDataToStore));
+//       localStorage.setItem("user", JSON.stringify(userDataToStore));
+      
+
+
+
+// ⬇️ Fixed version
+const responseData = await res.json();
+console.log("📥 Backend Response:", responseData);
+
+// Backend should return: { _id: "...", name "...", email "...", fcmToken "...", googleId: "..." }
+if (!res.ok) {
+  throw new Error(`Backend error: ${responseData.message || JSON.stringify(responseData)}`);
+}
+
+// Ensure backend userId exists
+const backendUserId = responseData.user._id;
+
+if (!backendUserId) {
+  console.error("❌ ERROR: Backend did not return userId (_id). Check backend response.");
+} else {
+  console.log("🔍 Extracted userId from backend:", backendUserId);
+}
+
+const finalUserId = backendUserId || user.uid;
+
+const userDataToStore = {
+  userId: finalUserId,
+  googleId: user.uid,
+  name: loggedInUser.name,
+  email: loggedInUser.email,
+  fcmToken: loggedInUser.fcmToken,
+};
+
+// Store in localStorage
+localStorage.setItem("userId", finalUserId);
+localStorage.setItem("user", JSON.stringify(userDataToStore));
+localStorage.setItem("userProfile", JSON.stringify(userDataToStore));
+localStorage.setItem("googleId", user.uid);
+localStorage.setItem("fcmToken", loggedInUser.fcmToken || "");
+localStorage.setItem("userName", loggedInUser.name);
+localStorage.setItem("userEmail", loggedInUser.email);
+
+// IMPORTANT FIX: Do NOT overwrite userId by using payload
+setUser(userDataToStore);
+
+
+
+
+
+
+
+
+      console.log("💾 User data stored successfully:", {
+        userId: finalUserId,
+        googleId: user.uid,
+        name: loggedInUser.name,
+        email: loggedInUser.email
+      });
+
+      // setUser({ ...payload });
+      
+      console.log("🎉 Registration successful! Navigating to main page...");
+      navigate("/change-location");
       
       
     } catch (error: any) {
@@ -267,38 +365,89 @@ const GoogleLoginButton: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      {!user ? (
-        <button
-          onClick={handleGoogleLogin}
-          className="flex items-center gap-3 bg-white border border-gray-300 shadow-md px-6 py-2 rounded-lg hover:bg-gray-50 transition"
-        >
+    // <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    //   {!user ? (
+    //     <button
+    //       onClick={handleGoogleLogin}
+    //       className="flex items-center gap-3 bg-white border border-gray-300 shadow-md px-6 py-2 rounded-lg hover:bg-gray-50 transition"
+    //     >
+    //       <img
+    //         src="https://www.svgrepo.com/show/475656/google-color.svg"
+    //         alt="Google"
+    //         className="w-6 h-6"
+    //       />
+    //       <span className="font-medium text-gray-700">
+    //         Continue with Google
+    //       </span>
+    //     </button>
+    //   ) : (
+    //     <div className="bg-white shadow-lg rounded-lg p-6 text-center">
+    //       <img
+    //         // src={user.photo}
+    //         alt={user.name}
+    //         className="w-16 h-16 rounded-full mx-auto mb-2"
+    //       />
+    //       <h3 className="text-lg font-semibold">{user.name}</h3>
+    //       <p className="text-gray-600">{user.email}</p>
+    //       <button
+    //         onClick={handleLogout}
+    //         className="mt-3 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+    //       >
+    //         Logout
+    //       </button>
+    //     </div>
+    //   )}
+    // </div>
+
+
+
+
+
+     <div className="flex items-center justify-center bg-gray-100 min-h-[calc(100vh-80px)] py-8">
+      <div className="w-full max-w-4xl flex bg-white rounded-2xl shadow-xl overflow-hidden">
+        
+       {/* Left Side (Illustration + Welcome) */}
+        <div className="hidden md:flex w-1/2 bg-gradient-to-b from-blue-600 to-blue-400 text-white flex-col justify-center items-center p-10">
+          <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
+          <p className="text-lg text-center">
+            Manage your vehicle listings, rentals, and bookings anytime.
+          </p>
           <img
-            src="https://www.svgrepo.com/show/475656/google-color.svg"
-            alt="Google"
-            className="w-6 h-6"
+            src={login} // add your illustration image in /public
+            alt="Login Illustration"
+            className="mt-10 w-72"
           />
-          <span className="font-medium text-gray-700">
-            Continue with Google
-          </span>
-        </button>
-      ) : (
-        <div className="bg-white shadow-lg rounded-lg p-6 text-center">
-          <img
-            // src={user.photo}
-            alt={user.name}
-            className="w-16 h-16 rounded-full mx-auto mb-2"
-          />
-          <h3 className="text-lg font-semibold">{user.name}</h3>
-          <p className="text-gray-600">{user.email}</p>
-          <button
-            onClick={handleLogout}
-            className="mt-3 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          >
-            Logout
-          </button>
         </div>
-      )}
+
+        {/* Right Side (Login Box) */}
+         <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Sign in to Continue</h2>
+          {!user ? (
+          <button
+            className="flex items-center justify-center gap-3 w-full max-w-sm bg-blue-600 border border-gray-300 rounded-lg px-4 py-3 text-gray-700 shadow hover:shadow-md transition"
+            onClick={handleGoogleLogin}
+          >
+            <img src={google} alt="Google" className="w-9 h-9" />
+            <span className="font-medium text-white">Login with Google</span>
+          </button>
+          ) : (
+            <div className="bg-gray-50 shadow-lg rounded-lg p-6 text-center w-full max-w-sm">
+              {/* <h3 className="text-lg font-semibold text-gray-800">{user.name}</h3>
+              <p className="text-gray-600">{user.email}</p>
+              <button
+                onClick={handleLogout}
+                className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Logout
+              </button> */}
+            </div>
+          )}
+          <p className="text-gray-500 text-sm mt-6 text-center">
+            No separate signup needed — your Google account is your key.
+          </p>
+        </div>  
+
+      </div>
     </div>
   );
 };

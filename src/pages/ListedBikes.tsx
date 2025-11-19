@@ -529,7 +529,7 @@ import BikeCC from "../assets/icons/BikeCC.png";
 import Petrol from "../assets/icons/Petrol.png";
 import enfield from "../assets/images/Enfield.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
-import AvailabilityDateTime from "../components/AvailabilityDateTimeModal";
+
 
 interface Vehicle {
   name: string;
@@ -1020,21 +1020,25 @@ useEffect(() => {
       {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
 
    
-    {/* Availability Calendar Modal */}
-{showCalendarModal && selectedVehicle && loggedInUserId && (
-  <AvailabilityDateTime
+ {showCalendarModal && selectedVehicle && loggedInUserId && (
+  <VehicleAvailabilityCalendar
     isOpen={showCalendarModal}
     onClose={() => {
       setShowCalendarModal(false);
       setSelectedVehicle(null);
       setError("");
+      // Refresh the car list to show updated availability
+      const fetchMyCars = async () => {
+        // Your existing fetchMyCars logic
+      };
+      fetchMyCars();
     }}
-    vehicleId={selectedVehicle._id || selectedVehicle.id || ""}
+    VechileId={selectedVehicle._id || selectedVehicle.id || ""}
     vehicleType="Bike"
     userId={loggedInUserId}
-    // userRole="owner"
   />
 )}
+
       {showDeleteModal && vehicleToDelete && (
         <DeleteConfirmationModal
           isOpen={showDeleteModal}

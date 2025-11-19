@@ -502,7 +502,7 @@ const ListCarPage = () => {
               {formFields.vehicleDetails.map(field => (
                 <div key={field.name}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} {field.required && "*"}
+                    {field.label} 
                   </label>
                   {renderField(field)}
                 </div>
@@ -625,7 +625,7 @@ const ListCarPage = () => {
               {formFields.addressFields.map(field => (
                 <div key={field.name} className={field.fullWidth ? "md:col-span-2" : ""}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} {field.required && "*"}
+                    {field.label} 
                   </label>
                   {renderField(field)}
                 </div>
@@ -670,7 +670,7 @@ const ListCarPage = () => {
                 </div>
               )}
 
-              {formData.pickupLatitude && formData.pickupLongitude && (
+              {/* {formData.pickupLatitude && formData.pickupLongitude && (
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -695,7 +695,7 @@ const ListCarPage = () => {
                     />
                   </div>
                 </div>
-              )}
+              )} */}
               
               {showMap && (
                 <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">

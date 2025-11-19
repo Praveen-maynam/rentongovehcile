@@ -505,7 +505,7 @@ const ListBikePage = () => {
               {formFields.vehicleDetails.map(field => (
                 <div key={field.name}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} {field.required && "*"}
+                    {field.label} 
                   </label>
                   {renderField(field)}
                 </div>
@@ -577,7 +577,7 @@ const ListBikePage = () => {
               {formFields.contactInfo.map(field => (
                 <div key={field.name}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} {field.required && "*"}
+                    {field.label} 
                   </label>
                   {renderField(field)}
                 </div>
@@ -637,7 +637,7 @@ const ListBikePage = () => {
               {formFields.addressFields.map(field => (
                 <div key={field.name} className={field.fullWidth ? "md:col-span-2" : ""}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} {field.required && "*"}
+                    {field.label} 
                   </label>
                   {renderField(field)}
                 </div>
@@ -682,7 +682,7 @@ const ListBikePage = () => {
                 </div>
               )}
 
-              {formData.latitude && formData.longitude && (
+              {/* {formData.latitude && formData.longitude && (
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -694,8 +694,8 @@ const ListBikePage = () => {
                       readOnly
                       className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm"
                     />
-                  </div>
-                  <div>
+                  </div> */}
+                  {/* <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
                       Longitude
                     </label>
@@ -707,7 +707,7 @@ const ListBikePage = () => {
                     />
                   </div>
                 </div>
-              )}
+              )} */}
 
               {showMap && (
                 <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">

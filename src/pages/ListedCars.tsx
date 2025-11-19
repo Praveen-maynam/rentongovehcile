@@ -571,8 +571,8 @@ import { Loader2 } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
-import AvailabilityDateTime from "../components/AvailabilityDateTimeModal";
-
+// import AvailabilityDateTime from "../components/AvailabilityDateTimeModal";
+import VehicleAvailabilityCalendar from "../components/AvailabilityDateTimeModal";
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
@@ -1061,23 +1061,25 @@ useEffect(() => {
 
       {/* Filter Modal */}
       {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
-
-    {/* Availability Calendar Modal */}
 {showCalendarModal && selectedVehicle && loggedInUserId && (
-  <AvailabilityDateTime
+  <VehicleAvailabilityCalendar
     isOpen={showCalendarModal}
     onClose={() => {
       setShowCalendarModal(false);
       setSelectedVehicle(null);
       setError("");
+      // Refresh the car list to show updated availability
+      const fetchMyCars = async () => {
+        // Your existing fetchMyCars logic
+      };
+      fetchMyCars();
     }}
-    vehicleId
-={selectedVehicle._id || selectedVehicle.id || ""}
+    VechileId={selectedVehicle._id || selectedVehicle.id || ""}
     vehicleType="Car"
     userId={loggedInUserId}
-    // userRole="owner"
   />
 )}
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && vehicleToDelete && (
         <DeleteConfirmationModal
