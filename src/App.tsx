@@ -331,16 +331,7 @@ import CarDetails from "./pages/CarDetails";
 import BikeDetails from "./pages/BikeDetails";
 import ListedCars from "./pages/ListedCars";
 import ListedBikes from "./pages/ListedBikes";
-<<<<<<< HEAD
-import BikeDetails from "./pages/BikeDetails";
-import Notifications from "pages/Notifications";
-
-// import VehicleReviews from './pages/VehicleReviews';
-
-
-=======
 import BookingDetail from "pages/BookingHistory";
->>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
 const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -355,9 +346,7 @@ const App: React.FC = () => {
         <Route path="/list-car" element={<ListCarPage />} />
         <Route path="/list-bike" element={<ListBikePage />} />
         
-        {/* Listed Vehicles */}
-        <Route path="/listed" element={<ListedCars />} />
-        <Route path="/listed-bikes" element={<ListedBikes />} />
+     
         
         {/* Nearby Vehicles */}
         <Route path="/nearby-cars" element={<Nearbycars />} />
@@ -396,24 +385,18 @@ const App: React.FC = () => {
         <Route path="/help" element={<Help />} />
         
 
+  <Route path="/listed" element={<ListedCars />} />
+  <Route path="/listed-bike" element={<ListedBikes />} />
+
+
 <Route path="/feedback" element={<Feedback />} />
-<Route path="/notifications" element={<Notifications />} />
+{/* <Route path="/notifications" element={<Notifications />} /> */}
 {/* <Route path="/reviews/:id" element={<VehicleReviews />} /> */}
 
         {/* Calendar */}
         <Route path="/calendar" element={<Calendar onConfirm={() => console.log("Confirmed!")} />} />
         <Route path="/calendar-screen" element={<CalendarScreen />} />
       </Routes>
-
-
-
-
-
-
-
-
-
-
 
       
     </div>

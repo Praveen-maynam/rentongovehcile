@@ -1,588 +1,759 @@
-// import React, { useState, useEffect } from "react";
-// import { X, Calendar, ChevronLeft, ChevronRight, Clock, Info } from "lucide-react";
 
-// // Mock API service for customer-side booking
-// const bookingAPI = {
-//   getVehicleAvailability: async (vehicleId: string, vehicleType: string, startDate: string, endDate: string) => {
-//     console.log("API: getVehicleAvailability", { vehicleId, vehicleType, startDate, endDate });
-//     // This would call your actual API to get blocked dates
-//     return [];
-//   },
-//   createBooking: async (payload: any) => {
-//     console.log("API: createBooking", payload);
-//     return { success: true, bookingId: `booking_${Date.now()}`, data: payload };
-//   }
+
+// import React, { useState, useEffect } from "react";
+// import {
+//   X,
+//   Calendar,
+//   ChevronLeft,
+//   ChevronRight,
+//   AlertCircle,
+//   CheckCircle,
+// } from "lucide-react";
+
+// // ==========================================
+// // TIME SELECTION POPUP
+// // ==========================================
+
+// const TimeSelectionPopup = ({ 
+//   isOpen, 
+//   onClose, 
+//   onConfirm, 
+//   startTime,
+//   endTime,
+//   setStartTime,
+//   setEndTime
+// }) => {
+//   if (!isOpen) return null;
+
+//   const generateTimeOptions = () => {
+//     const arr = [];
+//     for (let h = 0; h < 24; h++) {
+//       for (let m = 0; m < 60; m += 30) {
+//         const hh = String(h).padStart(2, "0");
+//         const mm = String(m).padStart(2, "0");
+//         arr.push({
+//           value: `${hh}:${mm}`,
+//           label: `${h % 12 || 12}:${mm} ${h >= 12 ? "PM" : "AM"}`,
+//         });
+//       }
+//     }
+//     return arr;
+//   };
+
+//   const timeOptions = generateTimeOptions();
+// const [isProcessing, setIsProcessing] = useState(false);
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
+//       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+//         {/* Header */}
+//         <div className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] p-6 text-white">
+//           <div className="flex justify-between items-start">
+//             <div>
+//               <h2 className="text-2xl font-bold mb-1">Select Time</h2>
+//               <p className="text-blue-100 text-sm">Choose pickup and return times</p>
+//             </div>
+//             <button 
+//               onClick={onClose}
+//               className="text-white hover:bg-white/20 rounded-full p-1 transition"
+//             >
+//               <X size={24} />
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Content */}
+//         <div className="p-6 space-y-4">
+//           <div>
+//             <label className="font-semibold block mb-2">Pickup Time</label>
+//             <select
+//               className="w-full p-3 border rounded-lg"
+//               value={startTime}
+//               onChange={(e) => setStartTime(e.target.value)}
+//             >
+//               {timeOptions.map((t) => (
+//                 <option value={t.value} key={t.value}>
+//                   {t.label}
+//                 </option>
+//               ))}
+//             </select>
+//           </div>
+
+//           <div>
+//             <label className="font-semibold block mb-2">Return Time</label>
+//             <select
+//               className="w-full p-3 border rounded-lg"
+//               value={endTime}
+//               onChange={(e) => setEndTime(e.target.value)}
+//             >
+//               {timeOptions.map((t) => (
+//                 <option value={t.value} key={t.value}>
+//                   {t.label}
+//                 </option>
+//               ))}
+//             </select>
+//           </div>
+//         </div>
+
+//         {/* Actions */}
+//         <div className="px-6 pb-6 flex gap-3">
+//           <button
+//             onClick={onClose}
+//             className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+//           >
+//             Cancel
+//           </button>
+//           <button
+//             onClick={onConfirm}
+//             className="flex-1 px-4 py-3 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white rounded-lg font-semibold hover:opacity-90 transition shadow-lg"
+//           >
+//             Confirm Time
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
 // };
 
-// interface CustomerBookingCalendarProps {
-//   isOpen?: boolean;
-//   onClose?: () => void;
-//   onConfirm?: (
-//     startDate: string,
-//     endDate: string,
-//     startTime: string,
-//     endTime: string
-//   ) => void;
-//   vehicleId?: string;
-//   vehicleType?: "Car" | "Bike" | "Auto";
-//   vehicleName?: string;
-//   pricePerDay?: number;
-// }
+// // ==========================================
+// // BOOKING CONFIRMATION POPUP
+// // ==========================================
 
-// const CustomerBookingCalendar: React.FC<CustomerBookingCalendarProps> = ({
+// const BookingConfirmationPopup = ({ 
+//   isOpen, 
+//   onClose, 
+//   onConfirm, 
+//   bookingDetails,
+//   vehicleDetails 
+// }) => {
+//   if (!isOpen) return null;
+
+//   const { startDate, endDate, startTime, endTime, totalDays, totalPrice } = bookingDetails;
+//   const { vehicleName, vehicleType, pricePerDay } = vehicleDetails;
+
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[70]">
+//       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+//         {/* Header */}
+//         <div className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] p-6 text-white">
+//           <div className="flex justify-between items-start">
+//             <div>
+//               <h2 className="text-2xl font-bold mb-1">Confirm Booking</h2>
+//               <p className="text-blue-100 text-sm">Review your rental details</p>
+//             </div>
+//             <button 
+//               onClick={onClose}
+//               className="text-white hover:bg-white/20 rounded-full p-1 transition"
+//             >
+//               <X size={24} />
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Content */}
+//         <div className="p-6 space-y-4">
+//           {/* Vehicle Info */}
+//           <div className="bg-gray-50 rounded-lg p-4">
+//             <h3 className="font-semibold text-gray-700 mb-2">Vehicle Details</h3>
+//             <p className="text-lg font-bold text-gray-900">{vehicleName}</p>
+//             <p className="text-sm text-gray-600">Type: {vehicleType}</p>
+//           </div>
+
+//           {/* Booking Dates */}
+//           <div className="space-y-3">
+//             <div className="flex items-start gap-3">
+//               <Calendar className="text-blue-600 mt-1" size={20} />
+//               <div className="flex-1">
+//                 <p className="text-sm text-gray-600">Pickup Date</p>
+//                 <p className="font-semibold text-gray-900">{startDate}</p>
+//                 <p className="text-sm text-gray-500">Time: {startTime}</p>
+//               </div>
+//             </div>
+
+//             <div className="flex items-start gap-3">
+//               <Calendar className="text-blue-600 mt-1" size={20} />
+//               <div className="flex-1">
+//                 <p className="text-sm text-gray-600">Return Date</p>
+//                 <p className="font-semibold text-gray-900">{endDate}</p>
+//                 <p className="text-sm text-gray-500">Time: {endTime}</p>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Price Breakdown */}
+//           <div className="border-t pt-4 space-y-2">
+//             <div className="flex justify-between text-sm">
+//               <span className="text-gray-600">Rate per day</span>
+//               <span className="font-semibold">₹{pricePerDay}</span>
+//             </div>
+//             <div className="flex justify-between text-sm">
+//               <span className="text-gray-600">Total days</span>
+//               <span className="font-semibold">{totalDays} days</span>
+//             </div>
+//             <div className="flex justify-between text-lg font-bold border-t pt-2">
+//               <span>Total Amount</span>
+//               <span className="text-blue-600">₹{totalPrice}</span>
+//             </div>
+//           </div>
+
+//           {/* Important Note */}
+//           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2">
+//             <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
+//             <p className="text-xs text-amber-800">
+//               Please arrive on time for pickup. Late arrivals may affect your booking.
+//             </p>
+//           </div>
+//         </div>
+
+//         {/* Actions */}
+//         <div className="px-6 pb-6 flex gap-3">
+//           <button
+//             onClick={onClose}
+//             className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+//           >
+//             Cancel
+//           </button>
+//           <button
+//             onClick={onConfirm}
+//             className="flex-1 px-4 py-3 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white rounded-lg font-semibold hover:opacity-90 transition shadow-lg"
+//           >
+//             Confirm Booking
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // ==========================================
+// // CUSTOMER BOOKING CALENDAR
+// // ==========================================
+
+// const CustomerBookingCalendar = ({
 //   isOpen = true,
 //   onClose = () => {},
-//   onConfirm,
-//   vehicleId = "vehicle456",
-//   vehicleType = "Car",
-//   vehicleName = "Sample Vehicle",
+//   onBookingConfirmed,
+  
+//   vehicleId = localStorage.getItem("vehicleId") || "V001",
+//   vehicleType = localStorage.getItem("vehicletype") || "Car",
+//   vehicleName = "Vehicle",
 //   pricePerDay = 1500
 // }) => {
+
+//   // STATE
 //   const [currentMonth, setCurrentMonth] = useState(new Date());
-//   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
-//   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
-//   const [activeInput, setActiveInput] = useState<"start" | "end" | null>(null);
+//   const [selectedStartDate, setSelectedStartDate] = useState(null);
+//   const [selectedEndDate, setSelectedEndDate] = useState(null);
 //   const [startTime, setStartTime] = useState("09:00");
 //   const [endTime, setEndTime] = useState("18:00");
+//   const [blockedDates, setBlockedDates] = useState([]);
 //   const [loading, setLoading] = useState(false);
-//   const [message, setMessage] = useState("");
-//   const [blockedDates, setBlockedDates] = useState<any[]>([]);
+//   const [message, setMessage] = useState({ type: "", text: "" });
+//   const [showTimePopup, setShowTimePopup] = useState(false);
+//   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
 
-//   // Load blocked dates when component mounts or month changes
-//   useEffect(() => {
-//     if (isOpen) {
-//       loadBlockedDatesForMonth();
-//     }
-//   }, [isOpen, currentMonth, vehicleId, vehicleType]);
+//   // ============================
+//   // FORMATTERS
+//   // ============================
 
-//   const loadBlockedDatesForMonth = async () => {
+//   const formatDateForAPI = (date) => {
+//     if (!date) return "";
+//     return date.toISOString().split("T")[0];
+//   };
+
+//   const formatDateForDisplay = (date) => {
+//     if (!date) return "Select Date";
+//     return date.toLocaleDateString("en-US", {
+//       month: "short",
+//       day: "numeric",
+//       year: "numeric",
+//     });
+//   };
+
+//   // ============================
+//   // FETCH API UNAVAILABLE DATES
+//   // ============================
+
+//   const fetchVehicleAvailability = async () => {
+//     setLoading(true);
 //     try {
-//       setLoading(true);
+//       const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
+//       const res = await fetch(url);
+//       const data = await res.json();
 
-//       const year = currentMonth.getFullYear();
-//       const month = currentMonth.getMonth();
-      
-//       const startDate = new Date(year, month, 1).toISOString().split("T")[0];
-//       const endDate = new Date(year, month + 1, 0).toISOString().split("T")[0];
-
-//       console.log("📅 Loading blocked dates for:", { startDate, endDate, vehicleId, vehicleType });
-
-//       const slots = await bookingAPI.getVehicleAvailability(
-//         vehicleId,
-//         vehicleType,
-//         startDate,
-//         endDate
-//       );
-
-//       console.log("✅ Loaded blocked slots:", slots);
-//       setBlockedDates(slots || []);
-      
-//     } catch (error) {
-//       console.error("❌ Error loading blocked dates:", error);
-//       setMessage("⚠️ Could not load availability. Please try again.");
-//       setBlockedDates([]);
+//       if (data.success && data.availability) {
+//         const unavailable = data.availability
+//           .filter((item) => item.status === "Unavailable")
+//           .map((item) => item.date);
+//         setBlockedDates(unavailable);
+//       }
+//     } catch (err) {
+//       console.error("Failed to fetch availability", err);
+//       showMessage("error", "Failed to load availability");
 //     } finally {
 //       setLoading(false);
 //     }
 //   };
 
-//   // Format date to YYYY-MM-DD for API
-//   const formatDateForAPI = (date: Date | null): string => {
-//     if (!date) return "";
-//     const year = date.getFullYear();
-//     const month = String(date.getMonth() + 1).padStart(2, "0");
-//     const day = String(date.getDate()).padStart(2, "0");
-//     return `${year}-${month}-${day}`;
+//   // ============================
+//   // USE EFFECT
+//   // ============================
+
+//   useEffect(() => {
+//     if (isOpen) {
+//       fetchVehicleAvailability();
+//     }
+//   }, [isOpen, currentMonth, vehicleId, vehicleType]);
+
+//   // ============================
+//   // DATE UTILITIES
+//   // ============================
+
+//   const isPastDate = (date) => {
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0);
+//     const d = new Date(date);
+//     d.setHours(0, 0, 0, 0);
+//     return d < today;
 //   };
 
-//   // Format date for display (YYYY/MM/DD)
-//   const formatDateForDisplay = (date: Date | null): string => {
-//     if (!date) return "Select Date";
-//     const year = date.getFullYear();
-//     const month = String(date.getMonth() + 1).padStart(2, "0");
-//     const day = String(date.getDate()).padStart(2, "0");
-//     return `${year}/${month}/${day}`;
+//   const isDateBlocked = (date) => {
+//     const formatted = formatDateForAPI(date);
+//     return blockedDates.includes(formatted);
 //   };
 
-//   const monthName = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-//   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+//   const isDateInRange = (date) => {
+//     if (!selectedStartDate || !selectedEndDate) return false;
+//     return date >= selectedStartDate && date <= selectedEndDate;
+//   };
+
+//   const isAnyDateInRangeBlocked = (start, end) => {
+//     const cur = new Date(start);
+//     while (cur <= end) {
+//       if (isDateBlocked(cur)) return true;
+//       cur.setDate(cur.getDate() + 1);
+//     }
+//     return false;
+//   };
+
+//   // ============================
+//   // HANDLE DATE CLICK
+//   // ============================
+
+//   const handleDateClick = (date) => {
+//     if (isPastDate(date)) {
+//       showMessage("error", "Cannot select past dates");
+//       return;
+//     }
+
+//     if (isDateBlocked(date)) {
+//       showMessage("error", "This date is unavailable");
+//       return;
+//     }
+
+//     if (!selectedStartDate) {
+//       setSelectedStartDate(date);
+//       setSelectedEndDate(null);
+//       showMessage("success", "Pickup date selected. Now select return date.");
+//       return;
+//     }
+
+//     if (!selectedEndDate) {
+//       if (date < selectedStartDate) {
+//         showMessage("error", "Return date cannot be before pickup date");
+//         return;
+//       }
+
+//       if (isAnyDateInRangeBlocked(selectedStartDate, date)) {
+//         showMessage("error", "Some dates in this range are unavailable");
+//         return;
+//       }
+
+//       setSelectedEndDate(date);
+//       showMessage("success", "Dates selected successfully!");
+//     } else {
+//       setSelectedStartDate(date);
+//       setSelectedEndDate(null);
+//       showMessage("success", "Pickup date selected. Now select return date.");
+//     }
+//   };
+
+//   // ============================
+//   // BOOKING LOGIC
+//   // ============================
+
+//   const totalDays = () => {
+//     if (!selectedStartDate || !selectedEndDate) return 0;
+//     return (
+//       Math.ceil(
+//         (selectedEndDate.getTime() - selectedStartDate.getTime()) /
+//           (1000 * 60 * 60 * 24)
+//       ) + 1
+//     );
+//   };
+
+//   const totalPrice = () => totalDays() * pricePerDay;
+
+//   const handleProceedToSelectTime = () => {
+//     if (!selectedStartDate || !selectedEndDate) {
+//       showMessage("error", "Please select both pickup and return dates");
+//       return;
+//     }
+//     setShowTimePopup(true);
+//   };
+
+//   const handleTimeConfirmed = () => {
+//     setShowTimePopup(false);
+//     setShowConfirmPopup(true);
+//   };
+
+//   const handleConfirm = async () => {
+//     const payload = {
+//       vehicleId,
+//       vehicleType,
+//       vehicleName,
+//       startDate: formatDateForAPI(selectedStartDate),
+//       endDate: formatDateForAPI(selectedEndDate),
+//       startTime,
+//       endTime,
+//       totalDays: totalDays(),
+//       totalPrice: totalPrice(),
+//       pricePerDay
+//     };
+
+//     if (onBookingConfirmed) {
+//       onBookingConfirmed(payload);
+//     }
+
+//     setShowConfirmPopup(false);
+//     showMessage("success", "Booking confirmed successfully!");
+    
+//     setTimeout(() => {
+//       setSelectedStartDate(null);
+//       setSelectedEndDate(null);
+//       onClose();
+//     }, 2000);
+//   };
+
+//   // ============================
+//   // UI HELPERS
+//   // ============================
+
+//   const showMessage = (type, text) => {
+//     setMessage({ type, text });
+//     setTimeout(() => setMessage({ type: "", text: "" }), 4000);
+//   };
+
+//   // ============================
+//   // CALENDAR UI GENERATION
+//   // ============================
+
+//   const monthName = currentMonth.toLocaleDateString("en-US", {
+//     month: "long",
+//     year: "numeric",
+//   });
 
 //   const daysInMonth = new Date(
 //     currentMonth.getFullYear(),
 //     currentMonth.getMonth() + 1,
 //     0
 //   ).getDate();
-//   const firstDayOfMonth = new Date(
+
+//   const firstDay = new Date(
 //     currentMonth.getFullYear(),
 //     currentMonth.getMonth(),
 //     1
 //   ).getDay();
 
-//   const previousMonth = () =>
-//     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
-//   const nextMonth = () =>
-//     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
-
-//   const handleDateClick = (date: Date) => {
-//     // Check if date is blocked
-//     if (isDateBlocked(date)) {
-//       setMessage("⚠️ This date is not available for booking");
-//       setTimeout(() => setMessage(""), 3000);
-//       return;
-//     }
-
-//     // Check if date is in the past
-//     if (isPastDate(date)) {
-//       setMessage("⚠️ Cannot select past dates");
-//       setTimeout(() => setMessage(""), 3000);
-//       return;
-//     }
-
-//     if (activeInput === "start") {
-//       setSelectedStartDate(date);
-//       setActiveInput("end");
-//       setMessage("Now select your end date");
-//       setTimeout(() => setMessage(""), 2000);
-//     } else if (activeInput === "end") {
-//       // Ensure end date is not before start date
-//       if (selectedStartDate && date < selectedStartDate) {
-//         setMessage("⚠️ End date cannot be before start date");
-//         setTimeout(() => setMessage(""), 3000);
-//         return;
-//       }
-
-//       // Check if any date in range is blocked
-//       if (isAnyDateInRangeBlocked(selectedStartDate!, date)) {
-//         setMessage("⚠️ Some dates in this range are not available");
-//         setTimeout(() => setMessage(""), 3000);
-//         return;
-//       }
-
-//       setSelectedEndDate(date);
-//       setActiveInput(null);
-//       setMessage("✅ Dates selected! Review and confirm your booking.");
-//       setTimeout(() => setMessage(""), 3000);
-//     }
-//   };
-
-//   const isDateSelected = (date: Date) => {
-//     return (
-//       (selectedStartDate && selectedStartDate.getTime() === date.getTime()) ||
-//       (selectedEndDate && selectedEndDate.getTime() === date.getTime())
-//     );
-//   };
-
-//   const isDateInRange = (date: Date) => {
-//     if (!selectedStartDate || !selectedEndDate) return false;
-//     return date.getTime() >= selectedStartDate.getTime() && date.getTime() <= selectedEndDate.getTime();
-//   };
-
-//   const isDateBlocked = (date: Date) => {
-//     return blockedDates.some((slot: any) => {
-//       if (!slot.isNotAvailable) return false;
-      
-//       const fromDate = new Date(slot.fromDate.split('T')[0]);
-//       fromDate.setHours(0, 0, 0, 0);
-      
-//       const toDate = new Date(slot.toDate.split('T')[0]);
-//       toDate.setHours(0, 0, 0, 0);
-      
-//       const checkDate = new Date(date);
-//       checkDate.setHours(0, 0, 0, 0);
-      
-//       return checkDate >= fromDate && checkDate <= toDate;
-//     });
-//   };
-
-//   const isAnyDateInRangeBlocked = (start: Date, end: Date): boolean => {
-//     const current = new Date(start);
-//     while (current <= end) {
-//       if (isDateBlocked(current)) {
-//         return true;
-//       }
-//       current.setDate(current.getDate() + 1);
-//     }
-//     return false;
-//   };
-
-//   const isPastDate = (date: Date) => {
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0);
-//     const checkDate = new Date(date);
-//     checkDate.setHours(0, 0, 0, 0);
-//     return checkDate < today;
-//   };
-
 //   const renderCalendarDays = () => {
 //     const days = [];
+//     const offset = firstDay === 0 ? 6 : firstDay - 1;
 
-//     // Add empty cells for days before the first day of the month
-//     for (let i = 0; i < firstDayOfMonth; i++) {
-//       days.push(<div key={`empty-${i}`} className="py-2" />);
-//     }
+//     for (let i = 0; i < offset; i++) days.push(<div key={"empty-" + i} />);
 
-//     for (let day = 1; day <= daysInMonth; day++) {
-//       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-//       const isSelected = isDateSelected(date);
-//       const inRange = isDateInRange(date);
-//       const blocked = isDateBlocked(date);
+//     for (let d = 1; d <= daysInMonth; d++) {
+//       const date = new Date(
+//         currentMonth.getFullYear(),
+//         currentMonth.getMonth(),
+//         d
+//       );
+
 //       const past = isPastDate(date);
+//       const blocked = isDateBlocked(date);
+//       const selected =
+//         selectedStartDate?.getTime() === date.getTime() ||
+//         selectedEndDate?.getTime() === date.getTime();
+//       const inRange = isDateInRange(date);
 
-//       let dayClass = "text-gray-700 hover:bg-blue-50 hover:scale-105";
-//       let isDisabled = past || blocked;
+//       let className =
+//         "h-12 rounded-lg transition relative font-medium flex items-center justify-center ";
 
 //       if (past) {
-//         dayClass = "text-gray-300 cursor-not-allowed bg-gray-50";
+//         className += "bg-gray-100 text-gray-400 cursor-not-allowed";
 //       } else if (blocked) {
-//         dayClass = "bg-red-50 text-red-400 cursor-not-allowed line-through";
-//       } else if (isSelected) {
-//         dayClass = "bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white ring-2 ring-blue-400 scale-110";
+//         className +=
+//           "bg-red-100 border-2 border-red-500 text-red-700 relative cursor-not-allowed";
+//       } else if (selected) {
+//         className += "bg-black text-white border-2 border-black";
 //       } else if (inRange) {
-//         dayClass = "bg-blue-100 text-blue-700";
+//         className += "bg-blue-100 text-blue-700 border border-blue-300";
+//       } else {
+//         className +=
+//           "bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white hover:opacity-90 cursor-pointer";
 //       }
 
 //       days.push(
 //         <button
-//           key={day}
-//           disabled={isDisabled}
-//           className={`py-2 rounded-lg transition-all w-full font-medium ${dayClass}`}
-//           onClick={() => !isDisabled && handleDateClick(date)}
+//           key={d}
+//           className={className}
+//           disabled={past || blocked}
+//           onClick={() => handleDateClick(date)}
 //         >
-//           {day}
+//           {d}
+//           {blocked && (
+//             <>
+//               <svg
+//                 className="absolute inset-0 w-full h-full pointer-events-none"
+//                 viewBox="0 0 40 40"
+//               >
+//                 <line
+//                   x1="6"
+//                   y1="6"
+//                   x2="34"
+//                   y2="34"
+//                   stroke="#dc2626"
+//                   strokeWidth="3"
+//                   strokeLinecap="round"
+//                 />
+//                 <line
+//                   x1="34"
+//                   y1="6"
+//                   x2="6"
+//                   y2="34"
+//                   stroke="#dc2626"
+//                   strokeWidth="3"
+//                   strokeLinecap="round"
+//                 />
+//               </svg>
+//               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
+//             </>
+//           )}
 //         </button>
 //       );
 //     }
+
 //     return days;
 //   };
 
 //   const generateTimeOptions = () => {
-//     const options = [];
+//     const arr = [];
 //     for (let h = 0; h < 24; h++) {
 //       for (let m = 0; m < 60; m += 30) {
-//         const hour = h.toString().padStart(2, "0");
-//         const minute = m.toString().padStart(2, "0");
-//         const time = `${hour}:${minute}`;
-//         const period = h >= 12 ? "PM" : "AM";
-//         const displayHour = h % 12 || 12;
-//         options.push({ value: time, label: `${displayHour}:${minute.padStart(2, "0")} ${period}` });
+//         const hh = String(h).padStart(2, "0");
+//         const mm = String(m).padStart(2, "0");
+//         arr.push({
+//           value: `${hh}:${mm}`,
+//           label: `${h % 12 || 12}:${mm} ${h >= 12 ? "PM" : "AM"}`,
+//         });
 //       }
 //     }
-//     return options;
+//     return arr;
 //   };
 
 //   const timeOptions = generateTimeOptions();
 
-//   const calculateTotalDays = () => {
-//     if (!selectedStartDate || !selectedEndDate) return 0;
-//     const days = Math.ceil((selectedEndDate.getTime() - selectedStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-//     return days;
-//   };
-
-//   const calculateTotalPrice = () => {
-//     const days = calculateTotalDays();
-//     return days * pricePerDay;
-//   };
-
-//   const handleConfirmBooking = async () => {
-//     if (!selectedStartDate || !selectedEndDate) {
-//       setMessage("⚠️ Please select both start and end dates");
-//       return;
-//     }
-
-//     const formattedStartDate = formatDateForAPI(selectedStartDate);
-//     const formattedEndDate = formatDateForAPI(selectedEndDate);
-
-//     // If onConfirm callback is provided, use it
-//     if (onConfirm) {
-//       onConfirm(formattedStartDate, formattedEndDate, startTime, endTime);
-//       return;
-//     }
-
-//     // Otherwise proceed with booking
-//     setLoading(true);
-//     setMessage("Processing your booking...");
-
-//     const bookingPayload = {
-//       vehicleId,
-//       vehicleType,
-//       startDate: formattedStartDate,
-//       endDate: formattedEndDate,
-//       startTime: startTime.padStart(5, "0"),
-//       endTime: endTime.padStart(5, "0"),
-//       totalDays: calculateTotalDays(),
-//       totalPrice: calculateTotalPrice()
-//     };
-
-//     console.log("📋 Booking payload:", bookingPayload);
-
-//     try {
-//       const response = await bookingAPI.createBooking(bookingPayload);
-//       console.log("✅ Booking response:", response);
-//       setMessage(`✅ Booking confirmed! Booking ID: ${response.bookingId}`);
-      
-//       setTimeout(() => {
-//         onClose();
-//       }, 2000);
-//     } catch (error: any) {
-//       console.error("❌ Booking error:", error);
-//       const errorMsg = error?.response?.data?.message || error?.message || "Failed to create booking";
-//       setMessage(`❌ ${errorMsg}`);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+//   // ============================
+//   // JSX
+//   // ============================
 
 //   if (!isOpen) return null;
 
 //   return (
-//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-//       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl p-6 relative max-h-[90vh] overflow-y-auto">
-//         {/* Header */}
-//         <div className="flex justify-between items-center mb-6">
-//           <div>
-//             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-//               <Calendar size={28} className="text-blue-600" />
+//     <>
+//       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+//         <div className="bg-white w-full max-w-6xl rounded-2xl p-6 overflow-y-auto max-h-[90vh] shadow-xl">
+//           {/* HEADER */}
+//           <div className="flex justify-between items-center mb-6">
+//             <h2 className="text-2xl font-bold flex items-center">
+//               <Calendar className="mr-2 text-blue-600" />
 //               Book Your {vehicleType}
 //             </h2>
-//             <p className="text-sm text-gray-600 mt-1">{vehicleName} • ₹{pricePerDay}/day</p>
+
+//             <button onClick={onClose}>
+//               <X size={24} />
+//             </button>
 //           </div>
-//           <button 
-//             onClick={onClose} 
-//             className="p-2 rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
-//           >
-//             <X size={24} />
-//           </button>
-//         </div>
 
-//         <div className="flex flex-col lg:flex-row gap-6">
-//           {/* Left Column: Calendar */}
-//           <div className="flex-1 space-y-4">
-//             {/* Date Selection Boxes */}
-//             <div className="grid grid-cols-2 gap-4">
-//               <div 
-//                 className="cursor-pointer" 
-//                 onClick={() => setActiveInput("start")}
-//               >
-//                 <label className="flex items-center gap-2 text-sm text-gray-600 font-medium mb-2">
-//                   <Calendar size={18} className="text-blue-500" /> 
-//                   Pickup Date
-//                 </label>
-//                 <div
-//                   className={`border-2 rounded-lg p-4 text-center font-semibold text-lg transition ${
-//                     activeInput === "start" 
-//                       ? "border-blue-500 ring-2 ring-blue-200 bg-blue-50" 
-//                       : "border-gray-200 bg-white"
-//                   }`}
-//                 >
-//                   {formatDateForDisplay(selectedStartDate)}
-//                 </div>
-//               </div>
-
-//               <div 
-//                 className="cursor-pointer" 
-//                 onClick={() => setActiveInput("end")}
-//               >
-//                 <label className="flex items-center gap-2 text-sm text-gray-600 font-medium mb-2">
-//                   <Calendar size={18} className="text-blue-500" /> 
-//                   Return Date
-//                 </label>
-//                 <div
-//                   className={`border-2 rounded-lg p-4 text-center font-semibold text-lg transition ${
-//                     activeInput === "end" 
-//                       ? "border-blue-500 ring-2 ring-blue-200 bg-blue-50" 
-//                       : "border-gray-200 bg-white"
-//                   }`}
-//                 >
-//                   {formatDateForDisplay(selectedEndDate)}
-//                 </div>
-//               </div>
+//           {/* MESSAGES */}
+//           {message.text && (
+//             <div
+//               className={`p-4 rounded-lg mb-4 flex items-center gap-2 ${
+//                 message.type === "error"
+//                   ? "bg-red-100 text-red-800"
+//                   : message.type === "success"
+//                   ? "bg-green-100 text-green-800"
+//                   : "bg-blue-100 text-blue-800"
+//               }`}
+//             >
+//               {message.type === "success" && <CheckCircle size={20} />}
+//               {message.type === "error" && <AlertCircle size={20} />}
+//               {message.text}
 //             </div>
+//           )}
 
-//             {/* Calendar */}
-//             <div className="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
+//           {/* DATE SELECTION AT TOP */}
+//           <div className="grid grid-cols-2 gap-4 mb-6">
+//             <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+//               <label className="text-sm font-semibold text-gray-600 block mb-2">
+//                 Pickup Date
+//               </label>
+//               <p className="text-lg font-bold text-gray-900">
+//                 {formatDateForDisplay(selectedStartDate)}
+//               </p>
+//             </div>
+//             <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+//               <label className="text-sm font-semibold text-gray-600 block mb-2">
+//                 Return Date
+//               </label>
+//               <p className="text-lg font-bold text-gray-900">
+//                 {formatDateForDisplay(selectedEndDate)}
+//               </p>
+//             </div>
+//           </div>
+
+//           <div className="grid grid-cols-3 gap-6">
+//             {/* CALENDAR */}
+//             <div className="col-span-2">
+//               {loading && (
+//                 <div className="flex justify-center items-center py-4">
+//                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+//                   <span className="ml-2 text-gray-600">Loading availability...</span>
+//                 </div>
+//               )}
+
 //               <div className="flex justify-between items-center mb-4">
-//                 <button 
-//                   onClick={previousMonth} 
-//                   disabled={loading}
-//                   className="p-2 hover:bg-white rounded-lg transition disabled:opacity-50 shadow-sm"
+//                 <button
+//                   onClick={() =>
+//                     setCurrentMonth(
+//                       new Date(
+//                         currentMonth.getFullYear(),
+//                         currentMonth.getMonth() - 1
+//                       )
+//                     )
+//                   }
 //                 >
-//                   <ChevronLeft size={20} />
+//                   <ChevronLeft />
 //                 </button>
-//                 <h3 className="font-bold text-lg text-gray-800">{monthName}</h3>
-//                 <button 
-//                   onClick={nextMonth} 
-//                   disabled={loading}
-//                   className="p-2 hover:bg-white rounded-lg transition disabled:opacity-50 shadow-sm"
+
+//                 <h3 className="text-xl font-bold">{monthName}</h3>
+
+//                 <button
+//                   onClick={() =>
+//                     setCurrentMonth(
+//                       new Date(
+//                         currentMonth.getFullYear(),
+//                         currentMonth.getMonth() + 1
+//                       )
+//                     )
+//                   }
 //                 >
-//                   <ChevronRight size={20} />
+//                   <ChevronRight />
 //                 </button>
 //               </div>
 
-//               <div className="grid grid-cols-7 gap-1 mb-3">
-//                 {weekDays.map((day) => (
-//                   <div key={day} className="text-center text-xs font-bold text-gray-600 py-2">
-//                     {day}
+//               <div className="grid grid-cols-7 gap-2 mb-2">
+//                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+//                   <div key={d} className="text-center font-bold text-gray-600">
+//                     {d}
 //                   </div>
 //                 ))}
 //               </div>
 
-//               <div className="grid grid-cols-7 gap-1">
-//                 {renderCalendarDays()}
-//               </div>
-//             </div>
+//               <div className="grid grid-cols-7 gap-2">{renderCalendarDays()}</div>
 
-//             {/* Legend */}
-//             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2 text-xs">
-//               <div className="flex items-center gap-2">
-//                 <div className="w-6 h-6 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] rounded"></div>
-//                 <span className="text-gray-700 font-medium">Selected dates</span>
-//               </div>
-//               <div className="flex items-center gap-2">
-//                 <div className="w-6 h-6 bg-red-50 rounded border border-red-300 flex items-center justify-center">
-//                   <span className="text-red-400 text-[10px] line-through">X</span>
+//               {/* Legend */}
+//               <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-gray-200 text-sm">
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-black rounded"></div>
+//                   <span className="text-gray-600">Selected</span>
 //                 </div>
-//                 <span className="text-gray-700 font-medium">Not available</span>
-//               </div>
-//               <div className="flex items-center gap-2">
-//                 <div className="w-6 h-6 bg-white rounded border border-gray-300"></div>
-//                 <span className="text-gray-700 font-medium">Available</span>
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* Right Column: Booking Details */}
-//           <div className="w-full lg:w-96 space-y-4">
-//             {/* Time Selection */}
-//             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-//               <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-//                 <Clock size={18} className="text-blue-600" />
-//                 Pickup & Return Time
-//               </h3>
-              
-//               <div className="space-y-3">
-//                 <div>
-//                   <label className="text-xs text-gray-600 font-medium">Pickup Time</label>
-//                   <select
-//                     value={startTime}
-//                     onChange={(e) => setStartTime(e.target.value)}
-//                     className="w-full p-3 border-2 border-blue-200 rounded-lg bg-white text-gray-900 font-semibold outline-none mt-1"
-//                   >
-//                     {timeOptions.map((time) => (
-//                       <option key={time.value} value={time.value}>
-//                         {time.label}
-//                       </option>
-//                     ))}
-//                   </select>
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div>
+//                   <span className="text-gray-600">In Range</span>
 //                 </div>
-
-//                 <div>
-//                   <label className="text-xs text-gray-600 font-medium">Return Time</label>
-//                   <select
-//                     value={endTime}
-//                     onChange={(e) => setEndTime(e.target.value)}
-//                     className="w-full p-3 border-2 border-blue-200 rounded-lg bg-white text-gray-900 font-semibold outline-none mt-1"
-//                   >
-//                     {timeOptions.map((time) => (
-//                       <option key={time.value} value={time.value}>
-//                         {time.label}
-//                       </option>
-//                     ))}
-//                   </select>
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* Booking Summary */}
-//             {(selectedStartDate || selectedEndDate) && (
-//               <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl p-4">
-//                 <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-//                   <Info size={18} className="text-gray-600" />
-//                   Booking Summary
-//                 </h3>
-                
-//                 <div className="space-y-2 text-sm">
-//                   <div className="flex justify-between">
-//                     <span className="text-gray-600">Pickup:</span>
-//                     <span className="font-semibold text-gray-800">
-//                       {selectedStartDate ? formatDateForDisplay(selectedStartDate) : "Not selected"}
-//                     </span>
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-red-100 border-2 border-red-500 rounded relative">
+//                     <X size={12} className="text-red-600 absolute inset-0 m-auto" />
 //                   </div>
-//                   <div className="flex justify-between">
-//                     <span className="text-gray-600">Return:</span>
-//                     <span className="font-semibold text-gray-800">
-//                       {selectedEndDate ? formatDateForDisplay(selectedEndDate) : "Not selected"}
-//                     </span>
-//                   </div>
-                  
-//                   {selectedStartDate && selectedEndDate && (
-//                     <>
-//                       <div className="border-t border-gray-300 my-2"></div>
-//                       <div className="flex justify-between">
-//                         <span className="text-gray-600">Duration:</span>
-//                         <span className="font-bold text-gray-800">
-//                           {calculateTotalDays()} {calculateTotalDays() === 1 ? "day" : "days"}
-//                         </span>
-//                       </div>
-//                       <div className="flex justify-between">
-//                         <span className="text-gray-600">Rate:</span>
-//                         <span className="font-semibold text-gray-800">₹{pricePerDay}/day</span>
-//                       </div>
-//                       <div className="border-t-2 border-gray-400 my-2"></div>
-//                       <div className="flex justify-between">
-//                         <span className="text-gray-800 font-bold text-lg">Total:</span>
-//                         <span className="font-bold text-blue-600 text-2xl">
-//                           ₹{calculateTotalPrice().toLocaleString()}
-//                         </span>
-//                       </div>
-//                     </>
-//                   )}
+//                   <span className="text-gray-600">Unavailable</span>
 //                 </div>
 //               </div>
-//             )}
+//             </div>
 
-//             {/* Messages */}
-//             {message && (
-//               <div className={`p-3 rounded-lg text-sm font-medium ${
-//                 message.includes('✅') 
-//                   ? 'bg-green-50 text-green-800 border-2 border-green-200' 
-//                   : message.includes('⚠️') || message.includes('❌')
-//                   ? 'bg-red-50 text-red-800 border-2 border-red-200'
-//                   : 'bg-blue-50 text-blue-800 border-2 border-blue-200'
-//               }`}>
-//                 {message}
-//               </div>
-//             )}
-
-//             {/* Confirm Button */}
-//             <button
-//               onClick={handleConfirmBooking}
-//               disabled={!selectedStartDate || !selectedEndDate || loading}
-//               className="w-full bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
-//             >
-//               {loading ? (
-//                 <>
-//                   <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-//                   Processing...
-//                 </>
-//               ) : (
-//                 <>
-//                   <Calendar size={20} />
-//                   Confirm Booking
-//                 </>
+//             {/* RIGHT SIDE - BOOKING SUMMARY */}
+//             <div>
+//               {selectedStartDate && selectedEndDate && (
+//                 <div className="bg-blue-50 rounded-lg p-4 mb-4">
+//                   <h4 className="font-bold text-gray-800 mb-3">Booking Summary</h4>
+//                   <div className="space-y-2 text-sm">
+//                     <div className="flex justify-between">
+//                       <span className="text-gray-600">Total Days</span>
+//                       <span className="font-semibold">{totalDays()}</span>
+//                     </div>
+//                     <div className="flex justify-between">
+//                       <span className="text-gray-600">Rate/Day</span>
+//                       <span className="font-semibold">₹{pricePerDay}</span>
+//                     </div>
+//                     <div className="flex justify-between text-lg font-bold border-t pt-2">
+//                       <span>Total</span>
+//                       <span className="text-blue-600">₹{totalPrice()}</span>
+//                     </div>
+//                   </div>
+//                 </div>
 //               )}
-//             </button>
 
-//             {/* Additional Info */}
-//             <div className="text-xs text-gray-500 text-center bg-gray-50 p-3 rounded-lg border border-gray-200">
-//               <p className="flex items-center justify-center gap-1">
-//                 <Info size={14} />
-//                 Click start date, then end date to select your booking period
-//               </p>
+//               <button
+//                 onClick={handleProceedToSelectTime}
+//                 disabled={!selectedStartDate || !selectedEndDate || loading}
+//                 className="w-full bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white p-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+//               >
+//                 Confirm Dates
+//               </button>
 //             </div>
 //           </div>
 //         </div>
 //       </div>
-//     </div>
+
+//       {/* Time Selection Popup */}
+//       <TimeSelectionPopup
+//         isOpen={showTimePopup}
+//         onClose={() => setShowTimePopup(false)}
+//         onConfirm={handleTimeConfirmed}
+//         startTime={startTime}
+//         endTime={endTime}
+//         setStartTime={setStartTime}
+//         setEndTime={setEndTime}
+//       />
+
+//       {/* Booking Confirmation Popup */}
+//       <BookingConfirmationPopup
+//         isOpen={showConfirmPopup}
+//         onClose={() => setShowConfirmPopup(false)}
+//         onConfirm={handleConfirm}
+//         bookingDetails={{
+//           startDate: formatDateForDisplay(selectedStartDate),
+//           endDate: formatDateForDisplay(selectedEndDate),
+//           startTime,
+//           endTime,
+//           totalDays: totalDays(),
+//           totalPrice: totalPrice()
+//         }}
+//         vehicleDetails={{
+//           vehicleName,
+//           vehicleType,
+//           pricePerDay
+//         }}
+//       />
+//     </>
 //   );
 // };
 
@@ -596,218 +767,265 @@
 
 
 
+
+
+
+
+
 // import React, { useState, useEffect } from "react";
-// import { X, Calendar, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+// import { X, Calendar, ChevronLeft, ChevronRight, Clock, AlertCircle, CheckCircle } from "lucide-react";
 
-// // Real API Client - Replace with your actual API base URL
-// const API_BASE_URL = 'http://3.110.122.127:3000'; // ⚠️ UPDATE THIS
+// // ==========================================
+// // API INTEGRATION
+// // ==========================================
 
-// const apiClient = {
-//   get: async (endpoint: string, options?: any) => {
-//     const url = new URL(endpoint, API_BASE_URL);
-//     if (options?.params) {
-//       Object.keys(options.params).forEach(key => 
-//         url.searchParams.append(key, options.params[key])
-//       );
-//     }
-//     const response = await fetch(url.toString(), {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         // Add authentication headers if needed
-//         // 'Authorization': `Bearer ${token}`
-//       }
-//     });
-//     if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-//     return response.json();
-//   },
-  
-//   post: async (endpoint: string, body: any, options?: any) => {
-//     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-//       method: 'POST',
-//       headers: {
-//         ...options?.headers,
-//         // Add authentication headers if needed
-//         // 'Authorization': `Bearer ${token}`
-//       },
-//       body: body
-//     });
-//     if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-//     return response.json();
-//   }
-// };
-
-// // Real API Integration
-// const availabilityAPI = {
-//   createUnavailability: async (availabilityData: {
-//     userId?: string;
-//     VechileId: string;
-//     vechileType: 'Car' | 'Bike' | 'Auto';
-//     fromDate: string;
-//     toDate: string;
-//     fromTime?: string;
-//     toTime?: string;
-//     isNotAvailable?: boolean;
-//   }) => {
-//     console.log("🚫 Create Unavailability - Input data:", availabilityData);
-//     const urlencoded = new URLSearchParams();
-//     if (availabilityData.userId) urlencoded.append("userId", availabilityData.userId);
-//     urlencoded.append("VechileId", availabilityData.VechileId);
-//     urlencoded.append("vechileType", availabilityData.vechileType);
-//     urlencoded.append("fromDate", availabilityData.fromDate);
-//     urlencoded.append("toDate", availabilityData.toDate);
-//     urlencoded.append("fromTime", availabilityData.fromTime || "00:00");
-//     urlencoded.append("toTime", availabilityData.toTime || "23:59");
-//     urlencoded.append("isNotAvailable", String(availabilityData.isNotAvailable ?? true));
-//     console.log("🚫 Create Unavailability - Encoded Body:", urlencoded.toString());
-//     return apiClient.post("/createNotAvailability", urlencoded, {
-//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-//     });
-//   },
-
-//   getVehicleAvailability: async (
-//     VechileId: string,
-//     vechileType: 'Car' | 'Bike' | 'Auto',
-//     startDate: string,
-//     endDate: string
-//   ) => {
-//     console.log("📅 Get Vehicle Availability:", { VechileId, vechileType, startDate, endDate });
-//     return apiClient.get("/getVehicleAvailability", {
-//       params: {
-//         VechileId,
-//         vechileType,
-//         startDate,
-//         endDate,
-//       },
-//     });
-//   },
-
-//   getUnavailabilityById: async (availabilityId: string) => {
-//     console.log("📄 Get Unavailability By ID:", availabilityId);
-//     return apiClient.get(`/getNotAvailabilityById/${availabilityId}`);
-//   },
-// };
-
-// // Booking API
 // const bookingAPI = {
-//   createBooking: async (bookingData: {
-//     customerId: string;
-//     VechileId: string;
-//     vehicleType: 'Car' | 'Bike' | 'Auto';
-//     fromDate: string;
-//     toDate: string;
-//     fromTime: string;
-//     toTime: string;
-//     bookingDate: string;
-//   }) => {
-//     console.log("📅 Creating booking:", bookingData);
-//     const urlencoded = new URLSearchParams();
-//     Object.keys(bookingData).forEach(key => {
-//       urlencoded.append(key, (bookingData as any)[key]);
-//     });
-//     return apiClient.post("/createBooking", urlencoded, {
-//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-//     });
+//   /**
+//    * Fetch vehicle availability (includes Owner blocked + Customer booked dates)
+//    * Returns all unavailable dates from the backend
+//    */
+//   getVehicleAvailability: async (vehicleId, vehicleType) => {
+//     try {
+//       const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
+//       const response = await fetch(url);
+//       const data = await response.json();
+
+//       if (!data.success || !data.availability) {
+//         return [];
+//       }
+
+//       // Extract ALL unavailable dates (Owner blocked + Customer booked)
+//       return data.availability
+//         .filter((item) => item.status === "Unavailable")
+//         .map((item) => item.date);
+
+//     } catch (error) {
+//       console.error("API error:", error);
+//       return [];
+//     }
+//   },
+
+//   /**
+//    * Create a new booking
+//    * This will mark dates as booked and automatically block them for others
+//    */
+//   createBooking: async (payload) => {
+//     try {
+//       const myHeaders = new Headers();
+//       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+//       const urlencoded = new URLSearchParams();
+//       urlencoded.append("userId", payload.userId || "customer_default");
+//       urlencoded.append("vechileType", payload.vehicleType);
+//       urlencoded.append("VechileId", payload.vehicleId);
+//       urlencoded.append("fromDate", payload.startDate);
+//       urlencoded.append("toDate", payload.endDate);
+//       urlencoded.append("fromTime", payload.startTime.replace(":", "."));
+//       urlencoded.append("toTime", payload.endTime.replace(":", "."));
+//       urlencoded.append("isNotAvailable", "true");
+//       urlencoded.append("bikeImages", "");
+
+//       const response = await fetch('http://3.110.122.127:3000/createNotAvailability', {
+//         method: 'POST',
+//         headers: myHeaders,
+//         body: urlencoded
+//       });
+      
+//       const data = await response.json();
+//       return { success: response.ok, data };
+//     } catch (error) {
+//       console.error("Booking API error:", error);
+//       return { success: false, error: error.message };
+//     }
 //   }
 // };
 
-// interface AvailabilitySlot {
-//   _id: string;
-//   VechileId: string;
-//   vechileType: string;
-//   fromDate: string;
-//   toDate: string;
-//   fromTime?: string;
-//   toTime?: string;
-//   isNotAvailable: boolean;
-// }
+// // ==========================================
+// // BOOKING CONFIRMATION POPUP
+// // ==========================================
 
-// interface CustomerBookingCalendarProps {
-//   isOpen?: boolean;
-//   onClose?: () => void;
-//   onBookingConfirm?: (bookingData: any) => void;  // ✅ this one exists
-//   VechileId?: string;
-//   vehicleType?: "Car" | "Bike" | "Auto";
-//   customerId?: string;
-// }
+// const BookingConfirmationPopup = ({ 
+//   isOpen, 
+//   onClose, 
+//   onConfirm, 
+//   bookingDetails,
+//   vehicleDetails 
+// }) => {
+//   if (!isOpen) return null;
 
-// const CustomerBookingCalendar: React.FC<CustomerBookingCalendarProps> = ({
+//   const { startDate, endDate, startTime, endTime, totalDays, totalPrice } = bookingDetails;
+//   const { vehicleName, vehicleType, pricePerDay } = vehicleDetails;
+
+//   return (
+//     <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
+//       <div className="bg-white max-w-md w-full rounded-2xl shadow-2xl overflow-hidden">
+//         <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+//           <div className="flex justify-between items-start">
+//             <div>
+//               <h2 className="text-2xl font-bold mb-1">Confirm Booking</h2>
+//               <p className="text-blue-100 text-sm">Review your rental details</p>
+//             </div>
+//             <button 
+//               onClick={onClose}
+//               className="text-white hover:bg-white/20 rounded-full p-1 transition"
+//             >
+//               <X size={24} />
+//             </button>
+//           </div>
+//         </div>
+
+//         <div className="p-6 space-y-4">
+//           <div className="bg-gray-50 rounded-lg p-4">
+//             <h3 className="font-semibold text-gray-700 mb-2">Vehicle Details</h3>
+//             <p className="text-lg font-bold text-gray-900">{vehicleName}</p>
+//             <p className="text-sm text-gray-600">Type: {vehicleType}</p>
+//           </div>
+
+//           <div className="space-y-3">
+//             <div className="flex items-start gap-3">
+//               <Calendar className="text-blue-600 mt-1" size={20} />
+//               <div className="flex-1">
+//                 <p className="text-sm text-gray-600">Pickup Date</p>
+//                 <p className="font-semibold text-gray-900">{startDate}</p>
+//                 <p className="text-sm text-gray-500">Time: {startTime}</p>
+//               </div>
+//             </div>
+
+//             <div className="flex items-start gap-3">
+//               <Calendar className="text-blue-600 mt-1" size={20} />
+//               <div className="flex-1">
+//                 <p className="text-sm text-gray-600">Return Date</p>
+//                 <p className="font-semibold text-gray-900">{endDate}</p>
+//                 <p className="text-sm text-gray-500">Time: {endTime}</p>
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="border-t pt-4 space-y-2">
+//             <div className="flex justify-between text-sm">
+//               <span className="text-gray-600">Rate per day</span>
+//               <span className="font-semibold">₹{pricePerDay}</span>
+//             </div>
+//             <div className="flex justify-between text-sm">
+//               <span className="text-gray-600">Total days</span>
+//               <span className="font-semibold">{totalDays} days</span>
+//             </div>
+//             <div className="flex justify-between text-lg font-bold border-t pt-2">
+//               <span>Total Amount</span>
+//               <span className="text-blue-600">₹{totalPrice}</span>
+//             </div>
+//           </div>
+
+//           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2">
+//             <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
+//             <p className="text-xs text-amber-800">
+//               Please arrive on time for pickup. Late arrivals may affect your booking.
+//             </p>
+//           </div>
+//         </div>
+
+//         <div className="px-6 pb-6 flex gap-3">
+//           <button
+//             onClick={onClose}
+//             className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition"
+//           >
+//             Cancel
+//           </button>
+//           <button
+//             onClick={onConfirm}
+//             className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg"
+//           >
+//             Confirm Booking
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // ==========================================
+// // CUSTOMER BOOKING CALENDAR
+// // ==========================================
+
+// const CustomerBookingCalendar = ({
 //   isOpen = true,
 //   onClose = () => {},
-//   onBookingConfirm,
-//   VechileId = "vehicle456",
-//   vehicleType = "Car",
-//   customerId = "customer789"
+//   onConfirm,
+  
+//   // Props or localStorage
+//   vehicleId = localStorage.getItem("vehicleId") || "V001",
+//   vehicleType = localStorage.getItem("vehicletype") || "Car",
+//   vehicleName = "Vehicle",
+//   pricePerDay = 1500,
+//   userId = localStorage.getItem("userId") || "customer_default"
 // }) => {
+
 //   const [currentMonth, setCurrentMonth] = useState(new Date());
-//   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
-//   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
-//   const [activeInput, setActiveInput] = useState<"start" | "end" | null>(null);
+//   const [selectedStartDate, setSelectedStartDate] = useState(null);
+//   const [selectedEndDate, setSelectedEndDate] = useState(null);
+//   const [activeInput, setActiveInput] = useState("start");
+
 //   const [startTime, setStartTime] = useState("09:00");
-//   const [endTime, setEndTime] = useState("17:00");
+//   const [endTime, setEndTime] = useState("18:00");
+
 //   const [loading, setLoading] = useState(false);
 //   const [message, setMessage] = useState("");
-//   const [existingSlots, setExistingSlots] = useState<AvailabilitySlot[]>([]);
+//   const [messageType, setMessageType] = useState("info");
+//   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
 
-//   // Load slots when component mounts or month changes
+//   // All blocked dates (Owner + Customer bookings)
+//   const [blockedDates, setBlockedDates] = useState([]);
+
+//   // Auto-refresh interval
+//   const [refreshInterval, setRefreshInterval] = useState(null);
+
+//   // ==============================
+//   // LOAD BLOCKED DATES FROM API
+//   // ==============================
+
 //   useEffect(() => {
 //     if (isOpen) {
-//       loadSlotsForCurrentMonth();
+//       loadBlockedDates();
+      
+//       // Auto-refresh every 30 seconds to sync with backend
+//       const interval = setInterval(() => {
+//         loadBlockedDates();
+//       }, 30000);
+      
+//       setRefreshInterval(interval);
+      
+//       return () => clearInterval(interval);
+//     } else {
+//       if (refreshInterval) clearInterval(refreshInterval);
 //     }
-//   }, [isOpen, currentMonth, VechileId, vehicleType]);
+//   }, [isOpen, currentMonth, vehicleId, vehicleType]);
 
-//   const loadSlotsForCurrentMonth = async () => {
+//   const loadBlockedDates = async () => {
+//     setLoading(true);
 //     try {
-//       setLoading(true);
-//       setMessage("🔄 Loading availability...");
-
-//       const year = currentMonth.getFullYear();
-//       const month = currentMonth.getMonth();
-      
-//       const startDate = new Date(year, month, 1).toISOString().split("T")[0];
-//       const endDate = new Date(year, month + 1, 0).toISOString().split("T")[0];
-
-//       console.log("📅 Loading slots for:", { startDate, endDate, VechileId, vehicleType });
-
-//       const response = await availabilityAPI.getVehicleAvailability(
-//         VechileId,
-//         vehicleType,
-//         startDate,
-//         endDate
+//       const unavailableDates = await bookingAPI.getVehicleAvailability(
+//         vehicleId,
+//         vehicleType
 //       );
-
-//       console.log("✅ API Response:", response);
-      
-//       // Handle different response structures
-//       const slots = response?.data || response?.slots || response || [];
-      
-//       console.log("✅ Loaded slots:", slots);
-//       setExistingSlots(Array.isArray(slots) ? slots : []);
-//       setMessage("");
-      
-//     } catch (error: any) {
-//       console.error("❌ Error loading slots:", error);
-//       setMessage("⚠️ Could not load availability. Please try again.");
-//       setExistingSlots([]);
+//       setBlockedDates(unavailableDates || []);
+//     } catch (error) {
+//       console.error("Failed to load blocked dates:", error);
+//       showMessage("Failed to load availability", "error");
 //     } finally {
 //       setLoading(false);
 //     }
 //   };
 
-//   const handleRefresh = () => {
-//     setMessage("🔄 Refreshing availability...");
-//     loadSlotsForCurrentMonth();
-//   };
+//   // ==============================
+//   // DATE UTILITIES
+//   // ==============================
 
-//   const formatDateForAPI = (date: Date | null): string => {
+//   const formatDateAPI = (date) => {
 //     if (!date) return "";
-//     const year = date.getFullYear();
-//     const month = String(date.getMonth() + 1).padStart(2, "0");
-//     const day = String(date.getDate()).padStart(2, "0");
-//     return `${year}-${month}-${day}`;
+//     return date.toISOString().split("T")[0];
 //   };
 
-//   const formatDateForDisplay = (date: Date | null): string => {
+//   const formatDisplay = (date) => {
 //     if (!date) return "Select Date";
 //     const year = date.getFullYear();
 //     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -815,50 +1033,7 @@
 //     return `${year}/${month}/${day}`;
 //   };
 
-//   const monthName = currentMonth.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-//   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-//   const daysInMonth = new Date(
-//     currentMonth.getFullYear(),
-//     currentMonth.getMonth() + 1,
-//     0
-//   ).getDate();
-//   const firstDayOfMonth = new Date(
-//     currentMonth.getFullYear(),
-//     currentMonth.getMonth(),
-//     1
-//   ).getDay();
-
-//   const previousMonth = () =>
-//     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
-//   const nextMonth = () =>
-//     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
-
-//   // Check date availability status
-//   const getDateStatus = (date: Date): { isAvailable: boolean; isBlocked: boolean; slot: AvailabilitySlot | null } => {
-//     const normalizedDate = new Date(date);
-//     normalizedDate.setHours(0, 0, 0, 0);
-    
-//     for (const slot of existingSlots) {
-//       const fromDate = new Date(slot.fromDate.split('T')[0]);
-//       fromDate.setHours(0, 0, 0, 0);
-      
-//       const toDate = new Date(slot.toDate.split('T')[0]);
-//       toDate.setHours(0, 0, 0, 0);
-      
-//       if (normalizedDate >= fromDate && normalizedDate <= toDate) {
-//         return {
-//           isAvailable: !slot.isNotAvailable,
-//           isBlocked: slot.isNotAvailable,
-//           slot: slot
-//         };
-//       }
-//     }
-    
-//     return { isAvailable: false, isBlocked: false, slot: null };
-//   };
-
-//   const isPastDate = (date: Date) => {
+//   const isPastDate = (date) => {
 //     const today = new Date();
 //     today.setHours(0, 0, 0, 0);
 //     const checkDate = new Date(date);
@@ -866,130 +1041,212 @@
 //     return checkDate < today;
 //   };
 
-//   const handleDateClick = (date: Date, status: { isAvailable: boolean; isBlocked: boolean }) => {
-//     // Only allow clicking on available dates
-//     if (!status.isAvailable || status.isBlocked) {
-//       if (status.isBlocked) {
-//         setMessage("❌ This date is not available for booking");
-//         setTimeout(() => setMessage(""), 2000);
-//       }
+//   const isDateBlocked = (date) => {
+//     const formatted = formatDateAPI(date);
+//     return blockedDates.includes(formatted);
+//   };
+
+//   const isSelected = (date) =>
+//     selectedStartDate?.getTime() === date.getTime() ||
+//     selectedEndDate?.getTime() === date.getTime();
+
+//   const isInRange = (date) => {
+//     if (!selectedStartDate || !selectedEndDate) return false;
+//     return date >= selectedStartDate && date <= selectedEndDate;
+//   };
+
+//   const isAnyDateInRangeBlocked = (start, end) => {
+//     const cur = new Date(start);
+//     while (cur <= end) {
+//       if (isDateBlocked(cur)) return true;
+//       cur.setDate(cur.getDate() + 1);
+//     }
+//     return false;
+//   };
+
+//   // ==============================
+//   // DATE SELECTION
+//   // ==============================
+
+//   const handleDateClick = (date) => {
+//     if (isPastDate(date)) {
+//       showMessage("⚠️ Cannot select past dates", "error");
+//       return;
+//     }
+
+//     if (isDateBlocked(date)) {
+//       showMessage("⚠️ This date is unavailable (blocked by owner or already booked)", "error");
 //       return;
 //     }
 
 //     if (activeInput === "start") {
 //       setSelectedStartDate(date);
+//       setSelectedEndDate(null);
 //       setActiveInput("end");
-//       setMessage("✅ Start date selected. Now select end date.");
-//       setTimeout(() => setMessage(""), 2000);
-//     } else if (activeInput === "end") {
-//       if (selectedStartDate && date < selectedStartDate) {
-//         setMessage("⚠️ End date cannot be before start date");
-//         setTimeout(() => setMessage(""), 3000);
+//       showMessage("✓ Pickup date selected. Now select return date.", "success");
+//       return;
+//     }
+
+//     if (activeInput === "end") {
+//       if (!selectedStartDate) {
+//         showMessage("⚠️ Select pickup date first", "error");
 //         return;
 //       }
-      
-//       // Check if all dates in range are available
-//       if (selectedStartDate) {
-//         const isRangeAvailable = checkDateRangeAvailability(selectedStartDate, date);
-//         if (!isRangeAvailable) {
-//           setMessage("❌ Some dates in the selected range are not available");
-//           setTimeout(() => setMessage(""), 3000);
-//           return;
-//         }
+
+//       if (date < selectedStartDate) {
+//         showMessage("⚠️ Return date cannot be before pickup", "error");
+//         return;
 //       }
-      
+
+//       if (isAnyDateInRangeBlocked(selectedStartDate, date)) {
+//         showMessage("⚠️ Some dates in this range are unavailable", "error");
+//         return;
+//       }
+
 //       setSelectedEndDate(date);
 //       setActiveInput(null);
-//       setMessage("✅ Date range selected. Review and confirm booking.");
-//       setTimeout(() => setMessage(""), 2000);
+//       showMessage("✓ Dates selected successfully!", "success");
 //     }
 //   };
 
-//   const checkDateRangeAvailability = (start: Date, end: Date): boolean => {
-//     const current = new Date(start);
-//     while (current <= end) {
-//       const status = getDateStatus(current);
-//       if (status.isBlocked || !status.isAvailable) {
-//         return false;
-//       }
-//       current.setDate(current.getDate() + 1);
-//     }
-//     return true;
+//   const showMessage = (msg, type = "info") => {
+//     setMessage(msg);
+//     setMessageType(type);
+//     setTimeout(() => setMessage(""), 4000);
 //   };
 
-//   const isDateSelected = (date: Date) => {
+//   // ==============================
+//   // BOOKING LOGIC
+//   // ==============================
+
+//   const totalDays = () => {
+//     if (!selectedStartDate || !selectedEndDate) return 0;
 //     return (
-//       (selectedStartDate && selectedStartDate.getTime() === date.getTime()) ||
-//       (selectedEndDate && selectedEndDate.getTime() === date.getTime())
+//       Math.ceil(
+//         (selectedEndDate.getTime() - selectedStartDate.getTime()) /
+//           (1000 * 60 * 60 * 24)
+//       ) + 1
 //     );
 //   };
 
-//   const isDateInRange = (date: Date) => {
-//     if (!selectedStartDate || !selectedEndDate) return false;
-//     return date.getTime() >= selectedStartDate.getTime() && date.getTime() <= selectedEndDate.getTime();
+//   const totalPrice = () => totalDays() * pricePerDay;
+
+//   const handleProceedToConfirm = () => {
+//     if (!selectedStartDate || !selectedEndDate) {
+//       showMessage("⚠️ Please select both dates", "error");
+//       return;
+//     }
+//     setShowConfirmPopup(true);
 //   };
 
-//   const renderCalendarDays = () => {
-//     const days = [];
-//     const startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+//   const handleConfirm = async () => {
+//     setLoading(true);
+//     showMessage("Processing booking...", "info");
 
-//     for (let i = 0; i < startDay; i++) days.push(<div key={`empty-${i}`} />);
+//     const payload = {
+//       userId,
+//       vehicleId,
+//       vehicleType,
+//       vehicleName,
+//       startDate: formatDateAPI(selectedStartDate),
+//       endDate: formatDateAPI(selectedEndDate),
+//       startTime,
+//       endTime,
+//       totalDays: totalDays(),
+//       totalPrice: totalPrice(),
+//       pricePerDay
+//     };
 
-//     for (let day = 1; day <= daysInMonth; day++) {
-//       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-//       const isSelected = isDateSelected(date);
-//       const inRange = isDateInRange(date);
-//       const past = isPastDate(date);
-//       const status = getDateStatus(date);
+//     // Call custom callback if provided
+//     if (onConfirm) {
+//       onConfirm(payload);
+//       setShowConfirmPopup(false);
+//       setLoading(false);
+//       return;
+//     }
+
+//     // Default: Send to API
+//     const result = await bookingAPI.createBooking(payload);
+
+//     if (result.success) {
+//       showMessage("✓ Booking confirmed! These dates are now blocked for everyone.", "success");
+//       setShowConfirmPopup(false);
       
-//       const isClickable = !past && status.isAvailable && !status.isBlocked;
-//       const showBlocked = status.isBlocked;
-//       const showAvailable = status.isAvailable && !status.isBlocked;
+//       // Reload blocked dates immediately
+//       await loadBlockedDates();
+      
+//       // Reset and close after success
+//       setTimeout(() => {
+//         setSelectedStartDate(null);
+//         setSelectedEndDate(null);
+//         setActiveInput("start");
+//         onClose();
+//       }, 2000);
+//     } else {
+//       showMessage("❌ Booking failed. Please try again.", "error");
+//     }
+    
+//     setLoading(false);
+//   };
+
+//   // ==============================
+//   // CALENDAR RENDERING
+//   // ==============================
+
+//   const daysInMonth = new Date(
+//     currentMonth.getFullYear(),
+//     currentMonth.getMonth() + 1,
+//     0
+//   ).getDate();
+
+//   const firstDay = new Date(
+//     currentMonth.getFullYear(),
+//     currentMonth.getMonth(),
+//     1
+//   ).getDay();
+
+//   const renderDays = () => {
+//     const days = [];
+
+//     for (let i = 0; i < firstDay; i++)
+//       days.push(<div key={"e" + i}></div>);
+
+//     for (let d = 1; d <= daysInMonth; d++) {
+//       const date = new Date(
+//         currentMonth.getFullYear(),
+//         currentMonth.getMonth(),
+//         d
+//       );
+
+//       const past = isPastDate(date);
+//       const blocked = isDateBlocked(date);
+//       const sel = isSelected(date);
+//       const rang = isInRange(date);
+
+//       let cls =
+//         "relative rounded-lg p-3 text-center transition-all font-semibold duration-200 ";
+
+//       if (past) cls += "text-gray-300 bg-gray-50 cursor-not-allowed";
+//       else if (blocked)
+//         cls += "bg-red-50 text-red-500 line-through cursor-not-allowed relative";
+//       else if (sel)
+//         cls += "bg-blue-600 text-white ring-4 ring-blue-300 scale-110 shadow-lg z-10";
+//       else if (rang)
+//         cls += "bg-blue-100 text-blue-700 shadow-sm";
+//       else cls += "hover:bg-blue-50 hover:scale-105 cursor-pointer hover:shadow-md";
 
 //       days.push(
 //         <button
-//           key={day}
-//           disabled={past || !isClickable}
-//           className={`py-2 rounded-full transition w-full relative ${
-//             past
-//               ? "text-gray-300 cursor-not-allowed bg-gray-100"
-//               : showBlocked
-//               ? "bg-red-50 border-2 border-red-300 cursor-not-allowed"
-//               : showAvailable && isSelected
-//               ? "bg-blue-600 text-white ring-2 ring-blue-400 cursor-pointer"
-//               : showAvailable && inRange
-//               ? "bg-blue-100 text-blue-700 cursor-pointer"
-//               : showAvailable
-//               ? "bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white cursor-pointer hover:opacity-90"
-//               : "text-gray-700 bg-white border border-gray-200 cursor-default hover:bg-gray-50"
-//           }`}
-//           onClick={() => isClickable && handleDateClick(date, status)}
+//           key={d}
+//           disabled={past || blocked}
+//           className={cls}
+//           onClick={() => handleDateClick(date)}
 //         >
-//           <span className={showBlocked ? "text-gray-800 font-bold relative z-10" : ""}>
-//             {day}
-//           </span>
-//           {showBlocked && (
-//             <>
-//               <svg
-//                 className="absolute inset-0 w-full h-full pointer-events-none z-20"
-//                 viewBox="0 0 40 40"
-//                 xmlns="http://www.w3.org/2000/svg"
-//               >
-//                 <line 
-//                   x1="4" y1="4" x2="36" y2="36" 
-//                   stroke="#dc2626" 
-//                   strokeWidth="3" 
-//                   strokeLinecap="round" 
-//                 />
-//                 <line 
-//                   x1="36" y1="4" x2="4" y2="36" 
-//                   stroke="#dc2626" 
-//                   strokeWidth="3" 
-//                   strokeLinecap="round" 
-//                 />
-//               </svg>
-//               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white z-30"></div>
-//             </>
+//           <span className="relative z-10">{d}</span>
+//           {blocked && (
+//             <span className="absolute inset-0 flex items-center justify-center">
+//               <X size={16} className="text-red-400" />
+//             </span>
 //           )}
 //         </button>
 //       );
@@ -997,309 +1254,2710 @@
 //     return days;
 //   };
 
-//   const generateTimeOptions = () => {
-//     const options = [];
-//     for (let h = 0; h < 24; h++) {
-//       for (let m = 0; m < 60; m += 30) {
-//         const hour = h.toString().padStart(2, "0");
-//         const minute = m.toString().padStart(2, "0");
-//         const time = `${hour}:${minute}`;
-//         const period = h >= 12 ? "PM" : "AM";
-//         const displayHour = h % 12 || 12;
-//         options.push({ value: time, label: `${displayHour}:${minute.padStart(2, "0")} ${period}` });
-//       }
-//     }
-//     return options;
-//   };
-
-//   const timeOptions = generateTimeOptions();
-
-//   const handleBookingConfirm = async () => {
-//     if (!selectedStartDate || !selectedEndDate) {
-//       setMessage("⚠️ Please select both start and end dates");
-//       setTimeout(() => setMessage(""), 3000);
-//       return;
-//     }
-
-//     const bookingData = {
-//       customerId,
-//       VechileId,
-//       vehicleType,
-//       fromDate: formatDateForAPI(selectedStartDate),
-//       toDate: formatDateForAPI(selectedEndDate),
-//       fromTime: startTime,
-//       toTime: endTime,
-//       bookingDate: new Date().toISOString(),
-//     };
-
-//     setLoading(true);
-//     setMessage("📅 Processing your booking...");
-
-//     try {
-//       const response = await bookingAPI.createBooking(bookingData);
-//       console.log("✅ Booking response:", response);
-      
-//       setMessage("🎉 Booking confirmed successfully!");
-      
-//       // After successful booking, mark these dates as unavailable
-//       await availabilityAPI.createUnavailability({
-//         userId: customerId,
-//         VechileId,
-//         vechileType: vehicleType,
-//         fromDate: bookingData.fromDate,
-//         toDate: bookingData.toDate,
-//         fromTime: bookingData.fromTime,
-//         toTime: bookingData.toTime,
-//         isNotAvailable: true
-//       });
-
-//       // Reload slots to show updated availability
-//       await loadSlotsForCurrentMonth();
-      
-//       if (onBookingConfirm) {
-//         onBookingConfirm(bookingData);
-//       }
-
-//       setTimeout(() => {
-//         setSelectedStartDate(null);
-//         setSelectedEndDate(null);
-//         setMessage("");
-//         onClose();
-//       }, 2000);
-      
-//     } catch (error: any) {
-//       console.error("❌ Booking error:", error);
-//       setMessage(`❌ Booking failed: ${error?.message || "Please try again"}`);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+//   // ==============================
+//   // MAIN RENDER
+//   // ==============================
 
 //   if (!isOpen) return null;
 
 //   return (
-//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-//       <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl p-6 relative max-h-[90vh] overflow-y-auto">
-//         {/* Header */}
-//         <div className="flex justify-between items-center mb-6">
-//           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-//             <Calendar size={24} className="text-blue-600" />
-//             Book Your {vehicleType}
-//           </h2>
-//           <div className="flex items-center gap-2">
-//             <button 
-//               onClick={handleRefresh}
-//               disabled={loading}
-//               className="p-2 rounded-full hover:bg-gray-100 transition text-gray-600 disabled:opacity-50"
-//               title="Refresh availability"
-//             >
-//               <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
-//             </button>
-//             <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-gray-600">
-//               <X size={20} />
-//             </button>
+//     <>
+//       <div className="fixed inset-0 bg-black/50 flex justify-center items-center p-4 z-40 overflow-y-auto">
+//         <div className="bg-white max-w-5xl w-full rounded-2xl shadow-2xl my-8">
+          
+//           {/* Header */}
+//           <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-t-2xl text-white">
+//             <div className="flex justify-between items-start">
+//               <div>
+//                 <h2 className="text-2xl font-bold mb-1 flex items-center gap-3">
+//                   <Calendar size={28} />
+//                   Book Your {vehicleType}
+//                 </h2>
+//                 <p className="text-blue-100">{vehicleName} • ₹{pricePerDay}/day</p>
+//               </div>
+//               <button 
+//                 onClick={onClose}
+//                 className="text-white hover:bg-white/20 rounded-full p-2 transition"
+//               >
+//                 <X size={24} />
+//               </button>
+//             </div>
 //           </div>
-//         </div>
 
-//         <div className="flex flex-col md:flex-row gap-6">
-//           {/* Left Column: Dates + Calendar */}
-//           <div className="flex-1 space-y-4">
-//             {/* Start & End Date */}
-//             <div className="flex gap-4">
-//               <div className="flex-1 cursor-pointer" onClick={() => setActiveInput("start")}>
-//                 <label className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-//                   <Calendar size={20} className="text-gray-400" /> Pickup Date
-//                 </label>
-//                 <div
-//                   className={`border rounded-lg p-4 text-center text-gray-700 font-semibold text-lg ${
-//                     activeInput === "start" ? "ring-2 ring-blue-500" : ""
-//                   }`}
-//                 >
-//                   {formatDateForDisplay(selectedStartDate)}
+//           <div className="p-6">
+//             {/* Date Selection */}
+//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+//               <div
+//                 className={`border-2 rounded-xl p-4 cursor-pointer transition ${
+//                   activeInput === "start" 
+//                     ? "border-blue-500 bg-blue-50 shadow-md" 
+//                     : "border-gray-200 hover:border-blue-300"
+//                 }`}
+//                 onClick={() => setActiveInput("start")}
+//               >
+//                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+//                   <Calendar size={16} />
+//                   Pickup Date
+//                 </div>
+//                 <div className="text-lg font-bold text-gray-900">
+//                   {formatDisplay(selectedStartDate)}
+//                 </div>
+//                 <div className="flex items-center gap-2 mt-2">
+//                   <Clock size={16} className="text-gray-400" />
+//                   <input
+//                     type="time"
+//                     value={startTime}
+//                     onChange={(e) => setStartTime(e.target.value)}
+//                     className="text-sm border rounded px-2 py-1"
+//                   />
 //                 </div>
 //               </div>
 
-//               <div className="flex-1 cursor-pointer" onClick={() => setActiveInput("end")}>
-//                 <label className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-//                   <Calendar size={20} className="text-gray-400" /> Return Date
-//                 </label>
-//                 <div
-//                   className={`border rounded-lg p-4 text-center text-gray-700 font-semibold text-lg ${
-//                     activeInput === "end" ? "ring-2 ring-blue-500" : ""
-//                   }`}
-//                 >
-//                   {formatDateForDisplay(selectedEndDate)}
+//               <div
+//                 className={`border-2 rounded-xl p-4 cursor-pointer transition ${
+//                   activeInput === "end" 
+//                     ? "border-blue-500 bg-blue-50 shadow-md" 
+//                     : "border-gray-200 hover:border-blue-300"
+//                 }`}
+//                 onClick={() => setActiveInput("end")}
+//               >
+//                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+//                   <Calendar size={16} />
+//                   Return Date
+//                 </div>
+//                 <div className="text-lg font-bold text-gray-900">
+//                   {formatDisplay(selectedEndDate)}
+//                 </div>
+//                 <div className="flex items-center gap-2 mt-2">
+//                   <Clock size={16} className="text-gray-400" />
+//                   <input
+//                     type="time"
+//                     value={endTime}
+//                     onChange={(e) => setEndTime(e.target.value)}
+//                     className="text-sm border rounded px-2 py-1"
+//                   />
 //                 </div>
 //               </div>
 //             </div>
 
 //             {/* Calendar */}
-//             <div className="border rounded-lg p-4">
-//               <div className="flex justify-between items-center mb-2">
-//                 <button onClick={previousMonth} disabled={loading} className="p-1 hover:bg-gray-100 rounded disabled:opacity-50">
-//                   <ChevronLeft size={20} />
-//                 </button>
-//                 <span className="font-semibold">{monthName}</span>
-//                 <button onClick={nextMonth} disabled={loading} className="p-1 hover:bg-gray-100 rounded disabled:opacity-50">
-//                   <ChevronRight size={20} />
-//                 </button>
-//               </div>
-
+//             <div className="border-2 border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white mb-6 relative">
 //               {loading && (
-//                 <div className="text-center py-4 text-gray-500">
-//                   <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
-//                   Loading availability...
+//                 <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-xl z-20">
+//                   <div className="text-center">
+//                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-2"></div>
+//                     <p className="text-sm text-gray-600">Loading availability...</p>
+//                   </div>
 //                 </div>
 //               )}
 
-//               <div className="grid grid-cols-7 gap-1 mb-2">
-//                 {weekDays.map((day) => (
-//                   <div key={day} className="text-center text-xs text-gray-500 font-medium">
-//                     {day}
+//               <div className="flex justify-between items-center mb-6">
+//                 <button
+//                   onClick={() =>
+//                     setCurrentMonth(
+//                       new Date(
+//                         currentMonth.getFullYear(),
+//                         currentMonth.getMonth() - 1
+//                       )
+//                     )
+//                   }
+//                   className="p-2 hover:bg-gray-100 rounded-lg transition"
+//                 >
+//                   <ChevronLeft size={24} />
+//                 </button>
+
+//                 <h3 className="text-xl font-bold text-gray-800">
+//                   {currentMonth.toLocaleDateString("en-US", {
+//                     month: "long",
+//                     year: "numeric"
+//                   })}
+//                 </h3>
+
+//                 <button
+//                   onClick={() =>
+//                     setCurrentMonth(
+//                       new Date(
+//                         currentMonth.getFullYear(),
+//                         currentMonth.getMonth() + 1
+//                       )
+//                     )
+//                   }
+//                   className="p-2 hover:bg-gray-100 rounded-lg transition"
+//                 >
+//                   <ChevronRight size={24} />
+//                 </button>
+//               </div>
+
+//               <div className="grid grid-cols-7 gap-2 mb-3">
+//                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+//                   <div
+//                     key={d}
+//                     className="text-center text-sm font-bold text-gray-600 p-2"
+//                   >
+//                     {d}
 //                   </div>
 //                 ))}
 //               </div>
 
-//               <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
-//             </div>
+//               <div className="grid grid-cols-7 gap-2">
+//                 {renderDays()}
+//               </div>
 
-//             {/* Legend */}
-//             <div className="space-y-2 text-xs">
-//               <div className="flex items-center gap-2">
-//                 <div className="w-8 h-8 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] rounded flex items-center justify-center">
-//                   <span className="text-[10px] text-white font-bold">15</span>
+//               <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-gray-200 text-sm">
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-blue-600 rounded"></div>
+//                   <span className="text-gray-600">Selected</span>
 //                 </div>
-//                 <span className="text-gray-600 font-medium">Available for booking (click to select)</span>
-//               </div>
-//               <div className="flex items-center gap-2">
-//                 <div className="w-8 h-8 bg-red-50 border-2 border-red-300 rounded flex items-center justify-center relative">
-//                   <span className="text-[10px] text-gray-800 font-bold z-10">20</span>
-//                   <svg className="absolute inset-0 w-full h-full" viewBox="0 0 32 32">
-//                     <line x1="6" y1="6" x2="26" y2="26" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
-//                     <line x1="26" y1="6" x2="6" y2="26" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
-//                   </svg>
-//                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white"></div>
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-blue-100 rounded"></div>
+//                   <span className="text-gray-600">In Range</span>
 //                 </div>
-//                 <span className="text-gray-600 font-medium">Not available (cannot book)</span>
-//               </div>
-//               <div className="flex items-center gap-2">
-//                 <div className="w-8 h-8 bg-white border border-gray-200 rounded flex items-center justify-center shadow-sm">
-//                   <span className="text-xs font-medium text-gray-700">25</span>
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-red-50 rounded relative">
+//                     <X size={12} className="text-red-400 absolute inset-0 m-auto" />
+//                   </div>
+//                   <span className="text-gray-600">Unavailable</span>
 //                 </div>
-//                 <span className="text-gray-600 font-medium">No status (not clickable)</span>
 //               </div>
 //             </div>
 
-//             {/* Info Note */}
-//             <div className="text-xs text-gray-500 flex items-center gap-2 bg-blue-50 p-2 rounded">
-//               <span>ℹ️</span>
-//               <span>Only blue dates are available for booking. Click to select your dates.</span>
-//             </div>
-//           </div>
-
-//           {/* Right Column: Time Selection & Booking */}
-//           <div className="w-full md:w-1/3 space-y-4">
-//             <div>
-//               <label className="text-sm text-gray-500 font-medium">Pickup Time</label>
-//               <select
-//                 value={startTime}
-//                 onChange={(e) => setStartTime(e.target.value)}
-//                 className="w-full p-3 border rounded-lg bg-white text-gray-900 font-semibold outline-none mt-1"
-//               >
-//                 {timeOptions.map((time) => (
-//                   <option key={time.value} value={time.value}>
-//                     {time.label}
-//                   </option>
-//                 ))}
-//               </select>
-//             </div>
-
-//             <div>
-//               <label className="text-sm text-gray-500 font-medium">Return Time</label>
-//               <select
-//                 value={endTime}
-//                 onChange={(e) => setEndTime(e.target.value)}
-//                 className="w-full p-3 border rounded-lg bg-white text-gray-900 font-semibold outline-none mt-1"
-//               >
-//                 {timeOptions.map((time) => (
-//                   <option key={time.value} value={time.value}>
-//                     {time.label}
-//                   </option>
-//                 ))}
-//               </select>
-//             </div>
-
+//             {/* Message */}
 //             {message && (
-//               <div className={`p-3 rounded-lg text-sm font-medium ${
-//                 message.includes('✅') || message.includes('🎉')
-//                   ? 'bg-green-50 text-green-800 border border-green-200' 
-//                   : message.includes('⚠️') || message.includes('❌')
-//                   ? 'bg-red-50 text-red-800 border border-red-200'
-//                   : 'bg-blue-50 text-blue-800 border border-blue-200'
-//               }`}>
-//                 {message}
+//               <div
+//                 className={`p-4 rounded-xl mb-4 flex items-center gap-3 ${
+//                   messageType === "success"
+//                     ? "bg-green-50 border border-green-200 text-green-800"
+//                     : messageType === "error"
+//                     ? "bg-red-50 border border-red-200 text-red-800"
+//                     : "bg-blue-50 border border-blue-200 text-blue-800"
+//                 }`}
+//               >
+//                 {messageType === "success" && <CheckCircle size={20} />}
+//                 {messageType === "error" && <AlertCircle size={20} />}
+//                 <span className="font-medium">{message}</span>
 //               </div>
 //             )}
 
-//             {/* Booking Summary */}
-//             {(selectedStartDate || selectedEndDate) && (
-//               <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-//                 <p className="text-sm font-semibold text-gray-700 mb-3">📋 Booking Summary</p>
-//                 <div className="space-y-2 text-sm text-gray-600">
-//                   <div className="flex justify-between">
-//                     <span className="font-medium">Vehicle:</span>
-//                     <span className="text-blue-600 font-semibold">{vehicleType}</span>
+//             {/* Summary */}
+//             {selectedStartDate && selectedEndDate && (
+//               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-4 border border-blue-200">
+//                 <h4 className="font-bold text-gray-800 mb-3">Booking Summary</h4>
+//                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+//                   <div>
+//                     <p className="text-gray-600">Total Days</p>
+//                     <p className="text-lg font-bold text-gray-900">{totalDays()}</p>
 //                   </div>
-//                   <div className="flex justify-between">
-//                     <span className="font-medium">Pickup:</span>
-//                     <span>{selectedStartDate ? formatDateForDisplay(selectedStartDate) : "Not selected"}</span>
+//                   <div>
+//                     <p className="text-gray-600">Rate/Day</p>
+//                     <p className="text-lg font-bold text-gray-900">₹{pricePerDay}</p>
 //                   </div>
-//                   <div className="flex justify-between">
-//                     <span className="font-medium">Return:</span>
-//                     <span>{selectedEndDate ? formatDateForDisplay(selectedEndDate) : "Not selected"}</span>
+//                   <div className="col-span-2">
+//                     <p className="text-gray-600">Total Amount</p>
+//                     <p className="text-2xl font-bold text-blue-600">₹{totalPrice()}</p>
 //                   </div>
-//                   <div className="flex justify-between">
-//                     <span className="font-medium">Time:</span>
-//                     <span>{startTime} - {endTime}</span>
-//                   </div>
-//                   {selectedStartDate && selectedEndDate && (
-//                     <div className="pt-2 border-t border-blue-200 mt-2">
-//                       <div className="flex justify-between text-blue-600 font-semibold">
-//                         <span>Total Days:</span>
-//                         <span>{Math.ceil((selectedEndDate.getTime() - selectedStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1}</span>
-//                       </div>
-//                     </div>
-//                   )}
 //                 </div>
 //               </div>
 //             )}
 
-//             {/* Confirm Booking Button */}
+//             {/* Confirm Button */}
 //             <button
-//               onClick={handleBookingConfirm}
 //               disabled={!selectedStartDate || !selectedEndDate || loading}
-//               className="w-full bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-semibold py-4 px-6 rounded-lg transition shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+//               onClick={handleProceedToConfirm}
+//               className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl"
 //             >
-//               {loading ? (
-//                 <>
-//                   <RefreshCw size={18} className="animate-spin" />
-//                   Processing...
-//                 </>
-//               ) : (
-//                 <>
-//                   <Calendar size={18} />
-//                   Confirm Booking
-//                 </>
-//               )}
+//               {loading ? "Processing..." : selectedStartDate && selectedEndDate 
+//                 ? "Proceed to Confirm Booking" 
+//                 : "Select Dates to Continue"}
 //             </button>
-
-//             <p className="text-xs text-center text-gray-500">
-//               By confirming, you agree to the booking terms and conditions
-//             </p>
 //           </div>
 //         </div>
 //       </div>
+
+//       {/* Confirmation Popup */}
+//       <BookingConfirmationPopup
+//         isOpen={showConfirmPopup}
+//         onClose={() => setShowConfirmPopup(false)}
+//         onConfirm={handleConfirm}
+//         bookingDetails={{
+//           startDate: formatDisplay(selectedStartDate),
+//           endDate: formatDisplay(selectedEndDate),
+//           startTime,
+//           endTime,
+//           totalDays: totalDays(),
+//           totalPrice: totalPrice()
+//         }}
+//         vehicleDetails={{
+//           vehicleName,
+//           vehicleType,
+//           pricePerDay
+//         }}
+//       />
+//     </>
+//   );
+// };
+
+// export default CustomerBookingCalendar;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useEffect } from "react";
+import { X, Calendar, ChevronLeft, ChevronRight, Clock, AlertCircle, CheckCircle } from "lucide-react";
+
+// ==========================================
+// API INTEGRATION
+// ==========================================
+
+const bookingAPI = {
+  /**
+   * Fetch vehicle availability (includes Owner blocked + Customer booked dates)
+   * Returns all unavailable dates from the backend
+   */
+  getVehicleAvailability: async (vehicleId, vehicleType) => {
+    try {
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("📡 FETCHING VEHICLE AVAILABILITY (Customer Calendar)");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("🚗 Vehicle ID:", vehicleId);
+      console.log("🏷️ Vehicle Type:", vehicleType);
+
+      const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (!data.success || !data.availability) {
+        console.log("⚠️ No availability data found");
+        return { 
+          allUnavailableDates: [], 
+          ownerBlockedDates: [], 
+          customerBookedDates: [] 
+        };
+      }
+
+      console.log("✅ Raw API Response:", data);
+
+      // Extract ALL unavailable dates (Owner blocked + Customer booked)
+      const allUnavailableDates = data.availability
+        .filter((item) => item.status === "Unavailable")
+        .map((item) => item.date);
+
+      // Separate owner blocked dates
+      const ownerBlockedDates = data.availability
+        .filter((item) => item.status === "Unavailable" && !item.isCustomerBooking)
+        .map((item) => item.date);
+
+      // Separate customer booked dates
+      const customerBookedDates = data.availability
+        .filter((item) => item.status === "Unavailable" && item.isCustomerBooking === true)
+        .map((item) => item.date);
+
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("📊 AVAILABILITY SUMMARY (Customer Calendar)");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("🔒 Total Unavailable Dates:", allUnavailableDates.length);
+      console.log("   All Unavailable:", allUnavailableDates);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("👤 Owner Blocked Dates:", ownerBlockedDates.length);
+      console.log("   Owner Dates:", ownerBlockedDates);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("🧑 Customer Booked Dates:", customerBookedDates.length);
+      console.log("   Customer Dates:", customerBookedDates);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+      return { 
+        allUnavailableDates, 
+        ownerBlockedDates, 
+        customerBookedDates 
+      };
+
+    } catch (error) {
+      console.error("❌ API error:", error);
+      return { 
+        allUnavailableDates: [], 
+        ownerBlockedDates: [], 
+        customerBookedDates: [] 
+      };
+    }
+  },
+
+  /**
+   * Create a new booking (this will automatically block dates)
+   */
+  createBooking: async (payload) => {
+    try {
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("📤 CREATING BOOKING FROM CUSTOMER CALENDAR");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("📋 Booking Payload:", payload);
+
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+      const urlencoded = new URLSearchParams();
+      urlencoded.append("userId", payload.userId || "customer_default");
+      urlencoded.append("vechileType", payload.vehicleType);
+      urlencoded.append("VechileId", payload.vehicleId);
+      urlencoded.append("fromDate", payload.startDate);
+      urlencoded.append("toDate", payload.endDate);
+      urlencoded.append("fromTime", payload.startTime.replace(":", "."));
+      urlencoded.append("toTime", payload.endTime.replace(":", "."));
+      urlencoded.append("isNotAvailable", "true");
+      urlencoded.append("bikeImages", "");
+      urlencoded.append("isCustomerBooking", "true"); // 🔥 Mark as customer booking
+
+      console.log("📤 Request Body:", Object.fromEntries(urlencoded));
+
+      const response = await fetch('http://3.110.122.127:3000/createNotAvailability', {
+        method: 'POST',
+        headers: myHeaders,
+        body: urlencoded
+      });
+      
+      const data = await response.json();
+      
+      console.log("✅ Booking API Response:", data);
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log("🎉 BOOKING CREATED & DATES BLOCKED!");
+      console.log("📅 From:", payload.startDate, "To:", payload.endDate);
+      console.log("⏰ Time:", payload.startTime, "-", payload.endTime);
+      console.log("🔒 These dates are now BLOCKED for:");
+      console.log("   ✅ Owner Calendar");
+      console.log("   ✅ All Customer Calendars");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+      return { success: response.ok, data };
+    } catch (error) {
+      console.error("❌ Booking API error:", error);
+      return { success: false, error: error.message };
+    }
+  }
+};
+
+// ==========================================
+// BOOKING CONFIRMATION POPUP
+// ==========================================
+
+const BookingConfirmationPopup = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  bookingDetails,
+  vehicleDetails 
+}) => {
+  if (!isOpen) return null;
+
+  const { startDate, endDate, startTime, endTime, totalDays, totalPrice } = bookingDetails;
+  const { vehicleName, vehicleType, pricePerDay } = vehicleDetails;
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
+      <div className="bg-white max-w-md w-full rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold mb-1">Confirm Booking</h2>
+              <p className="text-blue-100 text-sm">Review your rental details</p>
+            </div>
+            <button 
+              onClick={onClose}
+              className="text-white hover:bg-white/20 rounded-full p-1 transition"
+            >
+              <X size={24} />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-700 mb-2">Vehicle Details</h3>
+            <p className="text-lg font-bold text-gray-900">{vehicleName}</p>
+            <p className="text-sm text-gray-600">Type: {vehicleType}</p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <Calendar className="text-blue-600 mt-1" size={20} />
+              <div className="flex-1">
+                <p className="text-sm text-gray-600">Pickup Date</p>
+                <p className="font-semibold text-gray-900">{startDate}</p>
+                <p className="text-sm text-gray-500">Time: {startTime}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Calendar className="text-blue-600 mt-1" size={20} />
+              <div className="flex-1">
+                <p className="text-sm text-gray-600">Return Date</p>
+                <p className="font-semibold text-gray-900">{endDate}</p>
+                <p className="text-sm text-gray-500">Time: {endTime}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t pt-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Rate per day</span>
+              <span className="font-semibold">₹{pricePerDay}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Total days</span>
+              <span className="font-semibold">{totalDays} days</span>
+            </div>
+            <div className="flex justify-between text-lg font-bold border-t pt-2">
+              <span>Total Amount</span>
+              <span className="text-blue-600">₹{totalPrice}</span>
+            </div>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2">
+            <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
+            <p className="text-xs text-amber-800">
+              These dates will be blocked for all other customers once confirmed.
+            </p>
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg"
+          >
+            Confirm Booking
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// CUSTOMER BOOKING CALENDAR
+// ==========================================
+
+const CustomerBookingCalendar = ({
+  isOpen = true,
+  onClose = () => {},
+  onConfirm,
+  
+  // Props
+  vehicleId = localStorage.getItem("vehicleId") || "V001",
+  vehicleType = localStorage.getItem("vehicletype") || "Car",
+  vehicleName = "Vehicle",
+  pricePerDay = 1500,
+  userId = localStorage.getItem("userId") || "customer_default"
+}) => {
+
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedStartDate, setSelectedStartDate] = useState(null);
+  const [selectedEndDate, setSelectedEndDate] = useState(null);
+  const [activeInput, setActiveInput] = useState("start");
+
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("18:00");
+
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("info");
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+
+  // 🔥 NEW: Separate tracking for different types of blocked dates
+  const [allUnavailableDates, setAllUnavailableDates] = useState([]);
+  const [ownerBlockedDates, setOwnerBlockedDates] = useState([]);
+  const [customerBookedDates, setCustomerBookedDates] = useState([]);
+
+  // Auto-refresh interval
+  const [refreshInterval, setRefreshInterval] = useState(null);
+
+  // ==============================
+  // LOAD BLOCKED DATES FROM API
+  // ==============================
+
+  useEffect(() => {
+    if (isOpen) {
+      console.log("📅 Customer Calendar Opened - Loading blocked dates...");
+      loadBlockedDates();
+      
+      // Auto-refresh every 30 seconds to sync with backend
+      const interval = setInterval(() => {
+        console.log("🔄 Auto-refresh: Loading blocked dates...");
+        loadBlockedDates();
+      }, 30000);
+      
+      setRefreshInterval(interval);
+      
+      return () => {
+        if (interval) clearInterval(interval);
+        console.log("🛑 Customer Calendar Closed - Stopped auto-refresh");
+      };
+    } else {
+      if (refreshInterval) clearInterval(refreshInterval);
+    }
+  }, [isOpen, vehicleId, vehicleType]);
+
+  const loadBlockedDates = async () => {
+    setLoading(true);
+    try {
+      const { 
+        allUnavailableDates, 
+        ownerBlockedDates, 
+        customerBookedDates 
+      } = await bookingAPI.getVehicleAvailability(vehicleId, vehicleType);
+      
+      setAllUnavailableDates(allUnavailableDates || []);
+      setOwnerBlockedDates(ownerBlockedDates || []);
+      setCustomerBookedDates(customerBookedDates || []);
+
+      console.log("🎯 State Updated in Customer Calendar:");
+      console.log("   All Unavailable:", allUnavailableDates?.length || 0);
+      console.log("   Owner Blocked:", ownerBlockedDates?.length || 0);
+      console.log("   Customer Booked:", customerBookedDates?.length || 0);
+
+    } catch (error) {
+      console.error("Failed to load blocked dates:", error);
+      showMessage("Failed to load availability", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==============================
+  // DATE UTILITIES
+  // ==============================
+
+  const formatDateAPI = (date) => {
+    if (!date) return "";
+    return date.toISOString().split("T")[0];
+  };
+
+  const formatDisplay = (date) => {
+    if (!date) return "Select Date";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}/${month}/${day}`;
+  };
+
+  const isPastDate = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    return checkDate < today;
+  };
+
+  // 🔥 Check if date is blocked (ANY unavailable date)
+  const isDateBlocked = (date) => {
+    const formatted = formatDateAPI(date);
+    return allUnavailableDates.includes(formatted);
+  };
+
+  // 🔥 Check if date is owner blocked specifically
+  const isOwnerBlocked = (date) => {
+    const formatted = formatDateAPI(date);
+    return ownerBlockedDates.includes(formatted);
+  };
+
+  // 🔥 Check if date is customer booked specifically
+  const isCustomerBooked = (date) => {
+    const formatted = formatDateAPI(date);
+    return customerBookedDates.includes(formatted);
+  };
+
+  const isSelected = (date) =>
+    selectedStartDate?.getTime() === date.getTime() ||
+    selectedEndDate?.getTime() === date.getTime();
+
+  const isInRange = (date) => {
+    if (!selectedStartDate || !selectedEndDate) return false;
+    return date >= selectedStartDate && date <= selectedEndDate;
+  };
+
+  const isAnyDateInRangeBlocked = (start, end) => {
+    const cur = new Date(start);
+    while (cur <= end) {
+      if (isDateBlocked(cur)) return true;
+      cur.setDate(cur.getDate() + 1);
+    }
+    return false;
+  };
+
+  // ==============================
+  // DATE SELECTION
+  // ==============================
+
+  const handleDateClick = (date) => {
+    if (isPastDate(date)) {
+      showMessage("⚠️ Cannot select past dates", "error");
+      return;
+    }
+
+    if (isDateBlocked(date)) {
+      if (isOwnerBlocked(date)) {
+        showMessage("⚠️ This date is blocked by the owner", "error");
+        console.log("🚫 Attempted to select owner-blocked date:", formatDateAPI(date));
+      } else if (isCustomerBooked(date)) {
+        showMessage("⚠️ This date is already booked by another customer", "error");
+        console.log("🚫 Attempted to select customer-booked date:", formatDateAPI(date));
+      } else {
+        showMessage("⚠️ This date is unavailable", "error");
+      }
+      return;
+    }
+
+    if (activeInput === "start") {
+      setSelectedStartDate(date);
+      setSelectedEndDate(null);
+      setActiveInput("end");
+      showMessage("✓ Pickup date selected. Now select return date.", "success");
+      return;
+    }
+
+    if (activeInput === "end") {
+      if (!selectedStartDate) {
+        showMessage("⚠️ Select pickup date first", "error");
+        return;
+      }
+
+      if (date < selectedStartDate) {
+        showMessage("⚠️ Return date cannot be before pickup", "error");
+        return;
+      }
+
+      if (isAnyDateInRangeBlocked(selectedStartDate, date)) {
+        showMessage("⚠️ Some dates in this range are unavailable", "error");
+        return;
+      }
+
+      setSelectedEndDate(date);
+      setActiveInput(null);
+      showMessage("✓ Dates selected successfully!", "success");
+    }
+  };
+
+  const showMessage = (msg, type = "info") => {
+    setMessage(msg);
+    setMessageType(type);
+    setTimeout(() => setMessage(""), 4000);
+  };
+
+  // ==============================
+  // BOOKING LOGIC
+  // ==============================
+
+  const totalDays = () => {
+    if (!selectedStartDate || !selectedEndDate) return 0;
+    return (
+      Math.ceil(
+        (selectedEndDate.getTime() - selectedStartDate.getTime()) /
+          (1000 * 60 * 60 * 24)
+      ) + 1
+    );
+  };
+
+  const totalPrice = () => totalDays() * pricePerDay;
+
+  const handleProceedToConfirm = () => {
+    if (!selectedStartDate || !selectedEndDate) {
+      showMessage("⚠️ Please select both dates", "error");
+      return;
+    }
+    setShowConfirmPopup(true);
+  };
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    showMessage("Processing booking...", "info");
+
+    const payload = {
+      userId,
+      vehicleId,
+      vehicleType,
+      vehicleName,
+      startDate: formatDateAPI(selectedStartDate),
+      endDate: formatDateAPI(selectedEndDate),
+      startTime,
+      endTime,
+      totalDays: totalDays(),
+      totalPrice: totalPrice(),
+      pricePerDay
+    };
+
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("🎯 CUSTOMER CONFIRMING BOOKING");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("📋 Booking Details:", payload);
+
+    // Call custom callback if provided (e.g., from BookNow page)
+    if (onConfirm) {
+      onConfirm(payload);
+      setShowConfirmPopup(false);
+      setLoading(false);
+      return;
+    }
+
+    // Default: Send to API to create booking and block dates
+    const result = await bookingAPI.createBooking(payload);
+
+    if (result.success) {
+      showMessage("✓ Booking confirmed! Dates blocked for everyone.", "success");
+      setShowConfirmPopup(false);
+      
+      // Reload blocked dates immediately to show the newly booked dates
+      console.log("🔄 Reloading blocked dates to show new booking...");
+      await loadBlockedDates();
+      
+      // Reset and close after success
+      setTimeout(() => {
+        setSelectedStartDate(null);
+        setSelectedEndDate(null);
+        setActiveInput("start");
+        onClose();
+      }, 2000);
+    } else {
+      showMessage("❌ Booking failed. Please try again.", "error");
+    }
+    
+    setLoading(false);
+  };
+
+  // ==============================
+  // CALENDAR RENDERING
+  // ==============================
+
+  const daysInMonth = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth() + 1,
+    0
+  ).getDate();
+
+  const firstDay = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth(),
+    1
+  ).getDay();
+
+  const renderDays = () => {
+    const days = [];
+
+    for (let i = 0; i < firstDay; i++)
+      days.push(<div key={"e" + i}></div>);
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth(),
+        d
+      );
+
+      const past = isPastDate(date);
+      const blocked = isDateBlocked(date);
+      const ownerBlocked = isOwnerBlocked(date);
+      const customerBooked = isCustomerBooked(date);
+      const sel = isSelected(date);
+      const rang = isInRange(date);
+
+      let cls =
+        "relative rounded-lg p-3 text-center transition-all font-semibold duration-200 ";
+
+      if (past) {
+        cls += "text-gray-300 bg-gray-50 cursor-not-allowed";
+      } else if (blocked) {
+        if (customerBooked) {
+          // Customer booked dates - orange color
+          cls += "bg-orange-100 text-orange-700 line-through cursor-not-allowed relative border-2 border-orange-400";
+        } else if (ownerBlocked) {
+          // Owner blocked dates - red color
+          cls += "bg-red-50 text-red-500 line-through cursor-not-allowed relative border-2 border-red-400";
+        } else {
+          // Generic blocked
+          cls += "bg-red-50 text-red-500 line-through cursor-not-allowed relative";
+        }
+      } else if (sel) {
+        cls += "bg-blue-600 text-white ring-4 ring-blue-300 scale-110 shadow-lg z-10";
+      } else if (rang) {
+        cls += "bg-blue-100 text-blue-700 shadow-sm";
+      } else {
+        cls += "hover:bg-blue-50 hover:scale-105 cursor-pointer hover:shadow-md";
+      }
+
+      days.push(
+        <button
+          key={d}
+          disabled={past || blocked}
+          className={cls}
+          onClick={() => handleDateClick(date)}
+          title={
+            past 
+              ? "Past date" 
+              : customerBooked 
+                ? "Booked by another customer"
+                : ownerBlocked 
+                  ? "Blocked by owner"
+                  : "Available"
+          }
+        >
+          <span className="relative z-10">{d}</span>
+          {blocked && (
+            <span className="absolute inset-0 flex items-center justify-center">
+              <X size={16} className={customerBooked ? "text-orange-500" : "text-red-400"} />
+            </span>
+          )}
+        </button>
+      );
+    }
+    return days;
+  };
+
+  // ==============================
+  // MAIN RENDER
+  // ==============================
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/50 flex justify-center items-center p-4 z-40 overflow-y-auto">
+        <div className="bg-white max-w-5xl w-full rounded-2xl shadow-2xl my-8">
+          
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-t-2xl text-white">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold mb-1 flex items-center gap-3">
+                  <Calendar size={28} />
+                  Book Your {vehicleType}
+                </h2>
+                <p className="text-blue-100">{vehicleName} • ₹{pricePerDay}/day</p>
+              </div>
+              <button 
+                onClick={onClose}
+                className="text-white hover:bg-white/20 rounded-full p-2 transition"
+              >
+                <X size={24} />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6">
+            {/* Date Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div
+                className={`border-2 rounded-xl p-4 cursor-pointer transition ${
+                  activeInput === "start" 
+                    ? "border-blue-500 bg-blue-50 shadow-md" 
+                    : "border-gray-200 hover:border-blue-300"
+                }`}
+                onClick={() => setActiveInput("start")}
+              >
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                  <Calendar size={16} />
+                  Pickup Date
+                </div>
+                <div className="text-lg font-bold text-gray-900">
+                  {formatDisplay(selectedStartDate)}
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <Clock size={16} className="text-gray-400" />
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="text-sm border rounded px-2 py-1"
+                  />
+                </div>
+              </div>
+
+              <div
+                className={`border-2 rounded-xl p-4 cursor-pointer transition ${
+                  activeInput === "end" 
+                    ? "border-blue-500 bg-blue-50 shadow-md" 
+                    : "border-gray-200 hover:border-blue-300"
+                }`}
+                onClick={() => setActiveInput("end")}
+              >
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                  <Calendar size={16} />
+                  Return Date
+                </div>
+                <div className="text-lg font-bold text-gray-900">
+                  {formatDisplay(selectedEndDate)}
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <Clock size={16} className="text-gray-400" />
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="text-sm border rounded px-2 py-1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Calendar */}
+            <div className="border-2 border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white mb-6 relative">
+              {loading && (
+                <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-xl z-20">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                    <p className="text-sm text-gray-600">Loading availability...</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center mb-6">
+                <button
+                  onClick={() =>
+                    setCurrentMonth(
+                      new Date(
+                        currentMonth.getFullYear(),
+                        currentMonth.getMonth() - 1
+                      )
+                    )
+                  }
+                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+
+                <h3 className="text-xl font-bold text-gray-800">
+                  {currentMonth.toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric"
+                  })}
+                </h3>
+
+                <button
+                  onClick={() =>
+                    setCurrentMonth(
+                      new Date(
+                        currentMonth.getFullYear(),
+                        currentMonth.getMonth() + 1
+                      )
+                    )
+                  }
+                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 gap-2 mb-3">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                  <div
+                    key={d}
+                    className="text-center text-sm font-bold text-gray-600 p-2"
+                  >
+                    {d}
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-2">
+                {renderDays()}
+              </div>
+
+              {/* Legend */}
+              <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-gray-200 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-600 rounded"></div>
+                  <span className="text-gray-600">Selected</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-100 rounded"></div>
+                  <span className="text-gray-600">In Range</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-red-50 border-2 border-red-400 rounded relative">
+                    <X size={12} className="text-red-400 absolute inset-0 m-auto" />
+                  </div>
+                  <span className="text-gray-600">Owner Blocked</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-orange-100 border-2 border-orange-400 rounded relative">
+                    <X size={12} className="text-orange-500 absolute inset-0 m-auto" />
+                  </div>
+                  <span className="text-gray-600">Customer Booked</span>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-2 text-center">
+                  <p className="text-xs text-red-600 mb-1">Owner Blocked</p>
+                  <p className="text-lg font-bold text-red-700">{ownerBlockedDates.length}</p>
+                </div>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 text-center">
+                  <p className="text-xs text-orange-600 mb-1">Customer Booked</p>
+                  <p className="text-lg font-bold text-orange-700">{customerBookedDates.length}</p>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
+                  <p className="text-xs text-green-600 mb-1">Available</p>
+                  <p className="text-lg font-bold text-green-700">
+                    {daysInMonth - allUnavailableDates.filter(date => {
+                      const d = new Date(date);
+                      return d.getMonth() === currentMonth.getMonth() && 
+                             d.getFullYear() === currentMonth.getFullYear();
+                    }).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Message */}
+            {message && (
+              <div
+                className={`p-4 rounded-xl mb-4 flex items-center gap-3 ${
+                  messageType === "success"
+                    ? "bg-green-50 border border-green-200 text-green-800"
+                    : messageType === "error"
+                    ? "bg-red-50 border border-red-200 text-red-800"
+                    : "bg-blue-50 border border-blue-200 text-blue-800"
+                }`}
+              >
+                {messageType === "success" && <CheckCircle size={20} />}
+                {messageType === "error" && <AlertCircle size={20} />}
+                <span className="font-medium">{message}</span>
+              </div>
+            )}
+
+            {/* Summary */}
+            {selectedStartDate && selectedEndDate && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-4 border border-blue-200">
+                <h4 className="font-bold text-gray-800 mb-3">Booking Summary</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Total Days</p>
+                    <p className="text-lg font-bold text-gray-900">{totalDays()}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Rate/Day</p>
+                    <p className="text-lg font-bold text-gray-900">₹{pricePerDay}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-gray-600">Total Amount</p>
+                    <p className="text-2xl font-bold text-blue-600">₹{totalPrice()}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Confirm Button */}
+            <button
+              disabled={!selectedStartDate || !selectedEndDate || loading}
+              onClick={handleProceedToConfirm}
+              className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl"
+            >
+              {loading ? "Processing..." : selectedStartDate && selectedEndDate 
+                ? "Proceed to Confirm Booking" 
+                : "Select Dates to Continue"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Confirmation Popup */}
+      <BookingConfirmationPopup
+        isOpen={showConfirmPopup}
+        onClose={() => setShowConfirmPopup(false)}
+        onConfirm={handleConfirm}
+        bookingDetails={{
+          startDate: formatDisplay(selectedStartDate),
+          endDate: formatDisplay(selectedEndDate),
+          startTime,
+          endTime,
+          totalDays: totalDays(),
+          totalPrice: totalPrice()
+        }}
+        vehicleDetails={{
+          vehicleName,
+          vehicleType,
+          pricePerDay
+        }}
+      />
+    </>
+  );
+};
+
+export default CustomerBookingCalendar;
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState, useEffect } from "react";
+// import { X, Calendar, ChevronLeft, ChevronRight, Clock, AlertCircle, CheckCircle } from "lucide-react";
+
+// // ==========================================
+// // API INTEGRATION WITH YOUR BACKEND
+// // ==========================================
+
+// const bookingAPI = {
+//   /**
+//    * Fetch vehicle availability from your backend
+//    * API: http://3.110.122.127:3000/getVehicleAvailability
+//    */
+//   getVehicleAvailability: async (vehicleId, vehicleType) => {
+//     try {
+//       const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
+//       const response = await fetch(url);
+//       const data = await response.json();
+
+//       if (!data.success || !data.availability) {
+//         return [];
+//       }
+
+//       // Extract only unavailable dates
+//       return data.availability
+//         .filter((item) => item.status === "Unavailable")
+//         .map((item) => item.date); // Returns array of "YYYY-MM-DD" strings
+
+//     } catch (error) {
+//       console.error("API error:", error);
+//       return [];
+//     }
+//   },
+
+//   /**
+//    * Create a new booking (replace with your actual endpoint)
+//    */
+//   createBooking: async (payload) => {
+//     try {
+//       // Replace with your actual booking endpoint
+//       const response = await fetch('http://3.110.122.127:3000/createBooking', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(payload)
+//       });
+      
+//       const data = await response.json();
+//       return data;
+//     } catch (error) {
+//       console.error("Booking API error:", error);
+//       return { success: false, error: error.message };
+//     }
+//   }
+// };
+
+// // ==========================================
+// // BOOKING CONFIRMATION POPUP
+// // ==========================================
+
+// const BookingConfirmationPopup = ({ 
+//   isOpen, 
+//   onClose, 
+//   onConfirm, 
+//   bookingDetails,
+//   vehicleDetails 
+// }) => {
+//   if (!isOpen) return null;
+
+//   const { startDate, endDate, startTime, endTime, totalDays, totalPrice } = bookingDetails;
+//   const { vehicleName, vehicleType, pricePerDay } = vehicleDetails;
+
+//   return (
+//     <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
+//       <div className="bg-white max-w-md w-full rounded-2xl shadow-2xl overflow-hidden">
+//         <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+//           <div className="flex justify-between items-start">
+//             <div>
+//               <h2 className="text-2xl font-bold mb-1">Confirm Booking</h2>
+//               <p className="text-blue-100 text-sm">Review your rental details</p>
+//             </div>
+//             <button 
+//               onClick={onClose}
+//               className="text-white hover:bg-white/20 rounded-full p-1 transition"
+//             >
+//               <X size={24} />
+//             </button>
+//           </div>
+//         </div>
+
+//         <div className="p-6 space-y-4">
+//           <div className="bg-gray-50 rounded-lg p-4">
+//             <h3 className="font-semibold text-gray-700 mb-2">Vehicle Details</h3>
+//             <p className="text-lg font-bold text-gray-900">{vehicleName}</p>
+//             <p className="text-sm text-gray-600">Type: {vehicleType}</p>
+//           </div>
+
+//           <div className="space-y-3">
+//             <div className="flex items-start gap-3">
+//               <Calendar className="text-blue-600 mt-1" size={20} />
+//               <div className="flex-1">
+//                 <p className="text-sm text-gray-600">Pickup Date</p>
+//                 <p className="font-semibold text-gray-900">{startDate}</p>
+//                 <p className="text-sm text-gray-500">Time: {startTime}</p>
+//               </div>
+//             </div>
+
+//             <div className="flex items-start gap-3">
+//               <Calendar className="text-blue-600 mt-1" size={20} />
+//               <div className="flex-1">
+//                 <p className="text-sm text-gray-600">Return Date</p>
+//                 <p className="font-semibold text-gray-900">{endDate}</p>
+//                 <p className="text-sm text-gray-500">Time: {endTime}</p>
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="border-t pt-4 space-y-2">
+//             <div className="flex justify-between text-sm">
+//               <span className="text-gray-600">Rate per day</span>
+//               <span className="font-semibold">₹{pricePerDay}</span>
+//             </div>
+//             <div className="flex justify-between text-sm">
+//               <span className="text-gray-600">Total days</span>
+//               <span className="font-semibold">{totalDays} days</span>
+//             </div>
+//             <div className="flex justify-between text-lg font-bold border-t pt-2">
+//               <span>Total Amount</span>
+//               <span className="text-blue-600">₹{totalPrice}</span>
+//             </div>
+//           </div>
+
+//           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2">
+//             <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
+//             <p className="text-xs text-amber-800">
+//               Please arrive on time for pickup. Late arrivals may affect your booking.
+//             </p>
+//           </div>
+//         </div>
+
+//         <div className="px-6 pb-6 flex gap-3">
+//           <button
+//             onClick={onClose}
+//             className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition"
+//           >
+//             Cancel
+//           </button>
+//           <button
+//             onClick={onConfirm}
+//             className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg"
+//           >
+//             Confirm Booking
+//           </button>
+//         </div>
+//       </div>
 //     </div>
+//   );
+// };
+
+// // ==========================================
+// // CUSTOMER BOOKING CALENDAR - API VERSION
+// // ==========================================
+
+// const CustomerBookingCalendar = ({
+//   isOpen = true,
+//   onClose = () => {},
+//   onConfirm,
+  
+//   // Get from localStorage or props
+//   vehicleId = localStorage.getItem("vehicleId") || "V001",
+//   vehicleType = localStorage.getItem("vehicletype") || "Car",
+//   vehicleName = "Vehicle",
+//   pricePerDay = 1500
+// }) => {
+
+//   const [currentMonth, setCurrentMonth] = useState(new Date());
+//   const [selectedStartDate, setSelectedStartDate] = useState(null);
+//   const [selectedEndDate, setSelectedEndDate] = useState(null);
+//   const [activeInput, setActiveInput] = useState("start");
+
+//   const [startTime, setStartTime] = useState("09:00");
+//   const [endTime, setEndTime] = useState("18:00");
+
+//   const [loading, setLoading] = useState(false);
+//   const [message, setMessage] = useState("");
+//   const [messageType, setMessageType] = useState("info");
+//   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+
+//   // Blocked dates from API
+//   const [blockedDates, setBlockedDates] = useState([]);
+
+//   // ==============================
+//   // LOAD BLOCKED DATES FROM API
+//   // ==============================
+
+//   useEffect(() => {
+//     if (isOpen) {
+//       loadAPIBlockedDates();
+//     }
+//   }, [isOpen, currentMonth, vehicleId, vehicleType]);
+
+//   const loadAPIBlockedDates = async () => {
+//     setLoading(true);
+//     try {
+//       const unavailableDates = await bookingAPI.getVehicleAvailability(
+//         vehicleId,
+//         vehicleType
+//       );
+//       setBlockedDates(unavailableDates || []);
+//     } catch (error) {
+//       console.error("Failed to load blocked dates:", error);
+//       showMessage("Failed to load availability", "error");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // ==============================
+//   // DATE UTILITIES
+//   // ==============================
+
+//   const formatDateAPI = (date) => {
+//     if (!date) return "";
+//     return date.toISOString().split("T")[0];
+//   };
+
+//   const formatDisplay = (date) => {
+//     if (!date) return "Select Date";
+//     const year = date.getFullYear();
+//     const month = String(date.getMonth() + 1).padStart(2, "0");
+//     const day = String(date.getDate()).padStart(2, "0");
+//     return `${year}/${month}/${day}`;
+//   };
+
+//   const isPastDate = (date) => {
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0);
+//     const checkDate = new Date(date);
+//     checkDate.setHours(0, 0, 0, 0);
+//     return checkDate < today;
+//   };
+
+//   const isDateBlocked = (date) => {
+//     const formatted = formatDateAPI(date);
+//     return blockedDates.includes(formatted);
+//   };
+
+//   const isSelected = (date) =>
+//     selectedStartDate?.getTime() === date.getTime() ||
+//     selectedEndDate?.getTime() === date.getTime();
+
+//   const isInRange = (date) => {
+//     if (!selectedStartDate || !selectedEndDate) return false;
+//     return date >= selectedStartDate && date <= selectedEndDate;
+//   };
+
+//   const isAnyDateInRangeBlocked = (start, end) => {
+//     const cur = new Date(start);
+//     while (cur <= end) {
+//       if (isDateBlocked(cur)) return true;
+//       cur.setDate(cur.getDate() + 1);
+//     }
+//     return false;
+//   };
+
+//   // ==============================
+//   // DATE SELECTION
+//   // ==============================
+
+//   const handleDateClick = (date) => {
+//     if (isPastDate(date)) {
+//       showMessage("⚠️ Cannot select past dates", "error");
+//       return;
+//     }
+
+//     if (isDateBlocked(date)) {
+//       showMessage("⚠️ This date is unavailable", "error");
+//       return;
+//     }
+
+//     if (activeInput === "start") {
+//       setSelectedStartDate(date);
+//       setSelectedEndDate(null);
+//       setActiveInput("end");
+//       showMessage("✓ Pickup date selected. Now select return date.", "success");
+//       return;
+//     }
+
+//     if (activeInput === "end") {
+//       if (!selectedStartDate) {
+//         showMessage("⚠️ Select pickup date first", "error");
+//         return;
+//       }
+
+//       if (date < selectedStartDate) {
+//         showMessage("⚠️ Return date cannot be before pickup", "error");
+//         return;
+//       }
+
+//       if (isAnyDateInRangeBlocked(selectedStartDate, date)) {
+//         showMessage("⚠️ Some dates in this range are unavailable", "error");
+//         return;
+//       }
+
+//       setSelectedEndDate(date);
+//       setActiveInput(null);
+//       showMessage("✓ Dates selected successfully!", "success");
+//     }
+//   };
+
+//   const showMessage = (msg, type = "info") => {
+//     setMessage(msg);
+//     setMessageType(type);
+//     setTimeout(() => setMessage(""), 4000);
+//   };
+
+//   // ==============================
+//   // BOOKING LOGIC
+//   // ==============================
+
+//   const totalDays = () => {
+//     if (!selectedStartDate || !selectedEndDate) return 0;
+//     return (
+//       Math.ceil(
+//         (selectedEndDate.getTime() - selectedStartDate.getTime()) /
+//           (1000 * 60 * 60 * 24)
+//       ) + 1
+//     );
+//   };
+
+//   const totalPrice = () => totalDays() * pricePerDay;
+
+//   const handleProceedToConfirm = () => {
+//     if (!selectedStartDate || !selectedEndDate) {
+//       showMessage("⚠️ Please select both dates", "error");
+//       return;
+//     }
+//     setShowConfirmPopup(true);
+//   };
+
+//   const handleConfirm = async () => {
+//     const payload = {
+//       vehicleId,
+//       vehicleType,
+//       vehicleName,
+//       startDate: formatDateAPI(selectedStartDate),
+//       endDate: formatDateAPI(selectedEndDate),
+//       startTime,
+//       endTime,
+//       totalDays: totalDays(),
+//       totalPrice: totalPrice(),
+//       pricePerDay
+//     };
+
+//     // Call custom callback if provided
+//     if (onConfirm) {
+//       onConfirm(
+//         formatDateAPI(selectedStartDate),
+//         formatDateAPI(selectedEndDate),
+//         startTime,
+//         endTime
+//       );
+//       setShowConfirmPopup(false);
+//       return;
+//     }
+
+//     // Default: Send to API
+//     showMessage("Processing booking...", "info");
+//     const result = await bookingAPI.createBooking(payload);
+
+//     if (result.success) {
+//       showMessage("✓ Booking confirmed!", "success");
+//       setShowConfirmPopup(false);
+      
+//       // Reset and close after success
+//       setTimeout(() => {
+//         setSelectedStartDate(null);
+//         setSelectedEndDate(null);
+//         setActiveInput("start");
+//         onClose();
+//       }, 2000);
+//     } else {
+//       showMessage("❌ Booking failed. Please try again.", "error");
+//     }
+//   };
+
+//   // ==============================
+//   // CALENDAR RENDERING
+//   // ==============================
+
+//   const daysInMonth = new Date(
+//     currentMonth.getFullYear(),
+//     currentMonth.getMonth() + 1,
+//     0
+//   ).getDate();
+
+//   const firstDay = new Date(
+//     currentMonth.getFullYear(),
+//     currentMonth.getMonth(),
+//     1
+//   ).getDay();
+
+//   const renderDays = () => {
+//     const days = [];
+
+//     for (let i = 0; i < firstDay; i++)
+//       days.push(<div key={"e" + i}></div>);
+
+//     for (let d = 1; d <= daysInMonth; d++) {
+//       const date = new Date(
+//         currentMonth.getFullYear(),
+//         currentMonth.getMonth(),
+//         d
+//       );
+
+//       const past = isPastDate(date);
+//       const blocked = isDateBlocked(date);
+//       const sel = isSelected(date);
+//       const rang = isInRange(date);
+
+//       let cls =
+//         "relative rounded-lg p-3 text-center transition-all font-semibold duration-200 ";
+
+//       if (past) cls += "text-gray-300 bg-gray-50 cursor-not-allowed";
+//       else if (blocked)
+//         cls += "bg-red-50 text-red-500 line-through cursor-not-allowed relative";
+//       else if (sel)
+//         cls += "bg-blue-600 text-white ring-4 ring-blue-300 scale-110 shadow-lg z-10";
+//       else if (rang)
+//         cls += "bg-blue-100 text-blue-700 shadow-sm";
+//       else cls += "hover:bg-blue-50 hover:scale-105 cursor-pointer hover:shadow-md";
+
+//       days.push(
+//         <button
+//           key={d}
+//           disabled={past || blocked}
+//           className={cls}
+//           onClick={() => handleDateClick(date)}
+//         >
+//           <span className="relative z-10">{d}</span>
+//           {blocked && (
+//             <span className="absolute inset-0 flex items-center justify-center">
+//               <X size={16} className="text-red-400" />
+//             </span>
+//           )}
+//         </button>
+//       );
+//     }
+//     return days;
+//   };
+
+//   // ==============================
+//   // MAIN RENDER
+//   // ==============================
+
+//   if (!isOpen) return null;
+
+//   return (
+//     <>
+//       <div className="fixed inset-0 bg-black/50 flex justify-center items-center p-4 z-40 overflow-y-auto">
+//         <div className="bg-white max-w-5xl w-full rounded-2xl shadow-2xl my-8">
+          
+//           {/* Header */}
+//           <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-t-2xl text-white">
+//             <div className="flex justify-between items-start">
+//               <div>
+//                 <h2 className="text-2xl font-bold mb-1 flex items-center gap-3">
+//                   <Calendar size={28} />
+//                   Book Your {vehicleType}
+//                 </h2>
+//                 <p className="text-blue-100">{vehicleName} • ₹{pricePerDay}/day</p>
+//               </div>
+//               <button 
+//                 onClick={onClose}
+//                 className="text-white hover:bg-white/20 rounded-full p-2 transition"
+//               >
+//                 <X size={24} />
+//               </button>
+//             </div>
+//           </div>
+
+//           <div className="p-6">
+//             {/* Date Selection */}
+//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+//               <div
+//                 className={`border-2 rounded-xl p-4 cursor-pointer transition ${
+//                   activeInput === "start" 
+//                     ? "border-blue-500 bg-blue-50 shadow-md" 
+//                     : "border-gray-200 hover:border-blue-300"
+//                 }`}
+//                 onClick={() => setActiveInput("start")}
+//               >
+//                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+//                   <Calendar size={16} />
+//                   Pickup Date
+//                 </div>
+//                 <div className="text-lg font-bold text-gray-900">
+//                   {formatDisplay(selectedStartDate)}
+//                 </div>
+//                 <div className="flex items-center gap-2 mt-2">
+//                   <Clock size={16} className="text-gray-400" />
+//                   <input
+//                     type="time"
+//                     value={startTime}
+//                     onChange={(e) => setStartTime(e.target.value)}
+//                     className="text-sm border rounded px-2 py-1"
+//                   />
+//                 </div>
+//               </div>
+
+//               <div
+//                 className={`border-2 rounded-xl p-4 cursor-pointer transition ${
+//                   activeInput === "end" 
+//                     ? "border-blue-500 bg-blue-50 shadow-md" 
+//                     : "border-gray-200 hover:border-blue-300"
+//                 }`}
+//                 onClick={() => setActiveInput("end")}
+//               >
+//                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+//                   <Calendar size={16} />
+//                   Return Date
+//                 </div>
+//                 <div className="text-lg font-bold text-gray-900">
+//                   {formatDisplay(selectedEndDate)}
+//                 </div>
+//                 <div className="flex items-center gap-2 mt-2">
+//                   <Clock size={16} className="text-gray-400" />
+//                   <input
+//                     type="time"
+//                     value={endTime}
+//                     onChange={(e) => setEndTime(e.target.value)}
+//                     className="text-sm border rounded px-2 py-1"
+//                   />
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Calendar */}
+//             <div className="border-2 border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white mb-6 relative">
+//               {loading && (
+//                 <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-xl z-20">
+//                   <div className="text-center">
+//                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-2"></div>
+//                     <p className="text-sm text-gray-600">Loading availability...</p>
+//                   </div>
+//                 </div>
+//               )}
+
+//               <div className="flex justify-between items-center mb-6">
+//                 <button
+//                   onClick={() =>
+//                     setCurrentMonth(
+//                       new Date(
+//                         currentMonth.getFullYear(),
+//                         currentMonth.getMonth() - 1
+//                       )
+//                     )
+//                   }
+//                   className="p-2 hover:bg-gray-100 rounded-lg transition"
+//                 >
+//                   <ChevronLeft size={24} />
+//                 </button>
+
+//                 <h3 className="text-xl font-bold text-gray-800">
+//                   {currentMonth.toLocaleDateString("en-US", {
+//                     month: "long",
+//                     year: "numeric"
+//                   })}
+//                 </h3>
+
+//                 <button
+//                   onClick={() =>
+//                     setCurrentMonth(
+//                       new Date(
+//                         currentMonth.getFullYear(),
+//                         currentMonth.getMonth() + 1
+//                       )
+//                     )
+//                   }
+//                   className="p-2 hover:bg-gray-100 rounded-lg transition"
+//                 >
+//                   <ChevronRight size={24} />
+//                 </button>
+//               </div>
+
+//               <div className="grid grid-cols-7 gap-2 mb-3">
+//                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+//                   <div
+//                     key={d}
+//                     className="text-center text-sm font-bold text-gray-600 p-2"
+//                   >
+//                     {d}
+//                   </div>
+//                 ))}
+//               </div>
+
+//               <div className="grid grid-cols-7 gap-2">
+//                 {renderDays()}
+//               </div>
+
+//               <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-gray-200 text-sm">
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-blue-600 rounded"></div>
+//                   <span className="text-gray-600">Selected</span>
+//                 </div>
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-blue-100 rounded"></div>
+//                   <span className="text-gray-600">In Range</span>
+//                 </div>
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-red-50 rounded relative">
+//                     <X size={12} className="text-red-400 absolute inset-0 m-auto" />
+//                   </div>
+//                   <span className="text-gray-600">Unavailable</span>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Message */}
+//             {message && (
+//               <div
+//                 className={`p-4 rounded-xl mb-4 flex items-center gap-3 ${
+//                   messageType === "success"
+//                     ? "bg-green-50 border border-green-200 text-green-800"
+//                     : messageType === "error"
+//                     ? "bg-red-50 border border-red-200 text-red-800"
+//                     : "bg-blue-50 border border-blue-200 text-blue-800"
+//                 }`}
+//               >
+//                 {messageType === "success" && <CheckCircle size={20} />}
+//                 {messageType === "error" && <AlertCircle size={20} />}
+//                 <span className="font-medium">{message}</span>
+//               </div>
+//             )}
+
+//             {/* Summary */}
+//             {selectedStartDate && selectedEndDate && (
+//               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-4 border border-blue-200">
+//                 <h4 className="font-bold text-gray-800 mb-3">Booking Summary</h4>
+//                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+//                   <div>
+//                     <p className="text-gray-600">Total Days</p>
+//                     <p className="text-lg font-bold text-gray-900">{totalDays()}</p>
+//                   </div>
+//                   <div>
+//                     <p className="text-gray-600">Rate/Day</p>
+//                     <p className="text-lg font-bold text-gray-900">₹{pricePerDay}</p>
+//                   </div>
+//                   <div className="col-span-2">
+//                     <p className="text-gray-600">Total Amount</p>
+//                     <p className="text-2xl font-bold text-blue-600">₹{totalPrice()}</p>
+//                   </div>
+//                 </div>
+//               </div>
+//             )}
+
+//             {/* Confirm Button */}
+//             <button
+//               disabled={!selectedStartDate || !selectedEndDate}
+//               onClick={handleProceedToConfirm}
+//               className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl"
+//             >
+//               {selectedStartDate && selectedEndDate 
+//                 ? "Proceed to Confirm Booking" 
+//                 : "Select Dates to Continue"}
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Confirmation Popup */}
+//       <BookingConfirmationPopup
+//         isOpen={showConfirmPopup}
+//         onClose={() => setShowConfirmPopup(false)}
+//         onConfirm={handleConfirm}
+//         bookingDetails={{
+//           startDate: formatDisplay(selectedStartDate),
+//           endDate: formatDisplay(selectedEndDate),
+//           startTime,
+//           endTime,
+//           totalDays: totalDays(),
+//           totalPrice: totalPrice()
+//         }}
+//         vehicleDetails={{
+//           vehicleName,
+//           vehicleType,
+//           pricePerDay
+//         }}
+//       />
+//     </>
+//   );
+// };
+
+// export default CustomerBookingCalendar;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState, useEffect } from "react";
+// import { X, Calendar, ChevronLeft, ChevronRight, Clock, AlertCircle, CheckCircle } from "lucide-react";
+
+// // ==========================================
+// // API INTEGRATION
+// // ==========================================
+
+// const bookingAPI = {
+//   getVehicleAvailability: async (vehicleId, vehicleType) => {
+//     try {
+//       const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
+//       const response = await fetch(url);
+//       const data = await response.json();
+
+//       if (!data.success || !data.availability) {
+//         return [];
+//       }
+
+//       return data.availability
+//         .filter((item) => item.status === "Unavailable")
+//         .map((item) => item.date);
+
+//     } catch (error) {
+//       console.error("API error:", error);
+//       return [];
+//     }
+//   },
+
+//   createNotAvailability: async (vehicleId, vehicleType, startDate, endDate) => {
+//     try {
+//       const response = await fetch('http://3.110.122.127:3000/createNotAvailability', {
+//         method: 'POST',
+//         headers: { 
+//           'Content-Type': 'application/x-www-form-urlencoded' 
+//         },
+//         body: new URLSearchParams({
+//           vechileType: vehicleType,
+//           VechileId: vehicleId,
+//           fromDate: startDate,
+//           toDate: endDate,
+//           isNotAvailable: 'true'
+//         })
+//       });
+      
+//       const data = await response.json();
+//       return data;
+//     } catch (error) {
+//       console.error("Create not availability error:", error);
+//       return { success: false, error: error.message };
+//     }
+//   }
+// };
+
+// // ==========================================
+// // TIME SELECTION POPUP
+// // ==========================================
+
+// const TimeSelectionPopup = ({ 
+//   isOpen, 
+//   onClose, 
+//   onConfirm, 
+//   startTime,
+//   endTime,
+//   setStartTime,
+//   setEndTime
+// }) => {
+//   if (!isOpen) return null;
+
+//   const generateTimeOptions = () => {
+//     const arr = [];
+//     for (let h = 0; h < 24; h++) {
+//       for (let m = 0; m < 60; m += 30) {
+//         const hh = String(h).padStart(2, "0");
+//         const mm = String(m).padStart(2, "0");
+//         arr.push({
+//           value: `${hh}:${mm}`,
+//           label: `${h % 12 || 12}:${mm} ${h >= 12 ? "PM" : "AM"}`,
+//         });
+//       }
+//     }
+//     return arr;
+//   };
+
+//   const timeOptions = generateTimeOptions();
+
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
+//       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+//         <div className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] p-6 text-white">
+//           <div className="flex justify-between items-start">
+//             <div>
+//               <h2 className="text-2xl font-bold mb-1">Select Time</h2>
+//               <p className="text-blue-100 text-sm">Choose pickup and return times</p>
+//             </div>
+//             <button 
+//               onClick={onClose}
+//               className="text-white hover:bg-white/20 rounded-full p-1 transition"
+//             >
+//               <X size={24} />
+//             </button>
+//           </div>
+//         </div>
+
+//         <div className="p-6 space-y-4">
+//           <div>
+//             <label className="font-semibold block mb-2">Pickup Time</label>
+//             <select
+//               className="w-full p-3 border rounded-lg"
+//               value={startTime}
+//               onChange={(e) => setStartTime(e.target.value)}
+//             >
+//               {timeOptions.map((t) => (
+//                 <option value={t.value} key={t.value}>
+//                   {t.label}
+//                 </option>
+//               ))}
+//             </select>
+//           </div>
+
+//           <div>
+//             <label className="font-semibold block mb-2">Return Time</label>
+//             <select
+//               className="w-full p-3 border rounded-lg"
+//               value={endTime}
+//               onChange={(e) => setEndTime(e.target.value)}
+//             >
+//               {timeOptions.map((t) => (
+//                 <option value={t.value} key={t.value}>
+//                   {t.label}
+//                 </option>
+//               ))}
+//             </select>
+//           </div>
+//         </div>
+
+//         <div className="px-6 pb-6 flex gap-3">
+//           <button
+//             onClick={onClose}
+//             className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+//           >
+//             Cancel
+//           </button>
+//           <button
+//             onClick={onConfirm}
+//             className="flex-1 px-4 py-3 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white rounded-lg font-semibold hover:opacity-90 transition shadow-lg"
+//           >
+//             Confirm Time
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // ==========================================
+// // BOOKING CONFIRMATION POPUP
+// // ==========================================
+
+// const BookingConfirmationPopup = ({ 
+//   isOpen, 
+//   onClose, 
+//   onConfirm, 
+//   bookingDetails,
+//   vehicleDetails,
+//   isProcessing 
+// }) => {
+//   if (!isOpen) return null;
+
+//   const { startDate, endDate, startTime, endTime, totalDays, totalPrice } = bookingDetails;
+//   const { vehicleName, vehicleType, pricePerDay } = vehicleDetails;
+
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[70]">
+//       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+//         <div className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] p-6 text-white">
+//           <div className="flex justify-between items-start">
+//             <div>
+//               <h2 className="text-2xl font-bold mb-1">Confirm Booking</h2>
+//               <p className="text-blue-100 text-sm">Review your rental details</p>
+//             </div>
+//             <button 
+//               onClick={onClose}
+//               className="text-white hover:bg-white/20 rounded-full p-1 transition"
+//               disabled={isProcessing}
+//             >
+//               <X size={24} />
+//             </button>
+//           </div>
+//         </div>
+
+//         <div className="p-6 space-y-4">
+//           <div className="bg-gray-50 rounded-lg p-4">
+//             <h3 className="font-semibold text-gray-700 mb-2">Vehicle Details</h3>
+//             <p className="text-lg font-bold text-gray-900">{vehicleName}</p>
+//             <p className="text-sm text-gray-600">Type: {vehicleType}</p>
+//           </div>
+
+//           <div className="space-y-3">
+//             <div className="flex items-start gap-3">
+//               <Calendar className="text-blue-600 mt-1" size={20} />
+//               <div className="flex-1">
+//                 <p className="text-sm text-gray-600">Pickup Date</p>
+//                 <p className="font-semibold text-gray-900">{startDate}</p>
+//                 <p className="text-sm text-gray-500">Time: {startTime}</p>
+//               </div>
+//             </div>
+
+//             <div className="flex items-start gap-3">
+//               <Calendar className="text-blue-600 mt-1" size={20} />
+//               <div className="flex-1">
+//                 <p className="text-sm text-gray-600">Return Date</p>
+//                 <p className="font-semibold text-gray-900">{endDate}</p>
+//                 <p className="text-sm text-gray-500">Time: {endTime}</p>
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="border-t pt-4 space-y-2">
+//             <div className="flex justify-between text-sm">
+//               <span className="text-gray-600">Rate per day</span>
+//               <span className="font-semibold">₹{pricePerDay}</span>
+//             </div>
+//             <div className="flex justify-between text-sm">
+//               <span className="text-gray-600">Total days</span>
+//               <span className="font-semibold">{totalDays} days</span>
+//             </div>
+//             <div className="flex justify-between text-lg font-bold border-t pt-2">
+//               <span>Total Amount</span>
+//               <span className="text-blue-600">₹{totalPrice}</span>
+//             </div>
+//           </div>
+
+//           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2">
+//             <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
+//             <p className="text-xs text-amber-800">
+//               Please arrive on time for pickup. Late arrivals may affect your booking.
+//             </p>
+//           </div>
+//         </div>
+
+//         <div className="px-6 pb-6 flex gap-3">
+//           <button
+//             onClick={onClose}
+//             disabled={isProcessing}
+//             className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+//           >
+//             Cancel
+//           </button>
+//           <button
+//             onClick={onConfirm}
+//             disabled={isProcessing}
+//             className="flex-1 px-4 py-3 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white rounded-lg font-semibold hover:opacity-90 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+//           >
+//             {isProcessing ? (
+//               <span className="flex items-center justify-center gap-2">
+//                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+//                 Processing...
+//               </span>
+//             ) : (
+//               "Confirm Booking"
+//             )}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // ==========================================
+// // CUSTOMER BOOKING CALENDAR
+// // ==========================================
+
+// const CustomerBookingCalendar = ({
+//   isOpen = true,
+//   onClose = () => {},
+//   onBookingConfirmed,
+  
+//   vehicleId = "V001",
+//   vehicleType = "Car",
+//   vehicleName = "Vehicle",
+//   pricePerDay = 1500
+// }) => {
+
+//   const [currentMonth, setCurrentMonth] = useState(new Date());
+//   const [selectedStartDate, setSelectedStartDate] = useState(null);
+//   const [selectedEndDate, setSelectedEndDate] = useState(null);
+//   const [activeInput, setActiveInput] = useState("start");
+//   const [startTime, setStartTime] = useState("09:00");
+//   const [endTime, setEndTime] = useState("18:00");
+//   const [blockedDates, setBlockedDates] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [isProcessing, setIsProcessing] = useState(false);
+//   const [message, setMessage] = useState({ type: "", text: "" });
+//   const [showTimePopup, setShowTimePopup] = useState(false);
+//   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+
+//   // ============================
+//   // FORMATTERS
+//   // ============================
+
+//   const formatDateForAPI = (date) => {
+//     if (!date) return "";
+//     return date.toISOString().split("T")[0];
+//   };
+
+//   const formatDateForDisplay = (date) => {
+//     if (!date) return "Select Date";
+//     return date.toLocaleDateString("en-US", {
+//       month: "short",
+//       day: "numeric",
+//       year: "numeric",
+//     });
+//   };
+
+//   // ============================
+//   // FETCH API
+//   // ============================
+
+//   const fetchVehicleAvailability = async () => {
+//     setLoading(true);
+//     try {
+//       const unavailable = await bookingAPI.getVehicleAvailability(vehicleId, vehicleType);
+//       setBlockedDates(unavailable);
+//     } catch (err) {
+//       console.error("Failed to fetch availability", err);
+//       showMessage("error", "Failed to load availability");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (isOpen) {
+//       fetchVehicleAvailability();
+//     }
+//   }, [isOpen, currentMonth, vehicleId, vehicleType]);
+
+//   // ============================
+//   // DATE UTILITIES
+//   // ============================
+
+//   const isPastDate = (date) => {
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0);
+//     const d = new Date(date);
+//     d.setHours(0, 0, 0, 0);
+//     return d < today;
+//   };
+
+//   const isDateBlocked = (date) => {
+//     const formatted = formatDateForAPI(date);
+//     return blockedDates.includes(formatted);
+//   };
+
+//   const isDateInRange = (date) => {
+//     if (!selectedStartDate || !selectedEndDate) return false;
+//     return date >= selectedStartDate && date <= selectedEndDate;
+//   };
+
+//   const isAnyDateInRangeBlocked = (start, end) => {
+//     const cur = new Date(start);
+//     while (cur <= end) {
+//       if (isDateBlocked(cur)) return true;
+//       cur.setDate(cur.getDate() + 1);
+//     }
+//     return false;
+//   };
+
+//   // ============================
+//   // HANDLE DATE CLICK
+//   // ============================
+
+//   const handleDateClick = (date) => {
+//     if (isPastDate(date)) {
+//       showMessage("error", "Cannot select past dates");
+//       return;
+//     }
+
+//     if (isDateBlocked(date)) {
+//       showMessage("error", "This date is unavailable");
+//       return;
+//     }
+
+//     if (activeInput === "start") {
+//       setSelectedStartDate(date);
+//       setSelectedEndDate(null);
+//       setActiveInput("end");
+//       showMessage("success", "Pickup date selected. Now select return date.");
+//       return;
+//     }
+
+//     if (activeInput === "end") {
+//       if (!selectedStartDate) {
+//         showMessage("error", "Select pickup date first");
+//         return;
+//       }
+
+//       if (date < selectedStartDate) {
+//         showMessage("error", "Return date cannot be before pickup date");
+//         return;
+//       }
+
+//       if (isAnyDateInRangeBlocked(selectedStartDate, date)) {
+//         showMessage("error", "Some dates in this range are unavailable");
+//         return;
+//       }
+
+//       setSelectedEndDate(date);
+//       setActiveInput(null);
+//       showMessage("success", "Dates selected successfully!");
+//     }
+//   };
+
+//   // ============================
+//   // BOOKING LOGIC
+//   // ============================
+
+//   const totalDays = () => {
+//     if (!selectedStartDate || !selectedEndDate) return 0;
+//     return (
+//       Math.ceil(
+//         (selectedEndDate.getTime() - selectedStartDate.getTime()) /
+//           (1000 * 60 * 60 * 24)
+//       ) + 1
+//     );
+//   };
+
+//   const totalPrice = () => totalDays() * pricePerDay;
+
+//   const handleProceedToSelectTime = () => {
+//     if (!selectedStartDate || !selectedEndDate) {
+//       showMessage("error", "Please select both pickup and return dates");
+//       return;
+//     }
+//     setShowConfirmPopup(true);
+//   };
+
+//   const handleTimeConfirmed = () => {
+//     setShowConfirmPopup(false);
+//     setShowTimePopup(true);
+//   };
+
+//   const handleConfirm = async () => {
+//     setIsProcessing(true);
+    
+//     const startDateAPI = formatDateForAPI(selectedStartDate);
+//     const endDateAPI = formatDateForAPI(selectedEndDate);
+
+//     try {
+//       // Create not availability in backend
+//       const result = await bookingAPI.createNotAvailability(
+//         vehicleId,
+//         vehicleType,
+//         startDateAPI,
+//         endDateAPI
+//       );
+
+//       if (result.success) {
+//         // Call custom callback if provided
+//         if (onBookingConfirmed) {
+//           const payload = {
+//             vehicleId,
+//             vehicleType,
+//             vehicleName,
+//             startDate: startDateAPI,
+//             endDate: endDateAPI,
+//             startTime,
+//             endTime,
+//             totalDays: totalDays(),
+//             totalPrice: totalPrice(),
+//             pricePerDay
+//           };
+//           onBookingConfirmed(payload);
+//         }
+
+//         setShowTimePopup(false);
+//         showMessage("success", "✓ Booking confirmed successfully!");
+        
+//         // Refresh availability data
+//         await fetchVehicleAvailability();
+        
+//         setTimeout(() => {
+//           setSelectedStartDate(null);
+//           setSelectedEndDate(null);
+//           setActiveInput("start");
+//           onClose();
+//         }, 2000);
+//       } else {
+//         showMessage("error", "❌ Booking failed. Please try again.");
+//       }
+//     } catch (error) {
+//       console.error("Booking error:", error);
+//       showMessage("error", "❌ Booking failed. Please try again.");
+//     } finally {
+//       setIsProcessing(false);
+//     }
+//   };
+
+//   // ============================
+//   // UI HELPERS
+//   // ============================
+
+//   const showMessage = (type, text) => {
+//     setMessage({ type, text });
+//     setTimeout(() => setMessage({ type: "", text: "" }), 4000);
+//   };
+
+//   // ============================
+//   // CALENDAR UI
+//   // ============================
+
+//   const monthName = currentMonth.toLocaleDateString("en-US", {
+//     month: "long",
+//     year: "numeric",
+//   });
+
+//   const daysInMonth = new Date(
+//     currentMonth.getFullYear(),
+//     currentMonth.getMonth() + 1,
+//     0
+//   ).getDate();
+
+//   const firstDay = new Date(
+//     currentMonth.getFullYear(),
+//     currentMonth.getMonth(),
+//     1
+//   ).getDay();
+
+//   const renderCalendarDays = () => {
+//     const days = [];
+//     const offset = firstDay === 0 ? 6 : firstDay - 1;
+
+//     for (let i = 0; i < offset; i++) days.push(<div key={"empty-" + i} />);
+
+//     for (let d = 1; d <= daysInMonth; d++) {
+//       const date = new Date(
+//         currentMonth.getFullYear(),
+//         currentMonth.getMonth(),
+//         d
+//       );
+
+//       const past = isPastDate(date);
+//       const blocked = isDateBlocked(date);
+//       const selected =
+//         selectedStartDate?.getTime() === date.getTime() ||
+//         selectedEndDate?.getTime() === date.getTime();
+//       const inRange = isDateInRange(date);
+
+//       let className =
+//         "h-12 rounded-lg transition relative font-medium flex items-center justify-center ";
+
+//       if (past) {
+//         className += "bg-gray-100 text-gray-400 cursor-not-allowed";
+//       } else if (blocked) {
+//         className +=
+//           "bg-red-100 border-2 border-red-500 text-red-700 relative cursor-not-allowed";
+//       } else if (selected) {
+//         className += "bg-black text-white border-2 border-black";
+//       } else if (inRange) {
+//         className += "bg-blue-100 text-blue-700 border border-blue-300";
+//       } else {
+//         className +=
+//           "bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white hover:opacity-90 cursor-pointer";
+//       }
+
+//       days.push(
+//         <button
+//           key={d}
+//           className={className}
+//           disabled={past || blocked}
+//           onClick={() => handleDateClick(date)}
+//         >
+//           {d}
+//           {blocked && (
+//             <>
+//               <svg
+//                 className="absolute inset-0 w-full h-full pointer-events-none"
+//                 viewBox="0 0 40 40"
+//               >
+//                 <line
+//                   x1="6"
+//                   y1="6"
+//                   x2="34"
+//                   y2="34"
+//                   stroke="#dc2626"
+//                   strokeWidth="3"
+//                   strokeLinecap="round"
+//                 />
+//                 <line
+//                   x1="34"
+//                   y1="6"
+//                   x2="6"
+//                   y2="34"
+//                   stroke="#dc2626"
+//                   strokeWidth="3"
+//                   strokeLinecap="round"
+//                 />
+//               </svg>
+//               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
+//             </>
+//           )}
+//         </button>
+//       );
+//     }
+
+//     return days;
+//   };
+
+//   // ============================
+//   // JSX
+//   // ============================
+
+//   if (!isOpen) return null;
+
+//   return (
+//     <>
+//       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+//         <div className="bg-white w-full max-w-6xl rounded-2xl p-6 overflow-y-auto max-h-[90vh] shadow-xl">
+//           {/* HEADER */}
+//           <div className="flex justify-between items-center mb-6">
+//             <h2 className="text-2xl font-bold flex items-center">
+//               <Calendar className="mr-2 text-blue-600" />
+//               Book Your {vehicleType}
+//             </h2>
+
+//             <button onClick={onClose}>
+//               <X size={24} />
+//             </button>
+//           </div>
+
+//           {/* MESSAGES */}
+//           {message.text && (
+//             <div
+//               className={`p-4 rounded-lg mb-4 flex items-center gap-2 ${
+//                 message.type === "error"
+//                   ? "bg-red-100 text-red-800"
+//                   : message.type === "success"
+//                   ? "bg-green-100 text-green-800"
+//                   : "bg-blue-100 text-blue-800"
+//               }`}
+//             >
+//               {message.type === "success" && <CheckCircle size={20} />}
+//               {message.type === "error" && <AlertCircle size={20} />}
+//               {message.text}
+//             </div>
+//           )}
+
+//           {/* DATE SELECTION AT TOP */}
+//           <div className="grid grid-cols-2 gap-4 mb-6">
+//             <div
+//               className={`rounded-lg p-4 border-2 cursor-pointer transition ${
+//                 activeInput === "start"
+//                   ? "border-blue-500 bg-blue-50 shadow-md"
+//                   : "border-gray-200 hover:border-blue-300"
+//               }`}
+//               onClick={() => setActiveInput("start")}
+//             >
+//               <label className="text-sm font-semibold text-gray-600 block mb-2 flex items-center gap-2">
+//                 <Calendar size={16} />
+//                 Pickup Date
+//               </label>
+//               <p className="text-lg font-bold text-gray-900">
+//                 {formatDateForDisplay(selectedStartDate)}
+//               </p>
+//               <div className="flex items-center gap-2 mt-2">
+//                 <Clock size={16} className="text-gray-400" />
+//                 <input
+//                   type="time"
+//                   value={startTime}
+//                   onChange={(e) => setStartTime(e.target.value)}
+//                   className="text-sm border rounded px-2 py-1"
+//                 />
+//               </div>
+//             </div>
+//             <div
+//               className={`rounded-lg p-4 border-2 cursor-pointer transition ${
+//                 activeInput === "end"
+//                   ? "border-blue-500 bg-blue-50 shadow-md"
+//                   : "border-gray-200 hover:border-blue-300"
+//               }`}
+//               onClick={() => setActiveInput("end")}
+//             >
+//               <label className="text-sm font-semibold text-gray-600 block mb-2 flex items-center gap-2">
+//                 <Calendar size={16} />
+//                 Return Date
+//               </label>
+//               <p className="text-lg font-bold text-gray-900">
+//                 {formatDateForDisplay(selectedEndDate)}
+//               </p>
+//               <div className="flex items-center gap-2 mt-2">
+//                 <Clock size={16} className="text-gray-400" />
+//                 <input
+//                   type="time"
+//                   value={endTime}
+//                   onChange={(e) => setEndTime(e.target.value)}
+//                   className="text-sm border rounded px-2 py-1"
+//                 />
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="grid grid-cols-3 gap-6">
+//             {/* CALENDAR */}
+//             <div className="col-span-2">
+//               {loading && (
+//                 <div className="flex justify-center items-center py-4">
+//                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+//                   <span className="ml-2 text-gray-600">Loading availability...</span>
+//                 </div>
+//               )}
+
+//               <div className="flex justify-between items-center mb-4">
+//                 <button
+//                   onClick={() =>
+//                     setCurrentMonth(
+//                       new Date(
+//                         currentMonth.getFullYear(),
+//                         currentMonth.getMonth() - 1
+//                       )
+//                     )
+//                   }
+//                 >
+//                   <ChevronLeft />
+//                 </button>
+
+//                 <h3 className="text-xl font-bold">{monthName}</h3>
+
+//                 <button
+//                   onClick={() =>
+//                     setCurrentMonth(
+//                       new Date(
+//                         currentMonth.getFullYear(),
+//                         currentMonth.getMonth() + 1
+//                       )
+//                     )
+//                   }
+//                 >
+//                   <ChevronRight />
+//                 </button>
+//               </div>
+
+//               <div className="grid grid-cols-7 gap-2 mb-2">
+//                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+//                   <div key={d} className="text-center font-bold text-gray-600">
+//                     {d}
+//                   </div>
+//                 ))}
+//               </div>
+
+//               <div className="grid grid-cols-7 gap-2">{renderCalendarDays()}</div>
+
+//               {/* Legend */}
+//               <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-gray-200 text-sm">
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-black rounded"></div>
+//                   <span className="text-gray-600">Selected</span>
+//                 </div>
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div>
+//                   <span className="text-gray-600">In Range</span>
+//                 </div>
+//                 <div className="flex items-center gap-2">
+//                   <div className="w-4 h-4 bg-red-100 border-2 border-red-500 rounded relative">
+//                     <X size={12} className="text-red-600 absolute inset-0 m-auto" />
+//                   </div>
+//                   <span className="text-gray-600">Unavailable</span>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* RIGHT SIDE - BOOKING SUMMARY */}
+//             <div>
+//               {selectedStartDate && selectedEndDate && (
+//                 <div className="bg-blue-50 rounded-lg p-4 mb-4">
+//                   <h4 className="font-bold text-gray-800 mb-3">Booking Summary</h4>
+//                   <div className="space-y-2 text-sm">
+//                     <div className="flex justify-between">
+//                       <span className="text-gray-600">Total Days</span>
+//                       <span className="font-semibold">{totalDays()}</span>
+//                     </div>
+//                     <div className="flex justify-between">
+//                       <span className="text-gray-600">Rate/Day</span>
+//                       <span className="font-semibold">₹{pricePerDay}</span>
+//                     </div>
+//                     <div className="flex justify-between text-lg font-bold border-t pt-2">
+//                       <span>Total</span>
+//                       <span className="text-blue-600">₹{totalPrice()}</span>
+//                     </div>
+//                   </div>
+//                 </div>
+//               )}
+
+//               <button
+//                 onClick={handleProceedToSelectTime}
+//                 disabled={!selectedStartDate || !selectedEndDate || loading}
+//                 className="w-full bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white p-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+//               >
+//                 {selectedStartDate && selectedEndDate 
+//                   ? "Proceed to Confirm Booking" 
+//                   : "Confirm Dates"}
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Booking Confirmation Popup */}
+//       <BookingConfirmationPopup
+//         isOpen={showConfirmPopup}
+//         onClose={() => setShowConfirmPopup(false)}
+//         onConfirm={handleTimeConfirmed}
+//         bookingDetails={{
+//           startDate: formatDateForDisplay(selectedStartDate),
+//           endDate: formatDateForDisplay(selectedEndDate),
+//           startTime,
+//           endTime,
+//           totalDays: totalDays(),
+//           totalPrice: totalPrice()
+//         }}
+//         vehicleDetails={{
+//           vehicleName,
+//           vehicleType,
+//           pricePerDay
+//         }}
+//         isProcessing={isProcessing}
+//       />
+
+//       {/* Time Selection Popup */}
+//       <TimeSelectionPopup
+//         isOpen={showTimePopup}
+//         onClose={() => setShowTimePopup(false)}
+//         onConfirm={handleConfirm}
+//         startTime={startTime}
+//         endTime={endTime}
+//         setStartTime={setStartTime}
+//         setEndTime={setEndTime}
+//       />
+//     </>
 //   );
 // };
 

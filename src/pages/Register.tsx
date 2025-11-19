@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 // import
 //   React, { useState } from "react";
 // import axios from "axios";
@@ -195,7 +193,6 @@
 
 // export default Register;
 
->>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
 import React, { useState } from "react";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
@@ -306,9 +303,6 @@ const GoogleLoginButton: React.FC = () => {
   );
 };
 
-<<<<<<< HEAD
-export default GoogleLoginButton;
-=======
 export default GoogleLoginButton;
 
 
@@ -434,4 +428,3 @@ export default GoogleLoginButton;
 // };
 
 // export default GoogleLoginButton;
->>>>>>> 4b041fca879f812eed351c473026be6b8721efa3

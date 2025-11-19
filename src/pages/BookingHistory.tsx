@@ -1329,22 +1329,6 @@ const BookingDetail: React.FC = () => {
               📞 Call
             </button>
           </div>
-<<<<<<< HEAD
- 
-          {/* Popup Chat */}
- <PopupChat
-  isOpen={isChatOpen}
-  onClose={() => setIsChatOpen(false)}
-
-  ownerName={vehicleData?.contactName || "Owner"}
-  ownerAvatar={`https://ui-avatars.com/api/?name=${vehicleData?.contactName || "Owner"}`}
-
-  recipientName="Customer"
-  recipientImage="https://ui-avatars.com/api/?name=Customer"
-/>
-
-
-=======
 
           {/* <PopupChat
             isOpen={isChatOpen}
@@ -1354,17 +1338,10 @@ const BookingDetail: React.FC = () => {
               vehicleData.contactName || "Owner"
             )}&background=6B7280&color=fff&size=48`}
           /> */}
->>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
         </div>
       </div>
     </div>
   );
 };
-<<<<<<< HEAD
- 
-export default BookingHistory;
- 
-=======
 
 export default BookingDetail;
->>>>>>> 4b041fca879f812eed351c473026be6b8721efa3

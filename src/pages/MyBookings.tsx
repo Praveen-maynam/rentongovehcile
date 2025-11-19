@@ -1094,17 +1094,6 @@
 
 
 
-<<<<<<< HEAD
-
-
-
-
-
-
- 
-  
-=======
->>>>>>> 4b041fca879f812eed351c473026be6b8721efa3
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, RefreshCw, X } from "lucide-react";
@@ -1574,12 +1563,5 @@ const MyBookings: React.FC = () => {
     </div>
   );
 };
-<<<<<<< HEAD
- 
-export default MyBookings;
- 
- 
-=======
 
 export default MyBookings;
->>>>>>> 4b041fca879f812eed351c473026be6b8721efa3

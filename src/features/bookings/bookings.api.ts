@@ -2,7 +2,7 @@ import { useNotificationStore } from '../../store/notification.store';
 import { BookingStatus } from './bookings.types';
 import axios from "axios";
 // Simulated API endpoint for now
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:3000/api';
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || 'http://3.110.122.127:3000/api';
 
 export interface CreateBookingParams {
   vehicleId: string;
