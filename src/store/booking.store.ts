@@ -2,15 +2,13 @@
 // import { persist } from "zustand/middleware";
 // import { Booking } from "../types/booking";
  
-// // NEW
+// // ✅ Centralized type for all possible booking statuses
 // export type BookingStatus =
-//   | "Booked"      // Maps from "Pending" or "Confirmed"
-//   | "Cancelled"   // Maps from "Cancelled" or "Rejected"
-//   | "Picked"      // Maps from "Picked"
-//   | "Completed";  // Maps from "Completed"
-
-
-//   // 👈 Add any new status here
+//   | "Booked"
+//   | "Cancelled"
+//   | "Picked"
+//   | "Completed"
+//   | "YourNewStatus"; // 👈 Add any new status here
  
 // // ✅ Store definition interface
 // interface BookingStore {
@@ -92,17 +90,7 @@
 //   )
 // );
  
-
-
-
-
-
-
-
-
-
-
-import { create } from "zustand";
+ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 // ✅ Export BookingStatus with ALL possible statuses used in your app
@@ -216,4 +204,3 @@ export const useBookingStore = create<BookingStore>()(
     }
   )
 );
- 
