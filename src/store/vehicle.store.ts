@@ -4,10 +4,12 @@ import { persist } from 'zustand/middleware';
 export interface VehicleData {
   id: string;
   name: string;
+  number:string;
   price: string;
   transmission: string;
   seats: string;
   fuel: string;
+    engineCapacity?: string;
   ac: boolean;
   rating: string;
   image: string;

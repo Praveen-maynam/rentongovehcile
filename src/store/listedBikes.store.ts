@@ -5,8 +5,10 @@ export interface ListedBike {
   id: string;
   vehicleName: string;
   vehicleNumber:string;
+  engineCapacity?: string;
   farePrice: string;
   transmission?: string;
+  
   fuel?: string;
   photos: string[];
   rating?: number;
@@ -47,6 +49,7 @@ export const useListedBikesStore = create<ListedBikesState>()(
           depositMoney: bike.depositMoney || "0",
           transmission: bike.transmission || "Manual",
           fuel: bike.fuel || "Petrol",
+          engineCapacity: bike.engineCapacity || "",
           photos: bike.photos?.length ? bike.photos : [],
         };
 
@@ -71,6 +74,8 @@ export const useListedBikesStore = create<ListedBikesState>()(
                   transmission:
                     updatedBike.transmission ?? bike.transmission,
                   fuel: updatedBike.fuel ?? bike.fuel,
+                  engineCapacity:
+                    updatedBike.engineCapacity ?? bike.engineCapacity,
                   photos:
                     updatedBike.photos?.length
                       ? updatedBike.photos
@@ -103,4 +108,3 @@ export const useListedBikesStore = create<ListedBikesState>()(
  */
 export const updateBikeInStore = (id: string, data: Partial<ListedBike>) =>
   useListedBikesStore.getState().updateBike(id, data);
-

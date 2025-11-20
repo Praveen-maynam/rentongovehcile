@@ -4,7 +4,8 @@ import { persist } from 'zustand/middleware';
 export interface ListedCar {
   id: string;
   carName: string;
-  vehicleNumber: string;
+  carNumber:string;
+  // vehicleNumber: string;
   model: string;
   fuel: string;
   transmission: string;

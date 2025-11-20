@@ -278,22 +278,22 @@
 //         </div>
 //       </div>
 
-//       {/* ✅ Calendar modal shows on "Not Available" */}
-//       {showCalendarModal && selectedVehicle && (
-//         <AvailabilityDateTimeModal
-//           isOpen={showCalendarModal}
-//           onClose={() => setShowCalendarModal(false)}
-//           onConfirm={(startDate, endDate, startTime, endTime) => {
-//             console.log("Unavailable period for:", selectedVehicle.name, {
-//               startDate,
-//               endDate,
-//               startTime,
-//               endTime,
-//             });
-//             setShowCalendarModal(false);
-//           }}
-//         />
-//       )}
+    //   {/* ✅ Calendar modal shows on "Not Available" */}
+    //   {showCalendarModal && selectedVehicle && (
+    //     <AvailabilityDateTimeModal
+    //       isOpen={showCalendarModal}
+    //       onClose={() => setShowCalendarModal(false)}
+    //       onConfirm={(startDate, endDate, startTime, endTime) => {
+    //         console.log("Unavailable period for:", selectedVehicle.name, {
+    //           startDate,
+    //           endDate,
+    //           startTime,
+    //           endTime,
+    //         });
+    //         setShowCalendarModal(false);
+    //       }}
+    //     />
+    //   )}
 
 //       {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
 //     </>
@@ -301,4 +301,4 @@
 // };
 
 // export default ListedAutos;
-export{}
+export{};

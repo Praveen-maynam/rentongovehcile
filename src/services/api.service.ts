@@ -830,6 +830,8 @@ export const bikeAPI = {
     return apiClient.get(`/getBikeById/${bikeId}`);
   },
  
+
+  
   // ✅ Update bike by ID - MATCHES YOUR BACKEND EXACTLY
   updateBikeById: async (bikeId: string, bikeData: FormData) => {
     console.log("🚀 API Service - Update Bike Request");
@@ -1011,7 +1013,7 @@ export const bookingAPI = {
       carName: bookingData.carName || '',
       carModel: bookingData.carModel || '',
       carBrand: bookingData.carBrand || '',
-      carNumber: bookingData.carNumber || '',
+      CarNumber: bookingData.CarNumber || '',
       fuelType: bookingData.fuelType || '',
       transmissionType: bookingData.transmissionType || '',
       seatingCapacity: bookingData.seatingCapacity || '',

@@ -6018,6 +6018,7 @@ import { Vehicle } from "../types/Vehicle";
 import { Star, Loader2, RefreshCw, Trash2, Edit, MoreVertical, CheckCircle, XCircle, Clock } from "lucide-react";
 import apiService from "../services/api.service";
 import CustomerBookingCalendar from "../components/ui/CustomerBookingCalendar"
+// import VehicleAvailabilityCalendar from "../components/AvailabilityDateTimeModal";
 import WaitingPopup from "../components/ui/WaitingPopup";
 import BookingAcceptance from "../components/ui/BookingAcceptance";
 import BookingRejectModal from "../components/ui/BookingRejectModal";
@@ -6033,7 +6034,6 @@ import Fuel from "../assets/icons/fuel.jpeg";
 import LocationIcon from "../assets/icons/Location.png";
 import CalenderLogo from "../assets/icons/CalanderLogo.png";
 import ClockIcon from "../assets/icons/ClockIcon.png";
-
 interface Review {
   _id: string;
   userId: string;
@@ -6064,6 +6064,7 @@ interface BookingData {
   createdAt?: string;
 }
 
+ 
 // ============================================================================
 // 🔥 NEW BOOKING API SERVICE
 // ============================================================================
@@ -6074,10 +6075,10 @@ const bookingAPIService = {
   createCustomerBooking: async (payload: any) => {
     try {
       console.log("📤 Creating customer booking:", payload);
-      
+     
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-
+ 
       const urlencoded = new URLSearchParams();
       urlencoded.append("userId", payload.userId);
       urlencoded.append("vechileType", payload.vehicleType);
@@ -6094,34 +6095,34 @@ const bookingAPIService = {
       urlencoded.append("ToTime", payload.toTime);
       urlencoded.append("totalHours", payload.totalHours || "0");
       urlencoded.append("totalPrice", payload.totalPrice || "0");
-
+ 
       const response = await fetch('http://3.110.122.127:3000/Bookings', {
         method: 'POST',
         headers: myHeaders,
         body: urlencoded
       });
-      
+     
       const data = await response.json();
-      
+     
       console.log("✅ Booking API Response:", data);
-      
+     
       return { success: response.ok, data };
     } catch (error: any) {
       console.error("❌ Booking API Error:", error);
       return { success: false, error: error.message };
     }
   },
-
+ 
   /**
    * Block dates as unavailable (triggered after booking)
    */
   blockDatesAsUnavailable: async (payload: any) => {
     try {
       console.log("🔒 Blocking dates as unavailable:", payload);
-      
+     
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-
+ 
       const urlencoded = new URLSearchParams();
       urlencoded.append("userId", payload.userId);
       urlencoded.append("vechileType", payload.vehicleType);
@@ -6133,79 +6134,79 @@ const bookingAPIService = {
       urlencoded.append("isNotAvailable", "true");
       urlencoded.append("bikeImages", "");
       urlencoded.append("isCustomerBooking", "true"); // 🔥 Mark as customer booking
-
+ 
       const response = await fetch('http://3.110.122.127:3000/createNotAvailability', {
         method: 'POST',
         headers: myHeaders,
         body: urlencoded
       });
-      
+     
       const data = await response.json();
-      
+     
       console.log("✅ Date Blocking Response:", data);
-      
+     
       return { success: response.ok, data };
     } catch (error: any) {
       console.error("❌ Date Blocking Error:", error);
       return { success: false, error: error.message };
     }
   },
-
+ 
   /**
    * Get all bookings for a vehicle
    */
   getAllBookings: async (vehicleId: string, vehicleType: string) => {
     try {
       console.log(`📡 Fetching all bookings for ${vehicleType} ID: ${vehicleId}`);
-      
+     
       const url = `http://3.110.122.127:3000/getBookings?vehicleId=${vehicleId}&vehicleType=${vehicleType}`;
-      
+     
       const response = await fetch(url);
       const data = await response.json();
-      
+     
       console.log("✅ All Bookings Response:", data);
-      
+     
       return { success: response.ok, bookings: data.bookings || [] };
     } catch (error: any) {
       console.error("❌ Get Bookings Error:", error);
       return { success: false, bookings: [] };
     }
   },
-
+ 
   /**
    * Get vehicle availability (includes owner blocked + customer booked dates)
    */
   getVehicleAvailability: async (vehicleId: string, vehicleType: string) => {
     try {
       console.log(`📡 Fetching availability for ${vehicleType} ID: ${vehicleId}`);
-      
+     
       const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
-      
+     
       const response = await fetch(url);
       const data = await response.json();
-      
+     
       console.log("✅ Availability Response:", data);
-      
+     
       if (!data.success || !data.availability) {
         return { success: false, unavailableDates: [], customerBookedDates: [] };
       }
-
+ 
       // Separate owner blocked and customer booked dates
       const unavailableDates = data.availability
         .filter((item: any) => item.status === "Unavailable")
         .map((item: any) => item.date);
-
+ 
       const customerBookedDates = data.availability
         .filter((item: any) => item.status === "Unavailable" && item.isCustomerBooking)
         .map((item: any) => item.date);
-
+ 
       console.log("📊 Unavailable Dates:", unavailableDates);
       console.log("📊 Customer Booked Dates:", customerBookedDates);
-
-      return { 
-        success: true, 
-        unavailableDates, 
-        customerBookedDates 
+ 
+      return {
+        success: true,
+        unavailableDates,
+        customerBookedDates
       };
     } catch (error: any) {
       console.error("❌ Get Availability Error:", error);
@@ -6263,6 +6264,8 @@ const BookNow: React.FC = () => {
   const [isPollingBookingStatus, setIsPollingBookingStatus] = useState(false);
   const [bookingStatusMessage, setBookingStatusMessage] = useState<string>("");
   
+
+ 
   const [selectedPriceType, setSelectedPriceType] = useState<'day' | 'hour'>('day');
  
   const currentUserId = localStorage.getItem('userId') || "68ff377085e67372e72d1f39";
@@ -6302,8 +6305,7 @@ const BookNow: React.FC = () => {
               duration: 5000,
               position: 'top-center',
             });
-           
-            setTimeout(() => {
+                       setTimeout(() => {
               setShowContactButtons(true);
               setBookingStatusMessage("");
             }, 2000);
@@ -6514,7 +6516,7 @@ const BookNow: React.FC = () => {
       handleTimerComplete();
     }
   }, [waitingTimerSeconds, showWaitingPopup]);
-  
+ 
   useEffect(() => {
     const handleClickOutside = () => setMenuOpenIndex(null);
     if (menuOpenIndex !== null) {
@@ -6598,7 +6600,8 @@ const BookNow: React.FC = () => {
       }
     } catch (error: any) {
       console.error('❌ Error deleting review:', error);
-      toast.error(`Error: ${error.message}`, {
+          
+            toast.error(`Error: ${error.message}`, {
         duration: 3000,
         position: 'top-right',
       });
@@ -6656,7 +6659,6 @@ const BookNow: React.FC = () => {
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("📋 Vehicle ID:", vehicleId);
     localStorage.setItem("vehicleId",vehicleId);
-
  
     try {
       const result = await apiService.review.getReviewsByCarId(vehicleId);
@@ -6812,7 +6814,7 @@ const BookNow: React.FC = () => {
     }
   };
  
-  const formatDateForAPI = (dateString: string): string => {
+   const formatDateForAPI = (dateString: string): string => {
     try {
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
@@ -6861,7 +6863,6 @@ const BookNow: React.FC = () => {
     seats: apiCarData.Carseater || apiCarData.seatingCapacity || '2',
     location: apiCarData.pickupArea || apiCarData.pickupCity || 'Unknown Location',
   } : null);
-
   /**
    * 🔥 MAIN BOOKING CREATION FUNCTION WITH DATE BLOCKING
    */
@@ -7050,8 +7051,7 @@ const BookNow: React.FC = () => {
       setShowContactButtons(true);
     }
   };
- 
-  const handleCloseWaiting = () => {
+   const handleCloseWaiting = () => {
     console.log("❌ WaitingPopup closed manually");
     setShowWaitingPopup(false);
     setWaitingTimerSeconds(180);
@@ -7127,7 +7127,7 @@ const BookNow: React.FC = () => {
       </div>
     );
   }
-
+ 
   if (!currentVehicle) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -7143,7 +7143,7 @@ const BookNow: React.FC = () => {
       </div>
     );
   }
-
+ 
   const vehicleReviews = getReviewsByVehicleId(currentVehicle?.id || '');
   const averageRating = getAverageRating(currentVehicle?.id || '');
   const totalReviews = getTotalReviewCount(currentVehicle?.id || '');
@@ -7156,7 +7156,7 @@ const BookNow: React.FC = () => {
     : (apiReviews.length > 0
         ? calculateAverageRating(apiReviews)
         : averageRating);
-        
+       
   const displayTotalReviews = apiReviews.length > 0
     ? apiReviews.length
     : totalReviews;
@@ -7336,8 +7336,7 @@ const BookNow: React.FC = () => {
                 <p className="text-sm text-gray-500">Vehicle Owner</p>
               </div>
             </div>
- 
-            <div className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
+                        <div className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
               <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
@@ -7427,7 +7426,6 @@ const BookNow: React.FC = () => {
                 // Call createNotAvailability API to block dates
                 const myHeaders = new Headers();
                 myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-
                 const urlencoded = new URLSearchParams();
                 urlencoded.append("userId", userData?._id || currentUserId);
                 urlencoded.append("vechileType", mapVehicleTypeForAPI(currentVehicle?.type));
@@ -7523,7 +7521,7 @@ const BookNow: React.FC = () => {
           </div>
         )}
  
-        {sessionStorage.getItem('editingReviewId') && !loadingReviews && (
+                     {sessionStorage.getItem('editingReviewId') && !loadingReviews && (
           <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 animate-pulse">
             <span className="text-xs text-blue-700 font-medium">
               🔄 Refreshing to show your updated review...
@@ -7709,8 +7707,7 @@ const BookNow: React.FC = () => {
                       </div>
                     </div>
                   </div>
- 
-                  <p className={`text-sm leading-relaxed mt-2 mb-3 ${
+                                   <p className={`text-sm leading-relaxed mt-2 mb-3 ${
                     wasJustEdited
                       ? 'text-gray-900 font-medium'
                       : 'text-gray-700'
@@ -7745,7 +7742,7 @@ const BookNow: React.FC = () => {
           )}
         </div>
       </div>
-
+ 
       {/* MODALS */}
       {showWaitingPopup && (
         <WaitingPopup
@@ -7754,7 +7751,6 @@ const BookNow: React.FC = () => {
           onTimerComplete={handleTimerComplete}
         />
       )}
-
       {showAcceptance && bookingId && (
         <BookingAcceptance
           bookingId={bookingId}
@@ -7799,7 +7795,6 @@ const BookNow: React.FC = () => {
           }}
         />
       )}
-
       {showRejectModal && (
         <BookingRejectModal
           isOpen={showRejectModal}
@@ -7832,7 +7827,6 @@ const BookNow: React.FC = () => {
           }}
         />
       )}
-
       {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -7969,3 +7963,4 @@ const BookNow: React.FC = () => {
 };
  
 export default BookNow;
+ 

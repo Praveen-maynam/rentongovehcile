@@ -990,17 +990,7 @@ const RentalPage: React.FC = () => {
     </div>
   );
 };
-// ============================================
-// 8. DEMO APP
-// ============================================
-const App: React.FC = () => {
-  return (
-    <BookingProvider>
-      <RentalPage />
-      <BookingAcceptanceWithAPI />
-    </BookingProvider>
-  );
-};
+
 
 export default BookingAcceptance;
 

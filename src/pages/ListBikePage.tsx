@@ -1,6 +1,3 @@
-
-
-
 import React, { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { MapPin, Navigation, Loader, Plus, X } from "lucide-react";
@@ -93,6 +90,7 @@ const ListBikePage = () => {
     bikeName: "",
     bikeModel: "",
     bikeNumber: "",
+    bikeEngine: "",
     fuel: "Petrol",
     transmission: "Manual",
     pricePerKm: "",
@@ -121,6 +119,7 @@ const ListBikePage = () => {
       { name: "bikeName", label: "Bike Name", type: "text", required: true, placeholder: "Royal Enfield Classic" },
       { name: "bikeModel", label: "Bike Model", type: "text", required: true, placeholder: "BS4" },
       { name: "bikeNumber", label: "Bike Number", type: "text", required: true, placeholder: "AP12AB1234" },
+      { name: "bikeEngine", label: "Engine Capacity (CC)", type: "text", required: true, placeholder: "350" },
       { name: "kmDriven", label: "KM Driven", type: "text", required: true, placeholder: "15000" },
       { 
         name: "fuel", 
@@ -341,6 +340,11 @@ const ListBikePage = () => {
       return;
     }
 
+    if (!formData.bikeEngine) {
+      alert("Please enter the engine capacity");
+      return;
+    }
+
     if (!formData.pricePerKm || parseFloat(formData.pricePerKm) <= 0) {
       alert("Please enter a valid price per km");
       return;
@@ -381,6 +385,7 @@ const ListBikePage = () => {
     formDataToSend.append("bikeName", formData.bikeName.trim());
     formDataToSend.append("bikeModel", formData.bikeModel.trim());
     formDataToSend.append("bikeNumber", formData.bikeNumber.trim().toUpperCase());
+    formDataToSend.append("bikeEngine", formData.bikeEngine.trim());
     formDataToSend.append("fuel", formData.fuel);
     formDataToSend.append("transmission", formData.transmission);
     formDataToSend.append("pricePerKm", formData.pricePerKm);
@@ -500,7 +505,7 @@ const ListBikePage = () => {
               {formFields.vehicleDetails.map(field => (
                 <div key={field.name}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} {field.required && "*"}
+                    {field.label} 
                   </label>
                   {renderField(field)}
                 </div>
@@ -572,7 +577,7 @@ const ListBikePage = () => {
               {formFields.contactInfo.map(field => (
                 <div key={field.name}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} {field.required && "*"}
+                    {field.label} 
                   </label>
                   {renderField(field)}
                 </div>
@@ -632,7 +637,7 @@ const ListBikePage = () => {
               {formFields.addressFields.map(field => (
                 <div key={field.name} className={field.fullWidth ? "md:col-span-2" : ""}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} {field.required && "*"}
+                    {field.label} 
                   </label>
                   {renderField(field)}
                 </div>
@@ -677,7 +682,7 @@ const ListBikePage = () => {
                 </div>
               )}
 
-              {formData.latitude && formData.longitude && (
+              {/* {formData.latitude && formData.longitude && (
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -689,8 +694,8 @@ const ListBikePage = () => {
                       readOnly
                       className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm"
                     />
-                  </div>
-                  <div>
+                  </div> */}
+                  {/* <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">
                       Longitude
                     </label>
@@ -702,7 +707,7 @@ const ListBikePage = () => {
                     />
                   </div>
                 </div>
-              )}
+              )} */}
 
               {showMap && (
                 <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">

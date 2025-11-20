@@ -1258,7 +1258,20 @@
 //   // MAIN RENDER
 //   // ==============================
 
-//   if (!isOpen) return null;
+              //   <button
+              //     onClick={() =>
+              //       setCurrentMonth(
+              //         new Date(
+              //           currentMonth.getFullYear(),
+              //           currentMonth.getMonth() + 1
+              //         )
+              //       )
+              //     }
+              //     className="p-2 hover:bg-gray-100 rounded-lg transition"
+              //   >
+              //     <ChevronRight size={24} />
+              //   </button>
+              // </div>
 
 //   return (
 //     <>
