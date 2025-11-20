@@ -270,6 +270,7 @@ import NearbyBikes from "./NearByBikes";
  import Register from "./Register";
   // import Time from "../components/ui/Time";
 import VehicleAvailabilityCalendar from "../components/AvailabilityDateTimeModal";
+
 // import OwnerCalendar from "../components/ui/ownerCalender";
 const Rental: React.FC = (FeedbackModal) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
