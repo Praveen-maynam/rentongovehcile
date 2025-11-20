@@ -42,7 +42,11 @@ const Navbar: React.FC = () => {
         {/* Logo */}
         <div
           className="flex items-center cursor-pointer"
+<<<<<<< HEAD
           onClick={() => handleNavigate("/rental")}
+=======
+          onClick={() => handleNavigate("/")}
+>>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
         >
           <img
             src={RentOnGoLogo}
@@ -86,7 +90,11 @@ const Navbar: React.FC = () => {
           {/* Listing Button */}
           <button
             onClick={() => setIsModalOpen(true)}
+<<<<<<< HEAD
             className="bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-all"
+=======
+            className="bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-all"
+>>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
           >
             Listing +
           </button>

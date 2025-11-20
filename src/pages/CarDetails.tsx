@@ -36,7 +36,7 @@ interface VehicleDetails {
   contactNumber: string;
   description: string;
 }
-
+ 
 const defaultVehicle: VehicleDetails = {
   name: "Hyundai Verna",
   CarModel: "Thar",
@@ -58,24 +58,24 @@ const defaultVehicle: VehicleDetails = {
   doorName: "",
   isAvailable: true,
 };
-
+ 
 const CarDetails: React.FC = () => {
   const { carId } = useParams<{ carId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-
+ 
   const { carData, openEditForm } = (location && (location as any).state) || {};
-
+ 
   type VehicleWithImage = VehicleDetails & {
     carImages?: File | string;
   };
-
+ 
   const [editOpen, setEditOpen] = useState<boolean>(true);
   const [editVehicle, setEditVehicle] = useState<VehicleWithImage>({
     ...defaultVehicle,
     carImages: "",
   });
-
+ 
   const [originalVehicle, setOriginalVehicle] = useState<VehicleDetails>(defaultVehicle);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -91,7 +91,7 @@ const CarDetails: React.FC = () => {
     } else if (carData) {
       mapCarData(carData);
     }
-
+ 
     if (openEditForm) {
       setEditOpen(true);
     }
@@ -107,12 +107,12 @@ const CarDetails: React.FC = () => {
     try {
       setIsFetching(true);
       console.log("📡 Fetching car details for ID:", id);
-      
+     
       const response = await apiService.car.getCarById(id);
       const data = response.data || response;
-      
+     
       console.log("📥 Received car data:", data);
-      
+     
       if (data && data.car) {
         mapCarData(data.car);
       } else if (data) {
@@ -125,10 +125,10 @@ const CarDetails: React.FC = () => {
       setIsFetching(false);
     }
   };
-
+ 
   const mapCarData = (car: any) => {
     console.log("🗺️ Mapping car data:", car);
-    
+   
     const mapped: VehicleDetails = {
       ...defaultVehicle,
       name: `${car.CarName || car.name || ""} ${car.CarModel || car.model || ""}`.trim(),
@@ -157,17 +157,17 @@ const CarDetails: React.FC = () => {
       requireAadharCard: car.AadharCardRequired === true,
       depositMoney: car.DepositAmount?.toString() || "",
     };
-    
+   
     console.log("✅ Mapped vehicle data:", mapped);
-    
+   
     setEditVehicle(mapped);
     setOriginalVehicle(mapped);
     setPreview(mapped.image || null);
   };
-
+ 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+   
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
       setEditVehicle((prev) => ({ ...prev, [name]: checked }));
@@ -175,7 +175,7 @@ const CarDetails: React.FC = () => {
       setEditVehicle((prev) => ({ ...prev, [name]: value }));
     }
   };
-
+ 
   const handleCarImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -186,7 +186,7 @@ const CarDetails: React.FC = () => {
       setEditVehicle((prev) => ({ ...prev, image: objectUrl }));
     }
   };
-
+ 
   const handleAdditionalImagesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
@@ -195,15 +195,15 @@ const CarDetails: React.FC = () => {
       setAdditionalImages((prev) => [...prev, ...newImages]);
     }
   };
-
+ 
   const removeAdditionalImage = (index: number) => {
     console.log("🗑️ Removing additional image at index:", index);
     setAdditionalImages((prev) => prev.filter((_, i) => i !== index));
   };
-
+ 
   const handleSave = async () => {
     const vehicleId = editVehicle.id || carId;
-
+ 
     if (!vehicleId) {
       alert("❌ Vehicle ID missing — cannot update.");
       return;
@@ -216,7 +216,7 @@ const CarDetails: React.FC = () => {
       alert("❌ Vehicle name is required");
       return;
     }
-    
+   
     if (!trimmedPrice || trimmedPrice === "0" || Number(trimmedPrice) <= 0) {
       alert("❌ Valid price is required (must be greater than 0)");
       return;
@@ -238,10 +238,10 @@ const CarDetails: React.FC = () => {
 
     try {
       let userId = manualUserId || localStorage.getItem('userId') || editVehicle.userId;
-      
+     
       if (!userId) {
         const possibleKeys = ["user", "userData", "currentUser", "authUser", "userInfo"];
-        
+       
         for (const key of possibleKeys) {
           const stored = localStorage.getItem(key);
           if (stored) {
@@ -264,13 +264,13 @@ const CarDetails: React.FC = () => {
           }
         }
       }
-
+ 
       if (!userId) {
         console.error("❌ userId not found");
         alert("❌ User ID is missing. Please enter it manually in the form.");
         return;
       }
-
+ 
       console.log("✅ Using userId:", userId);
 
       const nameParts = trimmedName.split(" ");
@@ -304,7 +304,7 @@ const CarDetails: React.FC = () => {
       
       const fuelType = editVehicle.fuel.toLowerCase();
       const transmissionType = editVehicle.transmission.toLowerCase();
-      
+     
       formdata.append("fuelType", fuelType);
       formdata.append("transmissionType", transmissionType);
       formdata.append("Ac_available", editVehicle.ac?.toLowerCase() === "ac" ? "true" : "false");
@@ -312,10 +312,10 @@ const CarDetails: React.FC = () => {
       // Pricing
       const rentPerHour = trimmedPrice;
       const rentPerDay = (Number(rentPerHour) * 24).toString();
-      
+     
       formdata.append("RentPerHour", rentPerHour);
       formdata.append("RentPerDay", rentPerDay);
-      
+     
       console.log("  RentPerHour:", rentPerHour);
       console.log("  RentPerDay:", rentPerDay);
       
@@ -373,14 +373,14 @@ const CarDetails: React.FC = () => {
         formdata.append("carImages", carImage);
         console.log("📸 Added main image:", carImage.name);
       }
-      
+     
       if (additionalImages.length > 0) {
         additionalImages.forEach((img, index) => {
           formdata.append("carImages", img);
           console.log(`📸 Adding additional image ${index + 1}:`, img.name);
         });
       }
-
+ 
       console.log("🚀 Sending update request for car ID:", vehicleId);
       console.log("📦 Complete FormData:");
       for (const [key, value] of formdata.entries()) {
@@ -393,9 +393,9 @@ const CarDetails: React.FC = () => {
       
       const response = await apiService.car.updateCarById(vehicleId, formdata);
       const result = response.data || response;
-
+ 
       console.log("📥 API Response:", result);
-
+ 
       if (result?.message?.toLowerCase().includes("updated") || result?.success || result?.car) {
         alert("✅ Car updated successfully!");
         console.log("🎉 Updated car data:", result.car);
@@ -416,14 +416,14 @@ const CarDetails: React.FC = () => {
     } catch (error: any) {
       console.error("❌ Update Error:", error);
       console.error("❌ Error Response:", error.response?.data);
-      
-      const errorMsg = error.response?.data?.message || 
-                      error.response?.data?.error || 
-                      error.message || 
+     
+      const errorMsg = error.response?.data?.message ||
+                      error.response?.data?.error ||
+                      error.message ||
                       "Unknown error occurred";
-      
+     
       const errorDetails = error.response?.data?.details || "";
-      
+     
       alert(
         `❌ Failed to update car:\n\n${errorMsg}\n${errorDetails ? '\n' + errorDetails : ''}\n\n` +
         `Please check:\n` +
@@ -436,29 +436,29 @@ const CarDetails: React.FC = () => {
       setIsLoading(false);
     }
   };
-
+ 
   const handleDelete = async () => {
     const vehicleId = editVehicle.id || carId;
-    
+   
     if (!vehicleId) {
       alert("❌ Vehicle ID missing — cannot delete.");
       return;
     }
-
+ 
     if (!window.confirm(`⚠️ Are you sure you want to delete "${editVehicle.name}"?\n\nThis action cannot be undone.`)) {
       return;
     }
-
+ 
     setIsLoading(true);
-
+ 
     try {
       console.log("🗑️ Deleting car with ID:", vehicleId);
-      
+     
       const response = await apiService.car.deleteCarById(vehicleId);
       console.log("✅ Delete Response:", response);
-
+ 
       const data = response.data || response;
-
+ 
       if (data?.message?.toLowerCase().includes("deleted") || data?.success) {
         alert("✅ Car deleted successfully!");
         navigate("/listed", { state: { refresh: true } });
@@ -473,7 +473,7 @@ const CarDetails: React.FC = () => {
       setIsLoading(false);
     }
   };
-
+ 
   if (isFetching) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -638,7 +638,7 @@ const CarDetails: React.FC = () => {
                 Edit Car Details
               </h2>
             </div>
-
+ 
             {editOpen && (
               <div className="space-y-5 max-h-[70vh] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#E5E5E5 transparent' }}>
                 

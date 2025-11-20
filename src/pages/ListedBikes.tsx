@@ -518,19 +518,21 @@ import { Loader2 } from "lucide-react";
 import { useListedBikesStore } from "../store/listedBikes.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
-import VehicleAvailabilityCalendar from "../components/Available";
+import VehicleAvailabilityCalendar from "../components/AvailabilityDateTimeModal";
 import FilterCard from "../components/ui/FilterCard";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import BikeLogo from "../assets/icons/BikeLogo.png";
-import FilterLogo from "../assets/icons/FilterLogo.png";
-import Search from "../assets/icons/Search.png";
 import Location from "../assets/icons/Location.png";
+import Search from "../assets/icons/Search.png";
+import FilterLogo from "../assets/icons/FilterLogo.png";
+// import Search from "../assets/icons/Search.png";
+// import Location from "../assets/icons/Location.png";
 import BikeCC from "../assets/icons/BikeCC.png";
 import Petrol from "../assets/icons/Petrol.png";
 import enfield from "../assets/images/Enfield.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 
-
+  
 interface Vehicle {
   name: string;
   number: string;
@@ -576,7 +578,7 @@ useEffect(() => {
 
       let userId = localStorage.getItem('userId');
       if (!userId || userId.length !== 24 || !/^[a-f0-9]{24}$/i.test(userId)) {
-        userId = "690308d03a633b650dbc7e61";
+        userId = "68f32259cea8a9fa88029262";
       }
 
       console.log("🏍️ Fetching bikes for user:", userId);
@@ -1021,33 +1023,21 @@ useEffect(() => {
 
    
  {showCalendarModal && selectedVehicle && loggedInUserId && (
-  // <VehicleAvailabilityCalendar
-  //   isOpen={showCalendarModal}
-  //   onClose={() => {
-  //     setShowCalendarModal(false);
-  //     setSelectedVehicle(null);
-  //     setError("");
-  //     // Refresh the car list to show updated availability
-  //     const fetchMyCars = async () => {
-  //       // Your existing fetchMyCars logic
-  //     };
-  //     fetchMyCars();
-  //   }}
-  //   VechileId={selectedVehicle._id || selectedVehicle.id || ""}
-  //   vehicleType="Bike"
-  //   userId={loggedInUserId}
-  // />
-
-
-
-
-   <VehicleAvailabilityCalendar
+  <VehicleAvailabilityCalendar
     isOpen={showCalendarModal}
-    onClose={() => setShowCalendarModal(false)}
+    onClose={() => {
+      setShowCalendarModal(false);
+      setSelectedVehicle(null);
+      setError("");
+      // Refresh the car list to show updated availability
+      const fetchMyCars = async () => {
+        // Your existing fetchMyCars logic
+      };
+      fetchMyCars();
+    }}
     VechileId={selectedVehicle._id || selectedVehicle.id || ""}
-    vehicleType="Car"
-    userId={localStorage.getItem('userId') || "68f32259cea8a9fa88029262"}
-    userRole="owner" // 🔥 Shows three dots, edit/delete, "Owner Calendar" heading
+    vehicleType="Bike"
+    userId={loggedInUserId}
   />
 )}
 

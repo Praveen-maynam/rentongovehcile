@@ -1,5 +1,6 @@
 
 
+<<<<<<< HEAD
 // import React, { useState, useEffect } from "react";
 // import { useParams, useNavigate, useLocation } from "react-router-dom";
 // import { Loader2 } from "lucide-react";
@@ -1433,6 +1434,8 @@
 
 
 
+=======
+>>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
 
 
 
@@ -1648,6 +1651,7 @@ const BookingDetail: React.FC = () => {
   
   const priceUnit = isCar ? "/hr" : "/km";
 
+<<<<<<< HEAD
   // ✅ SIMPLIFIED: Use real booking ID or fallback to vehicle ID
   const currentUserId = localStorage.getItem('userId') || 'temp-user-' + Date.now();
   
@@ -1659,6 +1663,20 @@ const BookingDetail: React.FC = () => {
   console.log("📦 Booking ID (receiverId):", chatBookingId);
   console.log("🚗 Vehicle ID:", vehicleData._id);
   console.log("====================================");
+=======
+ const currentUserId = localStorage.getItem('userId') || 'temp-user-' + Date.now();
+const vehicleOwnerId = vehicleData.userId || vehicleData.ownerId || vehicleData.contactNumber || 'temp-owner-' + Date.now();
+const bookingCustomerId = passedBooking?.userId || currentUserId;
+const chatBookingId = passedBooking?._id || passedBooking?.bookingId || vehicleId || 'temp-booking-' + Date.now();
+
+console.log("📋 ========= CHAT IDS DEBUG =========");
+console.log("👤 Current User ID:", currentUserId);
+console.log("🏢 Vehicle Owner ID:", vehicleOwnerId);
+console.log("👥 Customer ID:", bookingCustomerId);
+console.log("💬 Booking ID:", chatBookingId);
+console.log("🚗 Vehicle ID:", vehicleData._id);
+console.log("====================================");
+>>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6 flex justify-center">
@@ -1792,6 +1810,7 @@ const BookingDetail: React.FC = () => {
             </button>
           </div>
 
+<<<<<<< HEAD
           {/* Popup Chat Component */}
           <PopupChat
             isOpen={isChatOpen}
@@ -1807,10 +1826,52 @@ const BookingDetail: React.FC = () => {
             apiUrl="http://3.110.122.127:3000"
             vehicleId={vehicleData._id}
           />
+=======
+
+<PopupChat
+  isOpen={isChatOpen}
+  onClose={() => {
+    console.log("❌ Closing chat...");
+    setIsChatOpen(false);
+  }}
+  
+  // ✅ CRITICAL: Customer View (user is viewing vehicle details and chatting with owner)
+  pageRole="customerView"
+  
+  // ✅ Current user (customer viewing the vehicle)
+  currentUserId={currentUserId}
+  currentUserName={localStorage.getItem('userName') || 'You'}
+  
+  // ✅ Owner info (vehicle owner)
+  ownerId={vehicleOwnerId}
+  ownerName={vehicleData.contactName || "Vehicle Owner"}
+  ownerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${vehicleData.contactName || "Owner"}`}
+  
+  // ✅ Customer info (current user)
+  customerId={currentUserId}
+  customerName={localStorage.getItem('userName') || 'You'}
+  customerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localStorage.getItem('userName') || 'You'}`}
+  
+ 
+  bookingId={chatBookingId}
+
+  vehicleId={vehicleData._id}
+  
+  // ✅ API URL
+  apiUrl="http://3.110.122.127:3000"
+  
+  // ✅ Real-time enabled
+  useRealtime={true}
+/>
+>>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
         </div>
       </div>
     </div>
   );
 };
 
+<<<<<<< HEAD
 export default BookingDetail;
+=======
+export default BookingDetail;
+>>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c

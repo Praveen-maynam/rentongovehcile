@@ -77,7 +77,6 @@
 //               onChange={(e) => setSearchText(e.target.value)}
 //             />
 //           </div>
-
 //           <button
 //             onClick={() => setIsFilterOpen(true)}
 //             className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
@@ -307,14 +306,12 @@ const Rental: React.FC = (FeedbackModal) => {
       <div className="px-6 py-4">
         <PromoSlides />
       </div>
-
       {/* 🔹 Search & Date Pickers */}
       <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h3 className="text-lg font-semibold mb-2 text-gray-800">
             Select Date & Time
           </h3>
-
           {/* ✅ Horizontal Calendars */}
           <div className="flex flex-col sm:flex-row gap-3">
             <DateTimePicker
@@ -353,12 +350,10 @@ const Rental: React.FC = (FeedbackModal) => {
 {/* <Time/>  */}
           </div>
         </div>
-
         {/* 🔹 Search & Filter */}
         <div className="flex gap-2 w-full md:w-auto">
           <div className="flex items-center bg-white border rounded-full relative flex-1 md:w-[300px] h-[40px]">
             <Search className="w-6 h-6 text-gray-500 mr-4 ml-2" />
-
             <input
               type="text"
               placeholder="Search by name or location..."

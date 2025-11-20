@@ -337,7 +337,8 @@ import { useLocation } from "react-router-dom";
 // import OwnerDashboard from "pages/OwnerDashboard";
 // import { BookingProvider } from "./components/ui/BookingAcceptance";
 // import BookingAcceptanceWithAPI from "./components/ui/BookingAcceptanceWrapper";
-
+import SupportTicketsPage from "./components/ui/SupportTickets";
+import RaiseTicketPage from "./components/ui/RaiseTicketPage";
 const App: React.FC = () => {
 
   const location = useLocation();
@@ -367,9 +368,7 @@ const App: React.FC = () => {
         <Route path="/list-car" element={<ListCarPage />} />
         <Route path="/list-bike" element={<ListBikePage />} />
         
-        {/* Listed Vehicles */}
-        <Route path="/listed" element={<ListedCars />} />
-        <Route path="/listed-bikes" element={<ListedBikes />} />
+     
         
         {/* Nearby Vehicles */}
         <Route path="/nearby-cars" element={<Nearbycars />} />
@@ -407,6 +406,20 @@ const App: React.FC = () => {
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/help" element={<Help />} />
         
+
+  <Route path="/listed" element={<ListedCars />} />
+  <Route path="/listed-bike" element={<ListedBikes />} />
+
+
+
+<Route path="/Support-Ticket" element={<SupportTicketsPage />} />
+<Route path="/Raise-Ticket" element={<RaiseTicketPage />} />
+
+
+<Route path="/feedback" element={<Feedback />} />
+{/* <Route path="/notifications" element={<Notifications />} /> */}
+{/* <Route path="/reviews/:id" element={<VehicleReviews />} /> */}
+
         {/* Calendar */}
         <Route path="/calendar" element={<Calendar onConfirm={() => console.log("Confirmed!")} />} />
         <Route path="/calendar-screen" element={<CalendarScreen />} />

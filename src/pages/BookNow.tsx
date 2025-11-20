@@ -2915,7 +2915,6 @@
 // import Driver from "../assets/icons/DriverLogo.png";
 // import Acicon from "../assets/icons/AutomaticLogo.png";
 // import Petrol from "../assets/icons/Petrol.png";
-
 // interface Review {
 //   _id: string;
 //   userId: string;

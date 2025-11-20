@@ -11,6 +11,10 @@ import {
   HelpCircle,
   X,
   Globe,
+<<<<<<< HEAD
+=======
+  Ticket,
+>>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
 } from "lucide-react";
 import ProfileOption from "../components/profileOption";
 import ProfileCard from "../components/profilecard";
@@ -140,6 +144,15 @@ const Profile: React.FC = () => {
           />
 
           <ProfileOption
+<<<<<<< HEAD
+=======
+          icon={Ticket}
+          label="Support"
+          onClick={()=> navigate("/Support-Ticket")}
+          />
+
+          <ProfileOption
+>>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
             icon={HelpCircle}
             label="Help"
             onClick={() => navigate("/help")}
