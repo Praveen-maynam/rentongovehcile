@@ -571,7 +571,7 @@ import { Loader2 } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
-// import AvailabilityDateTime from "../components/AvailabilityDateTimeModal";
+
 import VehicleAvailabilityCalendar from "../components/Available";
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
@@ -855,18 +855,19 @@ useEffect(() => {
         {/* Dropdown */}
         <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3 bg-white cursor-pointer border-2 border-transparent hover:border-blue-500 hover:shadow-xl transition-all duration-200">
           <img src={CarLogo} alt="Dropdown Logo" className="w-[24px] h-[24px]" />
-          <select
-            className="flex-1 ml-2 border-none outline-none text-sm bg-transparent"
-            value={selectedList}
-            onChange={(e) => {
-              const value = e.target.value as "cars" | "bikes";
-              setSelectedList(value);
-              if (value === "bikes") navigate("/listed-bikes");
-            }}
-          >
-            <option value="cars">Listed Cars</option>
-            <option value="bikes">Listed Bikes</option>
-          </select>
+       <select
+  className="flex-1 ml-2 border-none outline-none text-sm bg-transparent"
+  value={selectedList}
+  onChange={(e) => {
+    const value = e.target.value as "cars" | "bikes";
+    setSelectedList(value);
+    if (value === "bikes") navigate("/listed-bikes");
+  }}
+>
+  <option value="cars">Listed Cars</option>
+  <option value="bikes">Listed Bikes</option>
+</select>
+
         </div>
 
         {/* Search + Filter */}

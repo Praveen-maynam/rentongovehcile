@@ -264,7 +264,7 @@ import Filter from "../assets/icons/FilterLogo.png";
 import NearbyCars from "./NearByCars";
 import NearbyBikes from "./NearByBikes";
  import { useNavigate } from "react-router-dom";
- import Call from "../components/ui/Call";
+ 
  import Chat from "../components/ui/PopupChat";
  import Register from "./Register";
   // import Time from "../components/ui/Time";

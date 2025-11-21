@@ -408,7 +408,8 @@ const App: React.FC = () => {
         
 
   <Route path="/listed" element={<ListedCars />} />
-  <Route path="/listed-bike" element={<ListedBikes />} />
+ <Route path="/listed-bikes" element={<ListedBikes />} />
+
 
 
 

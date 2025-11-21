@@ -959,10 +959,10 @@ const handleChatClick = (booking: BookingHistory, e: React.MouseEvent) => {
                     
                   </div>
                 </div>
-                <div className="bg-[#FFF9E6] px-2.5 py-1 rounded-md flex items-center gap-1 flex-shrink-0">
+                {/* <div className="bg-[#FFF9E6] px-2.5 py-1 rounded-md flex items-center gap-1 flex-shrink-0">
                   <span className="text-[#FFB800] text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>★</span>
                   <span className="text-sm font-semibold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif' }}>4.2</span>
-                </div>
+                </div> */}
               </div>
 
               <div className="flex items-baseline gap-1 mb-3 w-fit cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all">

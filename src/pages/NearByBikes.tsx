@@ -3,10 +3,6 @@ import { useNavigate } from "react-router-dom";
 import apiService from "../services/api.service";
 import { useLocation } from "../store/location.context";
 import BikeCard from "../components/ui/BikeCard";
-<<<<<<< HEAD
-
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
 interface Bike {
   _id: string;
   bikeName: string;
@@ -43,10 +39,6 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit, filters }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [range] = useState(5); // Default range in kilometers
-<<<<<<< HEAD
-
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   useEffect(() => {
     const fetchNearbyBikes = async () => {
       try {
@@ -87,10 +79,6 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit, filters }) => {
           averageRating: bike.averageRating || "0.0",
           totalReviews: bike.totalReviews || 0,
         }));
-<<<<<<< HEAD
-
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
         setVehicles(formattedBikes);
       } catch (err: any) {
         console.error("Error fetching nearby bikes:", err);
@@ -99,11 +87,7 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit, filters }) => {
         setLoading(false);
       }
     };
-<<<<<<< HEAD
-
-=======
  
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
     fetchNearbyBikes();
   }, [coordinates, currentCity, range]);
 
@@ -184,8 +168,4 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit, filters }) => {
   );
 };
 
-<<<<<<< HEAD
 export default NearbyBikes;
-=======
-export default NearbyBikes;
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c

@@ -797,10 +797,6 @@ export const carAPI = {
       throw error;
     }
   },
-<<<<<<< HEAD
-
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   // Delete car by ID
   deleteCarById: async (carId: string) => {
     return apiClient.delete(`/deleteCar/${carId}`);
@@ -885,27 +881,11 @@ export const bikeAPI = {
     return apiClient.get(`/myVehicles/${userId}`);
   }
 };
-<<<<<<< HEAD
-=======
 // ==================== REVIEW APIs ====================
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
 
 // ==================== REVIEW APIs ====================
  
 export const reviewAPI = {
-<<<<<<< HEAD
-  // Create a new review
-  createReview: async (reviewData: {
-    carId?: string;
-    vehicleId?: string;
-    vehicleType?: 'car' | 'bike';
-    bikeId?: string;
-    userId: string;
-    rating: number;
-    comment: string;
-  }) => {
-    return apiClient.post('/addReview', reviewData);
-=======
   // Create a new review - Backend expects application/x-www-form-urlencoded
   createReview: async (reviewData: {
     userId: string;
@@ -934,7 +914,6 @@ urlencoded.append('rating', String(reviewData.rating));
     return apiClient.post('/addReview', urlencoded, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   },
  
   // Get reviews by car ID (also works for bikes)
@@ -951,10 +930,6 @@ urlencoded.append('rating', String(reviewData.rating));
   updateReviewById: async (reviewId: string, reviewData: {
     rating?: number;
     comment?: string;
-<<<<<<< HEAD
-  }) => {
-    return apiClient.put(`/updateReview/${reviewId}`, reviewData);
-=======
     carId?: string;
     bikeId?: string;
     autoId?: string;
@@ -985,7 +960,6 @@ urlencoded.append('rating', String(reviewData.rating));
     return apiClient.put(`/updateReview/${reviewId}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   },
  
   // Get average rating for a vehicle using query parameters
@@ -1334,10 +1308,6 @@ export const userAPI = {
   updateUserProfile: async (userId: string, userData: any) => {
     return apiClient.put(`/users/${userId}`, userData);
   },
-<<<<<<< HEAD
-
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   // Mark notification as read
   markNotificationRead: async (notificationId: string) => {
     return apiClient.put(`/notifications/${notificationId}/read`);
@@ -1355,8 +1325,4 @@ const apiService = {
   utils: utils, // ✅ IMPORTANT: Export utils so it can be accessed as apiService.utils
 };
  
-<<<<<<< HEAD
 export default apiService;
-=======
-export default apiService;
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c

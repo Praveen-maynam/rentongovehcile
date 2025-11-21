@@ -3,10 +3,6 @@ import { useNavigate } from "react-router-dom";
 import apiService from "../services/api.service";
 import { useLocation } from "../store/location.context";
 import VehicleCard from "../components/ui/VehicleCard";
-<<<<<<< HEAD
-
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
 interface Car {
   _id: string;
   CarName: string;
@@ -63,13 +59,8 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters }) => {
           : Array.isArray(responseData.data)
           ? responseData.data
           : responseData.cars || [];
-<<<<<<< HEAD
-
-        const formattedCars: Car[] = carsArray.map((car: any) => ({
-=======
  
          const formattedCars: Car[] = carsArray.map((car: any) => ({
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
           _id: car._id,
           CarName: car.CarName || "Unknown Car",
           CarModel: car.CarModel || "N/A",
@@ -91,10 +82,6 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters }) => {
           averageRating: car.averageRating || "0.0",
           totalReviews: car.totalReviews || 0,
         }));
-<<<<<<< HEAD
-
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
         setVehicles(formattedCars);
       } catch (err: any) {
         console.error("Error fetching nearby cars:", err);
@@ -103,11 +90,7 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters }) => {
         setLoading(false);
       }
     };
-<<<<<<< HEAD
-
-=======
  
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
     fetchNearbyCars();
   }, [coordinates, currentCity, range]);
 
@@ -178,10 +161,7 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters }) => {
               vehicle={{
                 id: v._id,
                 name: v.CarName,
-<<<<<<< HEAD
-=======
                 
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
                 price: v.RentPerDay,
                 transmission: v.transmissionType,
                 fuel: v.fuelType,

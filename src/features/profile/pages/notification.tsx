@@ -397,18 +397,6 @@
 // };
  
 // export default Notification;
-<<<<<<< HEAD
-=======
-
-
-
-
-
-
-
-
-
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotificationStore } from "../../../store/notification.store";
@@ -416,7 +404,6 @@ import CarLogo from "../../../assets/icons/CarLogo.png";
 import AutomaticLogo from "../../../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../../../assets/icons/DriverLogo.png";
 import { Bell, Check, X, Trash2 } from "lucide-react";
-<<<<<<< HEAD
  
 const Notifications: React.FC = () => {
   const navigate = useNavigate();
@@ -430,21 +417,6 @@ const Notifications: React.FC = () => {
     addNotification
   } = useNotificationStore();
  
-=======
-
-const Notifications: React.FC = () => {
-  const navigate = useNavigate();
-  const { 
-    notifications, 
-    unreadCount, 
-    markAsRead, 
-    markAllAsRead, 
-    deleteNotification, 
-    clearAllNotifications,
-    addNotification 
-  } = useNotificationStore();
-
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   // TEST NOTIFICATIONS - Remove after testing
   useEffect(() => {
     if (notifications.length === 0) {
@@ -458,10 +430,7 @@ const Notifications: React.FC = () => {
         vehicleName: 'Hyundai Verna',
         bookingId: 'booking-456'
       });
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
       // Booking confirmation notification
       addNotification({
         type: 'booking_confirmed',
@@ -472,10 +441,7 @@ const Notifications: React.FC = () => {
         vehicleName: 'Toyota Innova',
         bookingId: 'booking-789'
       });
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
       // Bike booking notification
       addNotification({
         type: 'booking_confirmed',
@@ -486,10 +452,7 @@ const Notifications: React.FC = () => {
         vehicleName: 'Royal Enfield Classic',
         bookingId: 'booking-101'
       });
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
       // General notification
       addNotification({
         type: 'general',
@@ -502,47 +465,29 @@ const Notifications: React.FC = () => {
       });
     }
   }, []);
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   // Helper to calculate "time ago"
   const getTimePassed = (timestamp: string | Date): string => {
     const date = typeof timestamp === "string" ? new Date(timestamp) : timestamp;
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
-<<<<<<< HEAD
  
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMinutes / 60);
     const diffDays = Math.floor(diffHours / 24);
  
-=======
-
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMinutes / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
     if (diffMinutes < 1) return "Just now";
     if (diffMinutes < 60) return `${diffMinutes} min ago`;
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
     return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
   };
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   // Feedback click handler
   const handleFeedbackClick = (notification: any) => {
     markAsRead(notification.id);
     navigate(`/feedback?vehicleId=${notification.vehicleId}&vehicleName=${notification.vehicleName}&bookingId=${notification.bookingId}`);
   };
-<<<<<<< HEAD
  
-=======
-
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto">
@@ -558,11 +503,7 @@ const Notifications: React.FC = () => {
                 </span>
               )}
             </div>
-<<<<<<< HEAD
  
-=======
-
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
             {notifications.length > 0 && (
               <div className="flex gap-2">
                 {unreadCount > 0 && (
@@ -586,20 +527,12 @@ const Notifications: React.FC = () => {
               </div>
             )}
           </div>
-<<<<<<< HEAD
  
-=======
-
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
           <p className="text-xs sm:text-sm text-gray-600">
             Stay updated with your ride completions and booking updates
           </p>
         </div>
-<<<<<<< HEAD
  
-=======
-
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
         {/* Notifications List */}
         <div className="space-y-3 sm:space-y-4">
           {notifications.length === 0 ? (
@@ -627,10 +560,7 @@ const Notifications: React.FC = () => {
                     alt="Vehicle Logo"
                     className="w-12 h-12 rounded-md object-cover flex-shrink-0"
                   />
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     {/* Title and Time */}
@@ -642,18 +572,12 @@ const Notifications: React.FC = () => {
                         {getTimePassed(notification.timestamp)}
                       </span>
                     </div>
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
                     {/* Message */}
                     <p className="text-sm text-gray-600 mb-3">
                       {notification.message}
                     </p>
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
                     {/* Vehicle Details */}
                     {notification.vehicleName && (
                       <div className="bg-gray-50 rounded-lg p-3 mb-4">
@@ -675,10 +599,7 @@ const Notifications: React.FC = () => {
                         </div>
                       </div>
                     )}
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
                     {/* Action Buttons */}
                     <div className="flex items-center justify-between gap-3 mt-4">
                       <div className="flex flex-wrap gap-3">
@@ -691,10 +612,7 @@ const Notifications: React.FC = () => {
                             Give Feedback
                           </button>
                         )}
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
                         {/* Booking Confirmation Buttons - Optional Yes/No */}
                         {notification.type === "booking_confirmed" && (
                           <>
@@ -702,10 +620,7 @@ const Notifications: React.FC = () => {
                           </>
                         )}
                       </div>
-<<<<<<< HEAD
  
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
                       {/* Mark as Read / Delete */}
                       <div className="flex items-center gap-2">
                         {!notification.read && (
@@ -736,13 +651,8 @@ const Notifications: React.FC = () => {
     </div>
   );
 };
-<<<<<<< HEAD
  
 export default Notifications;
  
  
  
-=======
-
-export default Notifications;
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c

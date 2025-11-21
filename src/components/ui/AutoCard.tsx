@@ -97,7 +97,4 @@
 // };
 
 // export default AutoCard;
-<<<<<<< HEAD
-=======
 export{};
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c

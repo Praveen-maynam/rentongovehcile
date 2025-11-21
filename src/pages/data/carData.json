@@ -1,0 +1,88 @@
+{
+  "carBrands": [
+    "Maruti Suzuki",
+    "Hyundai",
+    "Tata",
+    "Mahindra",
+    "Kia",
+    "Honda",
+    "Toyota",
+    "Ford",
+    "Renault",
+    "Nissan",
+    "Volkswagen",
+    "Skoda",
+    "MG",
+    "Jeep",
+    "BMW",
+    "Mercedes-Benz",
+    "Audi"
+  ],
+  "carModels": {
+    "Maruti Suzuki": ["Alto", "Swift", "Baleno", "Dzire", "Wagon R", "Ertiga", "Brezza", "Ciaz", "S-Cross", "XL6"],
+    "Hyundai": ["i10", "i20", "Verna", "Venue", "Creta", "Alcazar", "Tucson", "Elantra"],
+    "Tata": ["Tiago", "Tigor", "Altroz", "Nexon", "Harrier", "Safari", "Punch"],
+    "Mahindra": ["XUV300", "XUV500", "XUV700", "Scorpio", "Thar", "Bolero"],
+    "Kia": ["Seltos", "Sonet", "Carens", "Carnival"],
+    "Honda": ["Amaze", "City", "Jazz", "WR-V", "Civic"],
+    "Toyota": ["Fortuner", "Innova Crysta", "Glanza", "Urban Cruiser", "Camry"]
+  },
+  "fuelTypes": [
+    "Petrol",
+    "Diesel",
+    "CNG",
+    "Electric",
+    "Hybrid",
+    "Petrol + CNG"
+  ],
+  "transmissionTypes": [
+    "Manual",
+    "Automatic",
+    "AMT",
+    "CVT",
+    "DCT",
+    "iMT"
+  ],
+  "years": [
+    "2024",
+    "2023",
+    "2022",
+    "2021",
+    "2020",
+    "2019",
+    "2018",
+    "2017",
+    "2016",
+    "2015"
+  ],
+  "colors": [
+    "White",
+    "Black",
+    "Silver",
+    "Grey",
+    "Red",
+    "Blue",
+    "Brown",
+    "Beige",
+    "Orange",
+    "Yellow",
+    "Green"
+  ],
+  "seatingCapacity": [
+    "2",
+    "4",
+    "5",
+    "7",
+    "8"
+  ],
+  "vehicleTypes": [
+    "Sedan",
+    "Hatchback",
+    "SUV",
+    "MUV",
+    "Coupe",
+    "Convertible",
+    "Pickup Truck",
+    "Van"
+  ]
+}

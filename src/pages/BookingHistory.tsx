@@ -1,6 +1,5 @@
 
 
-<<<<<<< HEAD
 // import React, { useState, useEffect } from "react";
 // import { useParams, useNavigate, useLocation } from "react-router-dom";
 // import { Loader2 } from "lucide-react";
@@ -1434,14 +1433,6 @@
 
 
 
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
-
-
-
-
-
-
 
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -1651,19 +1642,6 @@ const BookingDetail: React.FC = () => {
   
   const priceUnit = isCar ? "/hr" : "/km";
 
-<<<<<<< HEAD
-  // ✅ SIMPLIFIED: Use real booking ID or fallback to vehicle ID
-  const currentUserId = localStorage.getItem('userId') || 'temp-user-' + Date.now();
-  
-  // Use real booking ID if available, otherwise use vehicle ID
-  const chatBookingId = passedBooking?._id || passedBooking?.bookingId || vehicleId || 'temp-booking-' + Date.now();
-
-  console.log("📋 ========= CHAT IDS DEBUG =========");
-  console.log("👤 Current User ID (senderId):", currentUserId);
-  console.log("📦 Booking ID (receiverId):", chatBookingId);
-  console.log("🚗 Vehicle ID:", vehicleData._id);
-  console.log("====================================");
-=======
  const currentUserId = localStorage.getItem('userId') || 'temp-user-' + Date.now();
 const vehicleOwnerId = vehicleData.userId || vehicleData.ownerId || vehicleData.contactNumber || 'temp-owner-' + Date.now();
 const bookingCustomerId = passedBooking?.userId || currentUserId;
@@ -1676,7 +1654,6 @@ console.log("👥 Customer ID:", bookingCustomerId);
 console.log("💬 Booking ID:", chatBookingId);
 console.log("🚗 Vehicle ID:", vehicleData._id);
 console.log("====================================");
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6 flex justify-center">
@@ -1810,39 +1787,21 @@ console.log("====================================");
             </button>
           </div>
 
-<<<<<<< HEAD
-          {/* Popup Chat Component */}
-          <PopupChat
-            isOpen={isChatOpen}
-            onClose={() => {
-              console.log("❌ Closing chat...");
-              setIsChatOpen(false);
-            }}
-            ownerName={vehicleData.contactName || "Vehicle Owner"}
-            ownerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${vehicleData.contactName || "Owner"}`}
-            userId={currentUserId}
-            receiverId={chatBookingId}
-            bookingId={chatBookingId}
-            apiUrl="http://3.110.122.127:3000"
-            vehicleId={vehicleData._id}
-          />
-=======
-
-<PopupChat
+     <PopupChat
   isOpen={isChatOpen}
   onClose={() => {
     console.log("❌ Closing chat...");
     setIsChatOpen(false);
   }}
   
-  // ✅ CRITICAL: Customer View (user is viewing vehicle details and chatting with owner)
+  // ✅ Customer View
   pageRole="customerView"
   
-  // ✅ Current user (customer viewing the vehicle)
+  // ✅ Current user (customer)
   currentUserId={currentUserId}
   currentUserName={localStorage.getItem('userName') || 'You'}
   
-  // ✅ Owner info (vehicle owner)
+  // ✅ Owner info (from vehicle data)
   ownerId={vehicleOwnerId}
   ownerName={vehicleData.contactName || "Vehicle Owner"}
   ownerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${vehicleData.contactName || "Owner"}`}
@@ -1852,9 +1811,10 @@ console.log("====================================");
   customerName={localStorage.getItem('userName') || 'You'}
   customerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localStorage.getItem('userName') || 'You'}`}
   
- 
+  // ✅ Booking ID
   bookingId={chatBookingId}
-
+  
+  // ✅ Vehicle ID
   vehicleId={vehicleData._id}
   
   // ✅ API URL
@@ -1863,15 +1823,10 @@ console.log("====================================");
   // ✅ Real-time enabled
   useRealtime={true}
 />
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
         </div>
       </div>
     </div>
   );
 };
 
-<<<<<<< HEAD
 export default BookingDetail;
-=======
-export default BookingDetail;
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
