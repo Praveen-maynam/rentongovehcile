@@ -797,10 +797,6 @@ export const carAPI = {
       throw error;
     }
   },
-<<<<<<< HEAD
-
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   // Delete car by ID
   deleteCarById: async (carId: string) => {
     return apiClient.delete(`/deleteCar/${carId}`);
@@ -885,15 +881,10 @@ export const bikeAPI = {
     return apiClient.get(`/myVehicles/${userId}`);
   }
 };
-<<<<<<< HEAD
-=======
-// ==================== REVIEW APIs ====================
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
 
 // ==================== REVIEW APIs ====================
  
 export const reviewAPI = {
-<<<<<<< HEAD
   // Create a new review
   createReview: async (reviewData: {
     carId?: string;
@@ -905,36 +896,6 @@ export const reviewAPI = {
     comment: string;
   }) => {
     return apiClient.post('/addReview', reviewData);
-=======
-  // Create a new review - Backend expects application/x-www-form-urlencoded
-  createReview: async (reviewData: {
-    userId: string;
-    vehicleId: string;
-    vehicleType: string;
-    bookingId?: string;
-    rating: number;
-    
-    comment: string;
-  }) => {
-    console.log("📝 Creating review with data:", reviewData);
-    
-    // Backend expects URL-encoded format with specific field names
-    const urlencoded = new URLSearchParams();
-urlencoded.append('userId', reviewData.userId);
-urlencoded.append('vechileType', reviewData.vehicleType); // Backend uses 'vechileType'
-urlencoded.append('VechileId', reviewData.vehicleId); // Backend uses 'VechileId'
-urlencoded.append('BookingId', reviewData.bookingId || 'TEMP-BOOKING-ID');
-
-urlencoded.append('review', reviewData.comment);
-urlencoded.append('rating', String(reviewData.rating));
-
-    
-    console.log("📤 URL Encoded payload:", urlencoded.toString());
-    
-    return apiClient.post('/addReview', urlencoded, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   },
  
   // Get reviews by car ID (also works for bikes)
@@ -951,41 +912,8 @@ urlencoded.append('rating', String(reviewData.rating));
   updateReviewById: async (reviewId: string, reviewData: {
     rating?: number;
     comment?: string;
-<<<<<<< HEAD
   }) => {
     return apiClient.put(`/updateReview/${reviewId}`, reviewData);
-=======
-    carId?: string;
-    bikeId?: string;
-    autoId?: string;
-  }) => {
-    console.log("🔄 Updating review:", { reviewId, reviewData });
-    
-    // Backend expects FormData format with specific field names
-    const formData = new FormData();
-    
-    if (reviewData.autoId !== undefined) {
-      formData.append('AutoId', reviewData.autoId || '');
-    }
-    if (reviewData.bikeId !== undefined) {
-      formData.append('BikeId', reviewData.bikeId || '');
-    }
-    if (reviewData.carId !== undefined) {
-      formData.append('CarId', reviewData.carId || '');
-    }
-    if (reviewData.comment !== undefined) {
-      formData.append('reviewText', reviewData.comment); // Backend uses 'reviewText'
-    }
-    if (reviewData.rating !== undefined) {
-      formData.append('rating', String(reviewData.rating));
-    }
-    
-    console.log("📤 FormData payload prepared");
-    
-    return apiClient.put(`/updateReview/${reviewId}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   },
  
   // Get average rating for a vehicle using query parameters
@@ -1309,7 +1237,7 @@ export const userAPI = {
     platform: string;
   }) => {
     console.log("📝 User Register API - Input data:", userData);
-   
+
     // Backend expects application/x-www-form-urlencoded format
     const urlencoded = new URLSearchParams();
     Object.entries(userData).forEach(([key, value]) => {
@@ -1317,30 +1245,62 @@ export const userAPI = {
         urlencoded.append(key, String(value));
       }
     });
-   
+
     console.log("📝 User Register API - URL Encoded:", urlencoded.toString());
-   
+
     return apiClient.post('/register', urlencoded, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
   },
- 
+
   // Get user profile
   getUserProfile: async (userId: string) => {
     return apiClient.get(`/users/${userId}`);
   },
- 
+
   // Update user profile
   updateUserProfile: async (userId: string, userData: any) => {
     return apiClient.put(`/users/${userId}`, userData);
   },
-<<<<<<< HEAD
+};
 
-=======
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
+// ==================== NOTIFICATION APIs ====================
+
+export const notificationAPI = {
+  // Get all notifications for a user
+  getNotifications: async (userId: string) => {
+    console.log("🔔 Get Notifications for user:", userId);
+    return apiClient.get(`/getNotifications/${userId}`);
+  },
+
+  // Get unread notifications count
+  getUnreadCount: async (userId: string) => {
+    console.log("🔔 Get Unread Count for user:", userId);
+    return apiClient.get(`/getUnreadNotificationsCount/${userId}`);
+  },
+
   // Mark notification as read
-  markNotificationRead: async (notificationId: string) => {
-    return apiClient.put(`/notifications/${notificationId}/read`);
+  markAsRead: async (notificationId: string) => {
+    console.log("🔔 Mark notification as read:", notificationId);
+    return apiClient.put(`/markNotificationRead/${notificationId}`);
+  },
+
+  // Mark all notifications as read
+  markAllAsRead: async (userId: string) => {
+    console.log("🔔 Mark all notifications as read for user:", userId);
+    return apiClient.put(`/markAllNotificationsRead/${userId}`);
+  },
+
+  // Delete notification
+  deleteNotification: async (notificationId: string) => {
+    console.log("🔔 Delete notification:", notificationId);
+    return apiClient.delete(`/deleteNotification/${notificationId}`);
+  },
+
+  // Clear all notifications
+  clearAllNotifications: async (userId: string) => {
+    console.log("🔔 Clear all notifications for user:", userId);
+    return apiClient.delete(`/clearAllNotifications/${userId}`);
   },
 };
  
@@ -1352,11 +1312,8 @@ const apiService = {
   booking: bookingAPI,
   availability: availabilityAPI,
   user: userAPI,
+  notification: notificationAPI,
   utils: utils, // ✅ IMPORTANT: Export utils so it can be accessed as apiService.utils
 };
- 
-<<<<<<< HEAD
+
 export default apiService;
-=======
-export default apiService;
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c

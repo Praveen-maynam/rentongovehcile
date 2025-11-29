@@ -299,9 +299,11 @@
 //   );
 // };
  
-// export default App;import React from "react";
+// export default App;
+import React, { useEffect } from "react";
 
 import { Routes, Route } from "react-router-dom";
+import { useNotificationStore } from "./store/notification.store";
  
 // Layout
 import Navbar from "./components/layout/NavBar";
@@ -339,9 +341,26 @@ import { useLocation } from "react-router-dom";
 // import BookingAcceptanceWithAPI from "./components/ui/BookingAcceptanceWrapper";
 import SupportTicketsPage from "./components/ui/SupportTickets";
 import RaiseTicketPage from "./components/ui/RaiseTicketPage";
-const App: React.FC = () => {
+import GlobalBookingModals from "./components/ui/GlobalBookingModals";
 
+const App: React.FC = () => {
   const location = useLocation();
+  const { initializeSocket, disconnectSocket, fetchNotifications } = useNotificationStore();
+
+  // Initialize notification socket when user is logged in
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      console.log('🔔 App: Initializing notification system for user:', userId);
+      initializeSocket(userId);
+      fetchNotifications(userId);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      disconnectSocket();
+    };
+  }, [initializeSocket, disconnectSocket, fetchNotifications]);
 
   // Pages where navbar should NOT show
   const hideNavbarPaths = ["/",  "/register"];
@@ -397,7 +416,7 @@ const App: React.FC = () => {
         {/* Notifications & Feedback */}
         <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/feedback" element={<Feedback />} />
-        
+       
         {/* Location */}
         <Route path="/change-location" element={<ChangeLocation />} />
         
@@ -425,8 +444,8 @@ const App: React.FC = () => {
         <Route path="/calendar-screen" element={<CalendarScreen />} />
       </Routes>
       
-      {/* Global Booking Acceptance Modal */}
-      {/* <BookingAcceptanceWithAPI /> */}
+      {/* Global Booking Modals - Shows on all screens */}
+      <GlobalBookingModals />
     </div>
     // </BookingProvider>
   );

@@ -13,10 +13,6 @@ export const useBooking = () => {
     startDate: Date;
     endDate: Date;
     userId: string;
-<<<<<<< HEAD
-=======
-    
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c
   }) => {
     setIsLoading(true);
     setError(null);

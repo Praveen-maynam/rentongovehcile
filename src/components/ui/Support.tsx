@@ -1,291 +1,360 @@
-// import React, { useState, useRef, useEffect } from 'react';
-// import { useSocket, useChatMessages } from '../../hooks/useSocket';
-// import { useAuth } from '../../hooks/useAuth';
-// import { IoSend, IoAttach, IoCheckmarkDone } from 'react-icons/io5';
+import React, { useState, useEffect } from 'react';
+import { Ticket, Plus, ArrowLeft, Clock, CheckCircle, AlertCircle, XCircle, Calendar, Tag, FileText } from 'lucide-react';
 
-// interface SupportMessage {
-//     id?: string;
-//     senderId: string;
-//     senderName?: string;
-//     message: string;
-//     timestamp?: string;
-//     isSent?: boolean;
-// }
+function SupportTicketsPage() {
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-// /**
-//  * Support Chat Component for real-time ticket communication
-//  */
-// const SupportChat: React.FC<{ ticketId: string }> = ({ ticketId }) => {
-//     const { user } = useAuth();
-//     const userId = user?.userId || user?.id || 'anonymous';
-//     const userName = user?.name || user?.username || 'Anonymous';
+  // Fetch tickets when component mounts 
+  useEffect(() => {
+    fetchTickets();
+  }, []);
 
-//     // Initialize socket connection
-//     useSocket(userId, 'customer');
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-//     // Use chat messages hook
-//     const { messages, isTyping, sendMessage, sendTypingIndicator, clearMessages } =
-//         useChatMessages(ticketId);
+      // Get userId from localStorage or use default
+      const userId = localStorage.getItem('userId') || '69034c0e60c1777de040024f';
 
-//     // Local state
-//     const [messageInput, setMessageInput] = useState('');
-//     const [isComposing, setIsComposing] = useState(false);
-//     const [sentMessages, setSentMessages] = useState<Set<string>>(new Set());
-//     const messagesEndRef = useRef<HTMLDivElement>(null);
-//     const typingTimeoutRef = useRef<NodeJS.Timeout>();
+      const requestOptions = {
+        method: "GET",
+        
+      };
 
-//     /**
-//      * Auto-scroll to bottom when new messages arrive
-//      */
-//     useEffect(() => {
-//         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-//     }, [messages]);
+      const response = await fetch(
+        `http://192.168.1.20:3000/getTicketsByUser/${userId}`,
+        requestOptions
+      );
 
-//     /**
-//      * Handle message input change with typing indicator
-//      */
-//     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//         const value = e.target.value;
-//         setMessageInput(value);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tickets');
+      }
 
-//         // Send typing indicator
-//         if (!isComposing) {
-//             sendTypingIndicator(true);
-//             setIsComposing(true);
-//         }
+      const result = await response.json();
+      console.log('Fetched Tickets:', result);
 
-//         // Clear previous timeout
-//         if (typingTimeoutRef.current) {
-//             clearTimeout(typingTimeoutRef.current);
-//         }
+      // Parse based on your API response structure
+      if (result.tickets && Array.isArray(result.tickets)) {
+        setTickets(result.tickets);
+      } else if (result.data && Array.isArray(result.data)) {
+        setTickets(result.data);
+      } else if (Array.isArray(result)) {
+        setTickets(result);
+      } else {
+        setTickets([]);
+      }
+    } catch (err) {
+      console.error('Error fetching tickets:', err);
+      setError('Failed to load tickets. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-//         // Stop typing indicator after 1 second of inactivity
-//         typingTimeoutRef.current = setTimeout(() => {
-//             sendTypingIndicator(false);
-//             setIsComposing(false);
-//         }, 1000);
-//     };
+  const handleCreateTicket = () => {
+    // Navigate to raise ticket page
+    window.location.href = "/raise-ticket";
+  };
 
-//     /**
-//      * Handle sending message
-//      */
-//     const handleSendMessage = (e: React.FormEvent) => {
-//         e.preventDefault();
+  const handleBack = () => {
+    window.history.back();
+  };
 
-//         if (!messageInput.trim()) return;
+  const getStatusIcon = (status) => {
+    const statusLower = status?.toLowerCase() || '';
+    
+    if (statusLower === 'open' || statusLower === 'pending') {
+      return <Clock size={20} className="text-orange-600" />;
+    } else if (statusLower === 'in progress' || statusLower === 'inprogress') {
+      return <AlertCircle size={20} className="text-blue-600" />;
+    } else if (statusLower === 'resolved' || statusLower === 'closed') {
+      return <CheckCircle size={20} className="text-green-600" />;
+    } else if (statusLower === 'cancelled') {
+      return <XCircle size={20} className="text-red-600" />;
+    }
+    return <Ticket size={20} className="text-gray-600" />;
+  };
 
-//         const messageId = `${Date.now()}_${Math.random()}`;
+  const getStatusColor = (status) => {
+    const statusLower = status?.toLowerCase() || '';
+    
+    if (statusLower === 'open' || statusLower === 'pending') {
+      return 'bg-orange-100 text-orange-700 border-orange-200';
+    } else if (statusLower === 'in progress' || statusLower === 'inprogress') {
+      return 'bg-blue-100 text-blue-700 border-blue-200';
+    } else if (statusLower === 'resolved' || statusLower === 'closed') {
+      return 'bg-green-100 text-green-700 border-green-200';
+    } else if (statusLower === 'cancelled') {
+      return 'bg-red-100 text-red-700 border-red-200';
+    }
+    return 'bg-gray-100 text-gray-700 border-gray-200';
+  };
 
-//         // Send message through socket
-//         sendMessage(messageInput);
-//         setSentMessages((prev) => new Set(prev).add(messageId));
+  const getPriorityColor = (priority) => {
+    const priorityLower = priority?.toLowerCase() || '';
+    
+    if (priorityLower === 'high' || priorityLower === 'urgent') {
+      return 'bg-red-50 text-red-700 border-red-200';
+    } else if (priorityLower === 'medium') {
+      return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+    } else if (priorityLower === 'low') {
+      return 'bg-green-50 text-green-700 border-green-200';
+    }
+    return 'bg-gray-50 text-gray-700 border-gray-200';
+  };
 
-//         setMessageInput('');
-//         setIsComposing(false);
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+    }
+  };
 
-//         // Stop typing indicator
-//         sendTypingIndicator(false);
-//     };
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
-//     /**
-//      * Get typing users message
-//      */
-//     const getTypingMessage = (): string => {
-//         const typingUsers = Object.values(isTyping)
-//             .filter((t) => t.isTyping)
-//             .map((t) => t.userName || 'Someone')
-//             .join(', ');
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+<div className="bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white px-6 py-6 shadow-lg">
+  <div className="max-w-6xl mx-auto flex items-center gap-4">
+    <button 
+      onClick={handleBack}
+      className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+    >
+      <ArrowLeft size={24} />
+    </button>
+    <div className="flex-1">
+      <h1 className="text-2xl font-bold">Support Tickets</h1>
+      <p className="text-blue-100 text-sm mt-1">View and manage your support requests</p>
+    </div>
+  </div>
+</div>
 
-//         if (typingUsers) {
-//             return `${typingUsers} ${Object.values(isTyping).filter((t) => t.isTyping).length > 1 ? 'are' : 'is'} typing...`;
-//         }
-//         return '';
-//     };
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* Create New Ticket Button */}
+       <button
+  onClick={handleCreateTicket}
+  className="w-full bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] 
+             text-white py-4 rounded-xl flex items-center justify-center 
+             gap-3 font-semibold text-lg hover:shadow-lg hover:scale-[1.02] 
+             transition-all mb-8"
+>
+  <div className="bg-white/20 rounded-full p-1.5">
+    <Plus size={22} />
+  </div>
+  Create New Support Ticket
+</button>
 
-//     return (
-//         <div className="flex flex-col h-full bg-gray-50">
-//             {/* Header */}
-//             <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-4 shadow-lg flex justify-between items-center">
-//                 <div>
-//                     <h2 className="text-lg font-bold">Support Ticket #{ticketId.slice(-6)}</h2>
-//                     <p className="text-sm text-blue-100">Chat with support team</p>
-//                 </div>
-//             </div>
 
-//             {/* Messages Container */}
-//             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-//                 {messages.length === 0 ? (
-//                     <div className="flex items-center justify-center h-full text-center">
-//                         <div className="text-gray-500">
-//                             <p className="text-lg font-semibold mb-2">No messages yet</p>
-//                             <p className="text-sm">Start a conversation by sending a message</p>
-//                         </div>
-//                     </div>
-//                 ) : (
-//                     <>
-//                         {messages.map((msg, index) => {
-//                             const isOwn = msg.senderId === userId;
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+            <p className="text-red-700 font-medium">{error}</p>
+            <button 
+              onClick={fetchTickets}
+              className="mt-2 text-sm text-red-700 underline hover:text-red-800 font-medium"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
 
-//                             return (
-//                                 <div
-//                                     key={index}
-//                                     className={`flex ${isOwn ? 'justify-end' : 'justify-start'} gap-2`}
-//                                 >
-//                                     <div
-//                                         className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg shadow-sm ${
-//                                             isOwn
-//                                                 ? 'bg-blue-500 text-white rounded-br-none'
-//                                                 : 'bg-white text-gray-900 border border-gray-200 rounded-bl-none'
-//                                         }`}
-//                                     >
-//                                         {msg.senderName && !isOwn && (
-//                                             <p className="text-xs font-semibold mb-1 opacity-75">
-//                                                 {msg.senderName}
-//                                             </p>
-//                                         )}
-//                                         <p className="text-sm break-words">{msg.message}</p>
-//                                         <div
-//                                             className={`text-xs mt-2 flex items-center gap-1 ${
-//                                                 isOwn ? 'text-blue-100' : 'text-gray-400'
-//                                             }`}
-//                                         >
-//                                             {msg.timestamp && (
-//                                                 <span>
-//                                                     {new Date(msg.timestamp).toLocaleTimeString(
-//                                                         'en-US',
-//                                                         {
-//                                                             hour: '2-digit',
-//                                                             minute: '2-digit',
-//                                                         }
-//                                                     )}
-//                                                 </span>
-//                                             )}
-//                                             {isOwn && (
-//                                                 <IoCheckmarkDone size={14} />
-//                                             )}
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                             );
-//                         })}
+        {/* My Tickets Section */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-100 p-2 rounded-lg">
+                <Ticket size={24} className="text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">My Tickets</h2>
+                <p className="text-sm text-gray-500">All your support requests</p>
+              </div>
+            </div>
+            {tickets.length > 0 && (
+              <div className="bg-blue-50 px-4 py-2 rounded-lg">
+                <span className="text-lg font-bold text-blue-700">{tickets.length}</span>
+                <span className="text-sm text-blue-600 ml-1">
+                  {tickets.length === 1 ? 'ticket' : 'tickets'}
+                </span>
+              </div>
+            )}
+          </div>
 
-//                         {/* Typing Indicator */}
-//                         {getTypingMessage() && (
-//                             <div className="flex justify-start">
-//                                 <div className="text-gray-500 text-sm italic px-4 py-2 bg-white rounded-lg border border-gray-200">
-//                                     {getTypingMessage()}
-//                                 </div>
-//                             </div>
-//                         )}
+          {/* Loading State */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mb-4"></div>
+              <p className="text-gray-600 font-medium">Loading your tickets...</p>
+            </div>
+          )}
 
-//                         <div ref={messagesEndRef} />
-//                     </>
-//                 )}
-//             </div>
+          {/* Empty State */}
+          {!loading && tickets.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="bg-gray-100 p-6 rounded-full mb-6">
+                <Ticket size={64} strokeWidth={1.5} className="text-gray-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                No tickets found
+              </h3>
+              <p className="text-gray-600 mb-6 max-w-md">
+                You haven't created any support tickets yet. Click the button above to create your first ticket.
+              </p>
+            </div>
+          )}
 
-//             {/* Message Input */}
-//             <div className="border-t border-gray-200 bg-white px-6 py-4 shadow-lg">
-//                 <form onSubmit={handleSendMessage} className="flex gap-3">
-//                     <input
-//                         type="text"
-//                         value={messageInput}
-//                         onChange={handleInputChange}
-//                         onKeyPress={(e) => {
-//                             if (e.key === 'Enter' && !e.shiftKey) {
-//                                 e.preventDefault();
-//                                 handleSendMessage(e as any);
-//                             }
-//                         }}
-//                         placeholder="Type your message..."
-//                         className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-//                     />
+          {/* Tickets List */}
+          {!loading && tickets.length > 0 && (
+            <div className="space-y-4">
+              {tickets.map((ticket) => (
+                <div
+                  key={ticket._id}
+                  className="border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer bg-gradient-to-br from-white to-gray-50"
+                >
+                  {/* Header Row */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex gap-4 flex-1">
+                      <div className="mt-1">
+                        {getStatusIcon(ticket.status)}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 text-xl mb-2">
+                          {ticket.subject || 'Untitled Ticket'}
+                        </h3>
+                        <p className="text-gray-700 text-base leading-relaxed mb-4">
+                          {ticket.description || 'No description provided'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
-//                     <button
-//                         type="button"
-//                         className="px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-//                         title="Attach file"
-//                     >
-//                         <IoAttach size={20} />
-//                     </button>
+                  {/* Badges Row */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg border ${getStatusColor(ticket.status)}`}>
+                      <span className="w-2 h-2 rounded-full bg-current"></span>
+                      {ticket.status || 'Pending'}
+                    </span>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg border ${getPriorityColor(ticket.priority)}`}>
+                      <Tag size={14} />
+                      {ticket.priority || 'Medium'} Priority
+                    </span>
+                  </div>
 
-//                     <button
-//                         type="submit"
-//                         disabled={!messageInput.trim()}
-//                         className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-semibold"
-//                     >
-//                         <IoSend size={20} />
-//                         Send
-//                     </button>
-//                 </form>
-//             </div>
-//         </div>
-//     );
-// };
+                  {/* Details Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
+                    {/* Vehicle Type */}
+                    {ticket.vehicleType && (
+                      <div className="flex items-start gap-2">
+                        <div className="bg-purple-100 p-1.5 rounded-md mt-0.5">
+                          <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase">Vehicle Type</p>
+                          <p className="text-sm font-semibold text-gray-900">{ticket.vehicleType}</p>
+                        </div>
+                      </div>
+                    )}
 
-// /**
-//  * Support Dashboard Component
-//  */
-// const SupportDashboard: React.FC = () => {
-//     const { user } = useAuth();
-//     const userId = user?.userId || user?.id || 'anonymous';
+                    {/* Created Date */}
+                    {ticket.createdAt && (
+                      <div className="flex items-start gap-2">
+                        <div className="bg-blue-100 p-1.5 rounded-md mt-0.5">
+                          <Calendar size={16} className="text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase">Created</p>
+                          <p className="text-sm font-semibold text-gray-900">{formatDate(ticket.createdAt)}</p>
+                          <p className="text-xs text-gray-500">{formatDateTime(ticket.createdAt)}</p>
+                        </div>
+                      </div>
+                    )}
 
-//     // Initialize socket
-//     const { isConnected, isLoading, error } = useSocket(userId, 'customer');
+                    {/* Booking ID */}
+                    {ticket.bookingId && (
+                      <div className="flex items-start gap-2">
+                        <div className="bg-green-100 p-1.5 rounded-md mt-0.5">
+                          <FileText size={16} className="text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase">Booking ID</p>
+                          <p className="text-sm font-semibold text-gray-900 font-mono">
+                            {ticket.bookingId.slice(-8)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
-//     const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
+                    {/* Ticket ID */}
+                    {ticket._id && (
+                      <div className="flex items-start gap-2">
+                        <div className="bg-orange-100 p-1.5 rounded-md mt-0.5">
+                          <Tag size={16} className="text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 uppercase">Ticket ID</p>
+                          <p className="text-sm font-semibold text-gray-900 font-mono">
+                            #{ticket._id.slice(-8)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-//     if (isLoading) {
-//         return (
-//             <div className="flex items-center justify-center h-screen bg-gray-50">
-//                 <div className="text-center">
-//                     <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-//                     <p className="text-gray-600">Connecting to support...</p>
-//                 </div>
-//             </div>
-//         );
-//     }
+                  {/* Review Section */}
+                  {ticket.review && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-xs font-semibold text-blue-700 uppercase mb-1">Review</p>
+                        <p className="text-sm text-gray-700">{ticket.review}</p>
+                        {ticket.reviewDate && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            Reviewed on {formatDateTime(ticket.reviewDate)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-//     if (error) {
-//         return (
-//             <div className="flex items-center justify-center h-screen bg-gray-50">
-//                 <div className="text-center">
-//                     <p className="font-semibold text-red-600 mb-2">Connection Error</p>
-//                     <p className="text-sm text-gray-600">{error}</p>
-//                 </div>
-//             </div>
-//         );
-//     }
-
-//     return (
-//         <div className="flex h-screen bg-gray-100">
-//             {/* Status Indicator */}
-//             <div className="fixed top-4 right-4 z-50">
-//                 <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow">
-//                     <div
-//                         className={`w-3 h-3 rounded-full ${
-//                             isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-//                         }`}
-//                     ></div>
-//                     <span className="text-sm font-medium text-gray-600">
-//                         {isConnected ? 'Connected' : 'Disconnected'}
-//                     </span>
-//                 </div>
-//             </div>
-
-//             {selectedTicket ? (
-//                 <SupportChat ticketId={selectedTicket} />
-//             ) : (
-//                 <div className="w-full flex items-center justify-center">
-//                     <div className="text-center">
-//                         <p className="text-gray-600 text-lg mb-4">
-//                             Select a support ticket to start chatting
-//                         </p>
-//                     </div>
-//                 </div>
-//             )}
-//         </div>
-//     );
-// };
-
-// export default SupportDashboard;
-export{}
+export default SupportTicketsPage;

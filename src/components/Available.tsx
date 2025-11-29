@@ -753,7 +753,7 @@ const VehicleAvailabilityCalendar: React.FC<VehicleAvailabilityCalendarProps> = 
       return;
     }
 
-    if (!confirm("Are you sure you want to delete this blocked date range?")) {
+    if (!window.confirm("Are you sure you want to delete this blocked date range?")) {
       return;
     }
 

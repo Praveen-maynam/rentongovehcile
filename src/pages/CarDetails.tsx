@@ -487,8 +487,7 @@ const CarDetails: React.FC = () => {
 
   const dummyImages = [
     "https://e7.pngegg.com/pngimages/768/421/png-clipart-car-computer-icons-sedan-auto-detailing-auto-driving-rectangle-thumbnail.png",
-    "https://e7.pngegg.com/pngimages/768/421/png-clipart-car-computer-icons-sedan-auto-detailing-auto-driving-rectangle-thumbnail.png",
-    "https://e7.pngegg.com/pngimages/768/421/png-clipart-car-computer-icons-sedan-auto-detailing-auto-driving-rectangle-thumbnail.png"
+ "https://png.pngtree.com/png-vector/20191201/ourmid/pngtree-car-vector-logo-design-png-image_2066853.jpg"
   ];
 
   const realImages = additionalImages.length > 0 
@@ -496,10 +495,10 @@ const CarDetails: React.FC = () => {
     : [preview || editVehicle.image || BlackCar];
   
   const carouselImages = [...realImages];
-  while (carouselImages.length < 4) {
+  while (carouselImages.length < 3) {
     carouselImages.push(dummyImages[carouselImages.length - 1] || dummyImages[0]);
   }
-  carouselImages.splice(4);
+  carouselImages.splice(3);
 
   return (
     <div className="min-h-screen bg-white px-4 sm:px-6 py-6 sm:py-10">
@@ -515,12 +514,42 @@ const CarDetails: React.FC = () => {
       <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-8">
         <div className="flex-1 bg-white">
           <div className="flex flex-col md:flex-row gap-6 mb-6">
-            <div className="relative w-300px md:w-[420px] h-[300px] flex-shrink-0 cursor-pointer rounded-[10px] overflow-hidden border-2 border-transparent hover:border-[#0066FF] transition-all duration-200">
+          <div className="relative w-300px md:w-[420px] h-[300px] flex-shrink-0 rounded-[10px] border-2 border-transparent hover:border-[#0066FF] transition-all duration-200">
               <img
                 src={carouselImages[currentImageIndex]}
                 alt={editVehicle.name}
-                className="w-full h-full object-cover transition-all duration-500"
+                className="w-full h-full object-cover transition-all duration-500 rounded-[10px]"
               />
+
+              {/* Left Arrow - Always Visible */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentImageIndex((prev) => (prev === 0 ? carouselImages.length - 1 : prev - 1));
+                }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-white hover:bg-gray-100 rounded-full flex items-center justify-center shadow-2xl z-20 transition-all cursor-pointer border border-gray-200"
+                type="button"
+                aria-label="Previous image"
+              >
+                <svg className="w-6 h-6 text-gray-800 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* Right Arrow - Always Visible */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentImageIndex((prev) => (prev === carouselImages.length - 1 ? 0 : prev + 1));
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-white hover:bg-gray-100 rounded-full flex items-center justify-center shadow-2xl z-20 transition-all cursor-pointer border border-gray-200"
+                type="button"
+                aria-label="Next image"
+              >
+                <svg className="w-6 h-6 text-gray-800 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
 
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1.5">
                 {carouselImages.map((_, idx) => (
@@ -530,7 +559,7 @@ const CarDetails: React.FC = () => {
                     className={`h-2 rounded-full transition-all ${
                       idx === currentImageIndex 
                         ? "bg-[#0066FF] w-6" 
-                        : "bg-white/60 w-2"
+                        : "bg-gray-700 w-2" 
                     }`}
                   />
                 ))}
@@ -547,11 +576,11 @@ const CarDetails: React.FC = () => {
                     >
                       {editVehicle.name}
                     </h1>
-                    {editVehicle.isAvailable && (
+                    {/* {editVehicle.isAvailable && (
                       <span className="px-3 py-1 bg-[#10B981] text-white text-[12px] font-semibold rounded-full" style={{ fontFamily: 'Inter, sans-serif' }}>
                         Available
                       </span>
-                    )}
+                    )} */}
                   </div>
                   {editVehicle.CarNumber && (
                     <p className="text-[16px] text-[#666666] mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -559,10 +588,10 @@ const CarDetails: React.FC = () => {
                     </p>
                   )}
                 </div>
-                <div className="bg-[#FFF9E6] px-2.5 py-1 rounded-md flex items-center gap-1 flex-shrink-0">
+                {/* <div className="bg-[#FFF9E6] px-2.5 py-1 rounded-md flex items-center gap-1 flex-shrink-0">
                   <span className="text-[#FFB800] text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>★</span>
                   <span className="text-sm font-semibold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif' }}>{editVehicle.rating}</span>
-                </div>
+                </div> */}
               </div>
 
               <div className="flex items-baseline gap-1 mb-3 w-fit cursor-pointer hover:underline hover:decoration-[#0066FF] hover:decoration-2 transition-all">
@@ -632,33 +661,92 @@ const CarDetails: React.FC = () => {
         
         {/* EDIT FORM - FIGMA DESIGN */}
         <aside className="md:w-[380px]">
-          <div className="sticky top-6 bg-white p-6 rounded-[12px] shadow-lg border border-[#E5E5E5]">
+        <div className="sticky top-6 bg-white p-6 rounded-[12px] shadow-lg border border-[#E5E5E5]">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-[20px] font-semibold text-[#000000]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
                 Edit Car Details
               </h2>
+            <button
+  onClick={() => setEditOpen((s) => !s)}
+  type="button"
+  aria-label={editOpen ? "Hide form" : "Show form"}
+  className="w-auto px-3 h-8 flex items-center justify-center rounded-full text-white text-sm font-medium transition-colors 
+             bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] shadow-md hover:opacity-90"
+>
+  {editOpen ? "Hide" : "Show"}
+</button>
+
             </div>
- 
+            
             {editOpen && (
+        
               <div className="space-y-5 max-h-[70vh] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#E5E5E5 transparent' }}>
                 
-                {/* Available Toggle */}
-                <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
-                  <label className="text-[14px] font-medium text-[#333333]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
-                    Available
-                  </label>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="isAvailable"
-                      checked={editVehicle.isAvailable}
-                      onChange={handleChange}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
-                  </label>
-                </div>
+         
+{/* <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
+  <label className="text-[14px] font-medium text-[#333333]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+    Available
+  </label> */}
+{/* 
+  <label className="relative inline-flex items-center cursor-pointer">
+    <input
+      type="checkbox"
+      name="isAvailable"
+      checked={editVehicle.isAvailable}
+      onChange={handleChange}
+      className="sr-only peer"
+    /> */}
+{/* 
+    <div
+      className="
+        w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full
+        peer
+        peer-checked:after:translate-x-full
+        peer-checked:after:border-white
+        after:content-['']
+        after:absolute after:top-[2px] after:left-[2px]
+        after:bg-white after:border-gray-300 after:border
+        after:rounded-full after:h-5 after:w-5 after:transition-all
+        
+        /
+      "
+    ></div>
+  </label>
+</div> */}
 
+                          <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
+  <label className="text-[14px] font-medium text-[#333333]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+    AC Available
+  </label>
+
+  <label className="relative inline-flex items-center cursor-pointer">
+    <input
+      type="checkbox"
+      name="ac"
+      checked={editVehicle.ac?.toLowerCase() === "ac"}
+      onChange={(e) => {
+        const checked = e.target.checked;
+        setEditVehicle((prev) => ({ ...prev, ac: checked ? "AC" : "Non-AC" }));
+      }}
+      className="sr-only peer"
+    />
+
+    {/* Toggle Button */}
+    <div
+      className="
+        w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full
+        peer
+        peer-checked:after:translate-x-full
+        peer-checked:after:border-white
+        after:content-['']
+        after:absolute after:top-[2px] after:left-[2px]
+        after:bg-white after:border-gray-300 after:border
+        after:rounded-full after:h-5 after:w-5 after:transition-all
+        peer-checked:bg-gradient-to-r peer-checked:from-[#0A0747] peer-checked:to-[#4EC8FF]
+      "
+    ></div>
+  </label>
+</div>
                 {/* Description */}
                 <div>
                   <label className="block text-[14px] font-medium text-[#000000] mb-2" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
@@ -674,25 +762,6 @@ const CarDetails: React.FC = () => {
                   />
                 </div>
 
-                {/* AC Available Toggle */}
-                <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
-                  <label className="text-[14px] font-medium text-[#333333]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
-                    AC Available
-                  </label>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="ac"
-                      checked={editVehicle.ac?.toLowerCase() === "ac"}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setEditVehicle((prev) => ({ ...prev, ac: checked ? "AC" : "Non-AC" }));
-                      }}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
-                  </label>
-                </div>
 
                 {/* Price Section */}
                 <div>
@@ -833,7 +902,14 @@ const CarDetails: React.FC = () => {
                           onChange={handleChange}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
+                         <div
+          className="w-11 h-6 bg-[#E5E5E5] rounded-full peer
+          peer-checked:after:translate-x-full peer-checked:after:border-white
+          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+          after:bg-white after:border-gray-300 after:border after:rounded-full
+          after:h-5 after:w-5 after:transition-all
+          peer-checked:bg-gradient-to-r peer-checked:from-[#0A0747] peer-checked:to-[#4EC8FF]"
+        ></div>
                       </label>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-[#F8F9FA] rounded-[8px] border border-[#E5E5E5]">
@@ -848,7 +924,14 @@ const CarDetails: React.FC = () => {
                           onChange={handleChange}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
+                          <div
+          className="w-11 h-6 bg-[#E5E5E5] rounded-full peer
+          peer-checked:after:translate-x-full peer-checked:after:border-white
+          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+          after:bg-white after:border-gray-300 after:border after:rounded-full
+          after:h-5 after:w-5 after:transition-all
+          peer-checked:bg-gradient-to-r peer-checked:from-[#0A0747] peer-checked:to-[#4EC8FF]"
+        ></div>
                       </label>
                     </div>
                   </div>
@@ -1035,23 +1118,24 @@ const CarDetails: React.FC = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={handleSave}
-                    disabled={isLoading}
-                    className="flex-1 bg-[#0066FF] text-white py-3 rounded-[8px] hover:bg-[#0052CC] transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-[14px]"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                    type="button"
-                  >
-                    {isLoading ? "Saving..." : "Save Changes"}
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    disabled={isLoading}
-                    className="px-6 bg-[#DC2626] text-white py-3 rounded-[8px] hover:bg-[#B91C1C] transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-[14px]"
-                    type="button"
-                  >
-                    Delete
-                  </button>
+                 <button
+  onClick={handleSave}
+  disabled={isLoading}
+  className="flex-1 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white py-3 rounded-[8px] hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-[14px]"
+  style={{ fontFamily: 'Inter, sans-serif' }}
+  type="button"
+>
+  {isLoading ? "Saving..." : "Save Changes"}
+</button>
+<button
+  onClick={handleDelete}
+  disabled={isLoading}
+  className="px-6 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white py-3 rounded-[8px] hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-[14px]"
+  type="button"
+>
+  Delete
+</button>
+
                 </div>
               </div>
             )}

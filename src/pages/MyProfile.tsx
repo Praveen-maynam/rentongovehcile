@@ -311,8 +311,4 @@ const MyProfile: React.FC = () => {
 };
  
 export default MyProfile;
-<<<<<<< HEAD
  
-=======
- 
->>>>>>> c4a2d7833a5f4df87f7cf7b8c290d33c6263a92c

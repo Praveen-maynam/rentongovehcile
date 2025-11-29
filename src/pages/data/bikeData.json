@@ -1,0 +1,332 @@
+{
+  "bikeBrands": [
+    "Royal Enfield",
+    "Hero",
+    "Honda",
+    "Bajaj",
+    "TVS",
+    "Yamaha",
+    "Suzuki",
+    "KTM",
+    "Husqvarna",
+    "Kawasaki",
+    "Harley-Davidson",
+    "Triumph",
+    "BMW",
+    "Ducati",
+    "Aprilia",
+    "Benelli",
+    "CFMoto",
+    "Jawa",
+    "Yezdi",
+    "Ather",
+    "Ola Electric",
+    "Revolt",
+    "Ultraviolette",
+    "Okinawa",
+    "Ampere",
+    "Pure EV",
+    "Tork",
+    "Oben",
+    "MV Agusta",
+    "Moto Guzzi",
+    "Can-Am",
+    "Savic",
+    "NIU",
+    "YADEA",
+    "SUNRA",
+    "QJMotor",
+    "Loncin",
+    "Zongshen",
+    "Lifan",
+    "Zero Motorcycles",
+    "Energica",
+    "Damon Motors",
+    "Lightning Motorcycles",
+    "Verge Motorcycles",
+    "Cake",
+    "Gogoro"
+  ],
+  "bikeModels": {
+    "Royal Enfield": ["Hunter 350", "Classic 350", "Meteor 350", "Bullet 350", "Goan Classic 350", "Himalayan 450", "Guerrilla 450", "Interceptor 650", "Continental GT 650", "Super Meteor 650", "Shotgun 650", "Classic 650"],
+    "Hero": ["Splendor Plus", "HF Deluxe", "Passion Plus", "Glamour X 125", "Xtreme 125R", "Xtreme 160R", "XPulse 200 4V", "Xtreme 250R", "Karizma XMR", "Pleasure +", "Destini 125", "Xoom 160"],
+    "Honda": ["Activa 6G", "Activa 125", "Dio", "Activa e", "CD 110 Dream", "Shine 100", "Shine", "SP 125", "Unicorn", "Hornet 2.0", "SP 160", "CB 350", "CB 350RS"],
+    "Bajaj": ["Platina 110", "CT 100", "Pulsar 125", "Pulsar NS125", "Pulsar N125", "Pulsar 150", "Pulsar NS160", "Pulsar N160", "Pulsar NS200", "Pulsar RS200", "Pulsar NS250", "Pulsar N250", "Pulsar NS400Z", "Avenger 160 Street", "Avenger 220 Cruise", "Dominar 250", "Dominar 400", "Freedom 125", "Chetak Electric"],
+    "TVS": ["Sport", "Star City Plus", "Radeon", "Raider 125", "Apache RTR 160", "Apache RTR 160 4V", "Ronin", "Apache RTR 200 4V", "Apache RR 310", "Jupiter", "Jupiter 125", "Ntorq 125", "iQube"],
+    "Yamaha": ["Fascino 125", "Ray ZR 125", "Aerox 155", "FZ-S FI V4", "FZ-X", "MT-15 V2", "R15 V4", "R15M", "FZ25", "Fazer 25"],
+    "Suzuki": ["Access 125", "Burgman Street 125", "Avenis 125", "Gixxer 155", "Gixxer SF 155", "Gixxer 250", "Gixxer SF 250", "V-Strom SX 250", "Hayabusa"],
+    "KTM": ["125 Duke", "200 Duke", "250 Duke", "390 Duke", "RC 125", "RC 200", "RC 390", "390 Adventure"],
+    "Husqvarna": ["Svartpilen 250", "Svartpilen 401", "Vitpilen 250", "Vitpilen 401"],
+    "Kawasaki": ["Ninja 300", "Ninja 400", "Ninja 650", "Z650", "Z900", "Versys 650"],
+    "Ather": ["450X Gen3", "450 Apex", "Rizta S", "Rizta Z"],
+    "Ola Electric": ["S1 Pro", "S1 X+", "S1 X", "S1 Air", "S1 Z", "Roadster X", "Roadster Pro", "Roadster"],
+    "Revolt": ["RV300", "RV400", "RV1", "RV1+"],
+    "Ultraviolette": ["F77", "F77 Mach 2", "F77 SuperStreet"],
+    "Jawa": ["Classic 350", "42 Bobber", "Perak 350"]
+  },
+  "fuelTypes": [
+    "Petrol",
+    "Electric",
+    "Hybrid",
+    "CNG"
+  ],
+  "transmissionTypes": [
+    "Manual",
+    "Automatic",
+    "CVT",
+    "Semi-Automatic",
+    "4-speed manual",
+    "5-speed manual",
+    "6-speed manual"
+  ],
+  "bikeCC": [
+    "50-100cc",
+    "100-125cc",
+    "125-150cc",
+    "150-200cc",
+    "200-250cc",
+    "250-350cc",
+    "350-500cc",
+    "500-750cc",
+    "750-1000cc",
+    "1000cc+",
+    "Electric"
+  ],
+  "years": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021",
+    "2020",
+    "2019",
+    "2018",
+    "2017",
+    "2016",
+    "2015"
+  ],
+  "colors": [
+    "Black",
+    "White",
+    "Red",
+    "Blue",
+    "Silver",
+    "Grey",
+    "Orange",
+    "Yellow",
+    "Green",
+    "Brown",
+    "Matte Black",
+    "Glossy White",
+    "Racing Red",
+    "Midnight Blue"
+  ],
+  "bikeTypes": [
+    "Commuter",
+    "Sport Bike",
+    "Cruiser",
+    "Touring",
+    "Adventure",
+    "Naked Bike",
+    "Cafe Racer",
+    "Scrambler",
+    "Scooter",
+    "Electric Scooter",
+    "Dirt Bike",
+    "Superbike",
+    "Standard",
+    "Dual Sport"
+  ],
+  "ownershipType": [
+    "First Owner",
+    "Second Owner",
+    "Third Owner",
+    "Fourth Owner or More"
+  ],
+  "kmsDriven": [
+    "0-5,000 km",
+    "5,000-10,000 km",
+    "10,000-20,000 km",
+    "20,000-30,000 km",
+    "30,000-50,000 km",
+    "50,000+ km"
+  ],
+
+  "states": [
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
+    "Andaman and Nicobar Islands",
+    "Chandigarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi",
+    "Jammu and Kashmir",
+    "Ladakh",
+    "Lakshadweep",
+    "Puducherry"
+  ],
+ 
+  "cities": {
+    "Andhra Pradesh": [
+      "Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Rajahmundry", "Tirupati", "Kadapa",
+      "Kakinada", "Anantapur", "Eluru", "Ongole", "Chittoor", "Srikakulam", "Vizianagaram", "Proddatur",
+      "Tenali", "Adoni", "Machilipatnam"
+    ],
+    "Arunachal Pradesh": [
+      "Itanagar", "Naharlagun", "Pasighat", "Tawang", "Ziro", "Bomdila", "Tezu", "Seppa", "Aalo",
+      "Daporijo", "Roing", "Changlang", "Namsai"
+    ],
+    "Assam": [
+      "Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Nagaon", "Tinsukia", "Tezpur", "Bongaigaon",
+      "Karimganj", "Dhubri", "Goalpara", "Hailakandi", "Barpeta", "Lakhimpur"
+    ],
+    "Bihar": [
+      "Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Bihar Sharif", "Arrah",
+      "Begusarai", "Katihar", "Chapra", "Sasaram", "Sitamarhi", "Motihari", "Samastipur"
+    ],
+    "Chhattisgarh": [
+      "Raipur", "Bhilai", "Bilaspur", "Korba", "Durg", "Rajnandgaon", "Jagdalpur", "Raigarh",
+      "Ambikapur", "Dhamtari", "Kanker", "Mahasamund"
+    ],
+    "Goa": [
+      "Panaji", "Margao", "Vasco da Gama", "Mapusa", "Ponda", "Bicholim", "Curchorem", "Sanquelim",
+      "Cuncolim", "Quepem"
+    ],
+    "Gujarat": [
+      "Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Junagadh", "Gandhinagar",
+      "Anand", "Nadiad", "Morbi", "Mehsana", "Bharuch", "Navsari", "Valsad"
+    ],
+    "Haryana": [
+      "Faridabad", "Gurgaon", "Panipat", "Ambala", "Yamunanagar", "Rohtak", "Hisar", "Karnal",
+      "Sonipat", "Panchkula", "Kurukshetra", "Jhajjar", "Bhiwani"
+    ],
+    "Himachal Pradesh": [
+      "Shimla", "Dharamshala", "Solan", "Mandi", "Palampur", "Kullu", "Hamirpur", "Bilaspur",
+      "Nahan", "Una", "Chamba", "Kangra"
+    ],
+    "Jharkhand": [
+      "Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh", "Giridih", "Ramgarh",
+      "Medininagar", "Chirkunda", "Chaibasa", "Gumla"
+    ],
+    "Karnataka": [
+      "Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum", "Gulbarga", "Davanagere", "Bellary",
+      "Bijapur", "Shimoga", "Tumkur", "Raichur", "Udupi", "Hassan"
+    ],
+    "Kerala": [
+      "Thiruvananthapuram", "Kochi", "Kozhikode", "Kollam", "Thrissur", "Palakkad", "Alappuzha",
+      "Malappuram", "Kannur", "Kottayam", "Idukki", "Pathanamthitta", "Kasargod"
+    ],
+    "Madhya Pradesh": [
+      "Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas", "Satna", "Ratlam",
+      "Rewa", "Chhindwara", "Khargone", "Morena"
+    ],
+    "Maharashtra": [
+      "Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Aurangabad", "Solapur", "Kolhapur",
+      "Amravati", "Nanded", "Akola", "Jalgaon", "Latur", "Sangli"
+    ],
+    "Manipur": [
+      "Imphal", "Thoubal", "Bishnupur", "Churachandpur", "Kakching", "Ukhrul", "Senapati",
+      "Tamenglong", "Jiribam", "Moirang"
+    ],
+    "Meghalaya": [
+      "Shillong", "Tura", "Nongstoin", "Jowai", "Baghmara", "Williamnagar", "Nongpoh",
+      "Resubelpara", "Mairang", "Cherrapunji"
+    ],
+    "Mizoram": [
+      "Aizawl", "Lunglei", "Champhai", "Serchhip", "Kolasib", "Lawngtlai", "Saiha", "Mamit",
+      "Khawzawl", "Zawlnuam"
+    ],
+    "Nagaland": [
+      "Kohima", "Dimapur", "Mokokchung", "Tuensang", "Wokha", "Zunheboto", "Phek", "Mon",
+      "Longleng", "Kiphire"
+    ],
+    "Odisha": [
+      "Bhubaneswar", "Cuttack", "Rourkela", "Brahmapur", "Sambalpur", "Puri", "Balasore",
+      "Bhadrak", "Baripada", "Jharsuguda", "Kendrapara", "Angul"
+    ],
+    "Punjab": [
+      "Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali", "Pathankot",
+      "Hoshiarpur", "Moga", "Batala", "Firozpur", "Sangrur"
+    ],
+    "Rajasthan": [
+      "Jaipur", "Jodhpur", "Kota", "Bikaner", "Ajmer", "Udaipur", "Bhilwara", "Alwar",
+      "Bharatpur", "Sikar", "Tonk", "Pali", "Jhunjhunu"
+    ],
+    "Sikkim": [
+      "Gangtok", "Namchi", "Gyalshing", "Mangan", "Rangpo", "Jorethang", "Singtam", "Pelling",
+      "Ravangla", "Yuksom"
+    ],
+    "Tamil Nadu": [
+      "Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Tiruppur",
+      "Erode", "Vellore", "Thoothukudi", "Nagercoil", "Dindigul", "Karur", "Kanchipuram"
+    ],
+    "Telangana": [
+      "Hyderabad", "Warangal", "Nizamabad", "Khammam", "Karimnagar", "Ramagundam", "Mahbubnagar",
+      "Nalgonda", "Adilabad", "Suryapet", "Sangareddy", "Jagtial", "Mancherial"
+    ],
+    "Tripura": [
+      "Agartala", "Udaipur", "Dharmanagar", "Kailasahar", "Belonia", "Khowai", "Ambassa",
+      "Teliamura", "Sabroom", "Amarpur"
+    ],
+    "Uttar Pradesh": [
+      "Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Prayagraj", "Bareilly",
+      "Aligarh", "Moradabad", "Noida", "Gorakhpur", "Firozabad", "Jhansi"
+    ],
+    "Uttarakhand": [
+      "Dehradun", "Haridwar", "Roorkee", "Haldwani", "Rudrapur", "Kashipur", "Rishikesh",
+      "Pithoragarh", "Nainital", "Almora", "Tehri", "Mussoorie"
+    ],
+    "West Bengal": [
+      "Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Bardhaman", "Malda",
+      "Baharampur", "Habra", "Kharagpur", "Jalpaiguri", "Haldia"
+    ],
+    "Andaman and Nicobar Islands": [
+      "Port Blair", "Car Nicobar", "Diglipur", "Mayabunder", "Rangat", "Hut Bay",
+      "Nancowry", "Campbell Bay"
+    ],
+    "Chandigarh": ["Chandigarh"],
+    "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Diu", "Silvassa"],
+    "Delhi": [
+      "New Delhi", "Delhi", "North Delhi", "South Delhi", "East Delhi", "West Delhi",
+      "Central Delhi", "Dwarka", "Rohini", "Shahdara"
+    ],
+    "Jammu and Kashmir": [
+      "Srinagar", "Jammu", "Anantnag", "Baramulla", "Udhampur", "Kathua", "Pulwama",
+      "Rajouri", "Sopore", "Kupwara"
+    ],
+    "Ladakh": [
+      "Leh", "Kargil", "Nubra", "Zanskar", "Drass", "Nyoma", "Khalsi", "Khaltse"
+    ],
+    "Lakshadweep": [
+      "Kavaratti", "Agatti", "Amini", "Andrott", "Minicoy", "Kalpeni"
+    ],
+    "Puducherry": [
+      "Puducherry", "Karaikal", "Mahe", "Yanam"
+    ]
+  }
+}

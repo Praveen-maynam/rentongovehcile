@@ -19,5 +19,6 @@ export interface Vehicle {
   contactNumber?: string;
   bikeNumber?: string;
   distance?:string;
+  ownerId?: string; // Owner's user ID for booking notifications
   unavailableDates?: { startDate: string; endDate: string; startTime: string; endTime: string }[];
 }

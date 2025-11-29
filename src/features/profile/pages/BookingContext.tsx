@@ -1,3 +1,4 @@
+
 import React, {
   createContext,
   useContext,
@@ -59,8 +60,29 @@ export const BookingProvider: React.FC<{ children: any }> = ({ children }) => {
 
   const socketRef = useRef<Socket | null>(null);
 
-  const ownerId =
-    localStorage.getItem("ownerId") || "68ff377085e67372e72d1f39";
+  // Dynamic ownerId - get from localStorage without static fallback
+  const getOwnerId = (): string | null => {
+    let ownerId = localStorage.getItem("ownerId");
+    const isValidMongoId = (id: string | null) => id && /^[a-f0-9]{24}$/i.test(id);
+
+    if (isValidMongoId(ownerId)) return ownerId;
+
+    const userId = localStorage.getItem("userId");
+    if (isValidMongoId(userId)) return userId;
+
+    try {
+      const userProfile = localStorage.getItem("userProfile");
+      if (userProfile) {
+        const profile = JSON.parse(userProfile);
+        if (isValidMongoId(profile.userId)) return profile.userId;
+        if (isValidMongoId(profile._id)) return profile._id;
+      }
+    } catch (e) {}
+
+    return ownerId;
+  };
+
+  const ownerId = getOwnerId();
   const authToken =
     localStorage.getItem("authToken") ||
     "eyFakeSampleTokenForUIOnly123456"; // only for UI testing

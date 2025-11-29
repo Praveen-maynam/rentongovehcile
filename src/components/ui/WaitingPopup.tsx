@@ -1,252 +1,166 @@
-// import React, { useEffect } from "react";
- 
-// interface WaitingPopupProps {
-//   timer: number;
-//   onClose: () => void;
-//   onTimerComplete: () => void;
-// }
- 
-// const WaitingPopup: React.FC<WaitingPopupProps> = ({
-//   timer,
-//   onClose,
-//   onTimerComplete,
-// }) => {
-//   const radius = 45;
-//   const strokeWidth = 10;
-//   const circumference = 2 * Math.PI * radius;
-//   const progress = timer / 30;
-//   const offset = circumference * (1 - progress);
- 
-//   // Trigger onTimerComplete when timer reaches 0
-//   useEffect(() => {
-//     if (timer === 0) {
-//       onTimerComplete();
-//     }
-//   }, [timer, onTimerComplete]);
- 
-//   return (
-//     <div className="fixed inset-0 z-50 flex items-end justify-center">
-//       {/* Backdrop blur */}
-//       <div
-//         className="absolute inset-0 bg-black/40"
-//         style={{ backdropFilter: "blur(12px)" }}
-//         onClick={onClose}
-//       />
- 
-//       {/* Popup card */}
-//       <div
-//         className="relative w-full bg-white rounded-t-3xl shadow-2xl pb-8 pt-6 px-6"
-//         style={{ animation: "slideUp 0.3s ease-out", maxWidth: "600px" }}
-//       >
-//         {/* Title */}
-//         <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">
-//           Waiting for response!
-//         </h2>
- 
-//         {/* Grey line separator */}
-//         <div className="w-full h-px bg-gray-300 my-5" />
- 
-//         {/* Progress bars */}
-//         <div className="flex justify-center gap-3 mb-8 px-8">
-//           {[0, 1, 2, 3].map((i) => (
-//             <div
-//               key={i}
-//               className="flex-1 h-1.5 rounded-full transition-opacity duration-300"
-//               style={{
-//                 background: "linear-gradient(to right, #1A2980, #26D0CE)",
-//                 opacity: i < Math.floor(progress * 4) ? 1 : 0.3,
-//               }}
-//             />
-//           ))}
-//         </div>
- 
-//         {/* Circular timer */}
-//         <div className="flex flex-col items-center">
-//           <div className="relative w-32 h-32 mb-3">
-//             <svg
-//               width="128"
-//               height="128"
-//               viewBox="0 0 128 128"
-//               style={{ transform: "rotate(-90deg)" }}
-//             >
-//               <defs>
-//                 <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-//                   <stop offset="0%" stopColor="#1A2980" />
-//                   <stop offset="100%" stopColor="#26D0CE" />
-//                 </linearGradient>
-//               </defs>
- 
-//               {/* Background circle */}
-//               <circle
-//                 cx="64"
-//                 cy="64"
-//                 r={radius}
-//                 stroke="#E5E7EB"
-//                 strokeWidth={strokeWidth}
-//                 fill="none"
-//               />
- 
-//               {/* Progress circle */}
-//               <circle
-//                 cx="64"
-//                 cy="64"
-//                 r={radius}
-//                 stroke="url(#grad)"
-//                 strokeWidth={strokeWidth}
-//                 strokeDasharray={circumference}
-//                 strokeDashoffset={offset}
-//                 strokeLinecap="round"
-//                 fill="none"
-//                 style={{ transition: "stroke-dashoffset 0.5s ease" }}
-//               />
-//             </svg>
- 
-//             {/* Clock icon in center */}
-//             <div className="absolute inset-0 flex items-center justify-center">
-//               <svg width="50" height="50" viewBox="0 0 24 24" fill="none">
-//                 <defs>
-//                   <linearGradient
-//                     id="clockGrad"
-//                     x1="0%"
-//                     y1="0%"
-//                     x2="100%"
-//                     y2="100%"
-//                   >
-//                     <stop offset="0%" stopColor="#1A2980" />
-//                     <stop offset="100%" stopColor="#26D0CE" />
-//                   </linearGradient>
-//                 </defs>
-//                 <circle
-//                   cx="12"
-//                   cy="12"
-//                   r="10"
-//                   stroke="url(#clockGrad)"
-//                   strokeWidth="2"
-//                   fill="none"
-//                 />
-//                 <path
-//                   d="M12 6V12L16 14"
-//                   stroke="url(#clockGrad)"
-//                   strokeWidth="2"
-//                   strokeLinecap="round"
-//                 />
-//               </svg>
-//             </div>
-//           </div>
- 
-//           {/* Timer text */}
-//           <p className="text-lg font-bold text-gray-800">{timer} sec</p>
-//         </div>
-//       </div>
- 
-//       <style>{`
-//         @keyframes slideUp {
-//           from {
-//             transform: translateY(100%);
-//             opacity: 0;
-//           }
-//           to {
-//             transform: translateY(0);
-//             opacity: 1;
-//           }
-//         }
-//       `}</style>
-//     </div>
-//   );
-// };
- 
-// export default WaitingPopup;
- import React, { useEffect, useState } from "react";
- 
+
+
+
+
+
+
+import React, { useEffect, useState, useRef } from "react";
+
 interface WaitingPopupProps {
   /**
    * Controls popup visibility.
-   * If not provided, truthiness of `timer` or `timerSeconds` will be used to show popup.
    */
-  isOpen?: boolean;
- 
-  /** Backward-compatible prop from older code: total countdown seconds */
-  timer?: number;
- 
+  isOpen: boolean;
+
+  /** Booking ID for reference */
+  bookingId?: string;
+
+  /** Current booking status message */
+  bookingStatus?: string;
+
   /** Preferred prop: total countdown duration in seconds */
   timerSeconds?: number;
- 
+
+  /** Backward-compatible prop from older code: total countdown seconds */
+  timer?: number;
+
   /** Called when user manually closes the popup */
   onClose: () => void;
- 
+
   /** Called automatically when timer completes */
   onTimerComplete?: () => void;
+
+  /** Called when booking is accepted */
+  onAccepted?: () => void;
+
+  /** Called when booking is rejected */
+  onRejected?: () => void;
+
+  /** Called when timer times out */
+  onTimeout?: () => void;
 }
- 
+
 /**
- * WaitingPopup
+ * WaitingPopup - Fixed version that properly closes when timer ends
  *
- * - Compatible with both `{ timer }` style and `{ isOpen, timerSeconds }` style.
  * - Shows circular progress + mini progress bars + remaining seconds.
- * - Calls `onTimerComplete` when countdown reaches 0.
+ * - Automatically closes and calls onTimeout when countdown reaches 0.
+ * - Default timer is 120 seconds
  */
 const WaitingPopup: React.FC<WaitingPopupProps> = ({
   isOpen,
+  bookingId,
+  bookingStatus = "Waiting for response...",
   timer,
   timerSeconds,
   onClose,
   onTimerComplete,
+  onAccepted,
+  onRejected,
+  onTimeout,
 }) => {
-  // Resolve "open" and initial timer in a backward-compatible way.
-  // If `isOpen` provided, respect it; otherwise, treat a positive timer as open.
-  const resolvedInitial = timerSeconds ?? timer ?? 30;
-  const resolvedIsOpen = typeof isOpen === "boolean" ? isOpen : Boolean(timer ?? timerSeconds);
- 
+  // Default to 120 seconds
+  const resolvedInitial = timerSeconds ?? timer ?? 120;
+
   const [remainingTime, setRemainingTime] = useState<number>(resolvedInitial);
- 
-  // Sync remainingTime whenever the modal is opened or timer props change.
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hasCalledTimeoutRef = useRef<boolean>(false);
+
+  // Reset state when popup opens
   useEffect(() => {
-    setRemainingTime(resolvedInitial);
-  }, [resolvedInitial, resolvedIsOpen]);
- 
+    if (isOpen) {
+      console.log("🟢 WaitingPopup OPENED - Timer set to:", resolvedInitial, "seconds");
+      setRemainingTime(resolvedInitial);
+      hasCalledTimeoutRef.current = false;
+    } else {
+      console.log("🔴 WaitingPopup CLOSED");
+      // Clear interval when closed
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }
+  }, [isOpen, resolvedInitial]);
+
   // Countdown logic
   useEffect(() => {
-    if (!resolvedIsOpen) return;
- 
-    // Ensure we start from the right value if prop changed
-    setRemainingTime((prev) => (prev === 0 ? resolvedInitial : prev));
- 
-    const interval = setInterval(() => {
+    if (!isOpen) return;
+
+    console.log("⏱ Starting countdown from", remainingTime);
+    
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    intervalRef.current = setInterval(() => {
       setRemainingTime((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          // notify parent
-          onTimerComplete?.();
+        const newTime = prev - 1;
+        
+        // Log every 10 seconds
+        if (newTime % 10 === 0 && newTime > 0) {
+          console.log("⏱ Timer:", newTime, "seconds remaining");
+        }
+        
+        // When timer reaches 0
+        if (newTime <= 0) {
+          console.log("⏰ TIMER REACHED 0 - Closing popup and calling callbacks");
+          
+          // Clear interval
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+          
+          // Only call timeout callbacks once
+          if (!hasCalledTimeoutRef.current) {
+            hasCalledTimeoutRef.current = true;
+            
+            // Call timeout callbacks
+            setTimeout(() => {
+              onTimeout?.();
+              onTimerComplete?.();
+              onClose(); // ✅ CLOSE THE POPUP
+            }, 100);
+          }
+          
           return 0;
         }
-        return prev - 1;
+        
+        return newTime;
       });
     }, 1000);
- 
-    return () => clearInterval(interval);
-  }, [resolvedIsOpen, resolvedInitial, onTimerComplete]);
- 
-  if (!resolvedIsOpen) return null;
- 
-  // Circular progress variables (based on original code)
+
+    return () => {
+      console.log("🧹 Cleaning up timer interval");
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [isOpen, onTimeout, onTimerComplete, onClose]);
+
+  if (!isOpen) return null;
+
+  console.log("🎨 WaitingPopup RENDERING - Time remaining:", remainingTime);
+
+  // Circular progress variables
   const radius = 45;
   const strokeWidth = 10;
   const circumference = 2 * Math.PI * radius;
-  // Protect against division by zero
-  const total = resolvedInitial > 0 ? resolvedInitial : 30;
+  const total = resolvedInitial > 0 ? resolvedInitial : 120;
   const progress = Math.max(0, Math.min(1, remainingTime / total));
   const offset = circumference * (1 - progress);
- 
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      {/* Backdrop blur */}
+    <div className="fixed inset-0 z-[9999] flex items-end justify-center">
+      {/* Backdrop - NO onClick to prevent closing */}
       <div
         className="absolute inset-0 bg-black/40"
         style={{ backdropFilter: "blur(12px)" }}
-        onClick={onClose}
       />
- 
-      {/* Popup card (slide-up style but constrained width for desktop) */}
+
+      {/* Popup card */}
       <div
         className="relative w-full bg-white rounded-t-3xl shadow-2xl pb-8 pt-6 px-6"
         style={{ animation: "slideUp 0.28s ease-out", maxWidth: "600px" }}
@@ -257,10 +171,22 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">
           Waiting for response!
         </h2>
- 
+
+        {/* Booking Status */}
+        {bookingStatus && (
+          <p className="text-center text-sm text-gray-600 mb-2">{bookingStatus}</p>
+        )}
+
+        {/* Booking ID (for debugging) */}
+        {bookingId && (
+          <p className="text-center text-xs text-gray-400 mb-2">
+            Booking: {bookingId.substring(0, 8)}...
+          </p>
+        )}
+
         {/* Grey line separator */}
         <div className="w-full h-px bg-gray-300 my-5" />
- 
+
         {/* Progress bars (top mini indicators) */}
         <div className="flex justify-center gap-3 mb-8 px-8">
           {[0, 1, 2, 3].map((i) => (
@@ -274,7 +200,7 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
             />
           ))}
         </div>
- 
+
         {/* Circular timer */}
         <div className="flex flex-col items-center">
           <div className="relative w-32 h-32 mb-3">
@@ -290,7 +216,7 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
                   <stop offset="100%" stopColor="#26D0CE" />
                 </linearGradient>
               </defs>
- 
+
               {/* Background circle */}
               <circle
                 cx="64"
@@ -300,7 +226,7 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
                 strokeWidth={strokeWidth}
                 fill="none"
               />
- 
+
               {/* Progress circle */}
               <circle
                 cx="64"
@@ -315,7 +241,7 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
                 style={{ transition: "stroke-dashoffset 0.45s ease" }}
               />
             </svg>
- 
+
             {/* Clock icon in center */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <svg width="50" height="50" viewBox="0 0 24 24" fill="none">
@@ -337,22 +263,33 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
               </svg>
             </div>
           </div>
- 
+
           {/* Timer text */}
-          <p className="text-lg font-bold text-gray-800">{remainingTime} sec</p>
+          <p className="text-lg font-bold text-gray-800">
+            {remainingTime} sec
+            {remainingTime === 0 && <span className="text-sm text-red-500 ml-2">(Closing...)</span>}
+          </p>
         </div>
- 
+
         {/* Action row */}
         <div className="mt-6 px-4">
           <button
-            onClick={onClose}
-            className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg transition font-medium"
+            onClick={() => {
+              console.log("🔴 User manually closed waiting popup");
+              // Clear interval
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+              }
+              onClose();
+            }}
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 rounded-lg transition font-medium"
           >
-            Cancel
+            Cancel Waiting
           </button>
         </div>
       </div>
- 
+
       {/* Slide-up animation style preserved */}
       <style>{`
         @keyframes slideUp {
@@ -369,7 +306,5 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
     </div>
   );
 };
- 
+
 export default WaitingPopup;
- 
- 
