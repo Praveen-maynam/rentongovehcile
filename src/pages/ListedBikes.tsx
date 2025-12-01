@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -7,6 +6,7 @@ import { useListedBikesStore } from "../store/listedBikes.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
 import VehicleAvailabilityCalendar from "../components/AvailabilityDateTimeModal";
+import OwnerCalendar from "../components/ui/OwnerCalender";
 import FilterCard from "../components/ui/FilterCard";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import BikeLogo from "../assets/icons/BikeLogo.png";
@@ -552,18 +552,18 @@ const ListedBikes: React.FC = () => {
       {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
 
       {showCalendarModal && selectedVehicle && loggedInUserId && (
-        <VehicleAvailabilityCalendar
-          isOpen={showCalendarModal}
-          onClose={() => {
-            setShowCalendarModal(false);
-            setSelectedVehicle(null);
-            setError("");
-          }}
-          VechileId={selectedVehicle._id || selectedVehicle.id || ""}
-          vehicleType="Bike"
-          userId={loggedInUserId}
-        />
+       <OwnerCalendar
+         
+           isOpen={showCalendarModal}
+           onClose={() => setShowCalendarModal(false)}
+           userRole="owner"
+           VechileId={selectedVehicle._id || selectedVehicle.id || ""}
+           vechileType="Bike"
+           userId={localStorage.getItem('userId') || ""}
+           
+         />
       )}
+      
 
       {showDeleteModal && vehicleToDelete && (
         <DeleteConfirmationModal

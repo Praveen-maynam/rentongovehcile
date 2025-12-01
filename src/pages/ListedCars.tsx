@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
-
+import OwnerCalendar from "../components/ui/OwnerCalender";
 import VehicleAvailabilityCalendar from "../components/Available";
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
@@ -556,18 +556,16 @@ const ListedCars: React.FC = () => {
       {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
 
     {showCalendarModal && selectedVehicle && loggedInUserId && (
-  <VehicleAvailabilityCalendar
-    isOpen={showCalendarModal}
-    onClose={() => {
-      setShowCalendarModal(false);
-      setSelectedVehicle(null);
-      setError("");
-    }}
-    VechileId={selectedVehicle._id || selectedVehicle.id || ""}
-    vehicleType="Car"
-    userId={loggedInUserId}
-    userRole="owner"
-  />
+ <OwnerCalendar
+   
+     isOpen={showCalendarModal}
+     onClose={() => setShowCalendarModal(false)}
+     userRole="owner"
+     VechileId={selectedVehicle._id || selectedVehicle.id || ""}
+     vechileType="Car"
+     userId={localStorage.getItem('userId') || ""}
+     
+   />
 )}
 
       {showDeleteModal && vehicleToDelete && (
