@@ -1,0 +1,28 @@
+{
+  "files": {
+    "main.css": "/static/css/main.29456564.css",
+    "main.js": "/static/js/main.aee13f59.js",
+    "static/media/slides.png": "/static/media/slides.7eb28c21979282e7e1b9.png",
+    "static/media/Auto.png": "/static/media/Auto.5b3aec744ebed710213c.png",
+    "static/media/BlackCar.png": "/static/media/BlackCar.78dc2ce6a1e75a410875.png",
+    "static/media/Activa.png": "/static/media/Activa.ec7e19c03e3daa6759d1.png",
+    "static/media/FilterLogo.png": "/static/media/FilterLogo.044b4ac9de2c0548133d.png",
+    "static/media/RentOnGoLogo.png": "/static/media/RentOnGoLogo.b0a8236f05965481c4d1.png",
+    "static/media/login.png": "/static/media/login.7d8c49a6bdd7e675387e.png",
+    "static/media/AutomaticLogo.png": "/static/media/AutomaticLogo.fae40ab9dc540ec388f6.png",
+    "static/media/automatic.jpeg": "/static/media/automatic.986f8de89251967c2454.jpeg",
+    "static/media/DriverLogo.png": "/static/media/DriverLogo.b2be73915be78b92650b.png",
+    "static/media/tvs-ntorq.png": "/static/media/tvs-ntorq.84019c2cf51275ac9fc6.png",
+    "static/media/seats.jpeg": "/static/media/seats.497bea1fb906edf3f96d.jpeg",
+    "static/media/yamaha.png": "/static/media/yamaha.def6b4dd57774038e0a6.png",
+    "static/media/sportbike.png": "/static/media/sportbike.95e6262a7998f4c98fe8.png",
+    "static/media/Enfield.png": "/static/media/Enfield.a77020728524aa250a79.png",
+    "index.html": "/index.html",
+    "main.29456564.css.map": "/static/css/main.29456564.css.map",
+    "main.aee13f59.js.map": "/static/js/main.aee13f59.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.29456564.css",
+    "static/js/main.aee13f59.js"
+  ]
+}

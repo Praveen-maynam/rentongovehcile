@@ -1,8 +1,17 @@
+
+
+
+
+
+
+
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, Image } from 'lucide-react';
+import apiService, { TicketFormData } from '../../services/api.service';
 
 function RaiseTicketPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TicketFormData>({
     issue: '',
     vehicle: '',
     description: '',
@@ -10,33 +19,22 @@ function RaiseTicketPage() {
     mobile: '',
     photos: []
   });
-
   const [showIssueDropdown, setShowIssueDropdown] = useState(false);
   const [showVehicleDropdown, setShowVehicleDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const issueOptions = [
-    'Booking issue',
-    'Payment issue',
-    'Vehicle issue',
-    'Driver issue',
-    'App issue',
-    'Other'
-  ];
-
+  const navigate = useNavigate();
+  const issueOptions = ['Booking issue', 'Payment issue', 'Vehicle issue', 'Driver issue', 'App issue', 'Other'];
   const vehicleOptions = ['Car', 'Bike', 'Auto', 'Other'];
 
   const handleBack = () => {
-    window.history.back();
+    navigate('/dashboard');
   };
 
-  const handlePhotoUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData(prev => ({
-      ...prev,
-      photos: [...prev.photos, ...files]
-    }));
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    setFormData(prev => ({ ...prev, photos: [...(prev.photos || []), ...files] }));
   };
 
   const handleCreateTicket = async () => {
@@ -49,55 +47,12 @@ function RaiseTicketPage() {
     setError(null);
 
     try {
-      const userId = localStorage.getItem('userId') || '690c9fb0e524c979c76104c9';
-      const vehicleId = localStorage.getItem('vehicleId') || '690dcd0ce524c979c76122c7';
-      const bookingId = localStorage.getItem('bookingId') || '691448d706702f6b9f792c2b';
-      const vehicleType = formData.vehicle || 'Car';
-
-      const myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-
-      const urlencoded = new URLSearchParams();
-      urlencoded.append("userId", userId);
-      urlencoded.append("vehicleType", vehicleType);
-      urlencoded.append("vehicleId", vehicleId);
-      urlencoded.append("bookingId", bookingId);
-      urlencoded.append("subject", formData.issue);
-      urlencoded.append("description", formData.description);
-
-      const requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: urlencoded,
-      };
-
-      const response = await fetch("http://192.168.1.20:3000/createTicket", requestOptions);
-      const result = await response.text();
-      
-      let parsedResult;
-      try {
-        parsedResult = JSON.parse(result);
-      } catch (parseError) {
-        parsedResult = { success: false, message: 'Invalid response format' };
-      }
-      
-      if (parsedResult.success || response.ok) {
-        alert('✅ Ticket created successfully!');
-        
-        setFormData({
-          issue: '',
-          vehicle: '',
-          description: '',
-          name: '',
-          mobile: '',
-          photos: []
-        });
-      } else {
-        throw new Error(parsedResult.message || 'Failed to create ticket');
-      }
-    } catch (err) {
-      setError('Failed to create ticket: ' + err.message);
-      alert('❌ Failed to create ticket: ' + err.message);
+      await apiService.ticket.createTicket(formData);
+      alert('✅ Ticket created successfully!');
+      setFormData({ issue: '', vehicle: '', description: '', name: '', mobile: '', photos: [] });
+    } catch (err: any) {
+      setError(err.message || 'Failed to create ticket');
+      alert('❌ Failed to create ticket: ' + (err.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -108,9 +63,10 @@ function RaiseTicketPage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white px-6 py-4 shadow-lg flex-shrink-0">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <button 
+          <button
             onClick={handleBack}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            type="button"
           >
             <ArrowLeft size={22} />
           </button>
@@ -118,21 +74,19 @@ function RaiseTicketPage() {
         </div>
       </div>
 
-      {/* Form Content - No Scroll */}
+      {/* Form Content */}
       <div className="flex-1 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 py-6 h-full">
-          {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
 
-          {/* Two Column Layout */}
           <div className="grid grid-cols-2 gap-6 h-full">
             {/* Left Column */}
             <div className="space-y-4">
-              {/* Select Issue */}
+              {/* Issue Dropdown */}
               <div>
                 <label className="block text-gray-900 font-medium mb-2 text-sm">
                   Select Issue <span className="text-red-500">*</span>
@@ -148,10 +102,9 @@ function RaiseTicketPage() {
                     </span>
                     <ChevronRight className="text-gray-400" size={18} />
                   </button>
-                  
                   {showIssueDropdown && (
                     <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                      {issueOptions.map((option) => (
+                      {issueOptions.map(option => (
                         <button
                           key={option}
                           onClick={() => {
@@ -170,11 +123,9 @@ function RaiseTicketPage() {
                 </div>
               </div>
 
-              {/* Select Vehicle */}
+              {/* Vehicle Dropdown */}
               <div>
-                <label className="block text-gray-900 font-medium mb-2 text-sm">
-                  Select Vehicle
-                </label>
+                <label className="block text-gray-900 font-medium mb-2 text-sm">Select Vehicle</label>
                 <div className="relative">
                   <button
                     onClick={() => setShowVehicleDropdown(!showVehicleDropdown)}
@@ -186,10 +137,9 @@ function RaiseTicketPage() {
                     </span>
                     <ChevronRight className="text-gray-400" size={18} />
                   </button>
-                  
                   {showVehicleDropdown && (
                     <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
-                      {vehicleOptions.map((option) => (
+                      {vehicleOptions.map(option => (
                         <button
                           key={option}
                           onClick={() => {
@@ -214,7 +164,7 @@ function RaiseTicketPage() {
                 </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => {
+                  onChange={e => {
                     setFormData(prev => ({ ...prev, description: e.target.value }));
                     setError(null);
                   }}
@@ -224,7 +174,7 @@ function RaiseTicketPage() {
                 />
               </div>
 
-              {/* Add Photos */}
+              {/* Photos */}
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                 <label className="flex flex-col items-center justify-center cursor-pointer">
                   <input
@@ -237,8 +187,7 @@ function RaiseTicketPage() {
                   <Image size={36} className="text-gray-600 mb-2" strokeWidth={1.5} />
                   <span className="text-gray-700 font-medium text-sm">Add Photos</span>
                 </label>
-                
-                {formData.photos.length > 0 && (
+                {formData.photos && formData.photos.length > 0 && (
                   <div className="mt-2 text-center text-xs text-gray-600">
                     {formData.photos.length} photo(s) selected
                   </div>
@@ -250,7 +199,6 @@ function RaiseTicketPage() {
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h2>
 
-              {/* Name */}
               <div>
                 <label className="block text-gray-900 font-medium mb-2 text-sm">
                   Name <span className="text-red-500">*</span>
@@ -258,7 +206,7 @@ function RaiseTicketPage() {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => {
+                  onChange={e => {
                     setFormData(prev => ({ ...prev, name: e.target.value }));
                     setError(null);
                   }}
@@ -267,29 +215,23 @@ function RaiseTicketPage() {
                 />
               </div>
 
-              {/* Mobile Number */}
               <div>
-                <label className="block text-gray-900 font-medium mb-2 text-sm">
-                  Mobile Number
-                </label>
+                <label className="block text-gray-900 font-medium mb-2 text-sm">Mobile Number</label>
                 <input
                   type="tel"
                   value={formData.mobile}
-                  onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
+                  onChange={e => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
                   placeholder="Enter mobile number"
                   className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400 text-sm"
                 />
               </div>
 
-              {/* Submit Button */}
               <div className="pt-6">
                 <button
                   onClick={handleCreateTicket}
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] 
-                             text-white py-3.5 rounded-lg font-semibold text-base
-                             hover:shadow-lg transition-shadow
-                             disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white py-3.5 rounded-lg font-semibold text-base hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                  type="button"
                 >
                   {loading ? 'Submitting...' : 'Submit Ticket'}
                 </button>

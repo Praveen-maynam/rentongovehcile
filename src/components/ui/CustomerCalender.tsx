@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { X, Calendar, ChevronLeft, ChevronRight, ShoppingCart, Loader2 } from "lucide-react";
+import CalendarGrid from "./CustomerCalendar/CalendarGrid";
+import BookingSummary from "./CustomerCalendar/BookingSummary";
+import TimeSelector from "./CustomerCalendar/TimeSelector";
+import Legend from "./CustomerCalendar/Legend";
+import BookingModal from "./CustomerCalendar/BookingModal";
+import MyBookingsModal from "./CustomerCalendar/MyBookingsModal";
+import MessageDisplay from "./CustomerCalendar/MessageDisplay";
 // WaitingPopup removed - using GlobalBookingModals instead
 import { useNotificationStore } from "../../store/notification.store";
 import { useBookingModalStore } from "../../store/booking-modal.store";
@@ -94,14 +101,14 @@ export default function CustomerCalendar({
     };
   }, []);
 
-  useEffect(() => {
-    if (isOpen && VechileId && vechileType) {
-      fetchOwnerBlocks();
-      fetchBookings();
-    }
-  }, [isOpen, VechileId, vechileType]);
+  // Move this useEffect below fetchOwnerBlocks and fetchBookings declarations
+  // ...existing code...
+  // Removed duplicate fetchOwnerBlocks
 
-  const fetchOwnerBlocks = async () => {
+  // Removed duplicate fetchBookings
+
+
+  const fetchOwnerBlocks = React.useCallback(async () => {
     try {
       setLoading(true);
       const startDate = formatDate(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1));
@@ -133,14 +140,14 @@ export default function CustomerCalendar({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentMonth, VechileId, vechileType]);
 
-  const fetchBookings = async () => {
+  const fetchBookings = React.useCallback(async () => {
     try {
       setLoading(true);
 
       const activeBookingIdLocal = localStorage.getItem("activeBookingId") || "";
-      
+
       if (!activeBookingIdLocal) {
         console.log("⚠ No active booking ID in localStorage");
         setAllBookedDates([]);
@@ -174,9 +181,7 @@ export default function CustomerCalendar({
         const curr = new Date(from);
 
         const isConfirmed = item.status?.toLowerCase() === "confirmed" ||
-                            item.bookingStatus?.toLowerCase() === "confirmed";
-
-        const isMyBooking = (item.customerId || item.userId) === userId;
+          item.bookingStatus?.toLowerCase() === "confirmed";
 
         myBookingsList.push({
           id: item._id,
@@ -209,7 +214,14 @@ export default function CustomerCalendar({
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+  // Now insert the useEffect after both functions are declared
+  useEffect(() => {
+    if (isOpen && VechileId && vechileType) {
+      fetchOwnerBlocks();
+      fetchBookings();
+    }
+  }, [isOpen, VechileId, vechileType, fetchOwnerBlocks, fetchBookings]);
 
   const formatDate = (date: Date | null): string => {
     if (!date) return "";
@@ -245,10 +257,7 @@ export default function CustomerCalendar({
   const isOwnerBlocked = (date: Date) => ownerBlockedDates.includes(formatDate(date));
   const isBooked = (date: Date) => allBookedDates.includes(formatDate(date));
   const isConfirmedBooking = (date: Date) => confirmedBookedDates.includes(formatDate(date));
-  const isMyBooking = (date: Date) => myBookings.some(b => {
-    const d = formatDate(date);
-    return d >= b.from && d <= b.to;
-  });
+  // Removed unused isMyBooking helper
   const isUnavailable = (date: Date) => isOwnerBlocked(date) || isBooked(date);
 
   const showMsg = (type: string, text: string) => {
@@ -389,10 +398,10 @@ export default function CustomerCalendar({
       }
 
       const contactName = propContactName || localStorage.getItem("userName") || localStorage.getItem("contactName") || "";
-      
+
       // ✅ FIX: Get ownerId with proper fallback
       const ownerId = propOwnerId || localStorage.getItem("vehicleOwnerId") || "";
-      
+
       console.log("📋 Booking Details:", {
         userId,
         ownerId,
@@ -410,7 +419,7 @@ export default function CustomerCalendar({
       formData.append("userId", userId);
       formData.append("vechileType", vechileType);
       formData.append("VechileId", VechileId);
-      
+
       // ✅ FIX: Add ownerId if available (API might need it)
       if (ownerId) {
         formData.append("ownerId", ownerId);
@@ -418,7 +427,7 @@ export default function CustomerCalendar({
       } else {
         console.warn("⚠ No ownerId available - booking may fail if API requires it");
       }
-      
+
       formData.append("pricePerKm", String(pricePerKm || pricePerDay || 0));
       formData.append("contactNumber", contactNumber);
       formData.append("contactName", contactName);
@@ -441,7 +450,7 @@ export default function CustomerCalendar({
 
       const data = await response.json();
       console.log("📥 Booking created:", data);
-      
+
       if (response.ok) {
         const bookingId = data.booking?._id || data._id || data.bookingId;
         console.log("✅ Booking ID:", bookingId);
@@ -470,14 +479,14 @@ export default function CustomerCalendar({
           showMsg("error", "Booking created but no ID received");
           return;
         }
-        
+
         showMsg("success", "Booking request sent!");
         await blockDatesAsUnavailable();
         // ❌ DISABLED - Don't fetch bookings as it might cause issues
         // await fetchBookings();
         setSelectedStart(null);
         setSelectedEnd(null);
-        
+
         if (onBookingComplete) {
           onBookingComplete(data);
         }
@@ -507,7 +516,7 @@ export default function CustomerCalendar({
       setLoading(false);
     }
   };
-  
+
   // ✅ POLLING - Only closes popup on Confirmed/Rejected
   const startPolling = (bookingId: string) => {
     console.log("⏱ Starting polling NOW for booking ID:", bookingId);
@@ -599,24 +608,24 @@ export default function CustomerCalendar({
           // ANY other status (Pending, empty, unknown) - keep waiting
           console.log("⏱ POLLING: Status is '" + status + "' - popup stays open, continuing to wait...");
         }
-        } catch (error) {
-          console.error("❌ Polling error:", error);
-          // ✅ DON'T CLOSE POPUP ON ERROR - Just log it and continue
-          console.log("⏱ Polling error - continuing to wait...");
-        }
-      }, 5000); // Poll every 5 seconds
+      } catch (error) {
+        console.error("❌ Polling error:", error);
+        // ✅ DON'T CLOSE POPUP ON ERROR - Just log it and continue
+        console.log("⏱ Polling error - continuing to wait...");
+      }
+    }, 5000); // Poll every 5 seconds
   };
 
   // ✅ NEW: Function to unblock dates after cancellation
   const unblockDatesAfterCancellation = async (bookingId: string) => {
     try {
       console.log("🔓 Attempting to unblock dates for booking:", bookingId);
-      
+
       // Try to remove the unavailability entry
       const response = await fetch(`${API_BASE}/removeNotAvailability/${bookingId}`, {
         method: "DELETE"
       });
-      
+
       if (response.ok) {
         console.log("✅ Dates unblocked successfully");
       } else {
@@ -664,7 +673,7 @@ export default function CustomerCalendar({
 
       if (response.ok) {
         showMsg("success", "Booking cancelled");
-        
+
         // ✅ Unblock dates and refresh calendar
         await unblockDatesAfterCancellation(booking.id);
         await fetchBookings();
@@ -696,7 +705,6 @@ export default function CustomerCalendar({
       const ownerBlocked = isOwnerBlocked(date);
       const booked = isBooked(date);
       const confirmedBooked = isConfirmedBooking(date);
-      const myBook = isMyBooking(date);
       const unavailable = isUnavailable(date);
       const isSelectedStart = selectedStart && formatDate(selectedStart) === formatDate(date);
       const isSelectedEnd = selectedEnd && formatDate(selectedEnd) === formatDate(date);
@@ -736,172 +744,109 @@ export default function CustomerCalendar({
 
   return (
     <>
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white w-full max-w-2xl rounded-2xl overflow-hidden relative max-h-[90vh] overflow-y-auto">
-        <button onClick={onClose} className="absolute top-3 right-3 p-2 rounded-lg hover:bg-gray-200 z-10">
-          <X size={20} />
-        </button>
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+        <div className="bg-white w-full max-w-2xl rounded-2xl overflow-hidden relative max-h-[90vh] overflow-y-auto">
+          <button onClick={onClose} className="absolute top-3 right-3 p-2 rounded-lg hover:bg-gray-200 z-10">
+            <X size={20} />
+          </button>
 
-        {loading && (
-          <div className="absolute top-3 left-3 bg-white rounded-lg shadow-lg p-2 flex items-center gap-2 z-10">
-            <Loader2 className="animate-spin" size={16} />
-            <span className="text-sm">Loading...</span>
-          </div>
-        )}
-
-        <div className="p-4 border-b flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Calendar className="text-blue-600" size={24} />
-            <div>
-              <h2 className="font-bold text-lg">Book {vehicleName}</h2>
-              <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">Customer</span>
+          {loading && (
+            <div className="absolute top-3 left-3 bg-white rounded-lg shadow-lg p-2 flex items-center gap-2 z-10">
+              <Loader2 className="animate-spin" size={16} />
+              <span className="text-sm">Loading...</span>
             </div>
-          </div>
-          {myBookings.length > 0 && (
-            <button onClick={() => setShowMyBookings(true)} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
-              My Bookings ({myBookings.length})
-            </button>
           )}
-        </div>
 
-        {message.text && (
-          <div className={`mx-4 mt-4 p-3 rounded-lg text-sm ${message.type === "error" ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}`}>
-            {message.text}
-          </div>
-        )}
-
-        <div className="p-4">
-          <div className="flex justify-between items-center mb-4">
-            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-2 hover:bg-gray-100 rounded-lg">
-              <ChevronLeft size={20} />
-            </button>
-            <h3 className="font-semibold">
-              {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-            </h3>
-            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="p-2 hover:bg-gray-100 rounded-lg">
-              <ChevronRight size={20} />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => (
-              <div key={d} className="text-center font-medium text-gray-500 text-xs py-1">{d}</div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-7 gap-1 mb-4">{renderCalendar()}</div>
-
-          <div className="flex flex-wrap gap-3 text-xs mb-4 p-3 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-gradient-to-br from-blue-500 to-indigo-500 rounded" />
-              <span>Available</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-red-100 border-2 border-red-400 rounded" />
-              <span>Owner Blocked</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-green-100 border-2 border-green-400 rounded" />
-              <span>Confirmed</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-orange-100 border-2 border-orange-400 rounded" />
-              <span>Pending</span>
-            </div>
-          </div>
-
-          <div className="border-t pt-4">
-            <div className="flex items-center justify-between mb-3">
+          <div className="p-4 border-b flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <Calendar className="text-blue-600" size={24} />
               <div>
-                <p className="text-sm text-gray-500">Selected:</p>
-                <p className="font-semibold">{formatDisplay(selectedStart)} → {formatDisplay(selectedEnd)}</p>
-                {selectedStart && selectedEnd && (
-                  <>
-                    <p className="text-xs text-gray-500">Hours: {calculateTotalHours()}</p>
-                    <p className="text-blue-600 font-bold">Total: ₹{calculateTotalPrice()}</p>
-                  </>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <select className="text-sm border rounded px-2 py-1" value={startTime} onChange={e => setStartTime(e.target.value)}>
-                  {["01:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"].map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-                <span className="text-gray-400">-</span>
-                <select className="text-sm border rounded px-2 py-1" value={endTime} onChange={e => setEndTime(e.target.value)}>
-                  {["06:00", "09:00", "12:00", "15:00", "18:00", "21:00", "23:00"].map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <h2 className="font-bold text-lg">Book {vehicleName}</h2>
+                <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">Customer</span>
               </div>
             </div>
-
-            <button onClick={handleCustomerBook} disabled={!selectedStart || !selectedEnd || loading}
-              className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700 transition flex items-center justify-center gap-2">
-              <ShoppingCart size={18} /> Book Now
-            </button>
+            {myBookings.length > 0 && (
+              <button onClick={() => setShowMyBookings(true)} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
+                My Bookings ({myBookings.length})
+              </button>
+            )}
           </div>
+
+          <MessageDisplay type={message.type} text={message.text} />
+
+          <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-2 hover:bg-gray-100 rounded-lg">
+                <ChevronLeft size={20} />
+              </button>
+              <h3 className="font-semibold">
+                {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+              </h3>
+              <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="p-2 hover:bg-gray-100 rounded-lg">
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => (
+                <div key={d} className="text-center font-medium text-gray-500 text-xs py-1">{d}</div>
+              ))}
+            </div>
+
+            <CalendarGrid days={renderCalendar()} />
+
+            <Legend />
+
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <BookingSummary
+                  selectedStart={selectedStart}
+                  selectedEnd={selectedEnd}
+                  totalHours={calculateTotalHours()}
+                  totalPrice={calculateTotalPrice()}
+                  formatDisplay={formatDisplay}
+                />
+                <TimeSelector
+                  startTime={startTime}
+                  endTime={endTime}
+                  setStartTime={setStartTime}
+                  setEndTime={setEndTime}
+                />
+              </div>
+
+              <button onClick={handleCustomerBook} disabled={!selectedStart || !selectedEnd || loading}
+                className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700 transition flex items-center justify-center gap-2">
+                <ShoppingCart size={18} /> Book Now
+              </button>
+            </div>
+          </div>
+
+          <BookingModal
+            show={showBookingModal}
+            loading={loading}
+            vehicleName={vehicleName}
+            selectedStart={selectedStart}
+            selectedEnd={selectedEnd}
+            startTime={startTime}
+            endTime={endTime}
+            totalHours={calculateTotalHours()}
+            totalPrice={calculateTotalPrice()}
+            formatDisplay={formatDisplay}
+            onConfirm={handleCustomerBook}
+            onCancel={() => setShowBookingModal(false)}
+          />
+
+          <MyBookingsModal
+            show={showMyBookings}
+            bookings={myBookings}
+            loading={loading}
+            onCancelBooking={handleCancelBooking}
+            onClose={() => setShowMyBookings(false)}
+          />
         </div>
-           
-        {showBookingModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl p-6 max-w-sm w-full">
-              <h3 className="font-bold text-lg mb-4">Confirm Booking</h3>
-              <div className="bg-gray-50 rounded-lg p-4 mb-4 text-sm space-y-2">
-                <p><strong>Vehicle:</strong> {vehicleName}</p>
-                <p><strong>Dates:</strong> {formatDisplay(selectedStart)} → {formatDisplay(selectedEnd)}</p>
-                <p><strong>Time:</strong> {startTime} - {endTime}</p>
-                <p><strong>Total Hours:</strong> {calculateTotalHours()}</p>
-                <p><strong>Total Price:</strong> ₹{calculateTotalPrice()}</p>
-              </div>
-              <div className="flex gap-3">
-                <button onClick={handleCustomerBook} disabled={loading} className="flex-1 bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50">
-                  {loading ? "Booking..." : "Confirm"}
-                </button>
-                <button onClick={() => setShowBookingModal(false)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showMyBookings && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[70vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-lg">My Bookings</h3>
-                <button onClick={() => setShowMyBookings(false)}><X size={20} /></button>
-              </div>
-              {myBookings.length === 0 ? (
-                <p className="text-gray-500">No bookings yet</p>
-              ) : (
-                <div className="space-y-3">
-                  {myBookings.map(b => (
-                    <div key={b.id} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-semibold">{b.from} → {b.to}</p>
-                          <p className="text-sm text-gray-500">{b.fromTime} - {b.toTime}</p>
-                        </div>
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          b.isConfirmed ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
-                        }`}>
-                          {b.status || 'Pending'}
-                        </span>
-                      </div>
-                      <button onClick={() => handleCancelBooking(b)} disabled={loading} 
-                        className="w-full px-3 py-1 bg-red-100 text-red-700 rounded text-sm font-medium hover:bg-red-200 disabled:opacity-50">
-                        Cancel Booking
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
-    </div>
 
-    {/* WaitingPopup removed - using GlobalBookingModals CustomerWaitingPopup instead */}
+      {/* WaitingPopup removed - using GlobalBookingModals CustomerWaitingPopup instead */}
 
     </>
   );

@@ -45,6 +45,7 @@ interface VehicleData {
   latitude?: string;
   longitude?: string;
 }
+
 const BookingDetail: React.FC = () => {
   const { vehicleId: urlVehicleId } = useParams<{ vehicleId: string }>();
   const navigate = useNavigate();
@@ -68,17 +69,17 @@ const BookingDetail: React.FC = () => {
 
   const isConfirmed = passedBooking?.status?.toLowerCase() === "confirmed";
 
-  
-     // Auto-open chat if coming from booking history
+  // Auto-open chat if coming from booking history
   useEffect(() => {
     if (openContact && passedBooking) {
       setIsChatOpen(true);
     }
   }, [openContact, passedBooking]);
+
   useEffect(() => {
     const loadVehicleData = async () => {
-      if (passedVehicleData && passedVehicleData._id && 
-          (passedVehicleData.CarName || passedVehicleData.carName || passedVehicleData.bikeName)) {
+      if (passedVehicleData && passedVehicleData._id &&
+        (passedVehicleData.CarName || passedVehicleData.carName || passedVehicleData.bikeName)) {
         setVehicleData(passedVehicleData);
         setLoading(false);
         setError("");
@@ -169,9 +170,9 @@ const BookingDetail: React.FC = () => {
       </div>
     );
   }
-      
+
   const isCar = vehicleType === "car" || !!vehicleData.CarName || !!vehicleData.carName || !!vehicleData.carImages;
-  
+
   let vehicleImages = (isCar ? vehicleData.carImages : vehicleData.bikeImages) || [];
   vehicleImages = vehicleImages.filter((img) => img && img.trim() !== "" && img !== "undefined");
 
@@ -199,13 +200,13 @@ const BookingDetail: React.FC = () => {
   const displayName = isCar
     ? vehicleData.CarName || vehicleData.carName || passedBooking?.vehicleName || "Unknown Vehicle"
     : vehicleData.bikeName || passedBooking?.vehicleName || "Unknown Bike";
-  
+
   const displayModel = isCar ? vehicleData.CarModel || "N/A" : vehicleData.bikeModel || "N/A";
-  
+
   const displayPrice = isCar
     ? vehicleData.RentPerHour || passedBooking?.price || 0
     : vehicleData.pricePerKm || passedBooking?.price || 0;
-  
+
   const priceUnit = isCar ? "/hr" : "/km";
 
   const currentUserId = localStorage.getItem('userId') || 'temp-user-' + Date.now();
@@ -278,9 +279,8 @@ const BookingDetail: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => setCurrentImage(idx)}
-                  className={`h-2 rounded-full transition-all ${
-                    idx === currentImage ? "bg-[#0066FF] w-6" : "bg-gray-700 w-2"
-                  }`}
+                  className={`h-2 rounded-full transition-all ${idx === currentImage ? "bg-[#0066FF] w-6" : "bg-gray-700 w-2"
+                    }`}
                 />
               ))}
             </div>
@@ -328,7 +328,7 @@ const BookingDetail: React.FC = () => {
               </>
             ) : (
               <>
-               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
                   <img src={BikeCC} className="w-6 h-6 mb-1.5" alt="engine" />
                   <span className="text-[13px] text-[#333333] font-medium whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
                     {vehicleData.engineCapacity || vehicleData.bikeEngine || vehicleData.bikeCC || "350"} CC
@@ -370,7 +370,7 @@ const BookingDetail: React.FC = () => {
             <div className="mb-3 sm:mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
               <AlertCircle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
               <p className="text-xs sm:text-sm text-amber-700">
-                Chat and Call are available only for <span className="font-semibold">Confirmed</span> bookings. 
+                Chat and Call are available only for <span className="font-semibold">Confirmed</span> bookings.
                 Current status: <span className="font-semibold">{passedBooking.status === "AutoCancelled" ? "Auto Cancelled" : passedBooking.status}</span>
               </p>
             </div>
@@ -401,44 +401,43 @@ const BookingDetail: React.FC = () => {
             </button>
           </div>
 
-      
-   
-     <PopupChat
-  isOpen={isChatOpen}
-  onClose={() => {
-    console.log("❌ Closing chat...");
-    setIsChatOpen(false);
-  }}
-  
-  // ✅ Customer View
-  pageRole="customerView"
-  
-  // ✅ Current user (customer)
-  currentUserId={currentUserId}
-  currentUserName={localStorage.getItem('userName') || 'You'}
-  
-  // ✅ Owner info (from vehicle data)
-  ownerId={vehicleOwnerId}
-  ownerName={vehicleData.contactName || "Vehicle Owner"}
-  ownerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${vehicleData.contactName || "Owner"}`}
-  
-  // ✅ Customer info (current user)
-  customerId={currentUserId}
-  customerName={localStorage.getItem('userName') || 'You'}
-  customerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localStorage.getItem('userName') || 'You'}`}
-  
-  // ✅ Booking ID
-  bookingId={chatBookingId}
-  
-  // ✅ Vehicle ID
-  vehicleId={vehicleData._id}
-  
-  // ✅ API URL
-  apiUrl="http://3.110.122.127:3000"
-  
-  // ✅ Real-time enabled
-  useRealtime={true}
-/>  </div>
+          <PopupChat
+            isOpen={isChatOpen}
+            onClose={() => {
+              console.log("❌ Closing chat...");
+              setIsChatOpen(false);
+            }}
+
+            // ✅ Customer View
+            pageRole="customerView"
+
+            // ✅ Current user (customer)
+            currentUserId={currentUserId}
+            currentUserName={localStorage.getItem('userName') || 'You'}
+
+            // ✅ Owner info (from vehicle data)
+            ownerId={vehicleOwnerId}
+            ownerName={vehicleData.contactName || "Vehicle Owner"}
+            ownerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${vehicleData.contactName || "Owner"}`}
+
+            // ✅ Customer info (current user)
+            customerId={currentUserId}
+            customerName={localStorage.getItem('userName') || 'You'}
+            customerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localStorage.getItem('userName') || 'You'}`}
+
+            // ✅ Booking ID
+            bookingId={chatBookingId}
+
+            // ✅ Vehicle ID
+            vehicleId={vehicleData._id}
+
+            // ✅ API URL
+            apiUrl={apiService.chat.apiUrl}
+
+            // ✅ Real-time enabled
+            useRealtime={true}
+          />
+        </div>
       </div>
     </div>
   );
