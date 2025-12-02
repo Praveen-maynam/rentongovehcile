@@ -18,6 +18,7 @@ interface PopupChatProps {
   bookingId: string;
   vehicleId?: string;
   apiUrl: string;
+  socketUrl?: string;
   useRealtime?: boolean;
 }
 
@@ -36,6 +37,7 @@ const PopupChat: React.FC<PopupChatProps> = ({
   bookingId,
   vehicleId,
   apiUrl,
+  socketUrl,
   useRealtime = true,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -118,9 +120,10 @@ const PopupChat: React.FC<PopupChatProps> = ({
       if (!useRealtime || !isMounted) return;
 
       try {
-        console.log("🔌 Connecting to Socket.IO...", apiUrl);
+        const connectionUrl = socketUrl || apiUrl;
+        console.log("🔌 Connecting to Socket.IO...", connectionUrl);
 
-        socket = io(apiUrl, {
+        socket = io(connectionUrl, {
           transports: ['websocket', 'polling'],
           reconnection: true,
           reconnectionAttempts: 5,
@@ -206,7 +209,7 @@ const PopupChat: React.FC<PopupChatProps> = ({
 
       setIsConnected(false);
     };
-  }, [isOpen, bookingId, apiUrl, useRealtime, currentUserId]);
+  }, [isOpen, bookingId, apiUrl, socketUrl, useRealtime, currentUserId]);
 
   // Handle file input
   const handleImageSelect = (e: ChangeEvent<HTMLInputElement>) => {

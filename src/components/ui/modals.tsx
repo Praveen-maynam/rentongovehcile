@@ -11,9 +11,9 @@ import {
   Truck,
 } from "lucide-react";
 import io from "socket.io-client";
-import apiService from "../../services/api.service";
+import apiService, { SOCKET_URL } from "../../services/api.service";
 
-const SOCKET_URL = "http://3.110.122.127:3001";
+
 const EXPIRY_TIME = 2 * 60 * 1000;
 
 export default function PriorityBookingSystem() {

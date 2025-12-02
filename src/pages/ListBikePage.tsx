@@ -173,13 +173,13 @@ const ListBikePage = () => {
     if (storedUserId && storedUserId.length === 24 && /^[a-f0-9]{24}$/i.test(storedUserId)) {
       return storedUserId;
     }
-    return "68f32259cea8a9fa88029262";
+    return "";
   };
 
   const [formData, setFormData] = useState({
     userId: getUserId(),
     bikeBrand: "", bikeModel: "", bikeNumber: "", bikeEngine: "",
-    bikeYear: "", bikeColor: "", fuel: "", transmission: "",
+    bikeYear: "", fuel: "", transmission: "",
     pricePerKm: "", kmDriven: "", description: "",
     photoFront: null as File | null,
     photoBack: null as File | null,
@@ -195,9 +195,9 @@ const ListBikePage = () => {
   });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-const bikeBrands = bikeDataJSON.bikeBrands.sort();
+  const bikeBrands = bikeDataJSON.bikeBrands.sort();
   const years = bikeDataJSON.years;
-  const colors = bikeDataJSON.colors;
+
   const fuelTypes = bikeDataJSON.fuelTypes;
   const transmissionOptions = bikeDataJSON.transmissionTypes;
   const states = bikeDataJSON.states;
@@ -212,42 +212,42 @@ const bikeBrands = bikeDataJSON.bikeBrands.sort();
     }
   }, [formData.bikeBrand]);
 
-// Add this useEffect after the bike brand/model useEffect (around line 210)
+  // Add this useEffect after the bike brand/model useEffect (around line 210)
 
-useEffect(() => {
-  if (formData.pickupCityState) {
-    const cities = bikeDataJSON.cities[formData.pickupCityState as keyof typeof bikeDataJSON.cities] || [];
-    setAvailableCities(cities);
-    // Reset city when state changes
-    setFormData(prev => ({ ...prev, pickupCity: "" }));
-  } else {
-    setAvailableCities([]);
-  }
-}, [formData.pickupCityState]);
+  useEffect(() => {
+    if (formData.pickupCityState) {
+      const cities = bikeDataJSON.cities[formData.pickupCityState as keyof typeof bikeDataJSON.cities] || [];
+      setAvailableCities(cities);
+      // Reset city when state changes
+      setFormData(prev => ({ ...prev, pickupCity: "" }));
+    } else {
+      setAvailableCities([]);
+    }
+  }, [formData.pickupCityState]);
 
 
-// Add this useEffect after the bike brand/model useEffect (around line 210)
+  // Add this useEffect after the bike brand/model useEffect (around line 210)
 
-useEffect(() => {
-  if (formData.pickupCityState) {
-    const cities = bikeDataJSON.cities[formData.pickupCityState as keyof typeof bikeDataJSON.cities] || [];
-    setAvailableCities(cities);
-    // Reset city when state changes
-    setFormData(prev => ({ ...prev, pickupCity: "" }));
-  } else {
-    setAvailableCities([]);
-  }
-}, [formData.pickupCityState]);
+  useEffect(() => {
+    if (formData.pickupCityState) {
+      const cities = bikeDataJSON.cities[formData.pickupCityState as keyof typeof bikeDataJSON.cities] || [];
+      setAvailableCities(cities);
+      // Reset city when state changes
+      setFormData(prev => ({ ...prev, pickupCity: "" }));
+    } else {
+      setAvailableCities([]);
+    }
+  }, [formData.pickupCityState]);
 
-// Update typeableFields - REMOVE State and City from here
-const typeableFields = [
-  { name: "bikeBrand", label: "Bike Brand", options: bikeBrands, placeholder: "Type brand name..." },
-  { name: "bikeModel", label: "Bike Model", options: availableModels, placeholder: "Type model name...", disabled: !formData.bikeBrand },
-  { name: "bikeYear", label: "Manufacturing Year", options: years, placeholder: "Type year..." },
-  { name: "bikeColor", label: "Bike Color", options: colors, placeholder: "Type color..." },
-  { name: "fuel", label: "Fuel Type", options: fuelTypes, placeholder: "Type fuel type..." },
-  { name: "transmission", label: "Transmission", options: transmissionOptions, placeholder: "Type transmission..." },
-];
+  // Update typeableFields - REMOVE State and City from here
+  const typeableFields = [
+    { name: "bikeBrand", label: "Bike Brand", options: bikeBrands, placeholder: "Type brand name..." },
+    { name: "bikeModel", label: "Bike Model", options: availableModels, placeholder: "Type model name...", disabled: !formData.bikeBrand },
+    { name: "bikeYear", label: "Manufacturing Year", options: years, placeholder: "Type year..." },
+
+    { name: "fuel", label: "Fuel Type", options: fuelTypes, placeholder: "Type fuel type..." },
+    { name: "transmission", label: "Transmission", options: transmissionOptions, placeholder: "Type transmission..." },
+  ];
 
   const textFields = [
     { name: "bikeNumber", label: "Bike Number", placeholder: "AP12AB1234" },
@@ -260,18 +260,18 @@ const typeableFields = [
     { name: "contactName", label: "Name", placeholder: "John Doe" },
     { name: "contactNumber", label: "Contact Number", placeholder: "9876543210", pattern: "[0-9]{10}" },
   ];
-        // Create NEW array for address dropdowns (State and City)
-const addressDropdownFields = [
-  { name: "pickupCityState", label: "State", options: states, placeholder: "Type state..." },
-  { name: "pickupCity", label: "City", options: availableCities, placeholder: "Type city...", disabled: !formData.pickupCityState },
-];
+  // Create NEW array for address dropdowns (State and City)
+  const addressDropdownFields = [
+    { name: "pickupCityState", label: "State", options: states, placeholder: "Type state..." },
+    { name: "pickupCity", label: "City", options: availableCities, placeholder: "Type city...", disabled: !formData.pickupCityState },
+  ];
 
-// Update addressFields - keep only text input fields
-const addressFields = [
-  { name: "pickupArea", label: "Street/Area", placeholder: "Street name or area" },
-  { name: "pickupCityPinCode", label: "Zip/Pincode", placeholder: "500001" },
-  { name: "pickupCityCountry", label: "Country", placeholder: "India", fullWidth: true },
-];
+  // Update addressFields - keep only text input fields
+  const addressFields = [
+    { name: "pickupArea", label: "Street/Area", placeholder: "Street name or area" },
+    { name: "pickupCityPinCode", label: "Zip/Pincode", placeholder: "500001" },
+    { name: "pickupCityCountry", label: "Country", placeholder: "India", fullWidth: true },
+  ];
   const checkboxes = [
     { name: "drivingLicense", label: "Driving License Required" },
     { name: "aadharCard", label: "Aadhar Card Required" },
@@ -381,8 +381,8 @@ const addressFields = [
     // Vehicle details validation
     if (!formData.bikeBrand) errors.bikeBrand = "Bike brand is required";
     // bikeModel is optional - no validation needed
-    if (!formData.bikeYear) errors.bikeYear = "Manufacturing year is required";
-    if (!formData.bikeColor) errors.bikeColor = "Bike color is required";
+    if (!formData.bikeYear) errors.bikeYear = "Manufancturing year is required";
+
     if (!formData.fuel) errors.fuel = "Fuel type is required";
     if (!formData.transmission) errors.transmission = "Transmission type is required";
     if (!formData.bikeNumber) errors.bikeNumber = "Bike number is required";
@@ -664,62 +664,62 @@ const addressFields = [
               </div>
             )}
 
-           {/* Address */}
-<div className="border-b pb-2 pt-4">
-  <h2 className="text-lg font-semibold text-gray-800">Vehicle Pickup Address</h2>
-</div>
+            {/* Address */}
+            <div className="border-b pb-2 pt-4">
+              <h2 className="text-lg font-semibold text-gray-800">Vehicle Pickup Address</h2>
+            </div>
 
-{/* State and City Dropdowns */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  {addressDropdownFields.map((field) => (
-    <div key={field.name} data-error={!!fieldErrors[field.name]}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        {field.label} <span className="text-red-500">*</span>
-      </label>
-      <div className={fieldErrors[field.name] ? "ring-2 ring-red-500 rounded-lg" : ""}>
-        <TypeableDropdown
-          options={field.options}
-          value={formData[field.name as keyof typeof formData] as string}
-          onChange={(value) => {
-            handleTypeableChange(field.name, value);
-            setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
-          }}
-          placeholder={field.placeholder}
-          disabled={field.disabled}
-        />
-      </div>
-      {fieldErrors[field.name] && (
-        <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
-      )}
-    </div>
-  ))}
-</div>
+            {/* State and City Dropdowns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {addressDropdownFields.map((field) => (
+                <div key={field.name} data-error={!!fieldErrors[field.name]}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {field.label} <span className="text-red-500">*</span>
+                  </label>
+                  <div className={fieldErrors[field.name] ? "ring-2 ring-red-500 rounded-lg" : ""}>
+                    <TypeableDropdown
+                      options={field.options}
+                      value={formData[field.name as keyof typeof formData] as string}
+                      onChange={(value) => {
+                        handleTypeableChange(field.name, value);
+                        setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
+                      }}
+                      placeholder={field.placeholder}
+                      disabled={field.disabled}
+                    />
+                  </div>
+                  {fieldErrors[field.name] && (
+                    <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
+                  )}
+                </div>
+              ))}
+            </div>
 
-{/* Address Text Fields */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  {addressFields.map((field) => (
-    <div key={field.name} className={field.fullWidth ? "md:col-span-2" : ""} data-error={!!fieldErrors[field.name]}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        {field.label} <span className="text-red-500">*</span>
-      </label>
-      <input
-        type="text"
-        name={field.name}
-        value={formData[field.name as keyof typeof formData] as string}
-        onChange={(e) => {
-          handleInputChange(e);
-          setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
-        }}
-        placeholder={field.placeholder}
-        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${fieldErrors[field.name] ? 'border-red-500 ring-2 ring-red-500' : 'border-gray-300'}`}
-        required
-      />
-      {fieldErrors[field.name] && (
-        <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
-      )}
-    </div>
-  ))}
-</div>
+            {/* Address Text Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {addressFields.map((field) => (
+                <div key={field.name} className={field.fullWidth ? "md:col-span-2" : ""} data-error={!!fieldErrors[field.name]}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {field.label} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name={field.name}
+                    value={formData[field.name as keyof typeof formData] as string}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
+                    }}
+                    placeholder={field.placeholder}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${fieldErrors[field.name] ? 'border-red-500 ring-2 ring-red-500' : 'border-gray-300'}`}
+                    required
+                  />
+                  {fieldErrors[field.name] && (
+                    <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
+                  )}
+                </div>
+              ))}
+            </div>
             <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -751,23 +751,14 @@ const addressFields = [
                   </button>
                 </div>
               </div>
-              
+
               {locationError && (
                 <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded mb-4">
                   {locationError}
                 </div>
               )}
 
-              {/* <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-gray-700">Latitude:</span>
-                  <span className="ml-2 text-gray-600">{formData.latitude}</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Longitude:</span>
-                  <span className="ml-2 text-gray-600">{formData.longitude}</span>
-                </div>
-              </div> */}
+
 
               {showMap && (
                 <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">

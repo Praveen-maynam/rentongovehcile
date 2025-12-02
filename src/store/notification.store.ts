@@ -1,10 +1,8 @@
 import { create } from 'zustand';
 import io, { Socket } from 'socket.io-client';
+import { API_BASE_URL, SOCKET_URL } from '../services/api.service';
 
-const API_BASE = "http://3.110.122.127:3000";
-const SOCKET_URL = "http://3.110.122.127:3001";
 
-// Socket instance for notifications
 let notificationSocket: Socket | null = null;
 
 export interface Notification {
@@ -86,7 +84,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       const userId = notification.userId || localStorage.getItem("userId");
       if (userId) {
         // Fire and forget - don't block UI
-        fetch(`${API_BASE}/createNotification`, {
+        fetch(`${API_BASE_URL}/createNotification`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -134,7 +132,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
     try {
       console.log('🔔 Fetching notifications for user:', userId);
-      const response = await fetch(`${API_BASE}/getNotifications/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/notifications/${userId}`);
 
       // If API returns 404, it means the endpoint doesn't exist yet
       // Just use local notifications without showing an error
@@ -228,7 +226,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
     // Sync with backend
     try {
-      await fetch(`${API_BASE}/markNotificationRead/${id}`, {
+      await fetch(`${API_BASE_URL}/markNotificationRead/${id}`, {
         method: 'PUT',
       });
       console.log('🔔 Marked notification as read:', id);
@@ -247,7 +245,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
     // Sync with backend
     try {
-      await fetch(`${API_BASE}/markAllNotificationsRead/${userId}`, {
+      await fetch(`${API_BASE_URL}/markAllNotificationsRead/${userId}`, {
         method: 'PUT',
       });
       console.log('🔔 Marked all notifications as read');
@@ -269,7 +267,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
     // Sync with backend
     try {
-      await fetch(`${API_BASE}/deleteNotification/${id}`, {
+      await fetch(`${API_BASE_URL}/deleteNotification/${id}`, {
         method: 'DELETE',
       });
       console.log('🔔 Deleted notification:', id);
@@ -285,7 +283,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
     // Sync with backend
     try {
-      await fetch(`${API_BASE}/clearAllNotifications/${userId}`, {
+      await fetch(`${API_BASE_URL}/clearAllNotifications/${userId}`, {
         method: 'DELETE',
       });
       console.log('🔔 Cleared all notifications');

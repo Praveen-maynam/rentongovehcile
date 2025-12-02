@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PopupChat from "../components/ui/PopupChat";
-import apiService from "../services/api.service";
+import apiService, { SOCKET_URL } from "../services/api.service";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import Petrol from "../assets/icons/Petrol.png";
 import Location from "../assets/icons/Location.png";
@@ -433,6 +433,7 @@ const BookingDetail: React.FC = () => {
 
             // ✅ API URL
             apiUrl={apiService.chat.apiUrl}
+            socketUrl={SOCKET_URL}
 
             // ✅ Real-time enabled
             useRealtime={true}

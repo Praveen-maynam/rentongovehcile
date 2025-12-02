@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { MessageCircle, Phone } from "lucide-react";
-import apiService from "../services/api.service";
+import apiService, { SOCKET_URL } from "../services/api.service";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import Petrol from "../assets/icons/Petrol.png";
 import Location from "../assets/icons/Location.png";
@@ -486,7 +486,7 @@ const VehicleHistory: React.FC = () => {
                       }`}>
                       {booking.status}
                     </span>
-                    {booking.status === "Confirmed" && (
+                    {booking.status === "Confirmed" ? (
                       <div className="flex gap-2 mt-3">
                         <button
                           onClick={(e) => handleChatClick(booking, e)}
@@ -495,6 +495,7 @@ const VehicleHistory: React.FC = () => {
                           <MessageCircle size={18} />
                           <span>Chat</span>
                         </button>
+
                         <button
                           onClick={(e) => handleCallClick(booking, e)}
                           className="flex-1 flex items-center justify-center gap-2 py-2 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white rounded-full font-semibold"
@@ -503,7 +504,14 @@ const VehicleHistory: React.FC = () => {
                           <span>Call</span>
                         </button>
                       </div>
-                    )}
+                    ) : booking.status === "Completed" ? (
+                      <div className="mt-3">
+                        <div className="bg-green-500 text-white text-center py-2 rounded-full font-semibold shadow-md">
+                          ✔ Ride Completed
+                        </div>
+                      </div>
+                    ) : null}
+
                   </div>
                 ))}
               </div>
@@ -546,6 +554,7 @@ const VehicleHistory: React.FC = () => {
           vehicleId={selectedBooking._id || ''}
           // ✅ API URL
           apiUrl={apiService.chat.apiUrl}
+          socketUrl={SOCKET_URL}
 
           // ✅ Enable real-time chat
           useRealtime={true}

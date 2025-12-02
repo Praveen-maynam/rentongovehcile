@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useListedBikesStore } from "../store/listedBikes.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
-import VehicleAvailabilityCalendar from "../components/AvailabilityDateTimeModal";
+
 import OwnerCalendar from "../components/ui/OwnerCalender";
 import FilterCard from "../components/ui/FilterCard";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";

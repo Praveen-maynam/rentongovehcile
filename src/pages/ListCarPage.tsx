@@ -78,13 +78,12 @@ const TypeableDropdown: React.FC<TypeableDropdownProps> = ({
       inputRef.current?.focus();
     }
   };
-             
+
   return (
     <div className="relative" ref={dropdownRef}>
       <div
-        className={`w-full flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition ${
-          disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white cursor-text"
-        }`}
+        className={`w-full flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white cursor-text"
+          }`}
       >
         <input
           ref={inputRef}
@@ -94,9 +93,8 @@ const TypeableDropdown: React.FC<TypeableDropdownProps> = ({
           onFocus={handleFocus}
           placeholder={placeholder}
           disabled={disabled}
-          className={`flex-1 px-4 py-3 outline-none rounded-lg ${
-            disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
-          }`}
+          className={`flex-1 px-4 py-3 outline-none rounded-lg ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+            }`}
         />
         <button
           type="button"
@@ -117,11 +115,10 @@ const TypeableDropdown: React.FC<TypeableDropdownProps> = ({
                 <div
                   key={option}
                   onClick={() => handleSelect(option)}
-                  className={`px-4 py-3 cursor-pointer transition ${
-                    option === value
-                      ? "bg-blue-50 text-blue-700 font-medium"
-                      : "hover:bg-gray-50"
-                  }`}
+                  className={`px-4 py-3 cursor-pointer transition ${option === value
+                    ? "bg-blue-50 text-blue-700 font-medium"
+                    : "hover:bg-gray-50"
+                    }`}
                 >
                   {option}
                 </div>
@@ -195,20 +192,18 @@ const ListCarPage = () => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([17.4889, 78.4603]);
   const [markerPos, setMarkerPos] = useState<[number, number] | null>(null);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
-     const carNumberRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/i;
-const [carNumberError, setCarNumberError] = useState("");
+  const carNumberRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/i;
+  const [carNumberError, setCarNumberError] = useState("");
+
   const getUserId = () => {
     const storedUserId = localStorage.getItem('userId');
-    if (storedUserId && storedUserId.length === 24 && /^[a-f0-9]{24}$/i.test(storedUserId)) {
-      return storedUserId;
-    }
-    return "68f32259cea8a9fa88029262";
+    return storedUserId || "";
   };
-      
+
   const [formData, setFormData] = useState({
     userId: getUserId(),
     CarName: "", CarBrand: "", CarModel: "", CarNumber: "", Carseater: "",
-    CarYear: "", CarColor: "", fuelType: "", transmissionType: "", kmDriven: "",
+    CarYear: "", fuelType: "", transmissionType: "", kmDriven: "",
     Ac_available: false, description: "", RentPerHour: "", RentPerDay: "",
     contactName: "", contactNumber: "", DepositAmount: "0",
     drivingLicenseRequired: false, AadharCardRequired: false, DepositVehicle: false,
@@ -234,40 +229,40 @@ const [carNumberError, setCarNumberError] = useState("");
   }, [formData.CarBrand]);
 
   const transmissionOptions = ["Manual", "Automatic", "AMT", "CVT", "DCT", "iMT"];
-            const states = carData.states;
+  const states = carData.states;
   const [availableCities, setAvailableCities] = useState<string[]>([]);
-           useEffect(() => {
-             if (formData.pickupCityState) {
-               const cities = carData.cities[formData.pickupCityState as keyof typeof carData.cities] || [];
-               setAvailableCities(cities);
-               // Reset city when state changes
-               setFormData(prev => ({ ...prev, pickupCity: "" }));
-             } else {
-               setAvailableCities([]);
-             }
-           }, [formData.pickupCityState]);
-           
-           
-           // Add this useEffect after the bike brand/model useEffect (around line 210)
-           
-           useEffect(() => {
-             if (formData.pickupCityState) {
-               const cities = carData.cities[formData.pickupCityState as keyof typeof carData.cities] || [];
-               setAvailableCities(cities);
-               // Reset city when state changes
-               setFormData(prev => ({ ...prev, pickupCity: "" }));
-             } else {
-               setAvailableCities([]);
-             }
-           }, [formData.pickupCityState]);
-           
+  useEffect(() => {
+    if (formData.pickupCityState) {
+      const cities = carData.cities[formData.pickupCityState as keyof typeof carData.cities] || [];
+      setAvailableCities(cities);
+      // Reset city when state changes
+      setFormData(prev => ({ ...prev, pickupCity: "" }));
+    } else {
+      setAvailableCities([]);
+    }
+  }, [formData.pickupCityState]);
+
+
+  // Add this useEffect after the bike brand/model useEffect (around line 210)
+
+  useEffect(() => {
+    if (formData.pickupCityState) {
+      const cities = carData.cities[formData.pickupCityState as keyof typeof carData.cities] || [];
+      setAvailableCities(cities);
+      // Reset city when state changes
+      setFormData(prev => ({ ...prev, pickupCity: "" }));
+    } else {
+      setAvailableCities([]);
+    }
+  }, [formData.pickupCityState]);
+
   // Typeable dropdown fields configuration
   const typeableFields = [
     { name: "CarBrand", label: "Car Brand", options: carData?.carBrands || [], placeholder: "Type brand name..." },
     { name: "CarModel", label: "Car Model", options: availableModels, placeholder: "Type model name...", disabled: !formData.CarBrand },
     { name: "CarYear", label: "Manufacturing Year", options: carData?.years || [], placeholder: "Type year..." },
     { name: "Carseater", label: "Seating Capacity", options: carData?.seatingCapacity || [], placeholder: "Type seats..." },
-    { name: "CarColor", label: "Car Color", options: carData?.colors || [], placeholder: "Type color..." },
+
     { name: "fuelType", label: "Fuel Type", options: carData?.fuelTypes || [], placeholder: "Type fuel type..." },
     { name: "transmissionType", label: "Transmission", options: transmissionOptions, placeholder: "Type transmission..." },
   ];
@@ -283,18 +278,18 @@ const [carNumberError, setCarNumberError] = useState("");
     { name: "contactName", label: "Name", placeholder: "John Doe" },
     { name: "contactNumber", label: "Contact Number", placeholder: "9876543210", pattern: "[0-9]{10}" },
   ];
-             // Create NEW array for address dropdowns (State and City)
-const addressDropdownFields = [
-  { name: "pickupCityState", label: "State", options: states, placeholder: "Type state..." },
-  { name: "pickupCity", label: "City", options: availableCities, placeholder: "Type city...", disabled: !formData.pickupCityState },
-];
+  // Create NEW array for address dropdowns (State and City)
+  const addressDropdownFields = [
+    { name: "pickupCityState", label: "State", options: states, placeholder: "Type state..." },
+    { name: "pickupCity", label: "City", options: availableCities, placeholder: "Type city...", disabled: !formData.pickupCityState },
+  ];
 
-// Update addressFields - keep only text input fields
-const addressFields = [
-  { name: "pickupArea", label: "Street/Area", placeholder: "Street name or area" },
-  { name: "pickupCityPinCode", label: "Zip/Pincode", placeholder: "500001" },
-  { name: "pickupCityCountry", label: "Country", placeholder: "India", fullWidth: true },
-];
+  // Update addressFields - keep only text input fields
+  const addressFields = [
+    { name: "pickupArea", label: "Street/Area", placeholder: "Street name or area" },
+    { name: "pickupCityPinCode", label: "Zip/Pincode", placeholder: "500001" },
+    { name: "pickupCityCountry", label: "Country", placeholder: "India", fullWidth: true },
+  ];
 
   const checkboxes = [
     { name: "Ac_available", label: "AC Available" },
@@ -331,7 +326,7 @@ const addressFields = [
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
-          // Dedicated handler for CarNumber with validation
+  // Dedicated handler for CarNumber with validation
   const handleCarNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
     setFormData((prev) => ({ ...prev, CarNumber: value }));
@@ -406,7 +401,7 @@ const addressFields = [
       .catch((e) => setLocationError(String(e)))
       .finally(() => setLoadingLocation(false));
   };
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate all required fields and collect errors
@@ -417,7 +412,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     // CarModel is optional - no validation needed
     if (!formData.CarYear) errors.CarYear = "Manufacturing year is required";
     if (!formData.Carseater) errors.Carseater = "Seating capacity is required";
-    if (!formData.CarColor) errors.CarColor = "Car color is required";
+
     if (!formData.fuelType) errors.fuelType = "Fuel type is required";
     if (!formData.transmissionType) errors.transmissionType = "Transmission type is required";
     if (!formData.CarNumber) {
@@ -536,7 +531,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
 
-             
+
 
             {/* Typeable Dropdown Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -563,7 +558,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   )}
                 </div>
               ))}
-         
+
 
 
               {/* Text/Number Fields */}
@@ -705,62 +700,62 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
             )}
 
-           {/* Address */}
-<div className="border-b pb-2 pt-4">
-  <h2 className="text-lg font-semibold text-gray-800">Vehicle Pickup Address</h2>
-</div>
+            {/* Address */}
+            <div className="border-b pb-2 pt-4">
+              <h2 className="text-lg font-semibold text-gray-800">Vehicle Pickup Address</h2>
+            </div>
 
-{/* State and City Dropdowns */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  {addressDropdownFields.map((field) => (
-    <div key={field.name} data-error={!!fieldErrors[field.name]}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        {field.label} <span className="text-red-500">*</span>
-      </label>
-      <div className={fieldErrors[field.name] ? "ring-2 ring-red-500 rounded-lg" : ""}>
-        <TypeableDropdown
-          options={field.options}
-          value={formData[field.name as keyof typeof formData] as string}
-          onChange={(value) => {
-            handleTypeableChange(field.name, value);
-            setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
-          }}
-          placeholder={field.placeholder}
-          disabled={field.disabled}
-        />
-      </div>
-      {fieldErrors[field.name] && (
-        <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
-      )}
-    </div>
-  ))}
-</div>
+            {/* State and City Dropdowns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {addressDropdownFields.map((field) => (
+                <div key={field.name} data-error={!!fieldErrors[field.name]}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {field.label} <span className="text-red-500">*</span>
+                  </label>
+                  <div className={fieldErrors[field.name] ? "ring-2 ring-red-500 rounded-lg" : ""}>
+                    <TypeableDropdown
+                      options={field.options}
+                      value={formData[field.name as keyof typeof formData] as string}
+                      onChange={(value) => {
+                        handleTypeableChange(field.name, value);
+                        setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
+                      }}
+                      placeholder={field.placeholder}
+                      disabled={field.disabled}
+                    />
+                  </div>
+                  {fieldErrors[field.name] && (
+                    <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
+                  )}
+                </div>
+              ))}
+            </div>
 
-{/* Address Text Fields */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  {addressFields.map((field) => (
-    <div key={field.name} className={field.fullWidth ? "md:col-span-2" : ""} data-error={!!fieldErrors[field.name]}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        {field.label} <span className="text-red-500">*</span>
-      </label>
-      <input
-        type="text"
-        name={field.name}
-        value={formData[field.name as keyof typeof formData] as string}
-        onChange={(e) => {
-          handleInputChange(e);
-          setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
-        }}
-        placeholder={field.placeholder}
-        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${fieldErrors[field.name] ? 'border-red-500 ring-2 ring-red-500' : 'border-gray-300'}`}
-        required
-      />
-      {fieldErrors[field.name] && (
-        <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
-      )}
-    </div>
-  ))}
-</div>
+            {/* Address Text Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {addressFields.map((field) => (
+                <div key={field.name} className={field.fullWidth ? "md:col-span-2" : ""} data-error={!!fieldErrors[field.name]}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {field.label} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name={field.name}
+                    value={formData[field.name as keyof typeof formData] as string}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
+                    }}
+                    placeholder={field.placeholder}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${fieldErrors[field.name] ? 'border-red-500 ring-2 ring-red-500' : 'border-gray-300'}`}
+                    required
+                  />
+                  {fieldErrors[field.name] && (
+                    <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
+                  )}
+                </div>
+              ))}
+            </div>
             <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -792,7 +787,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </button>
                 </div>
               </div>
-              
+
               {locationError && (
                 <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded mb-4">
                   {locationError}
@@ -810,7 +805,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
               )}
             </div>
-            
+
             <button
               type="button"
               onClick={handleSubmit}
@@ -891,7 +886,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         </div>
       )}
-   </div>
+    </div>
   );
 };
 

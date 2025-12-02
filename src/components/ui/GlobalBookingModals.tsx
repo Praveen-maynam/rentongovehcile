@@ -4,8 +4,7 @@ import io, { Socket } from 'socket.io-client';
 import { useBookingModalStore, PendingBooking } from '../../store/booking-modal.store';
 import { useNotificationStore } from '../../store/notification.store';
 
-const SOCKET_URL = "http://3.110.122.127:3001";
-const API_BASE = "http://3.110.122.127:3000";
+import { API_BASE_URL, SOCKET_URL } from '../../services/api.service';
 const EXPIRY_TIME = 2 * 60 * 1000; // 120 seconds
 const WARNING_TIME = 20 * 1000; // 20 seconds before expiry
 
@@ -172,7 +171,7 @@ function OwnerBookingModal() {
 
   const fetchPendingBookings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/getPendingBookingsOfOwner/${ownerId}`);
+      const res = await fetch(`${API_BASE_URL}/getPendingBookingsOfOwner/${ownerId}`);
       if (!res.ok) {
         throw new Error('Failed to fetch bookings');
       }
@@ -320,7 +319,7 @@ function OwnerBookingModal() {
     const vehicleName = expiredBooking?.vehicleName || expiredBooking?.VehicleName;
 
     try {
-      await fetch(`${API_BASE}/confirmBooking/${bookingId}/Cancelled`, {
+      await fetch(`${API_BASE_URL}/confirmBooking/${bookingId}/Cancelled`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -386,7 +385,7 @@ function OwnerBookingModal() {
     setActionLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/confirmBooking/${bookingId}/Confirmed`, {
+      const res = await fetch(`${API_BASE_URL}/confirmBooking/${bookingId}/Confirmed`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -447,7 +446,7 @@ function OwnerBookingModal() {
     setActionLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/confirmBooking/${bookingId}/Cancelled`, {
+      const res = await fetch(`${API_BASE_URL}/confirmBooking/${bookingId}/Cancelled`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -874,7 +873,7 @@ function CustomerBookingModal() {
 
       // If we have a specific booking we're waiting for, check if this event is for that booking
       if (currentWaitingBooking && currentWaitingBooking.bookingId &&
-          data.bookingId && currentWaitingBooking.bookingId !== data.bookingId) {
+        data.bookingId && currentWaitingBooking.bookingId !== data.bookingId) {
         console.log('Ignoring status update - not for current waiting booking');
         return;
       }

@@ -3,6 +3,7 @@ import axios from 'axios';
 
 // ✅ Export API_BASE_URL so it can be used in components
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://3.110.122.127:3000';
+export const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://3.110.122.127:3001';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
