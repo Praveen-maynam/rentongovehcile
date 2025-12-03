@@ -1,6 +1,6 @@
 
 
- import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { vehicles } from "./data/Vehicle";
 import { Vehicle } from "../types/Vehicle";
@@ -15,7 +15,7 @@ import { useReviewStore } from "../store/review.store";
 import { useNotificationStore } from "../store/notification.store";
 import { useBookingStore } from "../store/booking.store";
 import toast from "react-hot-toast";
- 
+
 import Automatic from "../assets/icons/automatic.jpeg";
 import Seats from "../assets/icons/seats.jpeg";
 import Fuel from "../assets/icons/fuel.jpeg";
@@ -23,7 +23,7 @@ import LocationIcon from "../assets/icons/Location.png";
 import CalenderLogo from "../assets/icons/CalanderLogo.png";
 import ClockIcon from "../assets/icons/ClockIcon.png";
 //  import VehicleAvailabilityCalendar from "../components/AvailabilityDateTimeModal";
- import CustomerCalendar from "../components/ui/CustomerCalender";
+import CustomerCalendar from "../components/ui/CustomerCalender";
 interface Review {
   _id: string;
   userId: string;
@@ -36,7 +36,7 @@ interface Review {
   userName?: string;
   createdAt?: string;
 }
- 
+
 interface BookingData {
   _id: string;
   userId: string;
@@ -53,7 +53,7 @@ interface BookingData {
   contactNumber?: string;
   createdAt?: string;
 }
- 
+
 // ============================================================================
 // 🔥 NEW BOOKING API SERVICE
 // ============================================================================
@@ -64,10 +64,10 @@ const bookingAPIService = {
   createCustomerBooking: async (payload: any) => {
     try {
       console.log("📤 Creating customer booking:", payload);
-     
+
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
- 
+
       const urlencoded = new URLSearchParams();
       urlencoded.append("userId", payload.userId);
       if (payload.ownerId) {
@@ -87,34 +87,34 @@ const bookingAPIService = {
       urlencoded.append("ToTime", payload.toTime);
       urlencoded.append("totalHours", payload.totalHours || "0");
       urlencoded.append("totalPrice", payload.totalPrice || "0");
- 
+
       const response = await fetch('http://3.110.122.127:3000/Bookings', {
         method: 'POST',
         headers: myHeaders,
         body: urlencoded
       });
-     
+
       const data = await response.json();
-     
+
       console.log("✅ Booking API Response:", data);
-     
+
       return { success: response.ok, data };
     } catch (error: any) {
       console.error("❌ Booking API Error:", error);
       return { success: false, error: error.message };
     }
   },
- 
+
   /**
    * Block dates as unavailable (triggered after booking)
    */
   blockDatesAsUnavailable: async (payload: any) => {
     try {
       console.log("🔒 Blocking dates as unavailable:", payload);
-     
+
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
- 
+
       const urlencoded = new URLSearchParams();
       urlencoded.append("userId", payload.userId);
       urlencoded.append("vechileType", payload.vehicleType);
@@ -126,75 +126,75 @@ const bookingAPIService = {
       urlencoded.append("isNotAvailable", "true");
       urlencoded.append("bikeImages", "");
       urlencoded.append("isCustomerBooking", "true"); // 🔥 Mark as customer booking
- 
+
       const response = await fetch('http://3.110.122.127:3000/createNotAvailability', {
         method: 'POST',
         headers: myHeaders,
         body: urlencoded
       });
-     
+
       const data = await response.json();
-     
+
       console.log("✅ Date Blocking Response:", data);
-     
+
       return { success: response.ok, data };
     } catch (error: any) {
       console.error("❌ Date Blocking Error:", error);
       return { success: false, error: error.message };
     }
   },
- 
+
   /**
    * Get all bookings for a vehicle
    */
   getAllBookings: async (vehicleId: string, vehicleType: string) => {
     try {
       console.log(`📡 Fetching all bookings for ${vehicleType} ID: ${vehicleId}`);
-     
+
       const url = `http://3.110.122.127:3000/getBookings?vehicleId=${vehicleId}&vehicleType=${vehicleType}`;
-     
+
       const response = await fetch(url);
       const data = await response.json();
-     
+
       console.log("✅ All Bookings Response:", data);
-     
+
       return { success: response.ok, bookings: data.bookings || [] };
     } catch (error: any) {
       console.error("❌ Get Bookings Error:", error);
       return { success: false, bookings: [] };
     }
   },
- 
+
   /**
    * Get vehicle availability (includes owner blocked + customer booked dates)
    */
   getVehicleAvailability: async (vehicleId: string, vehicleType: string) => {
     try {
       console.log(`📡 Fetching availability for ${vehicleType} ID: ${vehicleId}`);
-     
+
       const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
-     
+
       const response = await fetch(url);
       const data = await response.json();
-     
+
       console.log("✅ Availability Response:", data);
-     
+
       if (!data.success || !data.availability) {
         return { success: false, unavailableDates: [], customerBookedDates: [] };
       }
- 
+
       // Separate owner blocked and customer booked dates
       const unavailableDates = data.availability
         .filter((item: any) => item.status === "Unavailable")
         .map((item: any) => item.date);
- 
+
       const customerBookedDates = data.availability
         .filter((item: any) => item.status === "Unavailable" && item.isCustomerBooking)
         .map((item: any) => item.date);
- 
+
       console.log("📊 Unavailable Dates:", unavailableDates);
       console.log("📊 Customer Booked Dates:", customerBookedDates);
- 
+
       return {
         success: true,
         unavailableDates,
@@ -206,13 +206,13 @@ const bookingAPIService = {
     }
   }
 };
- 
+
 const BookNow: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const vehicle: Vehicle | undefined = vehicles.find((v) => v.id === id);
- 
+
   const {
     getReviewsByVehicleId,
     getAverageRating,
@@ -221,7 +221,7 @@ const BookNow: React.FC = () => {
   } = useReviewStore();
   const { addNotification } = useNotificationStore();
   const { addBooking } = useBookingStore();
- 
+
   const [apiCarData, setApiCarData] = useState<any>(null);
   const [loadingCarData, setLoadingCarData] = useState(true);
   const [carDataError, setCarDataError] = useState("");
@@ -242,7 +242,7 @@ const BookNow: React.FC = () => {
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [apiError, setApiError] = useState<string>("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
- 
+
   const [apiReviews, setApiReviews] = useState<Review[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [reviewsError, setReviewsError] = useState<string>("");
@@ -251,11 +251,11 @@ const BookNow: React.FC = () => {
   const [loadingAverageRating, setLoadingAverageRating] = useState<boolean>(false);
   const [isDeletingReview, setIsDeletingReview] = useState<boolean>(false);
   const [menuOpenIndex, setMenuOpenIndex] = useState<string | null>(null);
- 
+
   const [currentBookingStatus, setCurrentBookingStatus] = useState<'pending' | 'confirmed' | 'rejected' | null>(null);
   const [isPollingBookingStatus, setIsPollingBookingStatus] = useState(false);
   const [bookingStatusMessage, setBookingStatusMessage] = useState<string>("");
- 
+
   const [selectedPriceType, setSelectedPriceType] = useState<'day' | 'hour'>('day');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -303,20 +303,20 @@ const BookNow: React.FC = () => {
   };
 
   const currentUserId = getDynamicUserId();
- 
+
   // ============================================================================
   // BOOKING STATUS POLLING
   // ============================================================================
   useEffect(() => {
     let pollingInterval: NodeJS.Timeout | null = null;
- 
+
     if (bookingId && isPollingBookingStatus) {
       console.log("🔄 Starting booking status polling for:", bookingId);
-     
+
       pollingInterval = setInterval(async () => {
         try {
           console.log("📡 Polling booking status...");
-         
+
           // 🔥 REAL API CALL to check booking status from backend
           const response = await fetch(`http://3.110.122.127:3000/getBookingById/${bookingId}`);
 
@@ -331,49 +331,49 @@ const BookNow: React.FC = () => {
           // Extract status from response (handle different response formats)
           const booking = data.booking || data.data || data;
           const status = (booking?.status || booking?.Status || 'pending').toLowerCase();
-         
+
           console.log("📊 Current booking status:", status);
- 
+
           if (status === 'confirmed') {
             console.log("✅ Booking CONFIRMED by owner!");
             setCurrentBookingStatus('confirmed');
             setIsPollingBookingStatus(false);
             setShowWaitingPopup(false);
             setBookingStatusMessage("✅ Owner accepted your booking!");
-           
+
             toast.success("🎉 Booking Confirmed by Owner!", {
               duration: 5000,
               position: 'top-center',
             });
-                       setTimeout(() => {
+            setTimeout(() => {
               setShowContactButtons(true);
               setBookingStatusMessage("");
             }, 2000);
-           
+
           } else if (status === 'rejected' || status === 'cancelled' || status === 'declined') {
             console.log("❌ Booking REJECTED/CANCELLED by owner! Status:", status);
             setCurrentBookingStatus('rejected');
             setIsPollingBookingStatus(false);
             setShowWaitingPopup(false);
             setBookingStatusMessage("❌ Owner rejected your booking");
-           
+
             toast.error("Booking was rejected by the owner", {
               duration: 5000,
               position: 'top-center',
             });
-           
+
             setTimeout(() => {
               setBookingStatusMessage("");
               setBookingId(null);
               setSelectedDateTime(null);
             }, 3000);
           }
-         
+
         } catch (error) {
           console.error("❌ Error polling booking status:", error);
         }
       }, 3000);
- 
+
       setTimeout(() => {
         if (pollingInterval) {
           clearInterval(pollingInterval);
@@ -389,7 +389,7 @@ const BookNow: React.FC = () => {
       }
     };
   }, [bookingId, isPollingBookingStatus, currentBookingStatus]);
- 
+
   // ============================================================================
   // EXISTING VEHICLE DATA FETCH (unchanged)
   // ============================================================================
@@ -399,21 +399,21 @@ const BookNow: React.FC = () => {
         try {
           setLoadingCarData(true);
           setCarDataError("");
-         
+
           const vehicleType = location.state?.vehicleType || vehicle?.type || 'car';
-         
+
           console.log(`📡 Fetching ${vehicleType} details for ID: ${id}`);
-         
+
           let response;
           let vehicleData = null;
           let successType = vehicleType;
-         localStorage.setItem("vehicletype",successType);
-         
+          localStorage.setItem("vehicletype", successType);
+
           try {
             if (vehicleType.toLowerCase() === 'bike') {
               response = await apiService.bike.getBikeById(id);
               console.log("✅ Bike API response:", response);
-             
+
               if ((response as any).bike) {
                 vehicleData = (response as any).bike;
               } else if ((response as any).data) {
@@ -424,7 +424,7 @@ const BookNow: React.FC = () => {
             } else {
               response = await apiService.car.getCarById(id);
               console.log("✅ Car API response:", response);
-             
+
               if ((response as any).car) {
                 vehicleData = (response as any).car;
               } else if ((response as any).data) {
@@ -435,7 +435,7 @@ const BookNow: React.FC = () => {
             }
           } catch (apiError: any) {
             console.warn(`⚠️ ${vehicleType} API failed (${apiError.message}), trying alternate type...`);
-           
+
             try {
               if (vehicleType.toLowerCase() === 'bike') {
                 console.log("🔄 Trying Car API as fallback...");
@@ -461,7 +461,7 @@ const BookNow: React.FC = () => {
               );
             }
           }
-         
+
           if (vehicleData) {
             console.log("🎯 Final vehicle data to set:", vehicleData);
             console.log(`✅ Successfully loaded as ${successType.toUpperCase()}`);
@@ -472,7 +472,7 @@ const BookNow: React.FC = () => {
         } catch (err: any) {
           console.error(`❌ Error fetching vehicle details:`, err);
           setCarDataError(err.message || "Failed to load vehicle details");
-         
+
           toast.error(err.message || "Failed to load vehicle details", {
             duration: 5000,
             position: 'top-center',
@@ -482,10 +482,10 @@ const BookNow: React.FC = () => {
         }
       }
     };
- 
+
     fetchVehicleDetails();
   }, [id, location.state]);
- 
+
   // ============================================================================
   // EXISTING REVIEW EFFECTS (unchanged)
   // ============================================================================
@@ -499,7 +499,7 @@ const BookNow: React.FC = () => {
         }, 300);
       }
     };
- 
+
     const handleFocus = () => {
       if (id) {
         console.log("🎯 Window focused - Refreshing reviews");
@@ -509,16 +509,16 @@ const BookNow: React.FC = () => {
         }, 300);
       }
     };
- 
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
- 
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
   }, [id]);
- 
+
   useEffect(() => {
     if (id) {
       console.log("🔄 Initial review fetch triggered for vehicle:", id);
@@ -526,7 +526,7 @@ const BookNow: React.FC = () => {
       fetchAverageRating(id);
     }
   }, [id]);
- 
+
   useEffect(() => {
     if (id) {
       const intervalId = setInterval(() => {
@@ -534,11 +534,11 @@ const BookNow: React.FC = () => {
         fetchReviewsByVehicleId(id, true);
         fetchAverageRating(id, true);
       }, 30000);
- 
+
       return () => clearInterval(intervalId);
     }
   }, [id]);
- 
+
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (showWaitingPopup && waitingTimerSeconds > 0) {
@@ -550,13 +550,13 @@ const BookNow: React.FC = () => {
       if (interval) clearInterval(interval);
     };
   }, [showWaitingPopup, waitingTimerSeconds]);
- 
+
   useEffect(() => {
     if (showWaitingPopup && waitingTimerSeconds === 0) {
       handleTimerComplete();
     }
   }, [waitingTimerSeconds, showWaitingPopup]);
- 
+
   useEffect(() => {
     const handleClickOutside = () => setMenuOpenIndex(null);
     if (menuOpenIndex !== null) {
@@ -564,11 +564,11 @@ const BookNow: React.FC = () => {
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [menuOpenIndex]);
- 
+
   useEffect(() => {
     const editingReviewId = sessionStorage.getItem('editingReviewId');
     const returnToVehicleId = sessionStorage.getItem('returnToVehicleId');
-   
+
     if (editingReviewId && returnToVehicleId === id && apiReviews.length > 0) {
       const updatedReview = apiReviews.find(r => r._id === editingReviewId);
       if (updatedReview) {
@@ -577,7 +577,7 @@ const BookNow: React.FC = () => {
       }
     }
   }, [apiReviews, id]);
- 
+
   // ============================================================================
   // REVIEW FUNCTIONS (unchanged)
   // ============================================================================
@@ -585,12 +585,12 @@ const BookNow: React.FC = () => {
     const dynamicUserId = getDynamicUserId();
     return review.userId === dynamicUserId;
   };
- 
+
   const handleMenuToggle = (reviewId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     setMenuOpenIndex(menuOpenIndex === reviewId ? null : reviewId);
   };
- 
+
   const handleRefreshReviews = () => {
     if (id) {
       console.log("🔄 Manual refresh triggered");
@@ -598,40 +598,40 @@ const BookNow: React.FC = () => {
       fetchAverageRating(id, false);
     }
   };
- 
+
   const handleEditClick = (review: Review) => {
     console.log("✏️ Navigating to feedback page for review:", review._id);
     const currentVehicle = vehicle || (apiCarData ? {
       name: apiCarData.CarName || 'Unknown Vehicle',
     } : null);
-   
+
     sessionStorage.setItem('editingReviewId', review._id);
     sessionStorage.setItem('returnToVehicleId', id || '');
-   
+
     navigate(`/feedback?vehicleId=${id}&vehicleName=${encodeURIComponent(currentVehicle?.name || '')}&reviewId=${review._id}`);
     setMenuOpenIndex(null);
   };
- 
+
   const handleDeleteReview = async (reviewId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-   
+
     if (!window.confirm('Are you sure you want to delete this review?')) {
       return;
     }
- 
+
     setIsDeletingReview(true);
     setMenuOpenIndex(null);
-   
+
     try {
       console.log("🗑️ Deleting review:", reviewId);
-     
+
       await apiService.review.deleteReview(reviewId);
- 
+
       toast.success('✅ Review deleted successfully', {
         duration: 2000,
         position: 'top-right',
       });
-     
+
       if (id) {
         setTimeout(() => {
           fetchReviewsByVehicleId(id, false);
@@ -640,8 +640,8 @@ const BookNow: React.FC = () => {
       }
     } catch (error: any) {
       console.error('❌ Error deleting review:', error);
-          
-            toast.error(`Error: ${error.message}`, {
+
+      toast.error(`Error: ${error.message}`, {
         duration: 3000,
         position: 'top-right',
       });
@@ -649,23 +649,23 @@ const BookNow: React.FC = () => {
       setIsDeletingReview(false);
     }
   };
- 
+
   const fetchAverageRating = async (vehicleId: string, silent: boolean = false) => {
     if (!silent) {
       setLoadingAverageRating(true);
     }
- 
+
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("⭐ FETCHING AVERAGE RATING");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("📋 Vehicle ID:", vehicleId);
- 
+
     try {
       const vehicleType = "Car";
       const result = await apiService.review.getAverageRating(vehicleId, vehicleType as 'car' | 'bike');
-     
+
       console.log("✅ Average Rating Response:", result);
- 
+
       if ((result as any).success && (result as any).averageRating !== undefined) {
         const avgRating = parseFloat((result as any).averageRating);
         setApiAverageRating(avgRating);
@@ -679,40 +679,40 @@ const BookNow: React.FC = () => {
       }
     }
   };
- 
+
   const fetchReviewsByVehicleId = async (vehicleId: string, silent: boolean = false) => {
     const now = Date.now();
-   
+
     if (now - lastFetchTime < 5000 && silent) {
       console.log("⏳ Skipping fetch - too soon after last request");
       return;
     }
     setLastFetchTime(now);
- 
+
     if (!silent) {
       setLoadingReviews(true);
       setReviewsError("");
     }
- 
+
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("🔍 FETCHING REVIEWS FOR VEHICLE");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("📋 Vehicle ID:", vehicleId);
-    localStorage.setItem("vehicleId",vehicleId);
- 
- 
+    localStorage.setItem("vehicleId", vehicleId);
+
+
     try {
       const result = await apiService.review.getReviewsByCarId(vehicleId);
-     
+
       console.log("✅ Reviews Response:", result);
- 
+
       if ((result as any).success && Array.isArray((result as any).reviews)) {
         const reviews = (result as any).reviews;
         console.log("🎉 SUCCESS: Reviews found!", reviews.length);
         console.log("📝 Full Review Data:", JSON.stringify(reviews, null, 2));
-       
+
         setApiReviews(reviews);
-       
+
         const editingReviewId = sessionStorage.getItem('editingReviewId');
         if (editingReviewId) {
           const updatedReview = reviews.find((r: any) => r._id === editingReviewId);
@@ -720,31 +720,31 @@ const BookNow: React.FC = () => {
             console.log("✨ Updated review detected!");
             console.log("⭐ NEW Rating:", updatedReview.rating);
             console.log("💬 NEW Text:", updatedReview.review || updatedReview.reviewText);
-           
+
             toast.success(`🎉 Review updated! New rating: ${updatedReview.rating}★`, {
               duration: 3000,
               position: 'top-center',
             });
           }
-         
+
           setTimeout(() => {
             console.log("🧹 Clearing editingReviewId from sessionStorage");
             sessionStorage.removeItem('editingReviewId');
           }, 5000);
         }
-       
+
         if (!silent) {
           toast.success(`✅ Loaded ${reviews.length} review(s)`, {
             duration: 2000,
             position: 'top-right',
           });
         }
- 
+
         return reviews;
       } else {
         console.log("ℹ️ No reviews found");
         setApiReviews([]);
-       
+
         if (!silent) {
           toast("No reviews yet for this vehicle", {
             duration: 2000,
@@ -754,10 +754,10 @@ const BookNow: React.FC = () => {
       }
     } catch (error: any) {
       console.error("❌ Fetch reviews failed:", error.message);
-     
+
       setReviewsError("Unable to load reviews.");
       setApiReviews([]);
-     
+
       if (!silent) {
         toast.error("Failed to load reviews", {
           duration: 3000,
@@ -770,14 +770,14 @@ const BookNow: React.FC = () => {
       }
     }
   };
- 
+
   const calculateAverageRating = (reviews: Review[]): number => {
     if (reviews.length === 0) return 0;
     const total = reviews.reduce((sum, review) => sum + review.rating, 0);
     const average = total / reviews.length;
     return Number(average.toFixed(1));
   };
- 
+
   const calculateRatingDistribution = (reviews: Review[]) => {
     const distribution = [5, 4, 3, 2, 1].map(stars => {
       const count = reviews.filter(r => r.rating === stars).length;
@@ -786,7 +786,7 @@ const BookNow: React.FC = () => {
     });
     return distribution;
   };
- 
+
   // ============================================================================
   // 🔥 NEW COMPREHENSIVE BOOKING FUNCTIONS
   // ============================================================================
@@ -795,17 +795,17 @@ const BookNow: React.FC = () => {
       console.warn("⚠️ Vehicle type is undefined/null, defaulting to 'Car'");
       return "Car";
     }
-   
+
     const normalized = type.toLowerCase();
     const typeMap: Record<string, "Car" | "Auto" | "Bike"> = {
       car: "Car",
       auto: "Auto",
       bike: "Bike",
     };
-   
+
     return typeMap[normalized] || "Car";
   };
- 
+
   const mapVehicleTypeForStore = (type: Vehicle["type"] | undefined): "Car" | "Auto" | "Bike" => {
     const typeMap: Record<string, "Car" | "Auto" | "Bike"> = {
       car: "Car",
@@ -814,7 +814,7 @@ const BookNow: React.FC = () => {
     };
     return type ? typeMap[type.toLowerCase()] || "Car" : "Car";
   };
- 
+
   const calculateTotalHours = (
     startDate: string,
     endDate: string,
@@ -825,37 +825,37 @@ const BookNow: React.FC = () => {
       const parseTime = (timeStr: string) => {
         const match = timeStr.match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)?/i);
         if (!match) return { hours: 0, minutes: 0 };
-       
+
         let hours = parseInt(match[1]);
         const minutes = parseInt(match[2] || '0');
         const period = match[3]?.toUpperCase();
-       
+
         if (period === 'PM' && hours !== 12) hours += 12;
         if (period === 'AM' && hours === 12) hours = 0;
-       
+
         return { hours, minutes };
       };
- 
+
       const startTimeParsed = parseTime(startTime);
       const endTimeParsed = parseTime(endTime);
- 
+
       const start = new Date(startDate);
       start.setHours(startTimeParsed.hours, startTimeParsed.minutes, 0, 0);
- 
+
       const end = new Date(endDate);
       end.setHours(endTimeParsed.hours, endTimeParsed.minutes, 0, 0);
- 
+
       const diffInMs = end.getTime() - start.getTime();
       const hours = Math.ceil(diffInMs / (1000 * 60 * 60));
-     
+
       return hours > 0 ? hours : 1;
     } catch (error) {
       console.error("❌ Error calculating hours:", error);
       return 1;
     }
   };
- 
-   const formatDateForAPI = (dateString: string): string => {
+
+  const formatDateForAPI = (dateString: string): string => {
     try {
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
@@ -869,7 +869,7 @@ const BookNow: React.FC = () => {
     }
     return dateString;
   };
- 
+
   const formatTimeForAPI = (timeString: string): string => {
     try {
       const ampmMatch = timeString.match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)/i);
@@ -877,10 +877,10 @@ const BookNow: React.FC = () => {
         let hours = parseInt(ampmMatch[1]);
         const minutes = ampmMatch[2] || '00';
         const period = ampmMatch[3].toUpperCase();
-       
+
         if (period === 'PM' && hours !== 12) hours += 12;
         if (period === 'AM' && hours === 12) hours = 0;
-       
+
         return `${hours.toString().padStart(2, '0')}.${minutes}`;
       }
     } catch (error) {
@@ -888,15 +888,15 @@ const BookNow: React.FC = () => {
     }
     return timeString;
   };
- 
+
   const currentVehicle = vehicle || (apiCarData ? {
     id: apiCarData._id || apiCarData.id || id || '',
     name: apiCarData.CarName || apiCarData.bikeName || 'Unknown Vehicle',
     image: (apiCarData.carImages && apiCarData.carImages.length > 0)
       ? apiCarData.carImages[0]
       : (apiCarData.bikeImages && apiCarData.bikeImages.length > 0)
-      ? apiCarData.bikeImages[0]
-      : apiCarData.carImage || apiCarData.bikeImage || apiCarData.image || 'https://via.placeholder.com/400',
+        ? apiCarData.bikeImages[0]
+        : apiCarData.carImage || apiCarData.bikeImage || apiCarData.image || 'https://via.placeholder.com/400',
     price: apiCarData.RentPerDay || apiCarData.RentPerHour || apiCarData.pricePerKm || apiCarData.pricePerHour || '0',
     type: (apiCarData.bikeName ? 'bike' : 'car') as Vehicle["type"],
     transmission: apiCarData.transmissionType || 'Manual',
@@ -905,7 +905,7 @@ const BookNow: React.FC = () => {
     location: apiCarData.pickupArea || apiCarData.pickupCity || 'Unknown Location',
     ownerId: apiCarData.ownerId || apiCarData.userId || '', // Owner of the vehicle
   } : null);
- 
+
   /**
    * 🔥 MAIN BOOKING CREATION FUNCTION WITH DATE BLOCKING
    */
@@ -919,30 +919,30 @@ const BookNow: React.FC = () => {
       setApiError("Vehicle information is missing");
       return null;
     }
- 
+
     setIsSubmittingBooking(true);
     setApiError("");
- 
+
     try {
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
- 
+
       const totalHours = calculateTotalHours(startDate, endDate, startTime, endTime);
       const pricePerHour = parseInt(String(currentVehicle?.price ?? "0"), 10);
       const totalPrice = totalHours * pricePerHour;
-      const contactNumber= userData?.phone || "";
+      const contactNumber = userData?.phone || "";
       // Format dates for API (YYYY-MM-DD format)
       const formattedFromDate = formatDateForAPI(startDate);
       const formattedToDate = formatDateForAPI(endDate);
-     
+
       // Format times for API (H.MM format like 9.00)
       const formatTime = (time: string) => {
         const [hours, minutes] = time.split(":");
         return `${parseInt(hours)}.${minutes || "00"}`;
       };
-     
+
       const formattedFromTime = formatTime(startTime);
       const formattedToTime = formatTime(endTime);
- 
+
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       console.log("🔥 CREATING COMPREHENSIVE BOOKING");
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -953,7 +953,7 @@ const BookNow: React.FC = () => {
       console.log("💰 Total Price:", totalPrice);
       console.log("🚗 Vehicle ID:", currentVehicle.id);
       console.log("👤 User ID:", userData?._id || currentUserId);
- 
+
       // STEP 1: Create the booking (Optional - for your records)
       const bookingPayload = {
         userId: userData?._id || currentUserId,
@@ -975,12 +975,12 @@ const BookNow: React.FC = () => {
       };
 
       console.log("👨‍💼 Owner ID being sent:", currentVehicle.ownerId);
- 
+
       console.log("📤 STEP 1: Creating Booking Record...");
       console.log("📋 Booking Payload:", bookingPayload);
-     
+
       let newBookingId = `BOOK-${Date.now()}`;
-     
+
       try {
         const bookingResult = await bookingAPIService.createCustomerBooking(bookingPayload);
         if (bookingResult.success && bookingResult.data?.booking?._id) {
@@ -992,15 +992,15 @@ const BookNow: React.FC = () => {
       } catch (bookingError) {
         console.log("⚠️ Booking API failed, using temp ID. Error:", bookingError);
       }
-     
+
       setBookingId(newBookingId);
       setCurrentBookingStatus('pending');
- 
+
       // STEP 2: Block dates as unavailable (CRITICAL - This shows the red strike)
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       console.log("📤 STEP 2: Blocking dates as UNAVAILABLE...");
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-     
+
       // Create blocking payload matching your API format exactly
       const blockingPayload = {
         userId: userData?._id || currentUserId,
@@ -1014,11 +1014,11 @@ const BookNow: React.FC = () => {
         bikeImages: "",
         isCustomerBooking: "true" // Mark as customer booking
       };
- 
+
       console.log("📋 Blocking Payload:", JSON.stringify(blockingPayload, null, 2));
- 
+
       const blockingResult = await bookingAPIService.blockDatesAsUnavailable(blockingPayload);
- 
+
       if (blockingResult.success) {
         console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         console.log("✅ Dates successfully BLOCKED in all calendars!");
@@ -1032,7 +1032,7 @@ const BookNow: React.FC = () => {
         console.log("   ✅ Owner Calendar (orange - customer booked)");
         console.log("   ✅ All Customer Calendars (red strike - unavailable)");
         console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-       
+
         toast.success("🎉 Booking created & dates blocked across all calendars!", {
           duration: 5000,
           position: 'top-center',
@@ -1044,20 +1044,20 @@ const BookNow: React.FC = () => {
         console.error("Error:", blockingResult.error);
         console.error("Payload used:", blockingPayload);
         console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-       
+
         toast.error("❌ Booking created but dates NOT blocked. Please contact support.", {
           duration: 5000,
           position: 'top-center',
         });
       }
- 
+
       // Start polling for booking status and show waiting popup
       setIsPollingBookingStatus(true);
       setShowWaitingPopup(true);
       setWaitingTimerSeconds(120); // 2 minutes default timer
 
       return { success: true, bookingId: newBookingId };
- 
+
     } catch (error: any) {
       console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       console.error("❌ CRITICAL ERROR in booking process!");
@@ -1066,21 +1066,21 @@ const BookNow: React.FC = () => {
       console.error("Error message:", error.message);
       console.error("Stack:", error.stack);
       console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-     
+
       toast.error("❌ Booking failed: " + error.message, {
         duration: 5000,
         position: 'top-center',
       });
-     
+
       return { success: false, error: error.message };
     } finally {
       setIsSubmittingBooking(false);
     }
   };
- 
+
   const handleTimerComplete = () => {
     console.log("⏰ Timer completed - Checking booking status");
-   
+
     if (currentBookingStatus === 'confirmed') {
       console.log("✅ Booking was confirmed - showing contact buttons");
       setShowWaitingPopup(false);
@@ -1099,12 +1099,12 @@ const BookNow: React.FC = () => {
       setShowContactButtons(true);
     }
   };
-   const handleCloseWaiting = () => {
+  const handleCloseWaiting = () => {
     console.log("❌ WaitingPopup closed manually");
     setShowWaitingPopup(false);
     setWaitingTimerSeconds(180);
   };
- 
+
   const handleCallOwner = () => {
     console.log("📞 Customer calling owner...");
     console.log("🎉 Call initiated - Opening success modal");
@@ -1112,19 +1112,19 @@ const BookNow: React.FC = () => {
       handleConfirmBooking();
     }, 1000);
   };
- 
+
   const handleConfirmBooking = () => {
     if (!currentVehicle || !selectedDateTime) {
       console.error("❌ Cannot confirm booking");
       return;
     }
- 
+
     const currentDate = new Date();
     console.log("🎉 Confirming booking with ID:", bookingId);
- 
+
     setShowSuccessModal(true);
   };
- 
+
   // ============================================================================
   // LOADING STATES
   // ============================================================================
@@ -1139,7 +1139,7 @@ const BookNow: React.FC = () => {
       </div>
     );
   }
- 
+
   if (carDataError && !vehicle) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-pink-50">
@@ -1157,7 +1157,7 @@ const BookNow: React.FC = () => {
       </div>
     );
   }
- 
+
   if (!vehicle && !apiCarData) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -1175,7 +1175,7 @@ const BookNow: React.FC = () => {
       </div>
     );
   }
- 
+
   if (!currentVehicle) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -1191,28 +1191,28 @@ const BookNow: React.FC = () => {
       </div>
     );
   }
- 
+
   const vehicleReviews = getReviewsByVehicleId(currentVehicle?.id || '');
   const averageRating = getAverageRating(currentVehicle?.id || '');
   const totalReviews = getTotalReviewCount(currentVehicle?.id || '');
   const ratingDistribution = getRatingDistribution(currentVehicle?.id || '');
- 
+
   const displayReviews = apiReviews.length > 0 ? apiReviews : vehicleReviews;
- 
+
   const displayAverageRating = apiAverageRating > 0
     ? apiAverageRating
     : (apiReviews.length > 0
-        ? calculateAverageRating(apiReviews)
-        : averageRating);
-       
+      ? calculateAverageRating(apiReviews)
+      : averageRating);
+
   const displayTotalReviews = apiReviews.length > 0
     ? apiReviews.length
     : totalReviews;
- 
+
   const displayRatingDistribution = apiReviews.length > 0
     ? calculateRatingDistribution(apiReviews)
     : ratingDistribution;
- 
+
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
@@ -1315,30 +1315,28 @@ const BookNow: React.FC = () => {
               <button
                 key={idx}
                 onClick={() => setCurrentImageIndex(idx)}
-                className={`h-2 rounded-full transition-all ${
-                  idx === currentImageIndex 
-                    ? "bg-[#0066FF] w-6" 
-                    : "bg-gray-700 w-2" 
-                }`}
+                className={`h-2 rounded-full transition-all ${idx === currentImageIndex
+                  ? "bg-[#0066FF] w-6"
+                  : "bg-gray-700 w-2"
+                  }`}
               />
             ))}
           </div>
         </div>
       </div>
- 
+
       {/* MIDDLE COLUMN: Vehicle Details & Booking */}
       <div className="lg:col-span-1">
         <h1 className="text-4xl font-bold mb-4">{currentVehicle.name}</h1>
-       
+
         {/* Price Boxes */}
         <div className="flex items-center gap-3 mb-6">
           <div
             onClick={() => setSelectedPriceType('day')}
-            className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all ${
-              selectedPriceType === 'day'
-                ? 'border-transparent bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white'
-                : 'border-gray-300 bg-white hover:border-blue-300'
-            }`}
+            className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all ${selectedPriceType === 'day'
+              ? 'border-transparent bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white'
+              : 'border-gray-300 bg-white hover:border-blue-300'
+              }`}
           >
             <img src={CalenderLogo} alt="Calendar" className="w-6 h-6" />
             <div className="flex flex-col">
@@ -1350,14 +1348,13 @@ const BookNow: React.FC = () => {
               </span>
             </div>
           </div>
- 
+
           <div
             onClick={() => setSelectedPriceType('hour')}
-            className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all ${
-              selectedPriceType === 'hour'
-                ? 'border-transparent bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white'
-                : 'border-gray-300 bg-white hover:border-blue-300'
-            }`}
+            className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all ${selectedPriceType === 'hour'
+              ? 'border-transparent bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white'
+              : 'border-gray-300 bg-white hover:border-blue-300'
+              }`}
           >
             <img src={ClockIcon} alt="Clock" className="w-6 h-6" />
             <div className="flex flex-col">
@@ -1370,7 +1367,7 @@ const BookNow: React.FC = () => {
             </div>
           </div>
         </div>
-       
+
         {/* Icons Row */}
         <div className="flex items-center justify-between bg-white border-2 border-gray-200 rounded-lg p-4 mb-6">
           <div className="flex flex-col items-center gap-2 flex-1">
@@ -1401,7 +1398,7 @@ const BookNow: React.FC = () => {
             <span className="text-sm text-gray-700">{currentVehicle.location}</span>
           </div>
         </div>
- 
+
         {/* Description */}
         <div className="mb-6">
           <h3 className="text-4xl font-bold text-gray-900 mb-2">Description</h3>
@@ -1409,14 +1406,13 @@ const BookNow: React.FC = () => {
             {apiCarData?.description || 'Very good vehicle with excellent condition and comfortable seating.'}
           </div>
         </div>
- 
+
         {/* BOOKING STATUS BANNER */}
         {bookingStatusMessage && (
-          <div className={`mb-4 p-4 rounded-lg border-2 flex items-center gap-3 animate-pulse ${
-            currentBookingStatus === 'confirmed'
-              ? 'bg-green-50 border-green-400'
-              : 'bg-red-50 border-red-400'
-          }`}>
+          <div className={`mb-4 p-4 rounded-lg border-2 flex items-center gap-3 animate-pulse ${currentBookingStatus === 'confirmed'
+            ? 'bg-green-50 border-green-400'
+            : 'bg-red-50 border-red-400'
+            }`}>
             {currentBookingStatus === 'confirmed' ? (
               <>
                 <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
@@ -1436,7 +1432,7 @@ const BookNow: React.FC = () => {
             )}
           </div>
         )}
- 
+
         {/* POLLING STATUS INDICATOR */}
         {isPollingBookingStatus && !bookingStatusMessage && (
           <div className="mb-4 p-4 rounded-lg border-2 border-blue-400 bg-blue-50 flex items-center gap-3">
@@ -1447,7 +1443,7 @@ const BookNow: React.FC = () => {
             </div>
           </div>
         )}
- 
+
         {/* Book Now Button */}
         {!showContactButtons ? (
           <button
@@ -1476,7 +1472,7 @@ const BookNow: React.FC = () => {
                 <p className="text-sm text-gray-500">Vehicle Owner</p>
               </div>
             </div>
-                        <div className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
+            <div className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
               <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
@@ -1484,7 +1480,7 @@ const BookNow: React.FC = () => {
                 Please call the owner to discuss booking details and confirm availability.
               </p>
             </div>
- 
+
             <div className="flex gap-3">
               <button
                 onClick={() => setIsChatOpen(true)}
@@ -1501,46 +1497,46 @@ const BookNow: React.FC = () => {
             </div>
           </div>
         )}
- 
+
         {/* DateTime Modal */}
         {isDateTimeModalOpen && (
-//  <VehicleAvailabilityCalendar
-//   isOpen={isDateTimeModalOpen}
-//   onClose={() => setIsDateTimeModalOpen(false)}
-//   VechileId={currentVehicle?.id || id || ''}
-//   vehicleType="Car"
-//   userId={localStorage.getItem("userId") || ''}
-//   userRole="customer" // 🔥 No three dots, "Book Your Vehicle" heading
-//   vehicleName="Tesla Model 3"
-//   pricePerDay={2500}
-//   onBookingConfirm={addBooking}
-// />
+          //  <VehicleAvailabilityCalendar
+          //   isOpen={isDateTimeModalOpen}
+          //   onClose={() => setIsDateTimeModalOpen(false)}
+          //   VechileId={currentVehicle?.id || id || ''}
+          //   vehicleType="Car"
+          //   userId={localStorage.getItem("userId") || ''}
+          //   userRole="customer" // 🔥 No three dots, "Book Your Vehicle" heading
+          //   vehicleName="Tesla Model 3"
+          //   pricePerDay={2500}
+          //   onBookingConfirm={addBooking}
+          // />
 
 
-// In BookNow.tsx, update the CustomerCalendar usage:
-<CustomerCalendar
-  isOpen={isDateTimeModalOpen}
-  onClose={() => setIsDateTimeModalOpen(false)}
-  userRole="customer"
-  VechileId={currentVehicle?.id || id || ''}  // Capital V to match interface
-  vechileType={mapVehicleTypeForAPI(currentVehicle?.type)}
-  userId={localStorage.getItem("userId") || currentUserId}
-  ownerId={apiCarData?.ownerId || apiCarData?.userId || ''}  // Pass owner ID
-  pricePerDay={parseInt(currentVehicle?.price || '0')}
-  vehicleName={currentVehicle?.name || 'Vehicle'}
-latitude={localStorage.getItem("latitude")}
-longitude={localStorage.getItem("longitude")}
+          // In BookNow.tsx, update the CustomerCalendar usage:
+          <CustomerCalendar
+            isOpen={isDateTimeModalOpen}
+            onClose={() => setIsDateTimeModalOpen(false)}
+            userRole="customer"
+            VechileId={currentVehicle?.id || id || ''}  // Capital V to match interface
+            vechileType={mapVehicleTypeForAPI(currentVehicle?.type)}
+            userId={localStorage.getItem("userId") || currentUserId}
+            ownerId={apiCarData?.ownerId || apiCarData?.userId || ''}  // Pass owner ID
+            pricePerDay={parseInt(currentVehicle?.price || '0')}
+            vehicleName={currentVehicle?.name || 'Vehicle'}
+            latitude={localStorage.getItem("latitude")}
+            longitude={localStorage.getItem("longitude")}
 
-  onBookingComplete={(booking) => {
-    console.log("Booking completed!", booking);
-    setIsDateTimeModalOpen(false);
-    // Show success or navigate
-    toast.success("Booking confirmed!");
-  }}
-/>
-)}
+            onBookingComplete={(booking) => {
+              console.log("Booking completed!", booking);
+              setIsDateTimeModalOpen(false);
+              // Show success or navigate
+              toast.success("Booking confirmed!");
+            }}
+          />
+        )}
       </div>
- 
+
       {/* RIGHT COLUMN: Reviews (unchanged, keeping existing code) */}
       <div className="lg:col-span-1">
         <div className="flex items-center justify-between mb-3">
@@ -1559,7 +1555,7 @@ longitude={localStorage.getItem("longitude")}
             </button>
           </div>
         </div>
- 
+
         {apiReviews.length > 0 && (
           <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
             <span className="text-xs text-green-700 font-medium">
@@ -1570,15 +1566,15 @@ longitude={localStorage.getItem("longitude")}
             </span>
           </div>
         )}
- 
-                     {sessionStorage.getItem('editingReviewId') && !loadingReviews && (
+
+        {sessionStorage.getItem('editingReviewId') && !loadingReviews && (
           <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 animate-pulse">
             <span className="text-xs text-blue-700 font-medium">
               🔄 Refreshing to show your updated review...
             </span>
           </div>
         )}
- 
+
         <div className="flex items-center mt-2 mb-2 justify-between bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-200">
           <div className="flex flex-col">
             <span className="text-3xl font-bold text-gray-900">{displayAverageRating}</span>
@@ -1599,7 +1595,7 @@ longitude={localStorage.getItem("longitude")}
             </span>
           </div>
         </div>
- 
+
         <div className="mt-4 space-y-2 bg-white p-4 rounded-lg border">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">Rating Breakdown</h4>
           {displayRatingDistribution.map((r) => (
@@ -1617,28 +1613,27 @@ longitude={localStorage.getItem("longitude")}
             </div>
           ))}
         </div>
- 
+
         <div className="mt-6 space-y-3 max-h-[500px] overflow-y-auto pr-2">
           <h4 className="text-sm font-semibold text-gray-700 mb-3 sticky top-0 bg-white py-2 z-10">
             Customer Reviews ({displayTotalReviews})
           </h4>
-         
+
           {displayReviews.length > 0 ? (
             displayReviews.map((review, idx) => {
               const canEdit = isUserReview(review);
               const wasJustEdited = sessionStorage.getItem('editingReviewId') === review._id;
               const isMenuOpen = menuOpenIndex === review._id;
-             
+
               return (
                 <div
                   key={review._id || idx}
-                  className={`border rounded-xl p-4 transition-all duration-500 relative ${
-                    wasJustEdited
-                      ? 'border-green-400 bg-gradient-to-br from-green-50 to-emerald-50 shadow-2xl ring-2 ring-green-400 ring-offset-2'
-                      : canEdit
+                  className={`border rounded-xl p-4 transition-all duration-500 relative ${wasJustEdited
+                    ? 'border-green-400 bg-gradient-to-br from-green-50 to-emerald-50 shadow-2xl ring-2 ring-green-400 ring-offset-2'
+                    : canEdit
                       ? 'border-blue-200 bg-blue-50 hover:shadow-md'
                       : 'border-gray-200 bg-white hover:shadow-md'
-                  }`}
+                    }`}
                 >
                   {wasJustEdited && (
                     <div className="absolute -top-3 -right-3 z-20 animate-bounce">
@@ -1648,21 +1643,19 @@ longitude={localStorage.getItem("longitude")}
                       </div>
                     </div>
                   )}
-                 
+
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2 flex-1">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                        wasJustEdited
-                          ? 'bg-gradient-to-br from-green-400 to-emerald-500 ring-2 ring-green-300'
-                          : 'bg-gradient-to-br from-blue-400 to-purple-400'
-                      }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${wasJustEdited
+                        ? 'bg-gradient-to-br from-green-400 to-emerald-500 ring-2 ring-green-300'
+                        : 'bg-gradient-to-br from-blue-400 to-purple-400'
+                        }`}>
                         {(review.userName || `User ${idx + 1}`).charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className={`font-semibold text-gray-900 text-sm ${
-                            wasJustEdited ? 'text-green-800' : ''
-                          }`}>
+                          <span className={`font-semibold text-gray-900 text-sm ${wasJustEdited ? 'text-green-800' : ''
+                            }`}>
                             {review.userName || `User ${idx + 1}`}
                           </span>
                           {canEdit && (
@@ -1687,13 +1680,12 @@ longitude={localStorage.getItem("longitude")}
                         )}
                       </div>
                     </div>
- 
+
                     <div className="flex items-center gap-2">
-                      <div className={`flex px-2 py-1 rounded-lg border ${
-                        wasJustEdited
-                          ? 'bg-green-100 border-green-300 ring-2 ring-green-200'
-                          : 'bg-yellow-50 border-yellow-200'
-                      }`}>
+                      <div className={`flex px-2 py-1 rounded-lg border ${wasJustEdited
+                        ? 'bg-green-100 border-green-300 ring-2 ring-green-200'
+                        : 'bg-yellow-50 border-yellow-200'
+                        }`}>
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
@@ -1702,21 +1694,20 @@ longitude={localStorage.getItem("longitude")}
                           />
                         ))}
                       </div>
- 
+
                       <div className="relative" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={(e) => handleMenuToggle(review._id, e)}
-                          className={`p-1.5 rounded-full transition-all duration-200 ${
-                            isMenuOpen
-                              ? 'bg-blue-100 text-blue-600'
-                              : 'hover:bg-gray-100 text-gray-600'
-                          }`}
+                          className={`p-1.5 rounded-full transition-all duration-200 ${isMenuOpen
+                            ? 'bg-blue-100 text-blue-600'
+                            : 'hover:bg-gray-100 text-gray-600'
+                            }`}
                           aria-label="Review options"
                           title={canEdit ? "Edit or delete review" : "Review options"}
                         >
                           <MoreVertical size={18} />
                         </button>
- 
+
                         {isMenuOpen && (
                           <div
                             className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border-2 border-gray-200 z-30 overflow-hidden"
@@ -1734,9 +1725,9 @@ longitude={localStorage.getItem("longitude")}
                                   <Edit size={16} className="text-blue-600 group-hover:scale-110 transition-transform" />
                                   <span className="font-medium text-gray-700 group-hover:text-blue-700">Edit Review</span>
                                 </button>
-                               
+
                                 <div className="border-t border-gray-100"></div>
-                               
+
                                 <button
                                   onClick={(e) => handleDeleteReview(review._id, e)}
                                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors group"
@@ -1757,14 +1748,13 @@ longitude={localStorage.getItem("longitude")}
                       </div>
                     </div>
                   </div>
-                                   <p className={`text-sm leading-relaxed mt-2 mb-3 ${
-                    wasJustEdited
-                      ? 'text-gray-900 font-medium'
-                      : 'text-gray-700'
-                  }`}>
+                  <p className={`text-sm leading-relaxed mt-2 mb-3 ${wasJustEdited
+                    ? 'text-gray-900 font-medium'
+                    : 'text-gray-700'
+                    }`}>
                     {review.review || review.reviewText || review.comment || review.feedback || "No comment provided"}
                   </p>
-                 
+
                   {wasJustEdited && (
                     <div className="mt-3 p-3 bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-400 rounded-lg shadow-inner">
                       <p className="text-xs font-bold text-green-800 mb-2 flex items-center gap-1">
@@ -1792,7 +1782,7 @@ longitude={localStorage.getItem("longitude")}
           )}
         </div>
       </div>
- 
+
       {/* MODALS */}
       {showWaitingPopup && (
         <WaitingPopup
@@ -1813,7 +1803,7 @@ longitude={localStorage.getItem("longitude")}
           }}
         />
       )}
- 
+
       {showAcceptance && bookingId && (
         <BookingAcceptance
           bookingId={bookingId}
@@ -1823,12 +1813,12 @@ longitude={localStorage.getItem("longitude")}
             setCurrentBookingStatus('confirmed');
             setShowWaitingPopup(false);
             setBookingStatusMessage("✅ Owner accepted your booking!");
-           
+
             toast.success("🎉 Booking Confirmed by Owner!", {
               duration: 5000,
               position: 'top-center',
             });
-           
+
             setTimeout(() => {
               setShowContactButtons(true);
               setBookingStatusMessage("");
@@ -1840,12 +1830,12 @@ longitude={localStorage.getItem("longitude")}
             setCurrentBookingStatus('rejected');
             setShowWaitingPopup(false);
             setBookingStatusMessage("❌ Owner rejected your booking");
-           
+
             toast.error(`Booking rejected${reason ? `: ${reason}` : ''}`, {
               duration: 5000,
               position: 'top-center',
             });
-           
+
             setTimeout(() => {
               setBookingStatusMessage("");
               setBookingId(null);
@@ -1858,26 +1848,26 @@ longitude={localStorage.getItem("longitude")}
           }}
         />
       )}
- 
+
       {showRejectModal && (
         <BookingRejectModal
           isOpen={showRejectModal}
           onClose={() => setShowRejectModal(false)}
           onReject={async (reason: string) => {
             console.log("❌ Rejecting booking with reason:", reason);
-           
+
             try {
               if (bookingId) {
                 setCurrentBookingStatus('rejected');
                 setShowRejectModal(false);
                 setShowWaitingPopup(false);
                 setBookingStatusMessage("❌ Booking rejected");
-               
+
                 toast.error(`Booking rejected: ${reason}`, {
                   duration: 5000,
                   position: 'top-center',
                 });
-               
+
                 setTimeout(() => {
                   setBookingStatusMessage("");
                   setBookingId(null);
@@ -1891,7 +1881,7 @@ longitude={localStorage.getItem("longitude")}
           }}
         />
       )}
- 
+
       {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1905,24 +1895,24 @@ longitude={localStorage.getItem("longitude")}
                   <div className="w-20 h-20 border-4 border-green-500 rounded-full animate-ping opacity-20"></div>
                 </div>
               </div>
- 
+
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Booking Confirmed! 🎉
               </h2>
               <p className="text-gray-600 mb-6">
                 Your call with the owner was successful. Your booking has been confirmed!
               </p>
- 
+
               {selectedDateTime && currentVehicle && (
                 <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
                   <h3 className="font-semibold text-gray-900 mb-3 text-center">Booking Summary</h3>
-                 
+
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Vehicle:</span>
                       <span className="font-medium text-gray-900">{currentVehicle.name}</span>
                     </div>
-                   
+
                     <div className="flex justify-between">
                       <span className="text-gray-600">From:</span>
                       <span className="font-medium text-gray-900">
@@ -1933,7 +1923,7 @@ longitude={localStorage.getItem("longitude")}
                         })} at {selectedDateTime.startTime}
                       </span>
                     </div>
-                   
+
                     <div className="flex justify-between">
                       <span className="text-gray-600">To:</span>
                       <span className="font-medium text-gray-900">
@@ -1944,7 +1934,7 @@ longitude={localStorage.getItem("longitude")}
                         })} at {selectedDateTime.endTime}
                       </span>
                     </div>
-                   
+
                     <div className="border-t border-gray-200 pt-2 mt-2">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Total Duration:</span>
@@ -1957,12 +1947,12 @@ longitude={localStorage.getItem("longitude")}
                           )} hours
                         </span>
                       </div>
-                     
+
                       <div className="flex justify-between mt-1">
                         <span className="text-gray-600">Price per hour:</span>
                         <span className="font-medium text-gray-900">₹{currentVehicle.price}</span>
                       </div>
-                     
+
                       <div className="flex justify-between mt-2 pt-2 border-t border-gray-300">
                         <span className="font-semibold text-gray-900">Total Price:</span>
                         <span className="font-bold text-blue-600 text-lg">
@@ -1978,14 +1968,14 @@ longitude={localStorage.getItem("longitude")}
                   </div>
                 </div>
               )}
- 
+
               {bookingId && (
                 <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-xs text-blue-600 mb-1">Booking ID</p>
                   <p className="text-sm font-mono font-semibold text-blue-900">{bookingId}</p>
                 </div>
               )}
- 
+
               <div className="flex gap-3">
                 <button
                   onClick={() => {
@@ -1996,7 +1986,7 @@ longitude={localStorage.getItem("longitude")}
                 >
                   View My Bookings
                 </button>
- 
+
                 <button
                   onClick={() => {
                     setShowSuccessModal(false);
@@ -2011,7 +2001,7 @@ longitude={localStorage.getItem("longitude")}
           </div>
         </div>
       )}
- 
+
       {/* Loading Overlay */}
       {(isSubmittingBooking || isDeletingReview) && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -2026,5 +2016,5 @@ longitude={localStorage.getItem("longitude")}
     </div>
   );
 };
- 
+
 export default BookNow;

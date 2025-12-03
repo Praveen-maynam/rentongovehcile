@@ -6,29 +6,29 @@ import { useReviewStore } from "../../store/review.store";
 import AutomaticLogo from "../../assets/icons/automatic.jpeg";
 import DriverLogo from "../../assets/icons/seats.jpeg";
 import Petrol from "../../assets/icons/fuel.jpeg";
- 
+
 interface VehicleCardProps {
   vehicle: Vehicle;
   onBook?: (vehicle: Vehicle) => void;
 }
- 
+
 const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
   const navigate = useNavigate();
   const { getAverageRating } = useReviewStore();
   const rating = getAverageRating(vehicle.id);
- 
- const handleCardClick = () => {
-  if (onBook) {
-    onBook(vehicle);
-  } else {
-    navigate(`/book-now/${vehicle.id}`, {
-      state: { vehicleType: vehicle.type || 'car' }
-    });
-  }
-};
- 
+
+  const handleCardClick = () => {
+    if (onBook) {
+      onBook(vehicle);
+    } else {
+      navigate(`/book-now/${vehicle.id}`, {
+        state: { vehicleType: vehicle.type || 'car' }
+      });
+    }
+  };
+
   return (
-     <div
+    <div
       onClick={handleCardClick}
       className="w-full border-b pb-5 cursor-pointer p-2 hover:bg-gray-50 transition"
     >
@@ -53,7 +53,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
         {/* Price */}
         <p className="text-2xl font-bold mt-1">
           ₹{vehicle.price}
-          <span className="text-gray-500 text-base font-normal">/hr</span>
+          <span className="text-gray-500 text-base font-normal">/day</span>
         </p>
 
         {/* Features */}
@@ -74,11 +74,11 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
 
   );
 };
- 
+
 export default VehicleCard;
- 
- 
- 
+
+
+
 
 
 

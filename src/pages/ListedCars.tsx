@@ -1,17 +1,17 @@
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
 import OwnerCalendar from "../components/ui/OwnerCalender";
-import VehicleAvailabilityCalendar from "../components/Available";
+
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import DriverLogo from "../assets/icons/DriverLogo.png";
 import CarLogo from "../assets/icons/CarLogo.png";
-import FilterLogo from "../assets/icons/FilterLogo.png";
+
 import Petrol from "../assets/icons/Petrol.png";
 import Location from "../assets/icons/Location.png";
 import Search from "../assets/icons/Search.png";
@@ -34,7 +34,6 @@ interface Vehicle {
   contactNumber: number | string;
   contactName: string;
   approvalStatus?: "pending" | "approved" | "rejected";
-  Status?: string;
   status?: string;
 }
 
@@ -53,7 +52,6 @@ interface ApiCar {
   isAvailable?: boolean;
   contactNumber: number;
   contactName: string;
-  Status?: string;
   status?: string;
 }
 
@@ -61,9 +59,9 @@ const ListedCars: React.FC = () => {
   const navigate = useNavigate();
   const { currentCity } = useLocation();
   const { cars: userListedCars, deleteCar } = useListedCarsStore();
-  
+
   const hasFetched = useRef(false);
-  
+
   // State management
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
@@ -78,8 +76,8 @@ const ListedCars: React.FC = () => {
   const [deletingCarId, setDeletingCarId] = useState<string | null>(null);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
-  
-  const loggedInUserId = localStorage.getItem('userId') || "68f32259cea8a9fa88029262";
+
+  const loggedInUserId = localStorage.getItem('userId') || " ";
 
   useEffect(() => {
     if (hasFetched.current) {
@@ -90,20 +88,21 @@ const ListedCars: React.FC = () => {
     const fetchMyCars = async () => {
       try {
         hasFetched.current = true;
-        
+
         setLoading(true);
         setError("");
 
         let userId = localStorage.getItem('userId');
         if (!userId || userId.length !== 24 || !/^[a-f0-9]{24}$/i.test(userId)) {
-          userId = "68f32259cea8a9fa88029262";
+          setError("Invalid or missing userId. Please log in again.");
+          setLoading(false);
+          return;
         }
 
         console.log("🚗 Fetching cars for user:", userId);
 
         const response = await apiService.car.getMyVehicles(userId);
         const responseData = response.data || response;
-        
         let carsArray = [];
         if (responseData.data && responseData.data.cars) {
           carsArray = responseData.data.cars;
@@ -122,9 +121,9 @@ const ListedCars: React.FC = () => {
             car.pickupCityState,
             car.pickupCityPinCode
           ].filter(Boolean);
-          
-          const locationString = locationParts.length > 0 
-            ? locationParts.join(', ') 
+
+          const locationString = locationParts.length > 0
+            ? locationParts.join(', ')
             : currentCity;
 
           return {
@@ -143,10 +142,9 @@ const ListedCars: React.FC = () => {
             location: locationString,
             rating: car.rating?.toString() || "4.0",
             available: car.Available !== false && car.isAvailable !== false,
-            image: car.carImages && car.carImages.length > 0 
-              ? car.carImages[0] 
+            image: car.carImages && car.carImages.length > 0
+              ? car.carImages[0]
               : BlackCar,
-            Status: car.Status || car.status || "pending",
             status: car.Status || car.status || "pending",
           };
         });
@@ -161,8 +159,9 @@ const ListedCars: React.FC = () => {
         setLoading(false);
       }
     };
-    
+
     fetchMyCars();
+
   }, []);
 
   useEffect(() => {
@@ -195,14 +194,13 @@ const ListedCars: React.FC = () => {
       id: car.id,
       contactName: car.ownerName,
       contactNumber: car.contactNumber || "N/A",
-      Status: "pending",
       status: "pending",
     }));
     return [...userCars, ...cars];
   }, [userListedCars, cars]);
 
   const getCarStatus = (car: Vehicle) => {
-    const status = (car.Status || car.status || '').toLowerCase().trim();
+    const status = (car.status || '').toLowerCase().trim();
     const isPending = status === 'pending';
     const isApproved = status === 'verified' || status === 'approved';
     return { status, isPending, isApproved };
@@ -210,12 +208,12 @@ const ListedCars: React.FC = () => {
 
   const handleOpenAvailabilityModal = (vehicle: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     const { isApproved } = getCarStatus(vehicle);
     if (!isApproved) {
       return;
     }
-    
+
     setSelectedVehicle(vehicle);
     setShowCalendarModal(true);
   };
@@ -225,7 +223,7 @@ const ListedCars: React.FC = () => {
     if (!isApproved) {
       return;
     }
-    
+
     const id = vehicle._id || vehicle.id;
 
     if (!id) {
@@ -254,7 +252,7 @@ const ListedCars: React.FC = () => {
 
   const handleDeleteVehicle = async (vehicle: Vehicle) => {
     const vehicleId = vehicle._id || vehicle.id;
-    
+
     if (!vehicleId) {
       setError("Cannot delete vehicle without ID");
       setShowDeleteModal(false);
@@ -267,24 +265,24 @@ const ListedCars: React.FC = () => {
       console.log('🗑️ Deleting car with ID:', vehicleId);
 
       await apiService.car.deleteCarById(vehicleId);
-      
+
       console.log('✅ Car deleted successfully');
-      
+
       setCars(cars.filter((car) => {
         const carId = car._id || car.id;
         return carId !== vehicleId;
       }));
       deleteCar(vehicleId);
-      
+
       setSuccessMessage(`${vehicle.name} deleted successfully!`);
       setError("");
     } catch (error: any) {
       console.error('❌ Error deleting car:', error);
-      
-      const errorMsg = error?.response?.data?.message || 
-                      error?.message || 
-                      "Failed to delete vehicle. Please try again.";
-      
+
+      const errorMsg = error?.response?.data?.message ||
+        error?.message ||
+        "Failed to delete vehicle. Please try again.";
+
       setError(`Failed to delete ${vehicle.name}. ${errorMsg}`);
     } finally {
       setDeletingCarId(null);
@@ -306,6 +304,10 @@ const ListedCars: React.FC = () => {
     }
   };
 
+  const handleAddCar = () => {
+    navigate('/list-car');
+  };
+
   const filteredCars = allCars.filter((car) =>
     car.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -320,7 +322,7 @@ const ListedCars: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-6">
       {successMessage && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
           {successMessage}
@@ -333,78 +335,110 @@ const ListedCars: React.FC = () => {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-6 gap-4">
-        <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3 bg-white cursor-pointer border-2 border-transparent hover:border-blue-500 hover:shadow-xl transition-all duration-200">
-          <img src={CarLogo} alt="Dropdown Logo" className="w-[24px] h-[24px]" />
-          <select
-            className="flex-1 ml-2 border-none outline-none text-sm bg-transparent"
-            value={selectedList}
-            onChange={(e) => {
-              const value = e.target.value as "cars" | "bikes";
-              setSelectedList(value);
-              if (value === "bikes") navigate("/listed-bike");
-            }}
-          >
-            <option value="cars">Listed Cars</option>
-            <option value="bikes">Listed Bikes</option>
-          </select>
-        </div>
-
-        <div className="flex gap-2 w-full md:w-auto mt-6">
-          <div className="relative flex-1 md:w-[300px] h-[40px] transition-all duration-200 rounded-full">
-            <img
-              src={Search}
-              alt="Search"
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search Cars..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-full rounded-full border pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer border-2 border-transparent hover:border-blue-500 hover:shadow-xl transition-all duration-200"
-            />
+      {/* Header Section */}
+      <div className="max-w-8xl mx-auto mb-6">
+        {/* Search and Filter Bar */}
+        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+          <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3 bg-white cursor-pointer border-2 border-transparent hover:border-blue-500 hover:shadow-xl transition-all duration-200">
+            <img src={CarLogo} alt="Dropdown Logo" className="w-[24px] h-[24px]" />
+            <select
+              className="flex-1 ml-2 border-none outline-none text-sm bg-transparent"
+              value={selectedList}
+              onChange={(e) => {
+                const value = e.target.value as "cars" | "bikes";
+                setSelectedList(value);
+                if (value === "bikes") navigate("/listed-bike");
+              }}
+            >
+              <option value="cars">Listed Cars</option>
+              <option value="bikes">Listed Bikes</option>
+            </select>
           </div>
 
-          <button
-            onClick={() => setShowFilter(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
-          >
-            <img src={FilterLogo} alt="Filter" className="w-6 h-4" /> Filter
-          </button>
+          <div className="flex gap-2 w-full md:w-auto">
+            <div className="relative flex-1 md:w-[300px] h-[50px] transition-all duration-200 rounded-full">
+              <img
+                src={Search}
+                alt="Search"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Search Cars..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full h-full rounded-full border pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer border-2 border-transparent hover:border-blue-500 hover:shadow-xl transition-all duration-200"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col pb-16">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto">
         {filteredCars.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p className="text-lg mb-2">No cars found</p>
-            <p className="text-sm">
-              {searchTerm ? "Try adjusting your search" : "Start by adding your first car"}
-            </p>
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl shadow-sm">
+            <div className="text-center max-w-md">
+              <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-16 h-16 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                  />
+                </svg>
+              </div>
+
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                {searchTerm ? "No cars found" : "No cars listed yet"}
+              </h2>
+
+              <p className="text-gray-500 mb-8">
+                {searchTerm
+                  ? "Try adjusting your search terms"
+                  : "Start earning by listing your first car on our platform"}
+              </p>
+
+              {!searchTerm && (
+                <button
+                  onClick={handleAddCar}
+                  className="inline-flex items-center gap-3 bg-gradient-to-r from-[#0B0E92] to-[#69A6F0] text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:opacity-90 transition-all duration-200 transform hover:scale-105"
+                >
+                  <Plus size={24} />
+                  Add Your First Car
+                </button>
+              )}
+            </div>
           </div>
         ) : (
-          filteredCars.map((car, index) => {
-            const isUnavailable = !car.available;
-            const carId = car._id || car.id;
-            const { isPending, isApproved } = getCarStatus(car);
+          <div className="flex flex-col gap-6 pb-16">
+            {filteredCars.map((car, index) => {
+              const isUnavailable = !car.available;
+              const carId = car._id || car.id;
+              const { isPending, isApproved } = getCarStatus(car);
 
-            return (
-              <React.Fragment key={carId || `car-${index}`}>
+              return (
                 <div
+                  key={carId || `car-${index}`}
                   onClick={() => handleCardClick(car)}
                   className={`relative flex flex-col md:flex-row bg-white rounded-xl shadow-sm 
                     transition-all duration-300 overflow-hidden
                     border-2 border-transparent hover:border-blue-500 hover:shadow-xl
-                    p-4 gap-4 w-full max-w-4xl
+                    p-4 gap-4 w-full
                     ${!isApproved ? "opacity-60" : "cursor-pointer"}`}
                 >
                   <div className="flex flex-col md:flex-row gap-4 w-full">
-                    <div className="w-300px md:w-[300px] h-[250px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 rounded-2xl">
+                    <div className="w-full md:w-[300px] h-[250px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                       <img
                         src={car.image}
                         alt={car.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 rounded-2xl"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
                           e.currentTarget.src = BlackCar;
                         }}
@@ -441,21 +475,19 @@ const ListedCars: React.FC = () => {
                         <span className="text-xs">{car.location}</span>
                       </div>
 
-                      {isPending && (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2 mt-2">
+                      {isPending ? (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2 mt-2 w-3/4 mx-auto">
                           <p className="text-yellow-800 text-sm font-medium text-center">
                             Your car is under verification
                           </p>
                         </div>
-                      )}
-
-                      {isApproved && (
-                        <div className="bg-green-50 border border-green-200 rounded-md px-3 py-2 mt-2">
+                      ) : isApproved ? (
+                        <div className="bg-green-50 border border-green-200 rounded-md px-3 py-2 mt-2 w-3/4 mx-auto">
                           <p className="text-green-800 text-sm font-medium text-center">
                             Your car is approved
                           </p>
                         </div>
-                      )}
+                      ) : null}
 
                       <div className="flex flex-col md:flex-row gap-3 mt-3 w-full">
                         <button
@@ -477,9 +509,9 @@ const ListedCars: React.FC = () => {
                             const vehicleId = car._id || car.id;
                             console.log("🚗 Navigating to car history, ID:", vehicleId);
                             navigate(`/vehicle-history/${vehicleId}`, {
-                              state: { 
-                                vehicleData: car, 
-                                vehicleType: "car" 
+                              state: {
+                                vehicleData: car,
+                                vehicleType: "car"
                               },
                             });
                           }}
@@ -543,30 +575,24 @@ const ListedCars: React.FC = () => {
                     </div>
                   )}
                 </div>
-
-                {index < filteredCars.length - 1 && (
-                  <div className="w-full max-w-4xl h-px bg-gray-200 my-4"></div>
-                )}
-              </React.Fragment>
-            );
-          })
+              );
+            })}
+          </div>
         )}
       </div>
 
       {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
 
-    {showCalendarModal && selectedVehicle && loggedInUserId && (
- <OwnerCalendar
-   
-     isOpen={showCalendarModal}
-     onClose={() => setShowCalendarModal(false)}
-     userRole="owner"
-     VechileId={selectedVehicle._id || selectedVehicle.id || ""}
-     vechileType="Car"
-     userId={localStorage.getItem('userId') || ""}
-     
-   />
-)}
+      {showCalendarModal && selectedVehicle && loggedInUserId && (
+        <OwnerCalendar
+          isOpen={showCalendarModal}
+          onClose={() => setShowCalendarModal(false)}
+          userRole="owner"
+          VechileId={selectedVehicle._id || selectedVehicle.id || ""}
+          vechileType="Car"
+          userId={localStorage.getItem('userId') || ""}
+        />
+      )}
 
       {showDeleteModal && vehicleToDelete && (
         <DeleteConfirmationModal
@@ -583,3 +609,4 @@ const ListedCars: React.FC = () => {
 };
 
 export default ListedCars;
+

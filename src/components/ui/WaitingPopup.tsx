@@ -87,35 +87,35 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
     if (!isOpen) return;
 
     console.log("⏱ Starting countdown from", remainingTime);
-    
+
     // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    
+
     intervalRef.current = setInterval(() => {
       setRemainingTime((prev) => {
         const newTime = prev - 1;
-        
+
         // Log every 10 seconds
         if (newTime % 10 === 0 && newTime > 0) {
           console.log("⏱ Timer:", newTime, "seconds remaining");
         }
-        
+
         // When timer reaches 0
         if (newTime <= 0) {
           console.log("⏰ TIMER REACHED 0 - Closing popup and calling callbacks");
-          
+
           // Clear interval
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
           }
-          
+
           // Only call timeout callbacks once
           if (!hasCalledTimeoutRef.current) {
             hasCalledTimeoutRef.current = true;
-            
+
             // Call timeout callbacks
             setTimeout(() => {
               onTimeout?.();
@@ -123,10 +123,10 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
               onClose(); // ✅ CLOSE THE POPUP
             }, 100);
           }
-          
+
           return 0;
         }
-        
+
         return newTime;
       });
     }, 1000);
@@ -139,6 +139,56 @@ const WaitingPopup: React.FC<WaitingPopupProps> = ({
       }
     };
   }, [isOpen, onTimeout, onTimerComplete, onClose]);
+
+  // Sound effect for waiting state
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let audioContext: AudioContext | null = null;
+    let timerId: NodeJS.Timeout | null = null;
+
+    const playSound = () => {
+      try {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
+
+        // Create oscillator
+        const osc = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        osc.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Sound parameters (gentle ping)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+
+        // Envelope
+        gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1.0);
+
+        osc.start(audioContext.currentTime);
+        osc.stop(audioContext.currentTime + 1.0);
+
+      } catch (e) {
+        console.error("Audio play failed", e);
+      }
+    };
+
+    // Play immediately
+    playSound();
+
+    // Repeat every 3 seconds
+    timerId = setInterval(playSound, 3000);
+
+    return () => {
+      if (timerId) clearInterval(timerId);
+      if (audioContext && audioContext.state !== 'closed') {
+        audioContext.close();
+      }
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

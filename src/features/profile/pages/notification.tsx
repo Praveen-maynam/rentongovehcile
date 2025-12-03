@@ -404,9 +404,8 @@ const Notifications: React.FC = () => {
               return (
                 <div
                   key={notification.id}
-                  className={`bg-white rounded-xl shadow-sm p-5 transition hover:shadow-md ${
-                    !notification.read ? "border-l-4 border-blue-500" : "border border-gray-200"
-                  }`}
+                  className={`bg-white rounded-xl shadow-sm p-5 transition hover:shadow-md ${!notification.read ? "border-l-4 border-blue-500" : "border border-gray-200"
+                    }`}
                 >
                   <div className="flex items-start gap-4">
                     {/* Icon */}

@@ -910,8 +910,8 @@ const MyBookings: React.FC = () => {
                   onClick={handleRefresh}
                   disabled={isRefreshing}
                   className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-[10px] text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${isRefreshing
-                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white hover:opacity-90'
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white hover:opacity-90'
                     }`}
                 >
                   <RefreshCw size={16} className={`sm:w-[18px] sm:h-[18px] ${isRefreshing ? 'animate-spin' : ''}`} />

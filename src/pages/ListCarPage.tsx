@@ -192,7 +192,7 @@ const ListCarPage = () => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([17.4889, 78.4603]);
   const [markerPos, setMarkerPos] = useState<[number, number] | null>(null);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
-  const carNumberRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/i;
+  const carNumberRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{1,4}$/i;
   const [carNumberError, setCarNumberError] = useState("");
 
   const getUserId = () => {

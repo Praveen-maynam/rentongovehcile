@@ -1,18 +1,15 @@
-
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useListedBikesStore } from "../store/listedBikes.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
 
 import OwnerCalendar from "../components/ui/OwnerCalender";
-import FilterCard from "../components/ui/FilterCard";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import BikeLogo from "../assets/icons/BikeLogo.png";
 import Location from "../assets/icons/Location.png";
 import Search from "../assets/icons/Search.png";
-import FilterLogo from "../assets/icons/FilterLogo.png";
 import BikeCC from "../assets/icons/BikeCC.png";
 import Petrol from "../assets/icons/Petrol.png";
 import enfield from "../assets/images/Enfield.png";
@@ -34,7 +31,6 @@ interface Vehicle {
   cc?: string;
   contactName: string;
   contactNumber: string;
-  Status?: string;
   status?: string;
 }
 
@@ -56,7 +52,6 @@ const ListedBikes: React.FC = () => {
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
   const [selectedList, setSelectedList] = useState<"cars" | "bikes">("bikes");
   const [searchTerm, setSearchTerm] = useState("");
-  const [showFilter, setShowFilter] = useState(false);
   const [deletingBikeId, setDeletingBikeId] = useState<string | null>(null);
   const [loggedInUserId, setLoggedInUserId] = useState<string>("");
 
@@ -69,20 +64,22 @@ const ListedBikes: React.FC = () => {
     const fetchMyBikes = async () => {
       try {
         hasFetched.current = true;
-        
+
         setLoading(true);
         setError("");
 
         let userId = localStorage.getItem('userId');
         if (!userId || userId.length !== 24 || !/^[a-f0-9]{24}$/i.test(userId)) {
-          userId = "68f32259cea8a9fa88029262";
+          setError("Invalid or missing userId. Please log in again.");
+          setLoading(false);
+          return;
         }
 
         console.log("🏍️ Fetching bikes for user:", userId);
 
         const response = await apiService.bike.getMyVehicles(userId);
         const responseData = response.data || response;
-        
+
         let bikesArray = [];
         if (responseData.data && responseData.data.bikes) {
           bikesArray = responseData.data.bikes;
@@ -101,9 +98,9 @@ const ListedBikes: React.FC = () => {
             bike.pickupCityState,
             bike.pickupCityPinCode
           ].filter(Boolean);
-          
-          const locationString = locationParts.length > 0 
-            ? locationParts.join(', ') 
+
+          const locationString = locationParts.length > 0
+            ? locationParts.join(', ')
             : currentCity || "Unknown";
 
           return {
@@ -119,12 +116,12 @@ const ListedBikes: React.FC = () => {
             location: locationString,
             rating: bike.averageRating?.toString() || "4.0",
             available: bike.Available !== false,
-            image: bike.bikeImages && bike.bikeImages.length > 0 
-              ? bike.bikeImages[0] 
+            image: bike.bikeImages && bike.bikeImages.length > 0
+              ? bike.bikeImages[0]
               : enfield,
             engineCapacity: bike.bikeEngine || bike.engineCapacity || bike.cc?.toString() || "150",
             cc: bike.cc?.toString() || "150",
-            Status: bike.Status || bike.status || "pending",
+            // Status: bike.Status || bike.status || "pending",
             status: bike.Status || bike.status || "pending",
           };
         });
@@ -141,6 +138,7 @@ const ListedBikes: React.FC = () => {
     };
 
     fetchMyBikes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -175,7 +173,6 @@ const ListedBikes: React.FC = () => {
       contactNumber: "unknown",
       image: bike.photos?.[0] || enfield,
       cc: "150",
-      Status: "pending",
       status: "pending",
     }));
 
@@ -183,7 +180,7 @@ const ListedBikes: React.FC = () => {
   }, [userListedBikes, bikes, currentCity]);
 
   const getBikeStatus = (bike: Vehicle) => {
-    const status = (bike.Status || bike.status || '').toLowerCase().trim();
+    const status = (bike.status || '').toLowerCase().trim();
     const isPending = status === 'pending';
     const isApproved = status === 'verified' || status === 'approved';
     return { status, isPending, isApproved };
@@ -191,24 +188,24 @@ const ListedBikes: React.FC = () => {
 
   const handleOpenCalendarModal = (vehicle: Vehicle, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     const { isApproved } = getBikeStatus(vehicle);
     if (!isApproved) {
       return;
     }
-    
+
     setSelectedVehicle(vehicle);
-    
+
     let userId = localStorage.getItem('userId');
     if (!userId || userId.length !== 24 || !/^[a-f0-9]{24}$/i.test(userId)) {
       userId = "68f32259cea8a9fa88029262";
     }
-    
+
     console.log("🔧 Opening calendar for vehicle:", {
       vehicleId: vehicle._id || vehicle.id,
       userId: userId,
     });
-    
+
     setLoggedInUserId(userId);
     setShowCalendarModal(true);
     setError("");
@@ -219,7 +216,7 @@ const ListedBikes: React.FC = () => {
     if (!isApproved) {
       return;
     }
-    
+
     const id = vehicle._id || vehicle.id;
 
     if (!id) {
@@ -248,7 +245,7 @@ const ListedBikes: React.FC = () => {
 
   const handleDeleteVehicle = async (vehicle: Vehicle) => {
     const vehicleId = vehicle._id || vehicle.id;
-    
+
     if (!vehicleId) {
       setError("Cannot delete vehicle without ID");
       setShowDeleteModal(false);
@@ -261,24 +258,24 @@ const ListedBikes: React.FC = () => {
       console.log('🗑️ Deleting bike with ID:', vehicleId);
 
       await apiService.bike.deleteBikeById(vehicleId);
-      
+
       console.log('✅ Bike deleted successfully');
-      
+
       setBikes(bikes.filter((bike) => {
         const bikeId = bike._id || bike.id;
         return bikeId !== vehicleId;
       }));
       deleteBike(vehicleId);
-      
+
       setSuccessMessage(`${vehicle.name} deleted successfully!`);
       setError("");
     } catch (error: any) {
       console.error('❌ Error deleting bike:', error);
-      
-      const errorMsg = error?.response?.data?.message || 
-                      error?.message || 
-                      "Failed to delete vehicle. Please try again.";
-      
+
+      const errorMsg = error?.response?.data?.message ||
+        error?.message ||
+        "Failed to delete vehicle. Please try again.";
+
       setError(`Failed to delete ${vehicle.name}. ${errorMsg}`);
     } finally {
       setDeletingBikeId(null);
@@ -300,6 +297,10 @@ const ListedBikes: React.FC = () => {
     }
   };
 
+  const handleAddBike = () => {
+    navigate('/list-bike');
+  };
+
   const filteredBikes = allBikes.filter((bike) =>
     bike.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -314,7 +315,7 @@ const ListedBikes: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-6">
       {successMessage && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
           {successMessage}
@@ -327,78 +328,110 @@ const ListedBikes: React.FC = () => {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-6 gap-4">
-        <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3 bg-white cursor-pointer border-2 border-transparent hover:border-blue-500 hover:shadow-xl transition-all duration-200">
-          <img src={BikeLogo} alt="Dropdown Logo" className="w-[24px] h-[24px]" />
-          <select
-            className="flex-1 ml-2 border-none outline-none text-sm bg-transparent"
-            value={selectedList}
-            onChange={(e) => {
-              const value = e.target.value as "cars" | "bikes";
-              setSelectedList(value);
-              if (value === "cars") navigate("/listed");
-            }}
-          >
-            <option value="bikes">Listed Bikes</option>
-            <option value="cars">Listed Cars</option>
-          </select>
-        </div>
-
-        <div className="flex gap-2 w-full md:w-auto mt-6">
-          <div className="relative flex-1 md:w-[300px] h-[40px] transition-all duration-200 rounded-full">
-            <img
-              src={Search}
-              alt="Search"
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search Bikes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-full rounded-full border pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer border-2 border-transparent hover:border-blue-500 hover:shadow-xl transition-all duration-200"
-            />
+      {/* Header Section */}
+      <div className="max-w-8xl mx-auto mb-8">
+        {/* Search and Filter Bar */}
+        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+          <div className="flex items-center w-full md:w-[300px] h-[50px] border rounded-lg px-3 bg-white cursor-pointer border-2 border-transparent hover:border-blue-500 hover:shadow-xl transition-all duration-200">
+            <img src={BikeLogo} alt="Dropdown Logo" className="w-[24px] h-[24px]" />
+            <select
+              className="flex-1 ml-2 border-none outline-none text-sm bg-transparent"
+              value={selectedList}
+              onChange={(e) => {
+                const value = e.target.value as "cars" | "bikes";
+                setSelectedList(value);
+                if (value === "cars") navigate("/listed");
+              }}
+            >
+              <option value="bikes">Listed Bikes</option>
+              <option value="cars">Listed Cars</option>
+            </select>
           </div>
 
-          <button
-            onClick={() => setShowFilter(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
-          >
-            <img src={FilterLogo} alt="Filter" className="w-6 h-4" /> Filter
-          </button>
+          <div className="flex gap-2 w-full md:w-auto">
+            <div className="relative flex-1 md:w-[300px] h-[50px] transition-all duration-200 rounded-full">
+              <img
+                src={Search}
+                alt="Search"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Search Bikes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full h-full rounded-full border pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer border-2 border-transparent hover:border-blue-500 hover:shadow-xl transition-all duration-200"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col pb-16">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto">
         {filteredBikes.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p className="text-lg mb-2">No bikes found</p>
-            <p className="text-sm">
-              {searchTerm ? "Try adjusting your search" : "Start by adding your first bike"}
-            </p>
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl shadow-sm">
+            <div className="text-center max-w-md">
+              <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-16 h-16 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                  />
+                </svg>
+              </div>
+
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                {searchTerm ? "No bikes found" : "No bikes listed yet"}
+              </h2>
+
+              <p className="text-gray-500 mb-8">
+                {searchTerm
+                  ? "Try adjusting your search terms"
+                  : "Start earning by listing your first bike on our platform"}
+              </p>
+
+              {!searchTerm && (
+                <button
+                  onClick={handleAddBike}
+                  className="inline-flex items-center gap-3 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:opacity-90 transition-all duration-200 transform hover:scale-105"
+                >
+                  <Plus size={24} />
+                  Add Your First Bike
+                </button>
+              )}
+            </div>
           </div>
         ) : (
-          filteredBikes.map((bike, index) => {
-            const isUnavailable = !bike.available;
-            const bikeId = bike._id || bike.id;
-            const { isPending, isApproved } = getBikeStatus(bike);
+          <div className="flex flex-col gap-6 pb-16">
+            {filteredBikes.map((bike, index) => {
+              const isUnavailable = !bike.available;
+              const bikeId = bike._id || bike.id;
+              const { isPending, isApproved } = getBikeStatus(bike);
 
-            return (
-              <React.Fragment key={bikeId || `bike-${index}`}>
+              return (
                 <div
+                  key={bikeId || `bike-${index}`}
                   onClick={() => handleCardClick(bike)}
                   className={`relative flex flex-col md:flex-row bg-white rounded-xl shadow-sm 
                     transition-all duration-300 overflow-hidden
                     border-2 border-transparent hover:border-blue-500 hover:shadow-xl
-                    p-4 gap-4 w-full max-w-4xl
+                    p-4 gap-4 w-full
                     ${!isApproved ? "opacity-60" : "cursor-pointer"}`}
                 >
                   <div className="flex flex-col md:flex-row gap-4 w-full">
-                    <div className="w-300px md:w-[300px] h-[250px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 rounded-2xl">
+                    <div className="w-full md:w-[300px] h-[250px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                       <img
                         src={bike.image}
                         alt={bike.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 rounded-2xl"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
                           e.currentTarget.src = enfield;
                         }}
@@ -437,21 +470,20 @@ const ListedBikes: React.FC = () => {
                         <span className="text-xs">{bike.location}</span>
                       </div>
 
-                      {isPending && (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2 mt-2">
+                      {isPending ? (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2 mt-2 w-3/4 mx-auto">
                           <p className="text-yellow-800 text-sm font-medium text-center">
-                            Your bike is under verification
+                            Your Bike is under verification
                           </p>
                         </div>
-                      )}
-
-                      {isApproved && (
-                        <div className="bg-green-50 border border-green-200 rounded-md px-3 py-2 mt-2">
+                      ) : isApproved ? (
+                        <div className="bg-green-50 border border-green-200 rounded-md px-3 py-2 mt-2 w-3/4 mx-auto">
                           <p className="text-green-800 text-sm font-medium text-center">
-                            Your bike is approved
+                            Your Bike is approved
                           </p>
                         </div>
-                      )}
+                      ) : null}
+
 
                       <div className="flex flex-col md:flex-row gap-3 mt-3 w-full">
                         <button
@@ -473,9 +505,9 @@ const ListedBikes: React.FC = () => {
                             const vehicleId = bike._id || bike.id;
                             console.log("🏍️ Navigating to bike history, ID:", vehicleId);
                             navigate(`/vehicle-history/${vehicleId}`, {
-                              state: { 
-                                vehicleData: bike, 
-                                vehicleType: "bike" 
+                              state: {
+                                vehicleData: bike,
+                                vehicleType: "bike"
                               },
                             });
                           }}
@@ -539,31 +571,22 @@ const ListedBikes: React.FC = () => {
                     </div>
                   )}
                 </div>
-
-                {index < filteredBikes.length - 1 && (
-                  <div className="w-full max-w-4xl h-px bg-gray-200 my-4"></div>
-                )}
-              </React.Fragment>
-            );
-          })
+              );
+            })}
+          </div>
         )}
       </div>
 
-      {showFilter && <FilterCard onApply={() => setShowFilter(false)} />}
-
       {showCalendarModal && selectedVehicle && loggedInUserId && (
-       <OwnerCalendar
-         
-           isOpen={showCalendarModal}
-           onClose={() => setShowCalendarModal(false)}
-           userRole="owner"
-           VechileId={selectedVehicle._id || selectedVehicle.id || ""}
-           vechileType="Bike"
-           userId={localStorage.getItem('userId') || ""}
-           
-         />
+        <OwnerCalendar
+          isOpen={showCalendarModal}
+          onClose={() => setShowCalendarModal(false)}
+          userRole="owner"
+          VechileId={selectedVehicle._id || selectedVehicle.id || ""}
+          vechileType="Bike"
+          userId={localStorage.getItem('userId') || ""}
+        />
       )}
-      
 
       {showDeleteModal && vehicleToDelete && (
         <DeleteConfirmationModal

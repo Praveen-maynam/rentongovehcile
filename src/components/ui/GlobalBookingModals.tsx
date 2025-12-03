@@ -6,7 +6,7 @@ import { useNotificationStore } from '../../store/notification.store';
 
 import { API_BASE_URL, SOCKET_URL } from '../../services/api.service';
 const EXPIRY_TIME = 2 * 60 * 1000; // 120 seconds
-const WARNING_TIME = 20 * 1000; // 20 seconds before expiry
+const WARNING_TIME = 0* 1000; // 0 seconds before expiry
 
 // Sound file paths
 const SOUND_1_NEW_BOOKING = "/sounds/WhatsApp Audio 2025-11-26 at 12.29.34.mp3"; // Owner: New booking
@@ -92,7 +92,7 @@ function OwnerBookingModal() {
     return () => clearInterval(interval);
   }, [currentBooking, warningPlayed]);
 
-  // Initialize Socket.io - runs immediately on component mount
+
   useEffect(() => {
     if (!ownerId) {
       console.log('⚠️ No ownerId found, socket not initialized');
@@ -967,28 +967,7 @@ function CustomerBookingModal() {
               Please meet at the pickup point and complete the process offline.
             </p>
 
-            {/* Required Documents Section */}
-            <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
-              <p className="font-semibold text-gray-800 mb-3">Required Documents</p>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-gray-700 rounded-full"></span>
-                  Driving License
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-gray-700 rounded-full"></span>
-                  Aadhar Card
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-gray-700 rounded-full"></span>
-                  Deposit money :- 10,000
-                </li>
-              </ul>
-              <p className="text-red-500 text-xs mt-3 flex items-center gap-1">
-                <span className="text-red-500">⚠</span>
-                Don't forget to carry these documents.
-              </p>
-            </div>
+         
 
             <button
               onClick={closeCustomerModal}

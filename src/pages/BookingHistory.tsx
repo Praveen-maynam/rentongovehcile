@@ -388,7 +388,7 @@ const BookingDetail: React.FC = () => {
               <MessageCircle size={20} className="sm:w-6 sm:h-6" strokeWidth={2} />
               <span>Chat</span>
             </button>
-
+{/* 
             <button
               onClick={handleConfirmBooking}
               disabled={!isConfirmed}
@@ -398,7 +398,7 @@ const BookingDetail: React.FC = () => {
             >
               <Phone size={20} className="sm:w-6 sm:h-6" strokeWidth={2} />
               <span>Call</span>
-            </button>
+            </button> */}
           </div>
 
           <PopupChat

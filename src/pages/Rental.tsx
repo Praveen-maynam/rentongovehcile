@@ -1,4 +1,4 @@
- 
+
 // import React, { useState } from "react";
 // import { Search } from "lucide-react";
 // import VehicleSection from "../components/VehicleSection";
@@ -10,7 +10,7 @@
 // import NearbyCars from "./NearByCars";
 // import NearbyBikes from "./NearByBikes";
 //  import { useNavigate } from "react-router-dom";
- 
+
 // const Rental: React.FC = (FeedbackModal) => {
 //   const [isFilterOpen, setIsFilterOpen] = useState(false);
 //   const navigate = useNavigate();
@@ -21,7 +21,7 @@
 //   const [endDate, setEndDate] = useState<string>(
 //     new Date().toISOString().split("T")[0]
 //   );
- 
+
 //   // ✅ Filter vehicles by search text
 //   const filterVehicles = (list: typeof vehicles) =>
 //     list.filter(
@@ -29,11 +29,11 @@
 //         v.name.toLowerCase().includes(searchText.toLowerCase()) ||
 //         v.location?.toLowerCase().includes(searchText.toLowerCase())
 //     );
- 
+
 //   const cars = filterVehicles(vehicles.filter((v) => v.type === "Car"));
 //   // const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
 //   const bikes = filterVehicles(vehicles.filter((v) => v.type === "Bike"));
- 
+
 
 //   return (
 //     <div className="bg-gray-50 min-h-screen flex flex-col">
@@ -89,7 +89,7 @@
 
 //       {/* 🚗 Cars Section */}
 //       <div className="px-6">
-    
+
 //         <div className="flex justify-end mt-[-10px] mb-6">
 //           <button
 //             onClick={() => navigate("/nearby-cars")}
@@ -103,7 +103,7 @@
 
 //       {/* 🏍 Bikes Section */}
 //       <div className="px-6">
-       
+
 //         <div className="flex justify-end mt-[-10px] mb-6">
 //           <button
 //             onClick={() => navigate("/nearby-bikes")}
@@ -135,7 +135,7 @@
 // import NearbyCars from "./NearByCars";
 // import NearbyBikes from "./NearByBikes";
 //  import { useNavigate } from "react-router-dom";
- 
+
 // const Rental: React.FC = (FeedbackModal) => {
 //   const [isFilterOpen, setIsFilterOpen] = useState(false);
 //   const navigate = useNavigate();
@@ -146,7 +146,7 @@
 //   const [endDate, setEndDate] = useState<string>(
 //     new Date().toISOString().split("T")[0]
 //   );
- 
+
 //   // ✅ Filter vehicles by search text
 //   const filterVehicles = (list: typeof vehicles) =>
 //     list.filter(
@@ -154,11 +154,11 @@
 //         v.name.toLowerCase().includes(searchText.toLowerCase()) ||
 //         v.location?.toLowerCase().includes(searchText.toLowerCase())
 //     );
- 
+
 //   const cars = filterVehicles(vehicles.filter((v) => v.type === "Car"));
 //   // const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
 //   const bikes = filterVehicles(vehicles.filter((v) => v.type === "Bike"));
- 
+
 
 //   return (
 //     <div className="bg-gray-50 min-h-screen flex flex-col">
@@ -215,7 +215,7 @@
 
 //       {/* 🚗 Cars Section */}
 //       <div className="px-6">
-    
+
 //         <div className="flex justify-end mt-[-10px] mb-6">
 //           <button
 //             onClick={() => navigate("/nearby-cars")}
@@ -229,7 +229,7 @@
 
 //       {/* 🏍 Bikes Section */}
 //       <div className="px-6">
-       
+
 //         <div className="flex justify-end mt-[-10px] mb-6">
 //           <button
 //             onClick={() => navigate("/nearby-bikes")}
@@ -252,7 +252,7 @@
 
 
 
- 
+
 // import React, { useState } from "react";
 // import { Search } from "lucide-react";
 // import VehicleSection from "../components/VehicleSection";
@@ -287,7 +287,7 @@
 //   const handleRange = (data: any) => {
 //     console.log("Selected Range:", data);
 //   };
- 
+
 //   // ✅ Filter vehicles by search text
 //   const filterVehicles = (list: typeof vehicles) =>
 //     list.filter(
@@ -295,11 +295,11 @@
 //         v.name.toLowerCase().includes(searchText.toLowerCase()) ||
 //         v.location?.toLowerCase().includes(searchText.toLowerCase())
 //     );
- 
+
 //   const cars = filterVehicles(vehicles.filter((v) => v.type === "Car"));
 //   // const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
 //   const bikes = filterVehicles(vehicles.filter((v) => v.type === "Bike"));
- 
+
 
 //   return (
 //     <div className="bg-gray-50 min-h-screen flex flex-col">
@@ -413,7 +413,7 @@
 //                   Within {appliedFilters.distance}km
 //                 </span>
 //               )}
-              
+
 //             </div>
 //           </div>
 //         </div>
@@ -442,7 +442,7 @@
 //             priceRange: appliedFilters.priceRange,
 //             fuelType: appliedFilters.fuelType,
 //             transmission: appliedFilters.transmission,
-           
+
 //             distance: appliedFilters.distance
 //           } : undefined}
 //         />
@@ -467,7 +467,7 @@
 //           limit={4} 
 //           filters={appliedFilters ? {
 //             priceRange: appliedFilters.priceRange,
-          
+
 //             distance: appliedFilters.distance
 //           } : undefined}
 //         />
@@ -492,7 +492,7 @@
 //           }}
 //           onClose={() => setIsFilterOpen(false)}
 //           initialFilters={{
-            
+
 //           }}
 //         />
 //       )}

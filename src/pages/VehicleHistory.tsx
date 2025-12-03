@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { MessageCircle, Phone } from "lucide-react";
+import { MessageCircle, Phone, Trash2 } from "lucide-react";
 import apiService, { SOCKET_URL } from "../services/api.service";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";
 import Petrol from "../assets/icons/Petrol.png";
@@ -9,6 +9,8 @@ import seats from "../assets/icons/seats.jpeg";
 import AClogo from "../assets/icons/ac.png";
 import BikeCC from "../assets/icons/BikeCC.png";
 import PopupChat from "../components/ui/PopupChat";
+import DeleteConfirmModal from "../components/ui/DeleteConfirmModal";
+import Toast from "../components/ui/Toast";
 
 type BookingStatus = "Completed" | "Pending" | "Cancelled" | "Confirmed" | "AutoCancelled";
 
@@ -85,6 +87,20 @@ const VehicleHistory: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingHistory | null>(null);
 
+  // Delete functionality states
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [bookingToDelete, setBookingToDelete] = useState<BookingHistory | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    show: false,
+    message: '',
+    type: 'success'
+  });
+
   const passedVehicleData = location.state?.vehicleData;
   const passedVehicleType = location.state?.vehicleType;
 
@@ -153,9 +169,6 @@ const VehicleHistory: React.FC = () => {
       return;
     }
 
-    // Replace the fetchBookingHistory function in VehicleHistory.tsx with this:
-    // Replace the fetchBookingHistory function in VehicleHistory.tsx with this:
-
     const fetchBookingHistory = async () => {
       try {
         hasFetchedBookings.current = true;
@@ -169,25 +182,21 @@ const VehicleHistory: React.FC = () => {
           return;
         }
 
-        // ✅ Capitalize vehicle type (API expects "Car" or "Bike")
         const vehicleTypeParam = vehicleType === "car" ? "Car" : "Bike";
         console.log("📞 Calling getMyVehicleBookings with:", { ownerId, vehicleTypeParam, finalVehicleId });
 
         const response = await apiService.chat.getMyVehicleBookings(ownerId, vehicleTypeParam, finalVehicleId);
         console.log("📦 Full API Response:", response);
 
-        // ✅ FIX: Extract bookings from the nested structure
         let bookingsArray: any[] = [];
 
         if (response && typeof response === 'object' && 'data' in response) {
-          // Response structure: { message, data: { bike: [...], car: [...] } }
           const vehicleTypeKey = vehicleTypeParam.toLowerCase() as 'bike' | 'car';
           const vehicles = response.data?.[vehicleTypeKey];
 
           console.log(`📦 Vehicles array for ${vehicleTypeKey}:`, vehicles);
 
           if (Array.isArray(vehicles) && vehicles.length > 0) {
-            // Find the specific vehicle by ID
             const vehicle = vehicles.find((v: any) => v._id === finalVehicleId);
 
             if (vehicle && Array.isArray(vehicle.bookings)) {
@@ -198,11 +207,9 @@ const VehicleHistory: React.FC = () => {
             }
           }
         } else if (Array.isArray(response)) {
-          // Fallback: if response is directly an array
           bookingsArray = response;
         }
 
-        // Transform bookings to display format
         const transformedBookings = bookingsArray.map((booking: any) => ({
           _id: booking._id,
           customerName: booking.contactName || "Unknown Customer",
@@ -263,6 +270,49 @@ const VehicleHistory: React.FC = () => {
     if (phoneNumber) {
       window.location.href = `tel:${phoneNumber}`;
     }
+  };
+
+  const handleDeleteClick = (booking: BookingHistory, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setBookingToDelete(booking);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!bookingToDelete?._id) return;
+
+    setIsDeleting(true);
+    try {
+      await apiService.booking.deleteBooking(bookingToDelete._id);
+
+      // Remove booking from UI
+      setBookingHistory(prev => prev.filter(b => b._id !== bookingToDelete._id));
+
+      // Show success toast
+      setToast({
+        show: true,
+        message: 'Booking deleted successfully',
+        type: 'success'
+      });
+
+      // Close modal
+      setDeleteModalOpen(false);
+      setBookingToDelete(null);
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to delete booking';
+      setToast({
+        show: true,
+        message: errorMessage,
+        type: 'error'
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setBookingToDelete(null);
   };
 
   const formatPhoneNumber = (phone: string | undefined): string => {
@@ -454,8 +504,16 @@ const VehicleHistory: React.FC = () => {
                   <div
                     key={booking._id}
                     onClick={() => handleBookingClick(booking)}
-                    className="border rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-all"
+                    className="border rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-all relative"
                   >
+                    <button
+                      onClick={(e) => handleDeleteClick(booking, e)}
+                      className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-600 transition-colors z-10"
+                      title="Delete booking"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -463,7 +521,7 @@ const VehicleHistory: React.FC = () => {
                           <path d="M8 9C5.33333 9 2 10.3333 2 13V14H14V13C14 10.3333 10.6667 9 8 9Z" fill="#666" />
                         </svg>
                       </div>
-                      <h3 className="font-semibold">{booking.customerName}</h3>
+                      <h3 className="font-semibold pr-8">{booking.customerName}</h3>
                     </div>
                     <div className="space-y-1 text-sm mb-2">
                       <div className="flex gap-2">
@@ -479,14 +537,17 @@ const VehicleHistory: React.FC = () => {
                         <span>{formatPhoneNumber(booking.mobile)}</span>
                       </div>
                     </div>
-                    <span className={`inline-block px-2.5 py-0.5 rounded text-xs font-medium ${booking.status === "Confirmed" ? "bg-blue-100 text-blue-700" :
-                      booking.status === "Completed" ? "bg-green-100 text-green-700" :
-                        booking.status === "Cancelled" ? "bg-red-100 text-red-700" :
-                          "bg-yellow-100 text-yellow-700"
-                      }`}>
-                      {booking.status}
-                    </span>
-                    {booking.status === "Confirmed" ? (
+                    <div className="flex items-center justify-between">
+                      <span className={`inline-block px-2.5 py-0.5 rounded text-xs font-medium ${booking.status === "Confirmed" ? "bg-blue-100 text-blue-700" :
+                        booking.status === "Completed" ? "bg-green-100 text-green-700" :
+                          booking.status === "Cancelled" ? "bg-red-100 text-red-700" :
+                            "bg-yellow-100 text-yellow-700"
+                        }`}>
+                        {booking.status}
+                      </span>
+                    </div>
+
+                    {booking.status === "Confirmed" && (
                       <div className="flex gap-2 mt-3">
                         <button
                           onClick={(e) => handleChatClick(booking, e)}
@@ -504,14 +565,15 @@ const VehicleHistory: React.FC = () => {
                           <span>Call</span>
                         </button>
                       </div>
-                    ) : booking.status === "Completed" ? (
+                    )}
+
+                    {booking.status === "Completed" && (
                       <div className="mt-3">
                         <div className="bg-green-500 text-white text-center py-2 rounded-full font-semibold shadow-md">
                           ✔ Ride Completed
                         </div>
                       </div>
-                    ) : null}
-
+                    )}
                   </div>
                 ))}
               </div>
@@ -520,7 +582,6 @@ const VehicleHistory: React.FC = () => {
         </aside>
       </div>
 
-
       {isChatOpen && selectedBooking && vehicleData && (
         <PopupChat
           isOpen={isChatOpen}
@@ -528,39 +589,37 @@ const VehicleHistory: React.FC = () => {
             setIsChatOpen(false);
             setSelectedBooking(null);
           }}
-
-          // ✅ Owner View
           pageRole="ownerView"
-
-          // ✅ Current user (owner)
           currentUserId={vehicleData.userId || currentUserId}
           currentUserName={vehicleData.contactName}
-
-          // ✅ Owner info (same as current user in this case)
           ownerId={vehicleData.userId || currentUserId}
           ownerName={vehicleData.contactName || 'Owner'}
           ownerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${vehicleData.contactName || 'Owner'}`}
-
-          // ✅ Customer info (from booking)
           customerId={selectedBooking.userId || ''}
           customerName={selectedBooking.customerName || selectedBooking.contactName || 'Customer'}
           customerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedBooking.customerName || 'Customer'}`}
-
-          // ✅ Booking ID
           bookingId={selectedBooking._id || ''}
-
-          // // ✅ Vehicle ID (optional)
-          // vehicleId={finalVehicleId}
           vehicleId={selectedBooking._id || ''}
-          // ✅ API URL
           apiUrl={apiService.chat.apiUrl}
           socketUrl={SOCKET_URL}
-
-          // ✅ Enable real-time chat
           useRealtime={true}
         />
       )}
 
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        bookingCustomerName={bookingToDelete?.customerName || 'this customer'}
+        isDeleting={isDeleting}
+      />
+
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.show}
+        onClose={() => setToast(prev => ({ ...prev, show: false }))}
+      />
     </div>
   );
 };
