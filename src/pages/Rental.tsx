@@ -119,25 +119,6 @@ const Rental: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Search Text Display */}
-      {/* {searchText && (
-        <div className="px-6 py-2">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-            <p className="text-sm text-green-800">
-              Searching for: <span className="font-semibold">"{searchText}"</span>
-              <button
-                onClick={() => setSearchText("")}
-                className="ml-4 text-green-600 hover:text-green-800 text-sm font-medium"
-              >
-                Clear Search
-              </button>
-            </p>
-          </div>
-        </div>
-      )} */}
-
-      {/* 🚗 Cars Section */}
       {/* 🚗 Cars Section */}
       {(!appliedFilters || appliedFilters.vehicleType === "cars") && (
         <div className="px-4 sm:px-6">
