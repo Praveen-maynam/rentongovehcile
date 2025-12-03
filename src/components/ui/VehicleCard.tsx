@@ -6,29 +6,29 @@ import { useReviewStore } from "../../store/review.store";
 import AutomaticLogo from "../../assets/icons/automatic.jpeg";
 import DriverLogo from "../../assets/icons/seats.jpeg";
 import Petrol from "../../assets/icons/fuel.jpeg";
- 
+
 interface VehicleCardProps {
   vehicle: Vehicle;
   onBook?: (vehicle: Vehicle) => void;
 }
- 
+
 const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
   const navigate = useNavigate();
   const { getAverageRating } = useReviewStore();
   const rating = getAverageRating(vehicle.id);
- 
- const handleCardClick = () => {
-  if (onBook) {
-    onBook(vehicle);
-  } else {
-    navigate(`/book-now/${vehicle.id}`, {
-      state: { vehicleType: vehicle.type || 'car' }
-    });
-  }
-};
- 
+
+  const handleCardClick = () => {
+    if (onBook) {
+      onBook(vehicle);
+    } else {
+      navigate(`/book-now/${vehicle.id}`, {
+        state: { vehicleType: vehicle.type || 'car' }
+      });
+    }
+  };
+
   return (
-     <div
+    <div
       onClick={handleCardClick}
       className="w-full border-b pb-5 cursor-pointer p-2 hover:bg-gray-50 transition"
     >
@@ -36,14 +36,14 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
       <img
         src={vehicle.image}
         alt={vehicle.name}
-        className="w-full h-48 object-cover rounded-xl"
+        className="w-full h-40 sm:h-48 object-cover rounded-xl"
       />
 
       {/* Details Below */}
       <div className="mt-3">
         {/* Name + Rating */}
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">{vehicle.name}</h2>
+          <h2 className="text-lg sm:text-xl font-semibold truncate">{vehicle.name}</h2>
 
           <div className="flex items-center gap-1 border border-yellow-400 px-2 py-1 rounded-lg text-yellow-500 text-sm">
             ⭐ {vehicle.rating}
@@ -51,7 +51,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
         </div>
 
         {/* Price */}
-        <p className="text-2xl font-bold mt-1">
+        <p className="text-xl sm:text-2xl font-bold mt-1">
           ₹{vehicle.price}
           <span className="text-gray-500 text-base font-normal">/hr</span>
         </p>
@@ -74,19 +74,5 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onBook }) => {
 
   );
 };
- 
+
 export default VehicleCard;
- 
- 
- 
-
-
-
-
-
-
-
-
-
-
-

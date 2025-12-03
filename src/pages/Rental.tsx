@@ -1,4 +1,4 @@
- 
+
 // import React, { useState } from "react";
 // import { Search } from "lucide-react";
 // import VehicleSection from "../components/VehicleSection";
@@ -10,7 +10,7 @@
 // import NearbyCars from "./NearByCars";
 // import NearbyBikes from "./NearByBikes";
 //  import { useNavigate } from "react-router-dom";
- 
+
 // const Rental: React.FC = (FeedbackModal) => {
 //   const [isFilterOpen, setIsFilterOpen] = useState(false);
 //   const navigate = useNavigate();
@@ -21,7 +21,7 @@
 //   const [endDate, setEndDate] = useState<string>(
 //     new Date().toISOString().split("T")[0]
 //   );
- 
+
 //   // ✅ Filter vehicles by search text
 //   const filterVehicles = (list: typeof vehicles) =>
 //     list.filter(
@@ -29,11 +29,11 @@
 //         v.name.toLowerCase().includes(searchText.toLowerCase()) ||
 //         v.location?.toLowerCase().includes(searchText.toLowerCase())
 //     );
- 
+
 //   const cars = filterVehicles(vehicles.filter((v) => v.type === "Car"));
 //   // const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
 //   const bikes = filterVehicles(vehicles.filter((v) => v.type === "Bike"));
- 
+
 
 //   return (
 //     <div className="bg-gray-50 min-h-screen flex flex-col">
@@ -89,7 +89,7 @@
 
 //       {/* 🚗 Cars Section */}
 //       <div className="px-6">
-    
+
 //         <div className="flex justify-end mt-[-10px] mb-6">
 //           <button
 //             onClick={() => navigate("/nearby-cars")}
@@ -103,7 +103,7 @@
 
 //       {/* 🏍 Bikes Section */}
 //       <div className="px-6">
-       
+
 //         <div className="flex justify-end mt-[-10px] mb-6">
 //           <button
 //             onClick={() => navigate("/nearby-bikes")}
@@ -135,7 +135,7 @@
 // import NearbyCars from "./NearByCars";
 // import NearbyBikes from "./NearByBikes";
 //  import { useNavigate } from "react-router-dom";
- 
+
 // const Rental: React.FC = (FeedbackModal) => {
 //   const [isFilterOpen, setIsFilterOpen] = useState(false);
 //   const navigate = useNavigate();
@@ -146,7 +146,7 @@
 //   const [endDate, setEndDate] = useState<string>(
 //     new Date().toISOString().split("T")[0]
 //   );
- 
+
 //   // ✅ Filter vehicles by search text
 //   const filterVehicles = (list: typeof vehicles) =>
 //     list.filter(
@@ -154,11 +154,11 @@
 //         v.name.toLowerCase().includes(searchText.toLowerCase()) ||
 //         v.location?.toLowerCase().includes(searchText.toLowerCase())
 //     );
- 
+
 //   const cars = filterVehicles(vehicles.filter((v) => v.type === "Car"));
 //   // const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
 //   const bikes = filterVehicles(vehicles.filter((v) => v.type === "Bike"));
- 
+
 
 //   return (
 //     <div className="bg-gray-50 min-h-screen flex flex-col">
@@ -215,7 +215,7 @@
 
 //       {/* 🚗 Cars Section */}
 //       <div className="px-6">
-    
+
 //         <div className="flex justify-end mt-[-10px] mb-6">
 //           <button
 //             onClick={() => navigate("/nearby-cars")}
@@ -229,7 +229,7 @@
 
 //       {/* 🏍 Bikes Section */}
 //       <div className="px-6">
-       
+
 //         <div className="flex justify-end mt-[-10px] mb-6">
 //           <button
 //             onClick={() => navigate("/nearby-bikes")}
@@ -252,7 +252,7 @@
 
 
 
- 
+
 // import React, { useState } from "react";
 // import { Search } from "lucide-react";
 // import VehicleSection from "../components/VehicleSection";
@@ -287,7 +287,7 @@
 //   const handleRange = (data: any) => {
 //     console.log("Selected Range:", data);
 //   };
- 
+
 //   // ✅ Filter vehicles by search text
 //   const filterVehicles = (list: typeof vehicles) =>
 //     list.filter(
@@ -295,11 +295,11 @@
 //         v.name.toLowerCase().includes(searchText.toLowerCase()) ||
 //         v.location?.toLowerCase().includes(searchText.toLowerCase())
 //     );
- 
+
 //   const cars = filterVehicles(vehicles.filter((v) => v.type === "Car"));
 //   // const autos = filterVehicles(vehicles.filter((v) => v.type === "auto"));
 //   const bikes = filterVehicles(vehicles.filter((v) => v.type === "Bike"));
- 
+
 
 //   return (
 //     <div className="bg-gray-50 min-h-screen flex flex-col">
@@ -413,7 +413,7 @@
 //                   Within {appliedFilters.distance}km
 //                 </span>
 //               )}
-              
+
 //             </div>
 //           </div>
 //         </div>
@@ -442,7 +442,7 @@
 //             priceRange: appliedFilters.priceRange,
 //             fuelType: appliedFilters.fuelType,
 //             transmission: appliedFilters.transmission,
-           
+
 //             distance: appliedFilters.distance
 //           } : undefined}
 //         />
@@ -467,7 +467,7 @@
 //           limit={4} 
 //           filters={appliedFilters ? {
 //             priceRange: appliedFilters.priceRange,
-          
+
 //             distance: appliedFilters.distance
 //           } : undefined}
 //         />
@@ -492,7 +492,7 @@
 //           }}
 //           onClose={() => setIsFilterOpen(false)}
 //           initialFilters={{
-            
+
 //           }}
 //         />
 //       )}
@@ -773,14 +773,14 @@ const Rental: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
       {/* 🔹 Promo Slides */}
-      <div className="px-6 py-4">
+      <div className="px-4 sm:px-6 py-4">
         <PromoSlides />
       </div>
 
       {/* 🔹 Search & Date Pickers */}
-      <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="px-4 sm:px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">
+          <h3 className="text-base sm:text-lg font-semibold mb-2 text-gray-800">
             Select Date & Time
           </h3>
           {/* ✅ Horizontal Calendars */}
@@ -816,16 +816,16 @@ const Rental: React.FC = () => {
             onClick={() => setIsFilterOpen(true)}
             className="flex items-center gap-2 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
           >
-            <img src={Filter} alt="Filter" className="w-6 h-6" />
-            Filter
+            <img src={Filter} alt="Filter" className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="hidden sm:inline">Filter</span>
           </button>
         </div>
       </div>
 
       {/* Filter Summary */}
       {appliedFilters && (
-        <div className="px-6 py-2">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="px-4 sm:px-6 py-2">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-sm font-semibold text-blue-800">Active Filters:</h4>
               <button
@@ -881,9 +881,9 @@ const Rental: React.FC = () => {
       {/* 🚗 Cars Section */}
       {/* 🚗 Cars Section */}
       {(!appliedFilters || appliedFilters.vehicleType === "cars") && (
-        <div className="px-6">
-          <div className="flex w-full items-center justify-between mb-6 mt-2">
-            <h2 className="text-2xl font-semibold text-gray-800">
+        <div className="px-4 sm:px-6">
+          <div className="flex w-full items-center justify-between mb-4 sm:mb-6 mt-2">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
               Nearby Cars
             </h2>
             <button
@@ -909,9 +909,9 @@ const Rental: React.FC = () => {
 
       {/* 🏍 Bikes Section */}
       {(!appliedFilters || appliedFilters.vehicleType === "bikes") && (
-        <div className="px-6 mt-2">
-          <div className="flex w-full items-center justify-between mb-6 mt-2">
-            <h2 className="text-2xl font-semibold text-gray-800">
+        <div className="px-4 sm:px-6 mt-2">
+          <div className="flex w-full items-center justify-between mb-4 sm:mb-6 mt-2">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
               Nearby Bikes
             </h2>
             <button
