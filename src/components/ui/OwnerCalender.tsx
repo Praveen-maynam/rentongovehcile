@@ -38,6 +38,8 @@ export default function OwnerCalendar({
   const [message, setMessage] = useState({ type: "", text: "" });
   const [showBlockedDates, setShowBlockedDates] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [startTime, setStartTime] = useState("00:00");
+  const [endTime, setEndTime] = useState("23:59");
 
   // Data from API
   const [ownerBlockedDates, setOwnerBlockedDates] = useState<string[]>([]);
@@ -205,20 +207,25 @@ export default function OwnerCalendar({
 
     try {
       setLoading(true);
+
+      const body = new URLSearchParams();
+      body.append("userId", userId);
+      body.append("fromDate", formatDate(selectedStart) + "T00:00:00.000Z");
+      body.append("toDate", formatDate(selectedEnd) + "T23:59:59.000Z");
+      body.append("fromTime", startTime);
+      body.append("toTime", endTime);
+      body.append("vechileType", vechileType);
+      body.append("VechileId", VechileId);
+      body.append("isNotAvailable", "true");
+      body.append("bikeImages", "");
+      body.append("isCustomerBooking", "false");
+
       const response = await fetch(`${API_BASE}/createNotAvailability`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-          userId: userId,
-          fromDate: formatDate(selectedStart) + "T00:00:00.000Z",
-          toDate: formatDate(selectedEnd) + "T23:59:59.000Z",
-          fromTime: "00:00",
-          toTime: "23:59",
-          vechileType: vechileType,
-          VechileId: VechileId
-        }),
+        body: body,
       });
 
       const result = await response.json();
@@ -247,24 +254,23 @@ export default function OwnerCalendar({
     try {
       setLoading(true);
 
-      const payload = {
-        fromDate: formatDate(selectedStart) + "T00:00:00.000Z",
-        toDate: formatDate(selectedEnd) + "T23:59:59.000Z",
-        fromTime: "00:00",
-        toTime: "23:59",
-        userId: userId,
-        vechileType: vechileType,
-        VechileId: VechileId
-      };
+      const body = new URLSearchParams();
+      body.append("fromDate", formatDate(selectedStart) + "T00:00:00.000Z");
+      body.append("toDate", formatDate(selectedEnd) + "T23:59:59.000Z");
+      body.append("fromTime", startTime);
+      body.append("toTime", endTime);
+      body.append("vechileType", vechileType);
+      body.append("VechileId", VechileId);
+      body.append("isNotAvailable", "true");
 
-      console.log("Update payload:", payload); // Debug log
+      console.log("Update body:", body.toString()); // Debug log
 
-      const response = await fetch(`${API_BASE}/updateNotAvailability/${selectedRecord.id}`, {
+      const response = await fetch(`${API_BASE}/updateNotAvailability/${localStorage.getItem("newBlockId")}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify(payload),
+        body: body,
       });
 
       console.log("Update response status:", response.status); // Debug log
@@ -303,11 +309,12 @@ export default function OwnerCalendar({
 
     try {
       setLoading(true);
+
+      const body = new URLSearchParams();
+
       const response = await fetch(`${API_BASE}/deleteNotAvailability/${recordId}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        body: body,
       });
 
       console.log("Delete response status:", response.status); // Debug log
@@ -342,6 +349,8 @@ export default function OwnerCalendar({
     setSelectedRecord(record);
     setSelectedStart(new Date(record.from));
     setSelectedEnd(new Date(record.to));
+    setStartTime(record.fromTime);
+    setEndTime(record.toTime);
     setShowBlockedDates(false);
   };
 
@@ -397,7 +406,7 @@ export default function OwnerCalendar({
           <X size={20} />
         </button>
 
-        <div className="bg-gradient-to-br from-slate-100 to-blue-100 p-4">
+        <div className="bg-gradient-to-br from-slate-100 to-blue-100 p-2 sm:p-4">
           {loading && (
             <div className="fixed top-4 right-4 bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 z-50">
               <Loader2 className="animate-spin" size={18} />
@@ -406,18 +415,18 @@ export default function OwnerCalendar({
           )}
 
           <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="p-4 border-b flex justify-between items-center">
+            <div className="p-3 sm:p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
               <div className="flex items-center gap-3">
                 <Calendar className="text-blue-600" size={24} />
                 <div>
-                  <h2 className="font-bold text-lg">Manage Availability</h2>
+                  <h2 className="font-bold text-base sm:text-lg">Manage Availability</h2>
                   <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-700">
                     Owner
                   </span>
                 </div>
               </div>
               {blockedRecords.length > 0 && (
-                <button onClick={() => setShowBlockedDates(true)} className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm font-medium">
+                <button onClick={() => setShowBlockedDates(true)} className="w-full sm:w-auto px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs sm:text-sm font-medium">
                   Blocked Dates ({blockedRecords.length})
                 </button>
               )}
@@ -429,12 +438,12 @@ export default function OwnerCalendar({
               </div>
             )}
 
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <div className="flex justify-between items-center mb-4">
                 <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-2 hover:bg-gray-100 rounded-lg">
                   <ChevronLeft size={20} />
                 </button>
-                <h3 className="font-semibold">
+                <h3 className="font-semibold text-sm sm:text-base">
                   {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
                 </h3>
                 <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="p-2 hover:bg-gray-100 rounded-lg">
@@ -442,15 +451,15 @@ export default function OwnerCalendar({
                 </button>
               </div>
 
-              <div className="grid grid-cols-7 gap-1 mb-2">
+              <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
                 {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => (
                   <div key={d} className="text-center font-medium text-gray-500 text-xs py-1">{d}</div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 gap-1 mb-4">{renderCalendar()}</div>
+              <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-4">{renderCalendar()}</div>
 
-              <div className="flex flex-wrap gap-3 text-xs mb-4 p-3 bg-gray-50 rounded-lg">
+              <div className="flex flex-wrap gap-2 sm:gap-3 text-xs mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-1">
                   <div className="w-4 h-4 bg-gradient-to-br from-blue-500 to-indigo-500 rounded" />
                   <span>Available</span>
@@ -469,23 +478,45 @@ export default function OwnerCalendar({
                 <div className="mb-3">
                   <p className="text-sm text-gray-500">Selected Range:</p>
                   <p className="font-semibold">{formatDisplay(selectedStart)} → {formatDisplay(selectedEnd)}</p>
+
+                  <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                    <div className="flex-1">
+                      <label className="text-xs text-gray-500 block mb-1">Start Time</label>
+                      <input
+                        type="time"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                        className="w-full p-2 border rounded-lg text-sm"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-xs text-gray-500 block mb-1">End Time</label>
+                      <input
+                        type="time"
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                        className="w-full p-2 border rounded-lg text-sm"
+                      />
+                    </div>
+                  </div>
+
                   {selectedRecord && (
                     <p className="text-xs text-blue-600 mt-1">Editing existing block</p>
                   )}
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   {selectedRecord ? (
                     <>
-                      <button onClick={handleUpdateBlock} disabled={!selectedStart || !selectedEnd || loading} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition">
+                      <button onClick={handleUpdateBlock} disabled={!selectedStart || !selectedEnd || loading} className="w-full sm:flex-1 bg-blue-600 text-white py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition">
                         Update Block
                       </button>
-                      <button onClick={() => { setSelectedRecord(null); setSelectedStart(null); setSelectedEnd(null); }} className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-300">
+                      <button onClick={() => { setSelectedRecord(null); setSelectedStart(null); setSelectedEnd(null); }} className="w-full sm:w-auto px-4 py-2.5 sm:py-3 bg-gray-200 rounded-xl text-sm sm:text-base hover:bg-gray-300">
                         Cancel
                       </button>
                     </>
                   ) : (
-                    <button onClick={handleCreateBlock} disabled={!selectedStart || !selectedEnd || loading} className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700 transition">
+                    <button onClick={handleCreateBlock} disabled={!selectedStart || !selectedEnd || loading} className="w-full bg-red-600 text-white py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700 transition">
                       Block Selected Dates
                     </button>
                   )}
@@ -496,9 +527,9 @@ export default function OwnerCalendar({
 
           {showBlockedDates && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[70vh] overflow-y-auto">
+              <div className="bg-white rounded-xl p-4 sm:p-6 max-w-md w-full max-h-[70vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-bold text-lg">Blocked Dates</h3>
+                  <h3 className="font-bold text-base sm:text-lg">Blocked Dates</h3>
                   <button onClick={() => setShowBlockedDates(false)}><X size={20} /></button>
                 </div>
                 {blockedRecords.length === 0 ? (
@@ -513,7 +544,7 @@ export default function OwnerCalendar({
                             <p className="text-xs text-gray-500">{record.fromTime} - {record.toTime}</p>
                           </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <button onClick={() => handleEditBlock(record)} className="flex-1 px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium hover:bg-blue-200">
                             Edit
                           </button>
@@ -531,22 +562,22 @@ export default function OwnerCalendar({
 
           {clickedBlockRecord && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+              <div className="bg-white rounded-xl p-4 sm:p-6 max-w-sm w-full">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-bold text-lg">Manage Block</h3>
+                  <h3 className="font-bold text-base sm:text-lg">Manage Block</h3>
                   <button onClick={() => setClickedBlockRecord(null)}><X size={20} /></button>
                 </div>
                 <div className="mb-4">
                   <p className="text-sm text-gray-500">Selected Period:</p>
                   <p className="font-semibold">{clickedBlockRecord.from} → {clickedBlockRecord.to}</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
                     onClick={() => {
                       handleEditBlock(clickedBlockRecord);
                       setClickedBlockRecord(null);
                     }}
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700"
+                    className="w-full sm:flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700"
                   >
                     Edit Block
                   </button>
@@ -555,7 +586,7 @@ export default function OwnerCalendar({
                       handleDeleteBlock(clickedBlockRecord.id);
                       setClickedBlockRecord(null);
                     }}
-                    className="flex-1 bg-red-100 text-red-700 py-2 rounded-lg font-medium hover:bg-red-200"
+                    className="w-full sm:flex-1 bg-red-100 text-red-700 py-2.5 rounded-lg text-sm sm:text-base font-medium hover:bg-red-200"
                   >
                     Unblock
                   </button>
@@ -568,3 +599,8 @@ export default function OwnerCalendar({
     </div>
   );
 }
+
+
+
+
+

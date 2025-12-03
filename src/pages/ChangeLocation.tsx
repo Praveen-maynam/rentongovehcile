@@ -132,7 +132,7 @@ export default function SearchMapWithSave({
         const lon = pos.coords.longitude;
         setMarkerPos([lat, lon]);
         setMapCenter([lat, lon]);
-        
+
         // Reverse geocode to get address and update search bar
         try {
           const url = new URL("https://nominatim.openstreetmap.org/reverse");
@@ -145,7 +145,7 @@ export default function SearchMapWithSave({
           });
           const data = await res.json();
           const addr = data.display_name;
-          
+
           // Update all states including the search query
           setAddress(addr);
           setQuery(addr); // This will display the location in the search bar
@@ -203,7 +203,7 @@ export default function SearchMapWithSave({
 
 
 
-  
+
 
   return (
     <div className="flex flex-col md:flex-row items-start gap-10 p-4 ml-10">
@@ -216,7 +216,7 @@ export default function SearchMapWithSave({
           center={mapCenter}
           zoom={14}
           scrollWheelZoom
-          style={{ width: 50, height:50, minWidth: 700, minHeight: 500 }}
+          style={{ width: 50, height: 50, minWidth: 700, minHeight: 500 }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -262,18 +262,18 @@ export default function SearchMapWithSave({
                 </li>
               ))}
             </ul>
-            
+
           )}
 
-          
+
         </div>
 
         <button
           onClick={handleUseCurrent}
-         
+
         >
-         <img src={location} alt="Use Current Location" className="w-10 h-10" />
-        
+          <img src={location} alt="Use Current Location" className="w-10 h-10" />
+
         </button>
 
         {/* <div className="border p-3 rounded bg-gray-50 text-sm">
@@ -285,7 +285,7 @@ export default function SearchMapWithSave({
           onClick={handleSave}
           className="w-full bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white py-2 rounded hover:bg-blue-700 transition"
         >
-          Save 
+          Save
         </button>
       </div>
     </div>
