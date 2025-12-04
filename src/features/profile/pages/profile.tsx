@@ -42,6 +42,10 @@ const Profile: React.FC = () => {
     { code: "es" as Language, name: "Español" },
     { code: "fr" as Language, name: "Français" },
     { code: "de" as Language, name: "Deutsch" },
+    { code: "hi" as Language, name: "हिंदी" },
+    { code: "tel" as Language, name: "తెలుగు" },
+    { code: "tm" as Language, name: "தமிழ்" },
+    { code: "kn" as Language, name: "ಕನ್ನಡ" },
   ];
 
   // Close modals on ESC
@@ -231,11 +235,10 @@ const Profile: React.FC = () => {
                 <button
                   key={lang.code}
                   onClick={() => handleLanguageChange(lang.code)}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition ${
-                    currentLanguage === lang.code
-                      ? "bg-blue-50 border-2 border-blue-500 text-blue-700 font-semibold"
-                      : "bg-gray-50 border-2 border-transparent hover:bg-gray-100 text-gray-700"
-                  }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition ${currentLanguage === lang.code
+                    ? "bg-blue-50 border-2 border-blue-500 text-blue-700 font-semibold"
+                    : "bg-gray-50 border-2 border-transparent hover:bg-gray-100 text-gray-700"
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <span>{lang.name}</span>

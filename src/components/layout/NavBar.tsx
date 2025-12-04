@@ -18,7 +18,7 @@ const Navbar: React.FC = () => {
   const navItems = [
     { name: "Rental", path: "/rental" },
     { name: "Listed", path: "/listed" },
-     { name: "MyBookings", path: "/mybookings" },
+    { name: "MyBookings", path: "/mybookings" },
     { name: "Profile", path: "/profile" },
     { name: "Notifications", path: "/notifications" },
   ];
@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
   };
 
   // const handleVehicleSelect = (type: "car" | "auto" | "bike") => {
-    const handleVehicleSelect = (type: "car" |  "bike") => {
+  const handleVehicleSelect = (type: "car" | "bike") => {
     setIsModalOpen(false);
     if (type === "car") navigate("/list-car");
     // else if (type === "auto") navigate("/list-auto");
@@ -65,11 +65,10 @@ const Navbar: React.FC = () => {
             <button
               key={item.name}
               onClick={() => handleNavigate(item.path)}
-              className={`relative text-sm font-medium transition-all flex items-center gap-1 ${
-                routerLocation.pathname === item.path
+              className={`relative text-sm font-medium transition-all flex items-center gap-1 ${routerLocation.pathname === item.path
                   ? "text-blue-600"
                   : "text-gray-700 hover:text-blue-600"
-              }`}
+                }`}
             >
               {item.name}
               {item.name === "Notifications" && unreadCount > 0 && (
@@ -117,11 +116,10 @@ const Navbar: React.FC = () => {
               <button
                 key={item.name}
                 onClick={() => handleNavigate(item.path)}
-                className={`text-left text-sm font-medium flex items-center gap-2 ${
-                  routerLocation.pathname === item.path
+                className={`text-left text-sm font-medium flex items-center gap-2 ${routerLocation.pathname === item.path
                     ? "text-blue-600"
                     : "text-gray-700 hover:text-blue-600"
-                }`}
+                  }`}
               >
                 {item.name}
                 {item.name === "Notifications" && unreadCount > 0 && (

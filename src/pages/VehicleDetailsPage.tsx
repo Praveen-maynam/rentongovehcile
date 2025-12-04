@@ -55,7 +55,7 @@ const VehicleDetailsPage: React.FC = () => {
   const [vehicleType, setVehicleType] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
+
   // ✅ Dynamic Reviews State
   const [reviews, setReviews] = useState<Review[]>([]);
   const [ratingStats, setRatingStats] = useState<RatingStats>({
@@ -101,27 +101,27 @@ const VehicleDetailsPage: React.FC = () => {
   useEffect(() => {
     const fetchReviewsAndRating = async () => {
       if (!id || !vehicleType) return;
-      
+
       try {
         setReviewsLoading(true);
-        
+
         // Fetch reviews
         const reviewsResponse = await apiService.review.getReviewsByCarId(id);
         const reviewsData = apiService.utils.extractResponseData(reviewsResponse);
-        
+
         console.log("📊 Reviews fetched:", reviewsData);
-        
+
         // Transform reviews data
-        const transformedReviews: Review[] = Array.isArray(reviewsData) 
+        const transformedReviews: Review[] = Array.isArray(reviewsData)
           ? reviewsData.map((review: any) => ({
-              _id: review._id,
-              userId: review.userId,
-              userName: review.userName || "Anonymous",
-              rating: review.rating || 0,
-              comment: review.comment || "",
-              createdAt: review.createdAt || new Date().toISOString(),
-              location: review.location || "Unknown"
-            }))
+            _id: review._id,
+            userId: review.userId,
+            userName: review.userName || "Anonymous",
+            rating: review.rating || 0,
+            comment: review.comment || "",
+            createdAt: review.createdAt || new Date().toISOString(),
+            location: review.location || "Unknown"
+          }))
           : [];
 
         setReviews(transformedReviews);
@@ -129,13 +129,13 @@ const VehicleDetailsPage: React.FC = () => {
         // Fetch average rating
         try {
           const ratingResponse = await apiService.review.getAverageRating(
-            id, 
+            id,
             vehicleType as 'car' | 'bike'
           );
           const ratingData = apiService.utils.extractResponseData(ratingResponse);
-          
+
           console.log("⭐ Rating data:", ratingData);
-          
+
           // Calculate rating distribution
           const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
           transformedReviews.forEach(review => {
@@ -152,12 +152,12 @@ const VehicleDetailsPage: React.FC = () => {
           });
         } catch (ratingError) {
           console.warn("⚠️ Could not fetch average rating:", ratingError);
-          
+
           // Fallback: Calculate from reviews
           const avgRating = transformedReviews.length > 0
             ? transformedReviews.reduce((sum, r) => sum + r.rating, 0) / transformedReviews.length
             : 0;
-          
+
           const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
           transformedReviews.forEach(review => {
             const stars = Math.round(review.rating) as 1 | 2 | 3 | 4 | 5;
@@ -287,11 +287,10 @@ const VehicleDetailsPage: React.FC = () => {
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
-                        className={`w-2 h-2 rounded-full transition ${
-                          index === currentImageIndex
+                        className={`w-2 h-2 rounded-full transition ${index === currentImageIndex
                             ? "bg-white"
                             : "bg-white/50"
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>

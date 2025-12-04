@@ -3,8 +3,8 @@ import Carousel from "./ui/Carousel";
 import slideImage from "../assets/images/slides.png";
 import Car from "../assets/icons/Car.png"
 import Auto from "../assets/icons/Auto.png";
+import Bike from "../assets/icons/BikeLogo.png";
 
- 
 interface PromoSlide {
   id: string;
   title: string;
@@ -16,11 +16,11 @@ interface PromoSlide {
   textColor: string;
   onButtonClick: () => void;
 }
- 
+
 interface PromoSlidesProps {
   className?: string;
 }
- 
+
 const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
   const slides: PromoSlide[] = [
     {
@@ -68,7 +68,7 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
       onButtonClick: () => alert("Special offers coming soon!"),
     },
   ];
- 
+
   return (
     <div className={`w-full ${className}`}>
       <Carousel
@@ -82,7 +82,7 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
           <div
             key={slide.id}
             className="relative h-80 flex items-center justify-center overflow-hidden rounded-xl"
-            // style={{ background: slide.backgroundColor }}
+          // style={{ background: slide.backgroundColor }}
           >
             {slide.backgroundImage && (
               <div
@@ -94,7 +94,7 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
-           
+
             <div className="relative z-10 text-center px-8 max-w-2xl">
               <div>
                 <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${slide.textColor} tracking-wide`}>
@@ -104,13 +104,13 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
                   Car Rentals & Listings
                 </h2>
                 <h6 className={`text-sm  ${slide.textColor} tracking-wide`}>Rent or List Vehicles Effortlessly. Anywhere, Anytime.</h6>
-              <h6 className={`text-sm ${slide.textColor} tracking-wide flex items-center justify-center gap-2`}>
-  <img src={Car} alt="Car" className="w-6 h-6" />
-  Car’s Bookings & Listings
-  <span className="mx-1">|</span>
-  <img src={Auto} alt="Auto" className="w-6 h-6" />
-  Auto Bookings
-</h6>
+                <h6 className={`text-sm ${slide.textColor} tracking-wide flex items-center justify-center gap-2`}>
+                  <img src={Car} alt="Car" className="w-6 h-6" />
+                  Car’s Bookings & Listings
+                  <span className="mx-1">|</span>
+                  <img src={Bike} alt="Bike" className="w-6 h-6" />
+                  Bike Bookings
+                </h6>
 
               </div>
             </div>
@@ -120,6 +120,5 @@ const PromoSlides: React.FC<PromoSlidesProps> = ({ className = "" }) => {
     </div>
   );
 };
- 
+
 export default PromoSlides;
- 
