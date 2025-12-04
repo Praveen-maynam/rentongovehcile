@@ -1,52 +1,38 @@
 
-
-
-
-
-
 import React, { useEffect, useState, useRef } from "react";
 
 interface WaitingPopupProps {
-  /**
-   * Controls popup visibility.
-   */
+ 
   isOpen: boolean;
 
-  /** Booking ID for reference */
+
   bookingId?: string;
 
-  /** Current booking status message */
+
   bookingStatus?: string;
 
-  /** Preferred prop: total countdown duration in seconds */
   timerSeconds?: number;
 
-  /** Backward-compatible prop from older code: total countdown seconds */
+ 
   timer?: number;
 
-  /** Called when user manually closes the popup */
+
   onClose: () => void;
 
-  /** Called automatically when timer completes */
+
   onTimerComplete?: () => void;
 
-  /** Called when booking is accepted */
+
   onAccepted?: () => void;
 
-  /** Called when booking is rejected */
+  
   onRejected?: () => void;
 
-  /** Called when timer times out */
+
   onTimeout?: () => void;
 }
 
-/**
- * WaitingPopup - Fixed version that properly closes when timer ends
- *
- * - Shows circular progress + mini progress bars + remaining seconds.
- * - Automatically closes and calls onTimeout when countdown reaches 0.
- * - Default timer is 120 seconds
- */
+
 const WaitingPopup: React.FC<WaitingPopupProps> = ({
   isOpen,
   bookingId,

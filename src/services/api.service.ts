@@ -812,6 +812,36 @@ export const cancelBooking = async (bookingId: string) => {
 
 export const createTicket = ticketAPI.createTicket;
 
+
+
+
+
+
+
+
+
+// ---- GET OWNER PENDING BOOKINGS ----
+export const getOwnerPendingBookings = async (ownerId: string) => {
+  const res = await axios.get(`${API_BASE_URL}/getPendingBookingsOfOwner/${ownerId}`);
+  return res.data;
+};
+
+// ---- ACCEPT BOOKING ----
+export const acceptBooking = async (bookingId: string) => {
+  const res = await axios.put(`${API_BASE_URL}/updateBookingStatus/${bookingId}`, {
+    status: "Confirmed",
+  });
+  return res.data;
+};
+
+// ---- REJECT BOOKING ----
+export const rejectBooking = async (bookingId: string) => {
+  const res = await axios.put(`${API_BASE_URL}/updateBookingStatus/${bookingId}`, {
+    status: "Declined",
+  });
+  return res.data;
+};
+
 // ✅ FINAL DEFAULT EXPORT - All APIs defined above
 const apiService = {
   car: carAPI,

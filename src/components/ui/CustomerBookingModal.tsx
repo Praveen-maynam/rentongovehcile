@@ -5,7 +5,7 @@ import { useBookingModalStore } from '../../store/booking-modal.store';
 import { useNotificationStore } from '../../store/notification.store';
 import { SOCKET_URL } from '../../services/api.service';
 
-const SOUND_3_REJECTION = "/sounds/WhatsApp Audio 2025-11-26 at 12.30.04.mp3"; // Customer: Rejection
+const SOUND_2_REJECTION = "/sounds/WhatsApp Audio 2025-11-26 at 12.30.04.mp3"; // Customer: Rejection
 
 // Customer Booking Status Modal Component
 export default function CustomerBookingModal() {
@@ -26,7 +26,7 @@ export default function CustomerBookingModal() {
     const playRejectionSound = () => {
         try {
             if (!rejectionAudioRef.current) {
-                rejectionAudioRef.current = new Audio(SOUND_3_REJECTION);
+                rejectionAudioRef.current = new Audio(SOUND_2_REJECTION);
             }
             rejectionAudioRef.current.currentTime = 0;
             rejectionAudioRef.current.play().catch(err => console.log("Rejection audio play failed:", err));

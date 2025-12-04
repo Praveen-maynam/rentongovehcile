@@ -9,9 +9,75 @@ const EXPIRY_TIME = 2 * 60 * 1000; // 120 seconds
 const WARNING_TIME = 0 * 1000; // 0 seconds before expiry
 
 // Sound file paths
-const SOUND_1_NEW_BOOKING = "/sounds/WhatsApp Audio 2025-11-26 at 12.29.34.mp3"; // Owner: New booking
-const SOUND_2_WARNING = "/sounds/WhatsApp Audio 2025-11-26 at 12.29.55.mp3"; // Owner: 20 sec warning
-const SOUND_3_REJECTION = "/sounds/WhatsApp Audio 2025-11-26 at 12.30.04.mp3"; // Customer: Rejection
+const SOUND_1_WARNING = "/sounds/WhatsApp Audio 2025-11-26 at 12.29.55.mp3";
+const SOUND_2_REJECTION = "/sounds/WhatsApp Audio 2025-11-26 at 12.30.04.mp3";
+const SOUND_3_NEW_BOOKING = "/sounds/new-booking.mp3";
+
+// Browser Notification Helper Functions
+const requestNotificationPermission = async () => {
+  if (!("Notification" in window)) {
+    console.log("This browser does not support notifications");
+    return false;
+  }
+
+  if (Notification.permission === "granted") {
+    return true;
+  }
+
+  if (Notification.permission !== "denied") {
+    const permission = await Notification.requestPermission();
+    return permission === "granted";
+  }
+
+  return false;
+};
+
+// Enhanced notification with persistent sound
+const showBrowserNotification = (title: string, options: NotificationOptions, soundUrl?: string) => {
+  if (Notification.permission === "granted") {
+    const notification = new Notification(title, {
+      ...options,
+      requireInteraction: true, // Keep notification visible until user interacts
+      silent: false, // Allow sound
+    });
+
+    // Play sound with the notification - this works even when page is minimized
+    if (soundUrl) {
+      const audio = new Audio(soundUrl);
+      audio.loop = true; // Loop the sound until stopped
+      audio.play().catch(err => console.log("Audio play failed:", err));
+
+      // Store audio reference globally so it can be stopped later
+      (window as any).currentNotificationAudio = audio;
+    }
+
+    // Click handler to focus window and stop sound
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+      stopGlobalNotificationSound();
+    };
+
+    // Stop sound when notification is closed
+    notification.onclose = () => {
+      stopGlobalNotificationSound();
+    };
+
+    return notification;
+  }
+  return null;
+};
+
+// Global function to stop notification sound
+const stopGlobalNotificationSound = () => {
+  const audio = (window as any).currentNotificationAudio;
+  if (audio) {
+    audio.pause();
+    audio.currentTime = 0;
+    audio.loop = false;
+    (window as any).currentNotificationAudio = null;
+  }
+};
 
 // Owner Accept/Reject Modal Component
 function OwnerBookingModal() {
@@ -35,29 +101,82 @@ function OwnerBookingModal() {
   const warningAudioRef = useRef<HTMLAudioElement | null>(null);
   const [warningPlayed, setWarningPlayed] = useState<{ [key: string]: boolean }>({});
   const [socketConnected, setSocketConnected] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState(false);
   const ownerId = localStorage.getItem("userId") || "";
 
-  // Get notification store to add notifications and update status
   const { addNotification, updateNotificationStatus } = useNotificationStore();
 
-  // Play Sound 1: New booking notification for owner
+  // Request notification permission on mount
+  useEffect(() => {
+    requestNotificationPermission().then(granted => {
+      setNotificationPermission(granted);
+      if (!granted) {
+        console.log("⚠️ Notification permission denied. User won't receive browser notifications.");
+      } else {
+        console.log("✅ Notification permission granted!");
+      }
+    });
+  }, []);
+
+  // Play Sound: New booking notification for owner (LOOPING)
+  // Play Sound: New booking notification for owner (DOUBLE SOUND)
   const playNewBookingSound = () => {
     try {
+      // Stop any existing sound first
+      stopNewBookingSound();
+
       if (!audioRef.current) {
-        audioRef.current = new Audio(SOUND_1_NEW_BOOKING);
+        audioRef.current = new Audio(SOUND_3_NEW_BOOKING);
       }
+
+      let count = 0;
+      audioRef.current.loop = false;
       audioRef.current.currentTime = 0;
+
+      const playAgain = () => {
+        count++;
+        if (count < 2) {
+          audioRef.current!.currentTime = 0;
+          audioRef.current!.play().catch(err => console.log("Audio play failed:", err));
+        } else {
+          // Remove listener to avoid memory leaks or unexpected behavior if reused
+          audioRef.current?.removeEventListener('ended', playAgain);
+        }
+      };
+
+      // Remove any previous listeners just in case
+      audioRef.current.onended = null;
+      audioRef.current.addEventListener('ended', playAgain);
+
       audioRef.current.play().catch(err => console.log("Audio play failed:", err));
+
+      console.log("🔊 New booking sound started (double)");
     } catch (error) {
       console.log("Could not play new booking sound:", error);
     }
   };
 
-  // Play Sound 2: Warning sound at 10 seconds remaining for owner
+  // Stop new booking sound
+  const stopNewBookingSound = () => {
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.loop = false;
+      }
+      // Also stop global notification sound
+      stopGlobalNotificationSound();
+      console.log("🔇 New booking sound stopped");
+    } catch (error) {
+      console.log("Could not stop new booking sound:", error);
+    }
+  };
+
+  // Play Warning sound
   const playWarningSound = () => {
     try {
       if (!warningAudioRef.current) {
-        warningAudioRef.current = new Audio(SOUND_2_WARNING);
+        warningAudioRef.current = new Audio(SOUND_1_WARNING);
       }
       warningAudioRef.current.currentTime = 0;
       warningAudioRef.current.play().catch(err => console.log("Warning audio play failed:", err));
@@ -66,7 +185,29 @@ function OwnerBookingModal() {
     }
   };
 
-  // Check for 20-second warning and auto-expire
+  // Enhanced browser notification for new booking with persistent sound
+  const showNewBookingNotification = (booking: PendingBooking) => {
+    const vehicleName = booking.vehicleName || booking.VehicleName || 'your vehicle';
+    const customerName = booking.contactName || booking.customerName || 'A customer';
+
+    showBrowserNotification(
+      "🚗 New Vehicle Booking Received!",
+      {
+        body: `${customerName} wants to book ${vehicleName}. Open dashboard to respond within 2 minutes!`,
+        icon: '/logo.png',
+        badge: '/logo.png',
+        tag: `booking-${booking._id || booking.id}`,
+        requireInteraction: true,
+        data: {
+          bookingId: booking._id || booking.id,
+          vehicleName: vehicleName
+        }
+      },
+      SOUND_3_NEW_BOOKING // Pass sound URL to play with notification
+    );
+  };
+
+  // Check for warning and auto-expire
   useEffect(() => {
     if (!currentBooking) return;
 
@@ -75,14 +216,12 @@ function OwnerBookingModal() {
     const interval = setInterval(() => {
       const remaining = (currentBooking.expiresAt || 0) - Date.now();
 
-      // Play warning sound at 20 seconds remaining
       if (remaining <= WARNING_TIME && remaining > 0 && !warningPlayed[bookingId]) {
-        console.log('⚠️ 20 seconds warning for booking:', bookingId);
+        console.log('⚠️ Warning for booking:', bookingId);
         playWarningSound();
         setWarningPlayed(prev => ({ ...prev, [bookingId]: true }));
       }
 
-      // Auto-expire when time is up
       if (remaining <= 0) {
         clearInterval(interval);
         expireBooking(bookingId);
@@ -92,7 +231,7 @@ function OwnerBookingModal() {
     return () => clearInterval(interval);
   }, [currentBooking, warningPlayed]);
 
-
+  // Socket initialization
   useEffect(() => {
     if (!ownerId) {
       console.log('⚠️ No ownerId found, socket not initialized');
@@ -103,7 +242,7 @@ function OwnerBookingModal() {
 
     socketRef.current = io(SOCKET_URL, {
       query: { userId: ownerId },
-      transports: ['websocket', 'polling'], // Allow fallback to polling
+      transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,
@@ -113,8 +252,6 @@ function OwnerBookingModal() {
     socketRef.current.on('connect', () => {
       console.log('✅ Global Socket connected for owner:', ownerId);
       setSocketConnected(true);
-
-      // Re-fetch pending bookings on reconnect
       fetchPendingBookings();
     });
 
@@ -134,7 +271,6 @@ function OwnerBookingModal() {
       handleNewBooking(data);
     });
 
-    // Also listen for generic booking events
     socketRef.current.on('booking-created', (data: PendingBooking) => {
       console.log('🔔 Booking created event received:', data);
       handleNewBooking(data);
@@ -145,24 +281,22 @@ function OwnerBookingModal() {
       if (socketRef.current) socketRef.current.disconnect();
       Object.values(timersRef.current).forEach(clearTimeout);
       Object.values(warningTimersRef.current).forEach(clearTimeout);
+      stopNewBookingSound();
     };
   }, [ownerId]);
 
-  // Fetch initial pending bookings and set up polling as backup
+  // Fetch initial pending bookings
   useEffect(() => {
     if (ownerId) {
       fetchPendingBookings();
-
-      // Poll every 10 seconds as a backup in case socket events are missed
       const pollInterval = setInterval(() => {
         fetchPendingBookings();
-      }, 10000);
-
+      }, 3000);
       return () => clearInterval(pollInterval);
     }
   }, [ownerId]);
 
-  // Auto-show modal when there's no current booking but queue has items
+  // Auto-show modal when queue has items
   useEffect(() => {
     if (!currentBooking && bookingQueue.length > 0) {
       showNextBooking();
@@ -172,15 +306,11 @@ function OwnerBookingModal() {
   const fetchPendingBookings = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/getPendingBookingsOfOwner/${ownerId}`);
-      if (!res.ok) {
-        throw new Error('Failed to fetch bookings');
-      }
+      if (!res.ok) throw new Error('Failed to fetch bookings');
 
       const data = await res.json();
-      console.log('📋 Raw API response:', data);
-
-      // Handle various response formats
       let bookings: PendingBooking[] = [];
+
       if (Array.isArray(data)) {
         bookings = data;
       } else if (data.data && Array.isArray(data.data)) {
@@ -189,19 +319,11 @@ function OwnerBookingModal() {
         bookings = data.bookings;
       }
 
-      console.log('📋 Parsed bookings:', bookings.length, bookings);
-
-      // Filter for pending bookings - be more permissive with owner check since API already filters by owner
       const pending = bookings.filter((b) => {
         const statusLower = (b.status || '').toLowerCase();
-        const isPending = statusLower === 'pending' || statusLower === '';
-        console.log('📋 Booking:', b._id, 'status:', b.status, 'isPending:', isPending);
-        return isPending;
+        return statusLower === 'pending' || statusLower === '';
       });
 
-      console.log('📋 Pending bookings:', pending.length);
-
-      // Get current queue to compare
       const currentQueue = useBookingModalStore.getState().bookingQueue;
       const currentIds = new Set(currentQueue.map(b => b._id || b.id));
 
@@ -211,25 +333,22 @@ function OwnerBookingModal() {
         expiresAt: new Date(booking.createdAt || booking.CreatedAt || Date.now()).getTime() + EXPIRY_TIME
       }));
 
-      // Check for NEW bookings that weren't in the queue before
       const newBookings = bookingsWithTime.filter(b => !currentIds.has(b._id || b.id));
 
       if (newBookings.length > 0) {
         console.log('🆕 Found', newBookings.length, 'new pending booking(s) via polling');
-
-        // Play sound for new bookings found via polling
         playNewBookingSound();
+        newBookings.forEach(booking => {
+          showNewBookingNotification(booking);
+        });
       }
 
       setBookingQueue(bookingsWithTime);
-
       bookingsWithTime.forEach((booking) => {
         startExpiryTimer(booking);
       });
 
-      // Auto-show modal if we have bookings and no current booking is displayed
       const hasCurrentBooking = useBookingModalStore.getState().currentBooking;
-
       if (bookingsWithTime.length > 0 && !hasCurrentBooking) {
         const nextBooking = bookingsWithTime[0];
         setCurrentBooking(nextBooking);
@@ -248,7 +367,6 @@ function OwnerBookingModal() {
       return;
     }
 
-    // Check if this booking is already in the queue
     const existingBooking = bookingQueue.find(b =>
       (b._id || b.id) === (booking._id || booking.id)
     );
@@ -260,8 +378,11 @@ function OwnerBookingModal() {
 
     console.log('🆕 New booking received for owner - showing modal immediately');
 
-    // Play Sound 1: Buzzer for owner when new booking arrives
+    // Play looping sound
     playNewBookingSound();
+
+    // Show browser notification with sound
+    showNewBookingNotification(booking);
 
     const bookingWithTime: PendingBooking = {
       ...booking,
@@ -269,10 +390,10 @@ function OwnerBookingModal() {
       expiresAt: Date.now() + EXPIRY_TIME
     };
 
-    // Add notification for owner about new booking with full details
     const vehicleName = booking.vehicleName || booking.VehicleName || 'your vehicle';
     const customerName = booking.contactName || booking.customerName || 'A customer';
     const bookingId = booking._id || booking.id;
+
     addNotification({
       type: 'new_booking',
       title: 'Your car has been booked?',
@@ -281,7 +402,6 @@ function OwnerBookingModal() {
       vehicleId: booking.VechileId || booking.vehicleId,
       bookingId: bookingId,
       userId: ownerId,
-      // Include booking details for owner notification
       bookingStatus: 'Pending',
       customerName: customerName,
       fromDate: booking.FromDate || booking.fromDate,
@@ -292,11 +412,9 @@ function OwnerBookingModal() {
     addBookingToQueue(bookingWithTime);
     startExpiryTimer(bookingWithTime);
 
-    // If no current booking is showing, immediately show this one
     if (!currentBooking) {
       setCurrentBooking(bookingWithTime);
       setShowOwnerModal(true);
-      console.log('📢 Immediately showing modal for new booking:', bookingWithTime._id || bookingWithTime.id);
     }
   };
 
@@ -324,10 +442,8 @@ function OwnerBookingModal() {
         headers: { 'Content-Type': 'application/json' }
       });
 
-      // Update notification status to Expired
       updateNotificationStatus(bookingId, 'Expired');
 
-      // Notify customer about timeout
       if (socketRef.current?.connected && customerId) {
         socketRef.current.emit('booking-status-update', {
           bookingId,
@@ -341,11 +457,11 @@ function OwnerBookingModal() {
       removeBookingFromQueue(bookingId);
 
       if (currentBooking && (currentBooking._id || currentBooking.id) === bookingId) {
+        stopNewBookingSound(); // Stop sound on expiry
         setCurrentBooking(null);
         setShowOwnerModal(false);
       }
 
-      // Clean up timers
       if (timersRef.current[bookingId]) {
         clearTimeout(timersRef.current[bookingId]);
         delete timersRef.current[bookingId];
@@ -355,7 +471,6 @@ function OwnerBookingModal() {
         delete warningTimersRef.current[bookingId];
       }
 
-      // Clean up warning played state
       setWarningPlayed(prev => {
         const newState = { ...prev };
         delete newState[bookingId];
@@ -369,7 +484,6 @@ function OwnerBookingModal() {
 
   const showNextBooking = () => {
     if (bookingQueue.length === 0) return;
-
     const nextBooking = bookingQueue[0];
     setCurrentBooking(nextBooking);
     setShowOwnerModal(true);
@@ -382,6 +496,9 @@ function OwnerBookingModal() {
     const customerId = currentBooking.userId || currentBooking.customerId;
     const vehicleName = currentBooking.vehicleName || currentBooking.VehicleName;
 
+    // STOP SOUND ON ACCEPT
+    stopNewBookingSound();
+
     setActionLoading(true);
 
     try {
@@ -393,8 +510,6 @@ function OwnerBookingModal() {
       if (!res.ok) throw new Error('Failed to confirm booking');
 
       console.log('✅ Booking confirmed:', bookingId);
-
-      // Update notification status to Confirmed
       updateNotificationStatus(bookingId, 'Confirmed');
 
       if (socketRef.current?.connected && customerId) {
@@ -407,7 +522,6 @@ function OwnerBookingModal() {
         });
       }
 
-      // Clean up timers
       if (timersRef.current[bookingId]) {
         clearTimeout(timersRef.current[bookingId]);
         delete timersRef.current[bookingId];
@@ -417,7 +531,6 @@ function OwnerBookingModal() {
         delete warningTimersRef.current[bookingId];
       }
 
-      // Clean up warning played state
       setWarningPlayed(prev => {
         const newState = { ...prev };
         delete newState[bookingId];
@@ -443,6 +556,9 @@ function OwnerBookingModal() {
     const customerId = currentBooking.userId || currentBooking.customerId;
     const vehicleName = currentBooking.vehicleName || currentBooking.VehicleName;
 
+    // STOP SOUND ON REJECT
+    stopNewBookingSound();
+
     setActionLoading(true);
 
     try {
@@ -454,8 +570,6 @@ function OwnerBookingModal() {
       if (!res.ok) throw new Error('Failed to reject booking');
 
       console.log('❌ Booking rejected:', bookingId);
-
-      // Update notification status to Rejected
       updateNotificationStatus(bookingId, 'Rejected');
 
       if (socketRef.current?.connected && customerId) {
@@ -468,7 +582,6 @@ function OwnerBookingModal() {
         });
       }
 
-      // Clean up timers
       if (timersRef.current[bookingId]) {
         clearTimeout(timersRef.current[bookingId]);
         delete timersRef.current[bookingId];
@@ -478,7 +591,6 @@ function OwnerBookingModal() {
         delete warningTimersRef.current[bookingId];
       }
 
-      // Clean up warning played state
       setWarningPlayed(prev => {
         const newState = { ...prev };
         delete newState[bookingId];
@@ -500,12 +612,9 @@ function OwnerBookingModal() {
   const getRemainingTime = (booking: PendingBooking) => {
     const now = Date.now();
     const remaining = (booking.expiresAt || 0) - now;
-
     if (remaining <= 0) return '00:00';
-
     const minutes = Math.floor(remaining / 60000);
     const seconds = Math.floor((remaining % 60000) / 1000);
-
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
@@ -516,7 +625,6 @@ function OwnerBookingModal() {
       const interval = setInterval(() => {
         setTime(getRemainingTime(booking));
       }, 1000);
-
       return () => clearInterval(interval);
     }, [booking]);
 
@@ -541,6 +649,7 @@ function OwnerBookingModal() {
       <div className={`bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative animate-fadeIn ${isCritical ? 'ring-4 ring-red-500 ring-opacity-50' : ''}`}>
         <button
           onClick={() => {
+            stopNewBookingSound();
             setShowOwnerModal(false);
             setCurrentBooking(null);
           }}
@@ -559,7 +668,6 @@ function OwnerBookingModal() {
             You've got a new booking!
           </h2>
 
-          {/* Timer */}
           <div className={`flex items-center justify-center gap-2 mb-6 p-3 rounded-xl ${isCritical ? 'bg-red-50' : 'bg-gray-50'}`}>
             <Clock size={24} className={isCritical ? 'text-red-600' : 'text-orange-600'} />
             <TimeDisplay booking={currentBooking} />
@@ -573,7 +681,6 @@ function OwnerBookingModal() {
             </div>
           )}
 
-          {/* Booking Details */}
           <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
             <p className="font-bold text-lg text-gray-800 mb-2">
               {currentBooking.vehicleName || currentBooking.VehicleName || 'Vehicle'}
@@ -588,7 +695,6 @@ function OwnerBookingModal() {
             )}
           </div>
 
-          {/* Accept Button */}
           <button
             onClick={handleConfirm}
             disabled={actionLoading}
@@ -606,7 +712,6 @@ function OwnerBookingModal() {
             )}
           </button>
 
-          {/* Reject Button */}
           <button
             onClick={handleReject}
             disabled={actionLoading}
@@ -629,7 +734,7 @@ function OwnerBookingModal() {
   );
 }
 
-// Customer Waiting Popup Component (120 second countdown) - Original UI Style
+// Customer Components remain the same...
 function CustomerWaitingPopup() {
   const {
     showWaitingPopup,
@@ -640,28 +745,21 @@ function CustomerWaitingPopup() {
 
   const [remainingTime, setRemainingTime] = useState(120);
 
-  // Reset timer when popup opens with new booking
   useEffect(() => {
     if (showWaitingPopup && waitingBookingInfo) {
-      console.log('🕐 Waiting popup opened for booking:', waitingBookingInfo.bookingId);
-      console.log('🕐 Expires at:', new Date(waitingBookingInfo.expiresAt).toLocaleTimeString());
       const remaining = Math.max(0, Math.floor((waitingBookingInfo.expiresAt - Date.now()) / 1000));
       setRemainingTime(remaining > 0 ? remaining : 120);
     }
   }, [showWaitingPopup, waitingBookingInfo?.bookingId]);
 
-  // Countdown timer
   useEffect(() => {
     if (!showWaitingPopup || !waitingBookingInfo) return;
-
-    console.log('🕐 Starting countdown timer, remaining:', remainingTime);
 
     const interval = setInterval(() => {
       const remaining = Math.max(0, Math.floor((waitingBookingInfo.expiresAt - Date.now()) / 1000));
       setRemainingTime(remaining);
 
       if (remaining <= 0) {
-        console.log('🕐 Timer expired - showing timeout modal');
         clearInterval(interval);
         const vehicleName = waitingBookingInfo.vehicleName;
         showCustomerTimeoutModal(vehicleName);
@@ -673,7 +771,6 @@ function CustomerWaitingPopup() {
 
   if (!showWaitingPopup || !waitingBookingInfo) return null;
 
-  // Circular progress variables
   const radius = 45;
   const strokeWidth = 10;
   const circumference = 2 * Math.PI * radius;
@@ -694,6 +791,10 @@ function CustomerWaitingPopup() {
         className="relative w-full bg-white rounded-t-3xl shadow-2xl pb-8 pt-6 px-6 animate-slideUp"
         style={{ maxWidth: "600px" }}
       >
+        {/* Title */}
+        <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">
+          Waiting for response!
+        </h2>
         {/* Title */}
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">
           Waiting for response!
@@ -823,7 +924,7 @@ function CustomerBookingModal() {
   const playRejectionSound = () => {
     try {
       if (!rejectionAudioRef.current) {
-        rejectionAudioRef.current = new Audio(SOUND_3_REJECTION);
+        rejectionAudioRef.current = new Audio(SOUND_2_REJECTION);
       }
       rejectionAudioRef.current.currentTime = 0;
       rejectionAudioRef.current.play().catch(err => console.log("Rejection audio play failed:", err));

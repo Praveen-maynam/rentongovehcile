@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { X, Calendar, ChevronLeft, ChevronRight, Clock, AlertCircle, CheckCircle } from "lucide-react";
 
-// ==========================================
-// API INTEGRATION
-// ==========================================
+
 
 const bookingAPI = {
-  /**
-   * Fetch vehicle availability (includes Owner blocked + Customer booked dates)
-   * Returns all unavailable dates from the backend
-   */
+
   getVehicleAvailability: async (vehicleId, vehicleType) => {
     try {
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");

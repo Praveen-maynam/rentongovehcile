@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useBookingModalStore } from '../../store/booking-modal.store';
+import { API_BASE_URL } from '../../services/api.service';
+import { useNotificationStore } from '../../store/notification.store';
 
 // Customer Waiting Popup Component (120 second countdown) - Original UI Style
 export default function CustomerWaitingPopup() {
@@ -7,8 +9,12 @@ export default function CustomerWaitingPopup() {
         showWaitingPopup,
         waitingBookingInfo,
         showCustomerTimeoutModal,
-        closeWaitingPopup
+        closeWaitingPopup,
+        showCustomerAcceptedModal,
+        showCustomerRejectedModal
     } = useBookingModalStore();
+
+    const { addNotification } = useNotificationStore();
 
     const [remainingTime, setRemainingTime] = useState(120);
 
@@ -21,6 +27,64 @@ export default function CustomerWaitingPopup() {
             setRemainingTime(remaining > 0 ? remaining : 120);
         }
     }, [showWaitingPopup, waitingBookingInfo?.bookingId]);
+
+    // Polling to check booking status (backup for socket)
+    useEffect(() => {
+        if (!showWaitingPopup || !waitingBookingInfo?.bookingId) return;
+
+        const bookingId = waitingBookingInfo.bookingId;
+        const customerId = localStorage.getItem("userId") || "";
+
+        const checkStatus = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/getBookingById/${bookingId}`);
+                if (!res.ok) return;
+
+                const data = await res.json();
+                const booking = data.data || data;
+
+                if (!booking) return;
+
+                const status = (booking.status || '').toLowerCase();
+                const vehicleName = booking.vehicleName || booking.VehicleName || waitingBookingInfo.vehicleName;
+                const ownerName = booking.ownerName || 'Owner';
+
+                console.log(`🔍 Polling booking ${bookingId}: status=${status}`);
+
+                if (status === 'confirmed' || status === 'accepted') {
+                    // Accepted!
+                    addNotification({
+                        type: 'booking_confirmed',
+                        title: 'Booking Confirmed!',
+                        message: `Your booking for ${vehicleName} has been accepted.`,
+                        vehicleName: vehicleName,
+                        bookingId: bookingId,
+                        userId: customerId,
+                    });
+                    showCustomerAcceptedModal(vehicleName, ownerName);
+                } else if (status === 'cancelled' || status === 'rejected') {
+                    // Rejected!
+                    addNotification({
+                        type: 'booking_declined',
+                        title: 'Booking Declined',
+                        message: `Your booking for ${vehicleName} was declined.`,
+                        vehicleName: vehicleName,
+                        bookingId: bookingId,
+                        userId: customerId,
+                    });
+                    showCustomerRejectedModal(vehicleName, ownerName);
+                } else if (status === 'timeout') {
+                    // Timeout!
+                    showCustomerTimeoutModal(vehicleName);
+                }
+            } catch (err) {
+                console.error("Error polling booking status:", err);
+            }
+        };
+
+        const pollInterval = setInterval(checkStatus, 3000); // Check every 3 seconds
+        return () => clearInterval(pollInterval);
+    }, [showWaitingPopup, waitingBookingInfo?.bookingId, showCustomerAcceptedModal, showCustomerRejectedModal, showCustomerTimeoutModal, addNotification]);
 
     // Countdown timer
     useEffect(() => {

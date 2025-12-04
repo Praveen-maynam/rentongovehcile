@@ -19,14 +19,23 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // Handle background messages for push notifications
-messaging.onBackgroundMessage(function(payload) {
+messaging.onBackgroundMessage(function (payload) {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
   const notificationTitle = payload.notification?.title || 'Notification';
+
+  // Determine sound based on payload or default to new booking sound
+  // Note: Custom sounds in SW are not supported in all browsers/OS
+  const soundPath = '/sounds/new-booking.mp3';
+
   const notificationOptions = {
     body: payload.notification?.body,
     icon: '/logo.png', // Change to your app icon if needed
     data: payload.data || {},
+    sound: soundPath,
+    renotify: true,
+    tag: payload.data?.bookingId || 'general-notification'
   };
+
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 

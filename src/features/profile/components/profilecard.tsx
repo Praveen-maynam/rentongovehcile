@@ -489,7 +489,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
             )}
           </button>
         </div>
-
+ 
         {/* <div className="mt-5 pt-4 border-t border-gray-200 text-center space-y-1">
           <p className="text-xs text-gray-600 font-mono">
             Backend: <span className="text-indigo-600 font-semibold">{API_BASE_URL}/register</span>

@@ -40,7 +40,7 @@ interface VehicleData {
   CarName?: string;
   CarModel?: string;
   CarNumber?: string;
-  Carseater?: string;
+  Carseeter?: string;
   RentPerHour?: number;
   RentPerDay?: number;
   carImages?: string[];
@@ -246,12 +246,6 @@ const VehicleHistory: React.FC = () => {
     fetchBookingHistory();
   }, [finalVehicleId, vehicleData, vehicleType]);
 
-  const handleBookingClick = (booking: BookingHistory) => {
-    navigate(`/booking-details/${booking._id}`, {
-      state: { booking, vehicleData },
-    });
-  };
-
   const handleChatClick = (booking: BookingHistory, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -439,7 +433,7 @@ const VehicleHistory: React.FC = () => {
                       <div className="w-[1px] bg-gray-200"></div>
                       <div className="flex-1 flex flex-col items-center py-3">
                         <img src={seats} className="w-6 h-6 mb-1.5" alt="seats" />
-                        <span className="text-[13px]">{vehicleData.Carseater || "5"} Seaters</span>
+                        <span className="text-[13px]">{vehicleData.Carseeter || "5"} Seaters</span>
                       </div>
                       <div className="w-[1px] bg-gray-200"></div>
                       <div className="flex-1 flex flex-col items-center py-3">
@@ -503,8 +497,7 @@ const VehicleHistory: React.FC = () => {
                 {bookingHistory.map((booking) => (
                   <div
                     key={booking._id}
-                    onClick={() => handleBookingClick(booking)}
-                    className="border rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-all relative"
+                    className="border rounded-lg p-4 hover:border-blue-500 transition-all relative"
                   >
                     <button
                       onClick={(e) => handleDeleteClick(booking, e)}
@@ -557,13 +550,13 @@ const VehicleHistory: React.FC = () => {
                           <span>Chat</span>
                         </button>
 
-                        <button
+                        {/* <button
                           onClick={(e) => handleCallClick(booking, e)}
                           className="flex-1 flex items-center justify-center gap-2 py-2 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white rounded-full font-semibold"
                         >
                           <Phone size={18} />
                           <span>Call</span>
-                        </button>
+                        </button> */}
                       </div>
                     )}
 

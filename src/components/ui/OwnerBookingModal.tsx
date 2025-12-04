@@ -9,7 +9,7 @@ const EXPIRY_TIME = 2 * 60 * 1000; // 120 seconds
 const WARNING_TIME = 0 * 1000; // 0 seconds before expiry
 
 // Sound file paths
-const SOUND_1_NEW_BOOKING = "/sounds/WhatsApp Audio 2025-11-26 at 12.29.34.mp3"; // Owner: New booking
+const SOUND_3_NEW_BOOKING = "/sounds/new-booking.mp3"; /// Owner: New booking
 const SOUND_2_WARNING = "/sounds/WhatsApp Audio 2025-11-26 at 12.29.55.mp3"; // Owner: 20 sec warning
 
 export default function OwnerBookingModal() {
@@ -38,13 +38,30 @@ export default function OwnerBookingModal() {
     // Get notification store to add notifications and update status
     const { addNotification, updateNotificationStatus } = useNotificationStore();
 
-    // Play Sound 1: New booking notification for owner
+    // Play Sound 1: New booking notification for owner (DOUBLE SOUND)
     const playNewBookingSound = () => {
         try {
             if (!audioRef.current) {
-                audioRef.current = new Audio(SOUND_1_NEW_BOOKING);
+                audioRef.current = new Audio(SOUND_3_NEW_BOOKING);
             }
+
+            let count = 0;
+            audioRef.current.loop = false;
             audioRef.current.currentTime = 0;
+
+            const playAgain = () => {
+                count++;
+                if (count < 2) {
+                    audioRef.current!.currentTime = 0;
+                    audioRef.current!.play().catch(err => console.log("Audio play failed:", err));
+                } else {
+                    audioRef.current?.removeEventListener('ended', playAgain);
+                }
+            };
+
+            audioRef.current.onended = null;
+            audioRef.current.addEventListener('ended', playAgain);
+
             audioRef.current.play().catch(err => console.log("Audio play failed:", err));
         } catch (error) {
             console.log("Could not play new booking sound:", error);
@@ -154,7 +171,7 @@ export default function OwnerBookingModal() {
             // Poll every 10 seconds as a backup in case socket events are missed
             const pollInterval = setInterval(() => {
                 fetchPendingBookings();
-            }, 10000);
+            }, 3000);
 
             return () => clearInterval(pollInterval);
         }

@@ -1,5 +1,5 @@
 
- 
+
 import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
 
 interface Booking {
@@ -30,16 +30,16 @@ const playNotificationSound = () => {
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
-  
+
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
-  
+
   oscillator.frequency.value = 800;
   oscillator.type = 'sine';
-  
+
   gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
   gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-  
+
   oscillator.start(audioContext.currentTime);
   oscillator.stop(audioContext.currentTime + 0.5);
 };
@@ -63,7 +63,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [previousBookingIds, setPreviousBookingIds] = useState<Set<string>>(new Set<string>());
 
   const getAuthToken = () => {
-    return localStorage.getItem('authToken') || 
+    return localStorage.getItem('authToken') ||
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3ODFiNWUxLWZhM2YtNGQ5MS05MmIzLTBkOWFlZTk2ZTQ1ZSIsIm9yZ2FuaXphdGlvbl9pZCI6ImY5ZGU1MTcxLTVlMzAtNGU0Mi05YzIwLWQzOGQ4NjVlNjMxOSIsImlhdCI6MTc2MTY0MTY0NSwiZXhwIjoxNzYxNzI4MDQ1fQ.cQ5WztceBwvFswTqOaeV6UOJmABgNprBzeNRynwwQi4';
   };
 
@@ -88,7 +88,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (isValidMongoId(profile.userId)) return profile.userId;
         if (isValidMongoId(profile._id)) return profile._id;
       }
-    } catch (e) {}
+    } catch (e) { }
 
     console.warn("⚠️ No valid ownerId found in localStorage");
     return ownerId;
@@ -133,7 +133,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Polling effect
   useEffect(() => {
     fetchPendingBookings(); // Initial fetch
-    const interval = setInterval(fetchPendingBookings, 20000); // Poll every 20 seconds
+    const interval = setInterval(fetchPendingBookings, 3000); // Poll every 3 seconds
     return () => clearInterval(interval);
   }, [fetchPendingBookings]);
   // Accept booking
@@ -155,7 +155,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setPendingBookings(prev => prev.filter(b => b._id !== bookingId));
       setShowPopup(false);
       setCurrentBooking(null);
-      
+
       // Refresh bookings
       setTimeout(fetchPendingBookings, 1000);
     } catch (error) {
@@ -182,7 +182,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setPendingBookings(prev => prev.filter(b => b._id !== bookingId));
       setShowPopup(false);
       setCurrentBooking(null);
-      
+
       // Refresh bookings
       setTimeout(fetchPendingBookings, 1000);
     } catch (error) {
@@ -215,7 +215,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
 // ============================================
 interface BookingAcceptanceProps {
   isOpen?: boolean;
-  bookingId: string; 
+  bookingId: string;
   onAccept: () => void;
   onReject: () => void;
   onClose?: () => void;
@@ -223,7 +223,7 @@ interface BookingAcceptanceProps {
 
 const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
   isOpen = true,
-  
+
   onAccept,
   onReject,
   onClose,
@@ -374,7 +374,7 @@ const BookingAcceptanceWithAPI: React.FC = () => {
   return (
     <BookingAcceptance
       isOpen={showPopup}
-       bookingId={currentBooking._id} 
+      bookingId={currentBooking._id}
       onAccept={handleAccept}
       onReject={handleReject}
       onClose={closePopup}
@@ -392,7 +392,7 @@ const RentalPage: React.FC = () => {
           🚗 RentOnGo - Rental Page
         </h1>
         <p className="text-gray-600 mb-6">
-          This is your rental page. The booking acceptance popup will appear automatically 
+          This is your rental page. The booking acceptance popup will appear automatically
           when a new booking is received (checks every 20 seconds).
         </p>
 
@@ -411,7 +411,7 @@ const RentalPage: React.FC = () => {
 
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <p className="text-sm text-gray-600">
-            <strong>Testing:</strong> The system is now actively checking for bookings from owner ID: 
+            <strong>Testing:</strong> The system is now actively checking for bookings from owner ID:
             <code className="bg-gray-200 px-2 py-1 rounded ml-1">
               {localStorage.getItem('ownerId') || '68ff377085e67372e72d1f39'}
             </code>

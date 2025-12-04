@@ -9,8 +9,7 @@ import { MapPin } from "lucide-react";
 interface BikeCardProps {
   vehicle: Vehicle;
   showBookButton?: boolean;
-  // onEdit?: (vehicle: Vehicle) => void;
-  // onDelete?: (vehicle: Vehicle) => void;
+
   onBook?: (vehicle: Vehicle) => void;
 }
 

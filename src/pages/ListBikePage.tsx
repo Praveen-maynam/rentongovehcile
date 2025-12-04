@@ -4,6 +4,7 @@ import { MapPin, Navigation, Loader, Plus, X, ChevronDown } from "lucide-react";
 import bikeDataJSON from "./data/bikeData.json";
 
 import apiService from "../services/api.service";
+
 // Typeable Dropdown Component
 interface TypeableDropdownProps {
   options: string[];
@@ -11,6 +12,7 @@ interface TypeableDropdownProps {
   onChange: (value: string) => void;
   placeholder: string;
   disabled?: boolean;
+  required?: boolean;
 }
 
 const TypeableDropdown: React.FC<TypeableDropdownProps> = ({
@@ -19,6 +21,7 @@ const TypeableDropdown: React.FC<TypeableDropdownProps> = ({
   onChange,
   placeholder,
   disabled = false,
+  required = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
@@ -84,6 +87,7 @@ const TypeableDropdown: React.FC<TypeableDropdownProps> = ({
           onFocus={handleFocus}
           placeholder={placeholder}
           disabled={disabled}
+          required={required}
           className={`flex-1 px-4 py-3 outline-none rounded-lg ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
         />
         <button type="button" onClick={handleDropdownClick} disabled={disabled} className="px-3 py-3">
@@ -212,8 +216,6 @@ const ListBikePage = () => {
     }
   }, [formData.bikeBrand]);
 
-  // Add this useEffect after the bike brand/model useEffect (around line 210)
-
   useEffect(() => {
     if (formData.pickupCityState) {
       const cities = bikeDataJSON.cities[formData.pickupCityState as keyof typeof bikeDataJSON.cities] || [];
@@ -225,21 +227,6 @@ const ListBikePage = () => {
     }
   }, [formData.pickupCityState]);
 
-
-  // Add this useEffect after the bike brand/model useEffect (around line 210)
-
-  useEffect(() => {
-    if (formData.pickupCityState) {
-      const cities = bikeDataJSON.cities[formData.pickupCityState as keyof typeof bikeDataJSON.cities] || [];
-      setAvailableCities(cities);
-      // Reset city when state changes
-      setFormData(prev => ({ ...prev, pickupCity: "" }));
-    } else {
-      setAvailableCities([]);
-    }
-  }, [formData.pickupCityState]);
-
-  // Update typeableFields - REMOVE State and City from here
   const typeableFields = [
     { name: "bikeBrand", label: "Bike Brand", options: bikeBrands, placeholder: "Type brand name..." },
     { name: "bikeModel", label: "Bike Model", options: availableModels, placeholder: "Type model name...", disabled: !formData.bikeBrand },
@@ -260,13 +247,12 @@ const ListBikePage = () => {
     { name: "contactName", label: "Name", placeholder: "John Doe" },
     { name: "contactNumber", label: "Contact Number", placeholder: "9876543210", pattern: "[0-9]{10}" },
   ];
-  // Create NEW array for address dropdowns (State and City)
+
   const addressDropdownFields = [
     { name: "pickupCityState", label: "State", options: states, placeholder: "Type state..." },
     { name: "pickupCity", label: "City", options: availableCities, placeholder: "Type city...", disabled: !formData.pickupCityState },
   ];
 
-  // Update addressFields - keep only text input fields
   const addressFields = [
     { name: "pickupArea", label: "Street/Area", placeholder: "Street name or area" },
     { name: "pickupCityPinCode", label: "Zip/Pincode", placeholder: "500001" },
@@ -380,7 +366,7 @@ const ListBikePage = () => {
 
     // Vehicle details validation
     if (!formData.bikeBrand) errors.bikeBrand = "Bike brand is required";
-    // bikeModel is optional - no validation needed
+    if (!formData.bikeModel) errors.bikeModel = "Bike model is required";
     if (!formData.bikeYear) errors.bikeYear = "Manufancturing year is required";
 
     if (!formData.fuel) errors.fuel = "Fuel type is required";
@@ -498,7 +484,7 @@ const ListBikePage = () => {
               {typeableFields.map((field) => (
                 <div key={field.name} data-error={!!fieldErrors[field.name]}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} {field.name !== "bikeModel" && <span className="text-red-500">*</span>}
+                    {field.label} <span className="text-red-500">*</span>
                   </label>
                   <div className={fieldErrors[field.name] ? "ring-2 ring-red-500 rounded-lg" : ""}>
                     <TypeableDropdown
@@ -510,6 +496,7 @@ const ListBikePage = () => {
                       }}
                       placeholder={field.placeholder}
                       disabled={field.disabled}
+                      required={true}
                     />
                   </div>
                   {fieldErrors[field.name] && (
@@ -637,16 +624,23 @@ const ListBikePage = () => {
             <div className="border-b pb-2 pt-4">
               <h2 className="text-lg font-semibold text-gray-800">Additional Details</h2>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Insurance Number <span className="text-red-500"></span></label>
+            <div data-error={!!fieldErrors.insuranceNo}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Insurance Number <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 name="insuranceNo"
                 value={formData.insuranceNo}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  handleInputChange(e);
+                  setFieldErrors((prev) => ({ ...prev, insuranceNo: "" }));
+                }}
                 placeholder="1234567890"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition ${fieldErrors.insuranceNo ? 'border-red-500 ring-2 ring-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-transparent'}`}
+                required
               />
+              {fieldErrors.insuranceNo && (
+                <span className="text-red-500 text-xs mt-1 block">{fieldErrors.insuranceNo}</span>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {checkboxes.map((cb) => (
@@ -656,7 +650,6 @@ const ListBikePage = () => {
                 </label>
               ))}
             </div>
-
             {formData.depositVehicle && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (₹)</label>
@@ -686,6 +679,7 @@ const ListBikePage = () => {
                       }}
                       placeholder={field.placeholder}
                       disabled={field.disabled}
+                      required={true}
                     />
                   </div>
                   {fieldErrors[field.name] && (
