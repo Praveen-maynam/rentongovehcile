@@ -1,6 +1,5 @@
-
-
 import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import { bookingAPI } from '../../services/api.service';
 
 interface Booking {
   _id: string;
@@ -12,9 +11,10 @@ interface Booking {
   startDate: string;
   endDate: string;
   totalAmount: number;
-  status: 'pending' | 'confirmed' | 'rejected';
+  status: 'pending' | 'confirmed' | 'rejected' | 'completed';
   createdAt: string;
 }
+
 interface BookingContextType {
   pendingBookings: Booking[];
   showPopup: boolean;
@@ -23,8 +23,9 @@ interface BookingContextType {
   rejectBooking: (bookingId: string) => Promise<void>;
   closePopup: () => void;
 }
+
 // ============================================
-// 2. NOTIFICATION SOUND
+// NOTIFICATION SOUND
 // ============================================
 const playNotificationSound = () => {
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -45,16 +46,18 @@ const playNotificationSound = () => {
 };
 
 // ============================================
-// 3. BOOKING CONTEXT
+// BOOKING CONTEXT
 // ============================================
 const BookingContext = createContext<BookingContextType | null>(null);
+
 export const useBookings = () => {
   const context = useContext(BookingContext);
   if (!context) throw new Error('useBookings must be used within BookingProvider');
   return context;
 };
+
 // ============================================
-// 4. BOOKING PROVIDER WITH POLLING
+// BOOKING PROVIDER WITH POLLING
 // ============================================
 export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
@@ -62,25 +65,15 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
   const [previousBookingIds, setPreviousBookingIds] = useState<Set<string>>(new Set<string>());
 
-  const getAuthToken = () => {
-    return localStorage.getItem('authToken') ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3ODFiNWUxLWZhM2YtNGQ5MS05MmIzLTBkOWFlZTk2ZTQ1ZSIsIm9yZ2FuaXphdGlvbl9pZCI6ImY5ZGU1MTcxLTVlMzAtNGU0Mi05YzIwLWQzOGQ4NjVlNjMxOSIsImlhdCI6MTc2MTY0MTY0NSwiZXhwIjoxNzYxNzI4MDQ1fQ.cQ5WztceBwvFswTqOaeV6UOJmABgNprBzeNRynwwQi4';
-  };
-
   const getOwnerId = (): string | null => {
-    // Try ownerId first
     let ownerId = localStorage.getItem('ownerId');
-
-    // Check if it's a valid MongoDB ObjectId (24 hex characters)
     const isValidMongoId = (id: string | null) => id && /^[a-f0-9]{24}$/i.test(id);
 
     if (isValidMongoId(ownerId)) return ownerId;
 
-    // Try userId
     const userId = localStorage.getItem('userId');
     if (isValidMongoId(userId)) return userId;
 
-    // Try userProfile
     try {
       const userProfile = localStorage.getItem('userProfile');
       if (userProfile) {
@@ -94,99 +87,91 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return ownerId;
   };
 
-  // Fetch pending bookings
+  // Fetch pending bookings using API service
   const fetchPendingBookings = useCallback(async () => {
     try {
       const ownerId = getOwnerId();
-      const response = await fetch(
-        `http://3.110.122.127:3000/getPendingBookingsOfOwner/${ownerId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${getAuthToken()}`,
-          },
-        }
-      );
+      if (!ownerId) {
+        console.warn("⚠️ No ownerId available, skipping fetch");
+        return;
+      }
 
-      if (!response.ok) throw new Error('Failed to fetch bookings');
+      console.log("📥 Fetching pending bookings for owner:", ownerId);
 
-      const data = await response.json();
+      // Use centralized API service
+      const response = await bookingAPI.getPendingBookingsOfOwner(ownerId);
+      const data = response.data;
       const bookings = Array.isArray(data) ? data : data.bookings || [];
+
+      console.log("✅ Fetched bookings:", bookings);
 
       // Check for new bookings
       const currentIds = new Set<string>(bookings.map((b: Booking) => b._id));
       const newBookings = bookings.filter((b: Booking) => !previousBookingIds.has(b._id));
 
       if (newBookings.length > 0 && previousBookingIds.size > 0) {
-        // New booking detected!
         console.log('🔔 New booking detected!', newBookings[0]);
         playNotificationSound();
         setCurrentBooking(newBookings[0]);
         setShowPopup(true);
       }
+
       setPendingBookings(bookings);
       setPreviousBookingIds(currentIds);
     } catch (error) {
       console.error('❌ Error fetching bookings:', error);
     }
   }, [previousBookingIds]);
+
   // Polling effect
   useEffect(() => {
     fetchPendingBookings(); // Initial fetch
     const interval = setInterval(fetchPendingBookings, 3000); // Poll every 3 seconds
     return () => clearInterval(interval);
   }, [fetchPendingBookings]);
-  // Accept booking
+
+  // Accept booking using API service
   const acceptBooking = async (bookingId: string) => {
     try {
-      const myHeaders = new Headers();
-      myHeaders.append('Authorization', `Bearer ${getAuthToken()}`);
-      const response = await fetch(
-        `http://3.110.122.127:3000/confirmBooking/${bookingId}/Confirmed`,
-        {
-          method: 'POST',
-          headers: myHeaders,
-        }
-      );
+      console.log("✅ Accepting booking:", bookingId);
 
-      if (!response.ok) throw new Error('Failed to accept booking');
+      // Use centralized API service
+      await bookingAPI.confirmBooking(bookingId);
 
       // Update state
       setPendingBookings(prev => prev.filter(b => b._id !== bookingId));
       setShowPopup(false);
       setCurrentBooking(null);
 
+      console.log("✅ Booking accepted successfully");
+
       // Refresh bookings
       setTimeout(fetchPendingBookings, 1000);
     } catch (error) {
-      console.error('Error accepting booking:', error);
+      console.error('❌ Error accepting booking:', error);
       alert('Failed to accept booking. Please try again.');
     }
   };
-  // Reject booking
+
+  // Reject booking using API service
   const rejectBooking = async (bookingId: string) => {
     try {
-      const response = await fetch(
-        `http://3.110.122.127:3000/deleteBooking/${bookingId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${getAuthToken()}`,
-          },
-        }
-      );
+      console.log("❌ Rejecting booking:", bookingId);
 
-      if (!response.ok) throw new Error('Failed to reject booking');
+      // Use centralized API service
+      await bookingAPI.deleteBooking(bookingId);
 
       // Update state
       setPendingBookings(prev => prev.filter(b => b._id !== bookingId));
       setShowPopup(false);
       setCurrentBooking(null);
 
+      console.log("✅ Booking rejected successfully");
+
       // Refresh bookings
       setTimeout(fetchPendingBookings, 1000);
     } catch (error) {
-      console.error('Error rejecting booking:', error);
+      console.error('❌ Error rejecting booking:', error);
       alert('Failed to reject booking. Please try again.');
     }
   };
@@ -210,8 +195,9 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     </BookingContext.Provider>
   );
 };
+
 // ============================================
-// 5. BOOKING ACCEPTANCE COMPONENT
+// BOOKING ACCEPTANCE COMPONENT
 // ============================================
 interface BookingAcceptanceProps {
   isOpen?: boolean;
@@ -221,9 +207,8 @@ interface BookingAcceptanceProps {
   onClose?: () => void;
 }
 
-const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
+export const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
   isOpen = true,
-
   onAccept,
   onReject,
   onClose,
@@ -279,8 +264,7 @@ const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
             <div
               className="relative w-36 h-36 rounded-full flex items-center justify-center"
               style={{
-                background:
-                  "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+                background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
                 boxShadow: "0 10px 40px rgba(59, 130, 246, 0.4)",
               }}
             >
@@ -326,6 +310,7 @@ const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
             Reject
           </button>
         </div>
+
         {onClose && (
           <button
             onClick={onClose}
@@ -335,6 +320,7 @@ const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
             Close
           </button>
         )}
+
         <style>{`
           @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.96); }
@@ -349,24 +335,33 @@ const BookingAcceptance: React.FC<BookingAcceptanceProps> = ({
     </div>
   );
 };
+
 // ============================================
-// 6. WRAPPER COMPONENT WITH API INTEGRATION
+// WRAPPER COMPONENT WITH API INTEGRATION
 // ============================================
 const BookingAcceptanceWithAPI: React.FC = () => {
   const { showPopup, currentBooking, acceptBooking, rejectBooking, closePopup } = useBookings();
   const [isAccepting, setIsAccepting] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
+
   const handleAccept = async () => {
-    if (!currentBooking) return;
+    if (!currentBooking || isAccepting) return;
     setIsAccepting(true);
-    await acceptBooking(currentBooking._id);
-    setIsAccepting(false);
+    try {
+      await acceptBooking(currentBooking._id);
+    } finally {
+      setIsAccepting(false);
+    }
   };
+
   const handleReject = async () => {
-    if (!currentBooking) return;
+    if (!currentBooking || isRejecting) return;
     setIsRejecting(true);
-    await rejectBooking(currentBooking._id);
-    setIsRejecting(false);
+    try {
+      await rejectBooking(currentBooking._id);
+    } finally {
+      setIsRejecting(false);
+    }
   };
 
   if (!showPopup || !currentBooking) return null;
@@ -381,10 +376,13 @@ const BookingAcceptanceWithAPI: React.FC = () => {
     />
   );
 };
+
 // ============================================
-// 7. DEMO RENTAL PAGE
+// DEMO RENTAL PAGE
 // ============================================
 const RentalPage: React.FC = () => {
+  const { pendingBookings } = useBookings();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
@@ -393,34 +391,57 @@ const RentalPage: React.FC = () => {
         </h1>
         <p className="text-gray-600 mb-6">
           This is your rental page. The booking acceptance popup will appear automatically
-          when a new booking is received (checks every 20 seconds).
+          when a new booking is received (checks every 3 seconds).
         </p>
 
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-6">
           <p className="text-blue-800 font-semibold mb-2">
             ✅ Real-time Booking System Active
           </p>
           <ul className="text-sm text-blue-700 space-y-1">
-            <li>• Polls for new bookings every 20 seconds</li>
+            <li>• Polls for new bookings every 3 seconds</li>
             <li>• Plays sound notification on new booking</li>
-            <li>• Shows your BookingAcceptance popup</li>
+            <li>• Shows BookingAcceptance popup automatically</li>
             <li>• Works on every page of your app</li>
             <li>• Uses centralized API service</li>
           </ul>
         </div>
 
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+          <p className="text-sm font-semibold text-gray-700 mb-2">
+            📊 Current Status:
+          </p>
           <p className="text-sm text-gray-600">
-            <strong>Testing:</strong> The system is now actively checking for bookings from owner ID:
+            <strong>Owner ID:</strong>{' '}
             <code className="bg-gray-200 px-2 py-1 rounded ml-1">
-              {localStorage.getItem('ownerId') || '68ff377085e67372e72d1f39'}
+              {localStorage.getItem('ownerId') || localStorage.getItem('userId') || 'Not set'}
             </code>
           </p>
+          <p className="text-sm text-gray-600 mt-2">
+            <strong>Pending Bookings:</strong>{' '}
+            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded ml-1 font-semibold">
+              {pendingBookings.length}
+            </span>
+          </p>
+        </div>
+
+        <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+          <p className="text-green-800 font-semibold mb-2">
+            🎯 Key Improvements:
+          </p>
+          <ul className="text-sm text-green-700 space-y-1">
+            <li>✅ All API calls use centralized API service</li>
+            <li>✅ No direct fetch/axios calls in components</li>
+            <li>✅ Proper error handling and loading states</li>
+            <li>✅ Clean separation of concerns</li>
+            <li>✅ Easy to maintain and test</li>
+          </ul>
         </div>
       </div>
     </div>
   );
 };
+
 
 
 export default BookingAcceptance;

@@ -95,7 +95,7 @@ const MyBookings: React.FC = () => {
     setIsRefreshing(true);
 
     try {
-      const userId = localStorage.getItem("userId") || "690308d03a633b650dbc7e61";
+      const userId = localStorage.getItem("userId") || " ";
       console.log("🔍 Fetching bookings for user:", userId);
 
       // ✅ Use your existing API service

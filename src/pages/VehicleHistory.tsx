@@ -550,13 +550,7 @@ const VehicleHistory: React.FC = () => {
                           <span>Chat</span>
                         </button>
 
-                        {/* <button
-                          onClick={(e) => handleCallClick(booking, e)}
-                          className="flex-1 flex items-center justify-center gap-2 py-2 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white rounded-full font-semibold"
-                        >
-                          <Phone size={18} />
-                          <span>Call</span>
-                        </button> */}
+                       
                       </div>
                     )}
 
