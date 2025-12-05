@@ -512,7 +512,7 @@ export const userAPI = {
   },
 
   updateUserProfile: async (userId: string, userData: any) => {
-    return apiClient.put(`/users/${userId}`, userData);
+    return apiClient.put(`/updateUser/${userId}`, userData);
   },
 };
 

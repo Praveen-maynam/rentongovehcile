@@ -1,11 +1,8 @@
 
 
-
-
-
 import React, { useState, useEffect } from "react";
-import { X, Loader2, CheckCircle, AlertCircle } from "lucide-react";
-import apiService from "services/api.service";
+import { X, CheckCircle, AlertCircle } from "lucide-react";
+import apiService from "../../../services/api.service";
 
 interface ProfileCardProps {
   onClose: () => void;
@@ -48,31 +45,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
       const savedProfile = localStorage.getItem("userProfile");
       if (savedProfile) {
         const parsedProfile = JSON.parse(savedProfile);
-        setProfile((prev) => ({
-          ...prev,
-          name: parsedProfile.name || "",
-          phone: parsedProfile.phone || "",
-          email: parsedProfile.email || "",
-          image: parsedProfile.image || prev.image,
-          googleId: parsedProfile.googleId || "",
-          latitude: parsedProfile.latitude || "",
-          longitude: parsedProfile.longitude || "",
-          fcmToken: parsedProfile.fcmToken || "",
-        }));
-        console.log("✅ Profile loaded from localStorage");
+        setProfile((prev) => ({ ...prev, ...parsedProfile }));
       } else {
         const name = localStorage.getItem("userName") || localStorage.getItem("contactName") || "";
         const phone = localStorage.getItem("contactNumber") || "";
         const email = localStorage.getItem("userEmail") || "";
         const userId = localStorage.getItem("userId") || localStorage.getItem("googleId") || "";
-
-        setProfile((prev) => ({
-          ...prev,
-          name,
-          phone,
-          email,
-          googleId: userId,
-        }));
+        setProfile((prev) => ({ ...prev, name, phone, email, googleId: userId }));
       }
     } catch (error) {
       console.error("❌ Error loading profile:", error);
@@ -84,11 +63,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
     const savedLng = localStorage.getItem("longitude");
 
     if (savedLat && savedLng) {
-      setProfile((prev) => ({
-        ...prev,
-        latitude: savedLat,
-        longitude: savedLng,
-      }));
+      setProfile((prev) => ({ ...prev, latitude: savedLat, longitude: savedLng }));
       return;
     }
 
@@ -97,50 +72,26 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
         (position) => {
           const lat = position.coords.latitude.toString();
           const lng = position.coords.longitude.toString();
-          setProfile((prev) => ({
-            ...prev,
-            latitude: lat,
-            longitude: lng,
-          }));
+          setProfile((prev) => ({ ...prev, latitude: lat, longitude: lng }));
           localStorage.setItem("latitude", lat);
           localStorage.setItem("longitude", lng);
         },
-        (error) => {
+        () => {
           const defaultLat = "17.512343";
           const defaultLng = "78.500667";
-          setProfile((prev) => ({
-            ...prev,
-            latitude: defaultLat,
-            longitude: defaultLng,
-          }));
+          setProfile((prev) => ({ ...prev, latitude: defaultLat, longitude: defaultLng }));
         }
       );
     }
   };
 
   const getOrCreateGoogleId = (): string => {
-    // First try to get existing googleId from profile or localStorage
     let googleId = profile.googleId || localStorage.getItem("googleId");
-
-    // If no googleId exists, create a new unique one
     if (!googleId) {
       googleId = `google_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
       localStorage.setItem("googleId", googleId);
-      console.log("🆕 Created new googleId:", googleId);
-    } else {
-      console.log("♻️ Using existing googleId:", googleId);
     }
-
     return googleId;
-  };
-
-  const getOrCreateFCMToken = (): string => {
-    let fcmToken = profile.fcmToken || localStorage.getItem("fcmToken");
-    if (!fcmToken) {
-      fcmToken = `fcm_web_${Date.now()}_${Math.random().toString(36).substring(2, 25)}`;
-      localStorage.setItem("fcmToken", fcmToken);
-    }
-    return fcmToken;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,189 +128,107 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
       setSaveStatus("error");
       return false;
     }
-
     if (!profile.phone.trim()) {
       setErrorMessage("❌ Phone number is required");
       setSaveStatus("error");
       return false;
     }
-
     const phoneRegex = /^[+]?[\d\s-()]{10,}$/;
     if (!phoneRegex.test(profile.phone)) {
       setErrorMessage("❌ Invalid phone number (min 10 digits)");
       setSaveStatus("error");
       return false;
     }
-
     if (!profile.email.trim()) {
       setErrorMessage("❌ Email is required");
       setSaveStatus("error");
       return false;
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(profile.email)) {
       setErrorMessage("❌ Invalid email format");
       setSaveStatus("error");
       return false;
     }
-
     return true;
   };
-
   const handleSave = async () => {
-    if (!validateProfile()) {
-      return;
-    }
+    if (!validateProfile()) return;
 
     setIsLoading(true);
     setSaveStatus("idle");
     setErrorMessage("");
 
-    const googleId = getOrCreateGoogleId();
-    const fcmToken = getOrCreateFCMToken();
-    const latitude = profile.latitude || "17.512343";
-    const longitude = profile.longitude || "78.500667";
-
-    console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("🚀 SENDING TO BACKEND - POSTMAN FORMAT");
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("\nData being sent:");
-    console.log({
-      googleId,
-      name: profile.name.trim(),
-      mobilenumber: profile.phone.trim(),
-      latitude,
-      longitude,
-      email: profile.email.trim(),
-      fcmToken,
-      platform: "web",
-
-
-
-    });
-
     try {
-      // Use centralized API service
-      const result: any = await apiService.user.register({
+      const googleId = getOrCreateGoogleId();
+
+      const payload = {
         googleId,
         name: profile.name.trim(),
         mobilenumber: profile.phone.trim(),
-        latitude,
-        longitude,
         email: profile.email.trim(),
-        fcmToken,
-
+        profilePic: profile.image,
+        latitude: profile.latitude || "17.512343",
+        longitude: profile.longitude || "78.500667",
         platform: "web",
+      };
 
-      });
+      console.log("📡 Sending UPDATE request:", payload);
 
-      console.log("✅ Backend Response:", result);
+      // ------------------------------------------------
+      // 🔵 ALWAYS CALL UPDATE API (REGISTER REMOVED)
+      // ------------------------------------------------
+      const response = await apiService.user.updateUserProfile("69267920bc39c469be13b3a6", payload);
 
-      // Handle both new user and existing user responses
-      if (result.message === "User already exists" || result.message === "User registered successfully") {
-        // Save to localStorage
-        const profileToSave = {
-          name: profile.name.trim(),
-          phone: profile.phone.trim(),
-          email: profile.email.trim(),
-          image: profile.image,
-          googleId,
-          fcmToken,
-          latitude,
-          longitude,
-        };
+      console.log("✅ Update API Response:", response);
 
-        localStorage.setItem("userProfile", JSON.stringify(profileToSave));
-        localStorage.setItem("userName", profile.name.trim());
-        localStorage.setItem("userEmail", profile.email.trim());
-        localStorage.setItem("contactNumber", profile.phone.trim());
-        localStorage.setItem("contactName", profile.name.trim());
-        localStorage.setItem("userId", googleId);
-        localStorage.setItem("googleId", googleId);
-        localStorage.setItem("fcmToken", fcmToken);
-        localStorage.setItem("latitude", latitude);
-        localStorage.setItem("longitude", longitude);
+      // ------------------------------------------------
+      // 💾 SAVE TO LOCAL STORAGE
+      // ------------------------------------------------
+      const profileToSave = {
+        name: payload.name,
+        phone: payload.mobilenumber,
+        email: payload.email,
+        profilePic: payload.profilePic,
+        googleId,
+        latitude: payload.latitude,
+        longitude: payload.longitude,
+      };
 
-        console.log("💾 Saved to localStorage");
-        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+      localStorage.setItem("userProfile", JSON.stringify(profileToSave));
+      localStorage.setItem("userName", payload.name);
+      localStorage.setItem("userEmail", payload.email);
+      localStorage.setItem("contactNumber", payload.mobilenumber);
+      localStorage.setItem("contactName", payload.name);
+      localStorage.setItem("userId", googleId);
+      localStorage.setItem("googleId", googleId);
+      localStorage.setItem("latitude", payload.latitude);
+      localStorage.setItem("longitude", payload.longitude);
 
-        setSaveStatus("success");
-        setIsLoading(false);
+      // SUCCESS UI
+      setSaveStatus("success");
+      setIsLoading(false);
 
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      } else {
-        throw new Error(result.message || "Unknown error occurred");
-      }
-    } catch (error: any) {
-      console.error("❌ Error:", error);
-      console.error("Full error object:", JSON.stringify(error, null, 2));
-      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+      setTimeout(() => onClose(), 1500);
 
-      // Check if it's a duplicate key error (user already exists)
-      const isDuplicateError =
-        (error.error && typeof error.error === 'string' && error.error.includes("E11000")) ||
-        (error.message && error.message.includes("E11000")) ||
-        (error.message && error.message.includes("duplicate"));
-
-      if (isDuplicateError) {
-        console.log("✅ User already exists in database - treating as successful update");
-
-        // Save to localStorage (user's profile is updated locally)
-        const profileToSave = {
-          name: profile.name.trim(),
-          phone: profile.phone.trim(),
-          email: profile.email.trim(),
-          image: profile.image,
-          googleId,
-          fcmToken,
-          latitude,
-          longitude,
-        };
-
-        localStorage.setItem("userProfile", JSON.stringify(profileToSave));
-        localStorage.setItem("userName", profile.name.trim());
-        localStorage.setItem("userEmail", profile.email.trim());
-        localStorage.setItem("contactNumber", profile.phone.trim());
-        localStorage.setItem("contactName", profile.name.trim());
-        localStorage.setItem("userId", googleId);
-        localStorage.setItem("googleId", googleId);
-
-        console.log("💾 Profile updated locally");
-
-        setSaveStatus("success");
-        setIsLoading(false);
-
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      } else {
-        // Real error - show to user
-        setErrorMessage(`Failed to save: ${error.message || error.error || JSON.stringify(error)}`);
-        setSaveStatus("error");
-        setIsLoading(false);
-      }
+    } catch (err: any) {
+      console.error("❌ UPDATE API FAILED:", err);
+      setErrorMessage(err.message || "Update failed");
+      setSaveStatus("error");
+      setIsLoading(false);
     }
   };
 
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://3.110.122.127:3000';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[600px] max-h-[90vh] overflow-y-auto p-6 relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100 z-10"
-          aria-label="Close"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100 z-10" aria-label="Close">
           <X size={22} />
         </button>
 
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
-          {/* <p className="text-sm text-gray-500 mt-1">Update your personal information</p> */}
         </div>
 
         <div className="flex flex-col items-center mb-6">
@@ -369,10 +238,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-indigo-200 shadow-lg transition-transform group-hover:scale-105"
             />
-            <label
-              htmlFor="profilePic"
-              className="absolute bottom-0 right-0 bg-gradient-to-r from-indigo-600 to-blue-500 rounded-full p-2.5 shadow-lg cursor-pointer hover:shadow-xl transition-all transform hover:scale-110"
-            >
+            <label htmlFor="profilePic" className="absolute bottom-0 right-0 bg-gradient-to-r from-indigo-600 to-blue-500 rounded-full p-2.5 shadow-lg cursor-pointer hover:shadow-xl transition-all transform hover:scale-110">
               <input
                 id="profilePic"
                 type="file"
@@ -381,74 +247,28 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
                 className="hidden"
                 disabled={isLoading}
               />
-              <svg
-                className="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                />
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </label>
           </div>
-          {/* <p className="text-xs text-gray-500 mt-2">📷 Profile photo (saved locally only)</p> */}
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={profile.name}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-              disabled={isLoading}
-              className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
-            />
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Full Name</label>
+            <input type="text" name="name" value={profile.name} onChange={handleChange} placeholder="Enter your full name" disabled={isLoading} className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed" />
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={profile.phone}
-              onChange={handleChange}
-              placeholder="+91 1234567890"
-              disabled={isLoading}
-              className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
-            />
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Phone Number</label>
+            <input type="tel" name="phone" value={profile.phone} onChange={handleChange} placeholder="+91 1234567890" disabled={isLoading} className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed" />
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={profile.email}
-              onChange={handleChange}
-              placeholder="your.email@example.com"
-              disabled={isLoading}
-              className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
-            />
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Email Address</label>
+            <input type="email" name="email" value={profile.email} onChange={handleChange} placeholder="your.email@example.com" disabled={isLoading} className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed" />
           </div>
 
           {errorMessage && saveStatus === "error" && (
@@ -471,25 +291,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
             </div>
           )}
 
-          <button
-            onClick={handleSave}
-            disabled={isLoading}
-            className="w-full mt-6 py-3.5 text-white font-bold rounded-lg bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                {/* <CheckCircle className="w-5 h-5" /> */}
-                <span>Save</span>
-              </>
-            )}
+          <button onClick={handleSave} disabled={isLoading} className="w-full mt-6 py-3.5 text-white font-bold rounded-lg bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+            {isLoading ? "Saving..." : "Save"}
           </button>
         </div>
- 
+
         {/* <div className="mt-5 pt-4 border-t border-gray-200 text-center space-y-1">
           <p className="text-xs text-gray-600 font-mono">
             Backend: <span className="text-indigo-600 font-semibold">{API_BASE_URL}/register</span>
@@ -507,4 +313,3 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onClose }) => {
 };
 
 export default ProfileCard;
-
