@@ -1,7 +1,7 @@
 export interface Vehicle {
   id: string;
   name?: string; // make optional
-  Number?:string;
+  Number?: string;
   bikeName?: string; // ✅ add this line
   price: number;
   transmission: string;
@@ -14,11 +14,11 @@ export interface Vehicle {
   description?: string;
   model?: string;
   cc?: string;
-  type?:"Car"|"Bike"|"Auto";
+  type?: "Car" | "Bike" | "Auto";
   contactName?: string;
   contactNumber?: string;
   bikeNumber?: string;
-  distance?:string;
+  distance?: string;
   ownerId?: string; // Owner's user ID for booking notifications
   unavailableDates?: { startDate: string; endDate: string; startTime: string; endTime: string }[];
 }
