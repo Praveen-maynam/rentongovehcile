@@ -177,7 +177,7 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters, searchText, onR
                 fuel: v.fuelType,
                 seats: Number(v.Carseater) || 0,
                 location: `${v.pickupArea || ""}, ${v.pickupCity || ""}`,
-                rating: Number(v.averageRating) || 0,
+                rating: Number(v.averageRating) || 4.4,
                 distance: String(v.distance),
                 image:
                   v.carImages?.[0] ||

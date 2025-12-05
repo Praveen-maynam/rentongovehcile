@@ -26,70 +26,61 @@ interface PendingBooking {
   totalPrice?: number;
 }
 
+// Global function to stop notification sound
+const stopGlobalNotificationSound = () => {
+  const audio = (window as any).currentNotificationAudio;
+  if (audio) {
+    audio.pause();
+    audio.currentTime = 0;
+    audio.loop = false;
+    (window as any).currentNotificationAudio = null;
+  }
+};
+
 export default function OwnerPendingBookings() {
   const [pendingBooking, setPendingBooking] = useState<PendingBooking | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastBookingIdRef = useRef<string | null>(null);
 
   // Store
   const { addNotification } = useNotificationStore();
 
   // ----------------------------------------------------
-  // 🔔 INITIALIZE AUDIO ONLY ONCE
+  // 🔔 Request Permission on Mount
   // ----------------------------------------------------
   useEffect(() => {
-    audioRef.current = new Audio("/sounds/new-booking.mp3");
+    if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
   }, []);
 
   // ----------------------------------------------------
-  // 🔔 Play sound **2 times**
+  // 🔔 Play sound (Looping)
   // ----------------------------------------------------
-  const playNotificationSoundTwice = useCallback(() => {
-    if (!audioRef.current) return;
+  const playNotificationSoundLoop = useCallback(() => {
+    // Stop any existing sound first
+    stopGlobalNotificationSound();
 
-    let count = 0;
-    audioRef.current.currentTime = 0;
+    const audio = new Audio("/sounds/new-booking.mp3");
+    audio.loop = true;
 
-    const playAgain = () => {
-      count++;
-      if (count < 2) {
-        audioRef.current!.currentTime = 0;
-        audioRef.current!.play().catch(() => { });
-      }
-    };
+    audio.play().catch(err => console.log("Audio play failed:", err));
 
-    audioRef.current.onended = playAgain;
-    audioRef.current.play().catch(() => { });
-  }, []);
-
-  // ----------------------------------------------------
-  // 🔔 Play sound **1 time** (Single)
-  // ----------------------------------------------------
-  const playNotificationSoundSingle = useCallback(() => {
-    if (!audioRef.current) return;
-
-    audioRef.current.loop = false;
-    audioRef.current.currentTime = 0;
-    audioRef.current.onended = null; // Ensure no loop/repeat
-    audioRef.current.play().catch(() => { });
+    // Store globally
+    (window as any).currentNotificationAudio = audio;
   }, []);
 
   // ----------------------------------------------------
   // ⛔ Stop sound immediately
   // ----------------------------------------------------
   const stopNotificationSound = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.onended = null; // cancel second play
-    }
+    stopGlobalNotificationSound();
   }, []);
 
   // ----------------------------------------------------
-  // Browser notification
+  // Browser notification with Sound
   // ----------------------------------------------------
   const showBrowserNotification = (booking: PendingBooking) => {
     if ("Notification" in window && Notification.permission === "granted") {
@@ -97,13 +88,25 @@ export default function OwnerPendingBookings() {
         body: `You have a new booking request for your vehicle.`,
         icon: "/logo192.png",
         tag: booking._id,
-        requireInteraction: true
+        requireInteraction: true,
+        silent: false // We play our own sound
       });
+
+      // Play looping sound
+      playNotificationSoundLoop();
 
       notification.onclick = () => {
         window.focus();
         notification.close();
+        stopNotificationSound();
       };
+
+      notification.onclose = () => {
+        stopNotificationSound();
+      };
+    } else {
+      // If no notification permission, just play sound
+      playNotificationSoundLoop();
     }
   };
 
@@ -113,8 +116,8 @@ export default function OwnerPendingBookings() {
     message: string,
     type: "booking_confirmed" | "booking_declined" | "general" = "general"
   ) => {
-    playNotificationSoundSingle();
-
+    // For general notifications (not new booking), we might want a single beep or nothing
+    // But here we are just adding to the store
     addNotification({
       type,
       title,
@@ -172,13 +175,13 @@ export default function OwnerPendingBookings() {
 
       if (pending.length > 0) {
         const latest = pending[0];
+        // Only trigger if it's a NEW booking we haven't seen in this session
         if (latest._id !== lastBookingIdRef.current) {
           lastBookingIdRef.current = latest._id;
           setPendingBooking(latest);
           setShowModal(true);
 
-          // Play double sound
-          playNotificationSoundTwice();
+          // Show Notification AND Play Sound
           showBrowserNotification(latest);
 
           addNotification({
@@ -194,7 +197,7 @@ export default function OwnerPendingBookings() {
     } catch (err) {
       console.error("Error fetching bookings:", err);
     }
-  }, [ownerId, playNotificationSoundTwice, addNotification]);
+  }, [ownerId, addNotification]); // Removed playNotificationSoundTwice dependency
 
 
   useEffect(() => {
@@ -205,8 +208,9 @@ export default function OwnerPendingBookings() {
 
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
+      stopNotificationSound(); // Cleanup sound on unmount
     };
-  }, [ownerId, fetchPendingBookings]);
+  }, [ownerId, fetchPendingBookings, stopNotificationSound]);
 
   // ----------------------------------------------------
   // Owner actions
@@ -236,9 +240,9 @@ export default function OwnerPendingBookings() {
   const handleClose = () => {
     stopNotificationSound();
     setShowModal(false);
+   
   };
 
-  // ----------------------------------------------------
   return (
     <>
       {showModal && pendingBooking && (

@@ -6,7 +6,7 @@ import { useNotificationStore } from '../../store/notification.store';
 
 import { API_BASE_URL, SOCKET_URL } from '../../services/api.service';
 const EXPIRY_TIME = 2 * 60 * 1000; // 120 seconds
-const WARNING_TIME = 0 * 1000; // 0 seconds before expiry
+const WARNING_TIME = 20 * 1000; // 20 seconds before expiry
 
 // Sound file paths
 const SOUND_1_WARNING = "/sounds/WhatsApp Audio 2025-11-26 at 12.29.55.mp3";
@@ -156,7 +156,7 @@ function OwnerBookingModal() {
     }
   };
 
-  // Stop new booking sound
+  // Stop new bookin g sound
   const stopNewBookingSound = () => {
     try {
       if (audioRef.current) {

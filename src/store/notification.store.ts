@@ -25,6 +25,11 @@ export interface Notification {
   fromDate?: string;
   toDate?: string;
   totalPrice?: number;
+
+  // 🔥 Add these fields (Fixes your errors)
+  expiresAt?: number;          // For owner booking timer
+  contactNumber?: string;      // Customer phone number
+  customerId?: string;         // Needed for confirm/reject notifications
 }
 
 interface NotificationState {
@@ -44,6 +49,10 @@ interface NotificationState {
   markAllAsRead: (userId: string) => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
   clearAllNotifications: (userId: string) => Promise<void>;
+
+  // Booking actions
+  confirmBooking: (notificationId: string, bookingId: string) => Promise<void>;
+  rejectBooking: (notificationId: string, bookingId: string) => Promise<void>;
 
   // Socket actions
   initializeSocket: (userId: string) => void;
@@ -289,6 +298,81 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       console.log('🔔 Cleared all notifications');
     } catch (error) {
       console.error('🔔 Error clearing all notifications:', error);
+    }
+  },
+
+  // Confirm booking
+  confirmBooking: async (notificationId: string, bookingId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/confirmBooking/${bookingId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to confirm booking');
+      }
+
+      console.log('✅ Booking confirmed:', bookingId);
+
+      // Update notification status
+      set((state) => ({
+        notifications: state.notifications.map((notif) =>
+          notif.id === notificationId
+            ? { ...notif, bookingStatus: 'Confirmed', type: 'booking_confirmed' as const }
+            : notif
+        ),
+      }));
+
+      // Emit socket event if connected
+      if (notificationSocket?.connected) {
+        const userId = localStorage.getItem('userId');
+        notificationSocket.emit('booking-status-update', {
+          bookingId,
+          status: 'accepted',
+          ownerId: userId,
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error confirming booking:', error);
+      throw error;
+    }
+  },
+
+  // Reject booking
+  rejectBooking: async (notificationId: string, bookingId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/cancelBooking/${bookingId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reject booking');
+      }
+
+      console.log('❌ Booking rejected:', bookingId);
+
+      // Remove notification from list
+      set((state) => ({
+        notifications: state.notifications.filter((notif) => notif.id !== notificationId),
+        unreadCount: state.notifications.find(n => n.id === notificationId && !n.read)
+          ? state.unreadCount - 1
+          : state.unreadCount,
+      }));
+
+      // Emit socket event if connected
+      if (notificationSocket?.connected) {
+        const userId = localStorage.getItem('userId');
+        notificationSocket.emit('booking-status-update', {
+          bookingId,
+          status: 'rejected',
+          ownerId: userId,
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error rejecting booking:', error);
+      throw error;
     }
   },
 

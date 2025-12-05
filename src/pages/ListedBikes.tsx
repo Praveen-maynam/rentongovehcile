@@ -315,7 +315,8 @@ const ListedBikes: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-gray-50 px-2 sm:px-4 lg:px-6 py-6">
+
       {successMessage && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
           {successMessage}
@@ -410,7 +411,8 @@ const ListedBikes: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-6 pb-16">
+          <div className="flex flex-col gap-4 pb-12">
+
             {filteredBikes.map((bike, index) => {
               const isUnavailable = !bike.available;
               const bikeId = bike._id || bike.id;
@@ -420,14 +422,16 @@ const ListedBikes: React.FC = () => {
                 <div
                   key={bikeId || `bike-${index}`}
                   onClick={() => handleCardClick(bike)}
-                  className={`relative flex flex-col md:flex-row bg-white rounded-xl shadow-sm 
-                    transition-all duration-300 overflow-hidden
-                    border-2 border-transparent hover:border-blue-500 hover:shadow-xl
-                    p-4 gap-4 w-full
-                    ${!isApproved ? "opacity-60" : "cursor-pointer"}`}
+                  className={`relative flex flex-col md:flex-row bg-white rounded-xl shadow 
+transition-all duration-300
+border border-gray-200 hover:border-blue-500
+p-3 gap-3 w-full max-w-4xl mx-auto
+${!isApproved ? "opacity-60" : "cursor-pointer"}`}
+
                 >
                   <div className="flex flex-col md:flex-row gap-4 w-full">
-                    <div className="w-full md:w-[300px] h-[250px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                    <div className="w-full md:w-[330px] h-[300px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+
                       <img
                         src={bike.image}
                         alt={bike.name}
@@ -438,12 +442,20 @@ const ListedBikes: React.FC = () => {
                       />
                     </div>
 
-                    <div className="flex flex-col flex-1 font-medium gap-2">
-                      <h3 className="font-bold text-xl text-gray-900 truncate">
+                    <div className="flex flex-col flex-1 font-medium gap-1">
+
+                      <h3
+                        className="font-bold text-lg text-gray-900 leading-tight line-clamp-2 overflow-hidden"
+                        style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' }}
+                      >
                         {bike.name}
                       </h3>
 
-                      <p className="font-bold text-2xl mt-0.5 mb-0.5">
+
+
+
+                      <p className="font-bold text-xl mt-0.5 mb-0.5">
+
                         ₹{bike.price}
                         <span className="text-gray-500 font-normal text-sm">/km</span>
                       </p>

@@ -80,7 +80,7 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit, filters, searchText, o
               ? bike.bikeImages
               : ["https://via.placeholder.com/400x250?text=No+Image"],
           distance: bike.distance || "0",
-          averageRating: bike.averageRating || "0.0",
+          averageRating: bike.averageRating || "4.4",
           totalReviews: bike.totalReviews || 0,
         }));
         setVehicles(formattedBikes);

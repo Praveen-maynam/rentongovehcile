@@ -183,6 +183,7 @@ const ListCarPage = () => {
     Ac_available: false, description: "", RentPerHour: "", RentPerDay: "",
     contactName: "", contactNumber: "", DepositAmount: "0",
     drivingLicenseRequired: false, AadharCardRequired: false, DepositVehicle: false,
+     insurance: false, insuranceExpiry: "",
     photoFront: null as File | null,
     photoBack: null as File | null,
     photoLeft: null as File | null,

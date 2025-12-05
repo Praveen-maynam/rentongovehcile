@@ -1,11 +1,11 @@
-// // export default Feedback;
+
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Edit2, Star } from "lucide-react";
 import { useReviewStore } from "../store/review.store";
 import { useNotificationStore } from "../store/notification.store";
 
-// ✅ FeedbackModal Component
+
 const FeedbackModal = ({ isOpen, onClose, onSubmit }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -17,7 +17,7 @@ const FeedbackModal = ({ isOpen, onClose, onSubmit }) => {
       <div className="bg-white rounded-2xl max-w-md w-full p-6">
         <h2 className="text-xl font-semibold mb-4">Give Feedback</h2>
 
-        {/* Star Rating */}
+     
         <div className="mb-4">
           <p className="text-sm text-gray-600 mb-2">Rate your experience</p>
           <div className="flex gap-2">

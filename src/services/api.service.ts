@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
   }
 );
 
-// ==================== UTILS ====================
+
 const utils = {
   validateDateFormat: (date: string) => /^\d{4}-\d{2}-\d{2}$/.test(date),
   validateTimeFormat: (time: string) => /^\d{2}\.\d{2}$/.test(time),
