@@ -5,7 +5,7 @@ import { useListedBikesStore } from "../store/listedBikes.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
 
-import OwnerCalendar from "../components/ui/OwnerCalender";
+import OwnerCalendar from "../components/ui/OwnerCalendar/OwnerCalendar";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import BikeLogo from "../assets/icons/BikeLogo.png";
 import Location from "../assets/icons/Location.png";

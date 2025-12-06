@@ -5,7 +5,7 @@ import { Loader2, Plus } from "lucide-react";
 import { useListedCarsStore } from "../store/listedCars.store";
 import { useLocation } from "../store/location.context";
 import apiService from "../services/api.service";
-import OwnerCalendar from "../components/ui/OwnerCalender";
+import OwnerCalendar from "../components/ui/OwnerCalendar/OwnerCalendar";
 
 import BlackCar from "../assets/images/BlackCar.png";
 import AutomaticLogo from "../assets/icons/AutomaticLogo.png";

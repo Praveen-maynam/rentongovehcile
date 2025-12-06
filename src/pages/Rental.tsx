@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Search } from "lucide-react";
 import VehicleSection from "../components/VehicleSection";
@@ -54,7 +53,6 @@ const Rental: React.FC = () => {
               onChange={setEndDate}
               minDate={startDate}
             />
-
           </div>
         </div>
 
@@ -71,13 +69,27 @@ const Rental: React.FC = () => {
             />
           </div>
 
-          <button
-            onClick={() => setIsFilterOpen(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
-          >
-            <img src={Filter} alt="Filter" className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span className="hidden sm:inline">Filter</span>
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsFilterOpen(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white text-lm font-semibold px-4 py-1 rounded-md hover:opacity-100 transition-all"
+            >
+              <img src={Filter} alt="Filter" className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="hidden sm:inline">Filter</span>
+            </button>
+
+            {/* 🔹 Filter Modal */}
+            {isFilterOpen && (
+              <FilterCard
+                onApply={(filters) => {
+                  setAppliedFilters(filters);
+                  setIsFilterOpen(false);
+                }}
+                onClose={() => setIsFilterOpen(false)}
+                initialFilters={appliedFilters || {}}
+              />
+            )}
+          </div>
         </div>
       </div>
 
@@ -119,6 +131,7 @@ const Rental: React.FC = () => {
           </div>
         </div>
       )}
+
       {/* 🚗 Cars Section */}
       {(!appliedFilters || appliedFilters.vehicleType === "cars") && (
         <div className="px-4 sm:px-6">
@@ -171,18 +184,6 @@ const Rental: React.FC = () => {
             } : undefined}
           />
         </div>
-      )}
-
-      {/* 🔹 Filter Modal */}
-      {isFilterOpen && (
-        <FilterCard
-          onApply={(filters) => {
-            setAppliedFilters(filters);
-            setIsFilterOpen(false);
-          }}
-          onClose={() => setIsFilterOpen(false)}
-          initialFilters={appliedFilters || {}}
-        />
       )}
     </div>
   );

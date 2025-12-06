@@ -65,7 +65,7 @@ const BookingNotification: React.FC<BookingNotificationProps> = ({
               {timePassed}
             </span>
           </div>
-          
+
           <div className="flex gap-2 mt-3">
             <button
               onClick={handleConfirm}

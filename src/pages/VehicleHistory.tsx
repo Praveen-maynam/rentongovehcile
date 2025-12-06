@@ -550,7 +550,7 @@ const VehicleHistory: React.FC = () => {
                           <span>Chat</span>
                         </button>
 
-                       
+
                       </div>
                     )}
 

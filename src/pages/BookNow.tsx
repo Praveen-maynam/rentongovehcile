@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { vehicles } from "./data/Vehicle";
@@ -19,7 +18,8 @@ import toast from "react-hot-toast";
 import Automatic from "../assets/icons/automatic.jpeg";
 import Seats from "../assets/icons/seats.jpeg";
 import Fuel from "../assets/icons/fuel.jpeg";
-import LocationIcon from "../assets/icons/Location.png";
+// import LocationIcon from "../assets/icons/Location.png";
+import ac from "../assets/icons/ac.png";
 import CalenderLogo from "../assets/icons/CalanderLogo.png";
 import ClockIcon from "../assets/icons/ClockIcon.png";
 //  import VehicleAvailabilityCalendar from "../components/AvailabilityDateTimeModal";
@@ -46,6 +46,8 @@ interface BookingData {
   status: 'pending' | 'confirmed' | 'rejected' | 'cancelled';
   FromDate: string;
   ToDate: string;
+  pricePerDay: number;   // ⭐ ADD THIS
+  ac: boolean | string | any;
   FromTime: string;
   ToTime: string;
   totalPrice: string;
@@ -86,6 +88,7 @@ const bookingAPIService = {
       urlencoded.append("FromTime", payload.fromTime);
       urlencoded.append("ToTime", payload.toTime);
       urlencoded.append("totalHours", payload.totalHours || "0");
+      urlencoded.append("totalDays", payload.totalDay || "0");
       urlencoded.append("totalPrice", payload.totalPrice || "0");
 
       const response = await fetch('http://3.110.122.127:3000/Bookings', {
@@ -368,7 +371,6 @@ const BookNow: React.FC = () => {
               setSelectedDateTime(null);
             }, 3000);
           }
-
         } catch (error) {
           console.error("❌ Error polling booking status:", error);
         }
@@ -855,6 +857,7 @@ const BookNow: React.FC = () => {
     }
   };
 
+
   const formatDateForAPI = (dateString: string): string => {
     try {
       const date = new Date(dateString);
@@ -889,6 +892,27 @@ const BookNow: React.FC = () => {
     return timeString;
   };
 
+  // ============================================================================
+  // 🔥 CALCULATE HOURLY AND DAILY PRICES
+  // ============================================================================
+  const vehicleData = apiCarData || {};
+  const vehicleType = location.state?.vehicleType || vehicle?.type || 'car';
+  const isCar = !!vehicleData.CarName || !!vehicleData.carImages || vehicleType === "car";
+
+  // Get base hourly price from API
+  const baseHourlyPrice = parseInt(
+    isCar
+      ? (vehicleData.RentPerHour || vehicleData.pricePerHour || '0')
+      : (vehicleData.pricePerKm || vehicleData.pricePerHour || '0')
+  );
+
+  // 🔥 Calculate daily price as hourly × 24
+  const baseDailyPrice = baseHourlyPrice * 24;
+
+  console.log("💰 PRICE CALCULATION:");
+  console.log("   Hourly Price:", baseHourlyPrice);
+  console.log("   Daily Price (Hourly × 24):", baseDailyPrice);
+
   const currentVehicle = vehicle || (apiCarData ? {
     id: apiCarData._id || apiCarData.id || id || '',
     name: apiCarData.CarName || apiCarData.bikeName || 'Unknown Vehicle',
@@ -897,15 +921,16 @@ const BookNow: React.FC = () => {
       : (apiCarData.bikeImages && apiCarData.bikeImages.length > 0)
         ? apiCarData.bikeImages[0]
         : apiCarData.carImage || apiCarData.bikeImage || apiCarData.image || 'https://via.placeholder.com/400',
-    price: apiCarData.RentPerDay || apiCarData.RentPerHour || apiCarData.pricePerKm || apiCarData.pricePerHour || '0',
+    price: baseHourlyPrice.toString(), // Store hourly price as base
+    pricePerHour: baseHourlyPrice, // 🔥 NEW: Explicit hourly price
+    pricePerDay: baseDailyPrice,   // 🔥 NEW: Calculated daily price
     type: (apiCarData.bikeName ? 'bike' : 'car') as Vehicle["type"],
     transmission: apiCarData.transmissionType || 'Manual',
     fuel: apiCarData.fuelType || 'Petrol',
     seats: apiCarData.Carseater || apiCarData.seatingCapacity || '2',
-    location: apiCarData.pickupArea || apiCarData.pickupCity || 'Unknown Location',
+    ac: apiCarData.ac || false,
     ownerId: apiCarData.ownerId || apiCarData.userId || '', // Owner of the vehicle
   } : null);
-
   /**
    * 🔥 MAIN BOOKING CREATION FUNCTION WITH DATE BLOCKING
    */
@@ -927,9 +952,21 @@ const BookNow: React.FC = () => {
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
 
       const totalHours = calculateTotalHours(startDate, endDate, startTime, endTime);
-      const pricePerHour = parseInt(String(currentVehicle?.price ?? "0"), 10);
-      const totalPrice = totalHours * pricePerHour;
-      const contactNumber = userData?.phone || "";
+
+      // 🔥 Use correct price based on selected type with type guard
+      const pricePerHour = ("pricePerHour" in currentVehicle) ? currentVehicle.pricePerHour : parseInt(String(currentVehicle.price))
+
+      const pricePerDay = ("pricePerDay" in currentVehicle) ? currentVehicle.pricePerDay : parseInt(String(currentVehicle.price))
+        * 24;
+
+      const priceToUse = selectedPriceType === 'hour'
+        ? pricePerHour
+        : pricePerDay;
+
+      const totalPrice = selectedPriceType === 'hour'
+        ? totalHours * pricePerHour
+        : Math.ceil(totalHours / 24) * pricePerDay;
+
       // Format dates for API (YYYY-MM-DD format)
       const formattedFromDate = formatDateForAPI(startDate);
       const formattedToDate = formatDateForAPI(endDate);
@@ -950,6 +987,9 @@ const BookNow: React.FC = () => {
       console.log("📅 To Date:", formattedToDate);
       console.log("⏰ From Time:", formattedFromTime);
       console.log("⏰ To Time:", formattedToTime);
+      console.log("🕐 Total Hours:", totalHours);
+      console.log("💵 Price Type:", selectedPriceType);
+      console.log("💰 Price Per Unit:", priceToUse);
       console.log("💰 Total Price:", totalPrice);
       console.log("🚗 Vehicle ID:", currentVehicle.id);
       console.log("👤 User ID:", userData?._id || currentUserId);
@@ -960,9 +1000,10 @@ const BookNow: React.FC = () => {
         ownerId: currentVehicle.ownerId, // 🔥 CRITICAL: Owner ID for pending bookings notification
         vehicleType: mapVehicleTypeForAPI(currentVehicle.type),
         vehicleId: currentVehicle.id,
-        pricePerKm: String(pricePerHour),
+        pricePerKm: String(priceToUse),
         pricePerDay: String(totalPrice),
-        contactNumber: contactNumber,
+        contactNumber: userData?.contactNumber || "",
+
         contactName: userData?.name || "",
         latitude: userData?.latitude || "17.438095",
         longitude: userData?.longitude || "78.4485",
@@ -971,6 +1012,7 @@ const BookNow: React.FC = () => {
         fromTime: formattedFromTime,
         toTime: formattedToTime,
         totalHours: totalHours.toString(),
+        // totalDays: totalDays.toString(),
         totalPrice: totalPrice.toString(),
       };
 
@@ -1234,11 +1276,7 @@ const BookNow: React.FC = () => {
     );
   }
 
-  // 🔥 ADD THIS: Prepare vehicle images early
-  const vehicleData = apiCarData || {};
-  const vehicleType = location.state?.vehicleType || vehicle?.type || 'car';
-  const isCar = !!vehicleData.CarName || !!vehicleData.carImages || vehicleType === "car";
-
+  // 🔥 Prepare vehicle images
   let vehicleImages = (isCar ? vehicleData.carImages : vehicleData.bikeImages) || [];
   vehicleImages = vehicleImages.filter((img: string) => img && img.trim() !== "" && img !== "undefined");
 
@@ -1266,10 +1304,6 @@ const BookNow: React.FC = () => {
   const displayName = isCar
     ? `${vehicleData.CarName || "Unknown"} ${vehicleData.CarModel || ""}`.trim()
     : `${vehicleData.bikeName || "Unknown"} ${vehicleData.bikeModel || ""}`.trim();
-
-  const displayPrice = isCar
-    ? vehicleData.RentPerHour || 0
-    : vehicleData.pricePerKm || 0;
 
   return (
     <div className="max-w-8xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1329,7 +1363,7 @@ const BookNow: React.FC = () => {
       <div className="lg:col-span-1">
         <h1 className="text-4xl font-bold mb-4">{currentVehicle.name}</h1>
 
-        {/* Price Boxes */}
+        {/* 🔥 UPDATED PRICE BOXES - Shows different prices */}
         <div className="flex items-center gap-3 mb-6">
           <div
             onClick={() => setSelectedPriceType('day')}
@@ -1343,8 +1377,12 @@ const BookNow: React.FC = () => {
               <span className={`text-xs ${selectedPriceType === 'day' ? 'text-white' : 'text-gray-500'}`}>
                 Daily
               </span>
+              {/* <span className={`text-lg font-bold ${selectedPriceType === 'day' ? 'text-white' : 'text-gray-900'}`}>
+                ₹{currentVehicle.pricePerDay}/day
+              </span> */}
               <span className={`text-lg font-bold ${selectedPriceType === 'day' ? 'text-white' : 'text-gray-900'}`}>
-                ₹{currentVehicle.price}/day
+                ₹{("pricePerDay" in currentVehicle) ? currentVehicle.pricePerDay : parseInt(String(currentVehicle.price))
+                  * 24}/day
               </span>
             </div>
           </div>
@@ -1362,7 +1400,8 @@ const BookNow: React.FC = () => {
                 Hourly
               </span>
               <span className={`text-lg font-bold ${selectedPriceType === 'hour' ? 'text-white' : 'text-gray-900'}`}>
-                ₹{currentVehicle.price}/hr
+                ₹{("pricePerHour" in currentVehicle) ? currentVehicle.pricePerHour : parseInt(String(currentVehicle.price))
+                }/hr
               </span>
             </div>
           </div>
@@ -1393,9 +1432,12 @@ const BookNow: React.FC = () => {
           <div className="w-px h-16 bg-gray-300"></div>
           <div className="flex flex-col items-center gap-2 flex-1">
             <div className="w-[50px] h-[50px] flex items-center justify-center">
-              <img src={LocationIcon} alt="Location" className="w-full h-full object-contain" />
+              <img src={ac} alt="AC" className="w-full h-full object-contain" />
             </div>
-            <span className="text-sm text-gray-700">{currentVehicle.location}</span>
+            <span className="text-sm text-gray-700">
+              {"ac" in currentVehicle && currentVehicle.ac ? "AC" : "Non-AC"}
+            </span>
+
           </div>
         </div>
 
@@ -1443,7 +1485,6 @@ const BookNow: React.FC = () => {
             </div>
           </div>
         )}
-
         {/* Book Now Button */}
         {!showContactButtons ? (
           <button
@@ -1500,37 +1541,22 @@ const BookNow: React.FC = () => {
 
         {/* DateTime Modal */}
         {isDateTimeModalOpen && (
-          //  <VehicleAvailabilityCalendar
-          //   isOpen={isDateTimeModalOpen}
-          //   onClose={() => setIsDateTimeModalOpen(false)}
-          //   VechileId={currentVehicle?.id || id || ''}
-          //   vehicleType="Car"
-          //   userId={localStorage.getItem("userId") || ''}
-          //   userRole="customer" // 🔥 No three dots, "Book Your Vehicle" heading
-          //   vehicleName="Tesla Model 3"
-          //   pricePerDay={2500}
-          //   onBookingConfirm={addBooking}
-          // />
-
-
-          // In BookNow.tsx, update the CustomerCalendar usage:
           <CustomerCalendar
             isOpen={isDateTimeModalOpen}
             onClose={() => setIsDateTimeModalOpen(false)}
             userRole="customer"
-            VechileId={currentVehicle?.id || id || ''}  // Capital V to match interface
+            VechileId={currentVehicle?.id || id || ''}
             vechileType={mapVehicleTypeForAPI(currentVehicle?.type)}
             userId={localStorage.getItem("userId") || currentUserId}
-            ownerId={apiCarData?.ownerId || apiCarData?.userId || ''}  // Pass owner ID
-            pricePerDay={parseInt(currentVehicle?.price || '0')}
+            ownerId={apiCarData?.ownerId || apiCarData?.userId || ''}
+            pricePerDay={("pricePerDay" in currentVehicle) ? currentVehicle.pricePerDay : parseInt(String(currentVehicle.price))
+              * 24}
             vehicleName={currentVehicle?.name || 'Vehicle'}
             latitude={localStorage.getItem("latitude")}
             longitude={localStorage.getItem("longitude")}
-
             onBookingComplete={(booking) => {
               console.log("Booking completed!", booking);
               setIsDateTimeModalOpen(false);
-              // Show success or navigate
               toast.success("Booking confirmed!");
             }}
           />
@@ -1949,19 +1975,36 @@ const BookNow: React.FC = () => {
                       </div>
 
                       <div className="flex justify-between mt-1">
-                        <span className="text-gray-600">Price per hour:</span>
-                        <span className="font-medium text-gray-900">₹{currentVehicle.price}</span>
+                        <span className="text-gray-600">Price per {selectedPriceType}:</span>
+                        <span className="font-medium text-gray-900">
+                          ₹{selectedPriceType === 'hour'
+                            ? (("pricePerHour" in currentVehicle) ? currentVehicle.pricePerHour : parseInt(String(currentVehicle.price))
+                            )
+                            : (("pricePerDay" in currentVehicle) ? currentVehicle.pricePerDay : parseInt(String(currentVehicle.price))
+                              * 24)
+                          }
+                        </span>
                       </div>
 
                       <div className="flex justify-between mt-2 pt-2 border-t border-gray-300">
                         <span className="font-semibold text-gray-900">Total Price:</span>
                         <span className="font-bold text-blue-600 text-lg">
-                          ₹{calculateTotalHours(
-                            selectedDateTime.startDate,
-                            selectedDateTime.endDate,
-                            selectedDateTime.startTime,
-                            selectedDateTime.endTime
-                          ) * parseInt(currentVehicle.price)}
+                          ₹{selectedPriceType === 'hour'
+                            ? calculateTotalHours(
+                              selectedDateTime.startDate,
+                              selectedDateTime.endDate,
+                              selectedDateTime.startTime,
+                              selectedDateTime.endTime
+                            ) * (("pricePerHour" in currentVehicle) ? currentVehicle.pricePerHour : parseInt(String(currentVehicle.price))
+                            )
+                            : Math.ceil(calculateTotalHours(
+                              selectedDateTime.startDate,
+                              selectedDateTime.endDate,
+                              selectedDateTime.startTime,
+                              selectedDateTime.endTime
+                            ) / 24) * (("pricePerDay" in currentVehicle) ? currentVehicle.pricePerDay : parseInt(String(currentVehicle.price))
+                              * 24)
+                          }
                         </span>
                       </div>
                     </div>

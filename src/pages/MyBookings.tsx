@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, RefreshCw, X } from "lucide-react";
+import toast, { Toaster } from 'react-hot-toast';
 import {
   useBookingStore,
   Booking,
@@ -11,7 +12,8 @@ import {
   shouldShowPopup,
   mapVehicleType,
   formatApiDate,
-  formatApiTime
+  formatApiTime,
+  getStatusMessage
 } from "../store/booking.store";
 import apiService from "../services/api.service";
 import Auto from "../assets/images/Auto.png";
@@ -60,7 +62,7 @@ interface ApiBookingResponse {
 
 const MyBookings: React.FC = () => {
   const navigate = useNavigate();
-  const { bookings, setBookings } = useBookingStore();
+  const { bookings, setBookings, updateBookingStatus } = useBookingStore();
 
   const [searchText, setSearchText] = useState("");
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
@@ -528,3 +530,10 @@ const MyBookings: React.FC = () => {
 };
 
 export default MyBookings;
+
+
+
+
+
+
+

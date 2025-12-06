@@ -9,7 +9,7 @@ interface RideCompletionNotificationProps {
   timePassed?: string;
 }
 
-const RideCompletionNotification: React.FC<RideCompletionNotificationProps> = ({ 
+const RideCompletionNotification: React.FC<RideCompletionNotificationProps> = ({
   rideId,
   vehicleName,
   timePassed = '6 min ago'
@@ -17,7 +17,7 @@ const RideCompletionNotification: React.FC<RideCompletionNotificationProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const navigate = useNavigate();
-  
+
   const handleGiveFeedback = () => {
     setIsModalOpen(true);
   };
@@ -43,7 +43,7 @@ const RideCompletionNotification: React.FC<RideCompletionNotificationProps> = ({
           </button>
         </div>
       </div>
-      
+
       {/* Feedback Modal - Mounted at root level */}
       <FeedbackModal
         isOpen={isModalOpen}
