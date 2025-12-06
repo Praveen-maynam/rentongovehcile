@@ -697,68 +697,101 @@ const BookNow: React.FC = () => {
     }
 
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("🔍 FETCHING REVIEWS FOR VEHICLE");
+    console.log("🔍 FETCHING REVIEWS FOR VEHICLE (Production API)");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("📋 Vehicle ID:", vehicleId);
-    localStorage.setItem("vehicleId", vehicleId);
 
+    // 🔥 Get vehicle type dynamically from state or localStorage
+    const vehicleType = location.state?.vehicleType || vehicle?.type || localStorage.getItem("vehicletype") || 'car';
+    const normalizedVehicleType = vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1).toLowerCase();
+
+    console.log("🚗 Vehicle Type:", normalizedVehicleType);
+    console.log("🌐 API URL:", `http://3.110.122.127:3000/getReviews?vechileType=${normalizedVehicleType}&VechileId=${vehicleId}`);
 
     try {
-      const result = await apiService.review.getReviewsByCarId(vehicleId);
+      // 🔥 PRODUCTION API CALL with dynamic parameters
+      const apiUrl = `http://3.110.122.127:3000/getReviews?vechileType=${normalizedVehicleType}&VechileId=${vehicleId}`;
+      const response = await fetch(apiUrl);
 
-      console.log("✅ Reviews Response:", result);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      if ((result as any).success && Array.isArray((result as any).reviews)) {
-        const reviews = (result as any).reviews;
-        console.log("🎉 SUCCESS: Reviews found!", reviews.length);
-        console.log("📝 Full Review Data:", JSON.stringify(reviews, null, 2));
+      const result = await response.json();
+      console.log("✅ Reviews API Response:", result);
 
-        setApiReviews(reviews);
+      // Handle different response formats
+      let reviews: Review[] = [];
 
-        const editingReviewId = sessionStorage.getItem('editingReviewId');
-        if (editingReviewId) {
-          const updatedReview = reviews.find((r: any) => r._id === editingReviewId);
-          if (updatedReview) {
-            console.log("✨ Updated review detected!");
-            console.log("⭐ NEW Rating:", updatedReview.rating);
-            console.log("💬 NEW Text:", updatedReview.review || updatedReview.reviewText);
+      if (result.success && Array.isArray(result.reviews)) {
+        reviews = result.reviews;
+      } else if (result.success && Array.isArray(result.data)) {
+        reviews = result.data;
+      } else if (Array.isArray(result.reviews)) {
+        reviews = result.reviews;
+      } else if (Array.isArray(result.data)) {
+        reviews = result.data;
+      } else if (Array.isArray(result)) {
+        reviews = result;
+      }
 
-            toast.success(`🎉 Review updated! New rating: ${updatedReview.rating}★`, {
-              duration: 3000,
-              position: 'top-center',
-            });
-          }
+      console.log("🎉 SUCCESS: Reviews found!", reviews.length);
+      console.log("📝 Review Details:", JSON.stringify(reviews.slice(0, 2), null, 2));
 
-          setTimeout(() => {
-            console.log("🧹 Clearing editingReviewId from sessionStorage");
-            sessionStorage.removeItem('editingReviewId');
-          }, 5000);
+      setApiReviews(reviews);
+
+      // Calculate and set average rating
+      if (reviews.length > 0) {
+        const avgRating = calculateAverageRating(reviews);
+        setApiAverageRating(avgRating);
+        console.log("⭐ Average Rating:", avgRating);
+      } else {
+        setApiAverageRating(0);
+      }
+
+      // Check for updated review (from edit flow)
+      const editingReviewId = sessionStorage.getItem('editingReviewId');
+      if (editingReviewId) {
+        const updatedReview = reviews.find((r: any) => r._id === editingReviewId);
+        if (updatedReview) {
+          console.log("✨ Updated review detected!");
+          console.log("⭐ NEW Rating:", updatedReview.rating);
+          console.log("💬 NEW Text:", updatedReview.review || updatedReview.reviewText);
+
+          toast.success(`🎉 Review updated! New rating: ${updatedReview.rating}★`, {
+            duration: 3000,
+            position: 'top-center',
+          });
         }
 
-        if (!silent) {
+        setTimeout(() => {
+          console.log("🧹 Clearing editingReviewId from sessionStorage");
+          sessionStorage.removeItem('editingReviewId');
+        }, 5000);
+      }
+
+      if (!silent) {
+        if (reviews.length > 0) {
           toast.success(`✅ Loaded ${reviews.length} review(s)`, {
             duration: 2000,
             position: 'top-right',
           });
-        }
-
-        return reviews;
-      } else {
-        console.log("ℹ️ No reviews found");
-        setApiReviews([]);
-
-        if (!silent) {
+        } else {
           toast("No reviews yet for this vehicle", {
             duration: 2000,
             position: 'top-right',
           });
         }
       }
+
+      return reviews;
     } catch (error: any) {
       console.error("❌ Fetch reviews failed:", error.message);
+      console.error("❌ Error details:", error);
 
       setReviewsError("Unable to load reviews.");
       setApiReviews([]);
+      setApiAverageRating(0);
 
       if (!silent) {
         toast.error("Failed to load reviews", {

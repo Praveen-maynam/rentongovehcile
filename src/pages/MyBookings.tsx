@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, RefreshCw, X } from "lucide-react";
@@ -12,7 +11,6 @@ import {
   shouldShowPopup,
   mapVehicleType,
   formatApiDate,
-  formatApiTime,
   getStatusMessage
 } from "../store/booking.store";
 import apiService from "../services/api.service";
@@ -59,6 +57,44 @@ interface ApiBookingResponse {
     RentPerDay?: number;
   };
 }
+
+// 24-hour time formatter function - converts any time format to 24-hour
+const formatTimeTo24Hour = (timeString: string | undefined): string => {
+  if (!timeString) return "N/A";
+
+  try {
+    // If already in HH:MM format (24-hour), return as is
+    if (/^\d{2}:\d{2}$/.test(timeString)) {
+      return timeString;
+    }
+
+    // Handle 12-hour format with AM/PM
+    const time12hrMatch = timeString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (time12hrMatch) {
+      let hours = parseInt(time12hrMatch[1]);
+      const minutes = time12hrMatch[2];
+      const period = time12hrMatch[3].toUpperCase();
+
+      if (period === 'PM' && hours !== 12) {
+        hours += 12;
+      } else if (period === 'AM' && hours === 12) {
+        hours = 0;
+      }
+
+      return `${hours.toString().padStart(2, '0')}:${minutes}`;
+    }
+
+    // If it's just a number (like "10"), assume it's hours
+    if (/^\d{1,2}$/.test(timeString)) {
+      return `${timeString.padStart(2, '0')}:00`;
+    }
+
+    return timeString;
+  } catch (error) {
+    console.error("Error formatting time:", error);
+    return timeString;
+  }
+};
 
 const MyBookings: React.FC = () => {
   const navigate = useNavigate();
@@ -139,7 +175,7 @@ const MyBookings: React.FC = () => {
               bookingId: apiBooking._id,
               vehicleType: apiBooking.vechileType,
               fromDate: formatApiDate(apiBooking.FromDate),
-              fromTime: formatApiTime(apiBooking.FromTime),
+              fromTime: formatTimeTo24Hour(apiBooking.FromTime),
               status: newStatus,
               rejectionReason: apiBooking.rejectionReason,
             });
@@ -194,11 +230,11 @@ const MyBookings: React.FC = () => {
             customerName: apiBooking.contactName,
             contactNumber: apiBooking.contactNumber,
             bookingDate: formatApiDate(apiBooking.createdAt || apiBooking.FromDate),
-            bookingTime: formatApiTime(apiBooking.FromTime),
+            bookingTime: formatTimeTo24Hour(apiBooking.FromTime),
             startDate: formatApiDate(apiBooking.FromDate),
-            startTime: formatApiTime(apiBooking.FromTime),
+            startTime: formatTimeTo24Hour(apiBooking.FromTime),
             endDate: formatApiDate(apiBooking.ToDate),
-            endTime: formatApiTime(apiBooking.ToTime),
+            endTime: formatTimeTo24Hour(apiBooking.ToTime),
             modelNo: apiBooking._id.slice(0, 10).toUpperCase(),
             status: newStatus,
             price,
@@ -401,7 +437,7 @@ const MyBookings: React.FC = () => {
                             )}
                           </div>
 
-                          {/* Time Row */}
+                          {/* Time Row - Now in 24-hour format */}
                           <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-5">
                             <div className="flex items-center gap-2">
                               <svg className="w-[13px] h-[13px] text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -530,10 +566,3 @@ const MyBookings: React.FC = () => {
 };
 
 export default MyBookings;
-
-
-
-
-
-
-

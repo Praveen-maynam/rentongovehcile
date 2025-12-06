@@ -1,284 +1,4 @@
-// import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { useMap } from "react-leaflet";
-// import { useLocation } from "../store/location.context";
-// import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
-// import L, { LatLngExpression } from "leaflet";
-// import "leaflet/dist/leaflet.css";
-// import location from "../assets/icons/Location.png";
-// type Suggestion = {
-//   display_name: string;
-//   lat: string;
-//   lon: string;
-//   address?: {
-//     city?: string;
-//     state?: string;
-//     country?: string;
-//   };
-// };
-
-// type Props = {
-//   initialLat?: number;
-//   initialLng?: number;
-//   onSaveLocation?: (city: string, lat: number, lng: number) => void;
-// };
-
-// const DefaultCenter: LatLngExpression = [17.4894387, 78.4602418];
-
-// const DefaultIcon = L.icon({
-//   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-//   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-//   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-//   iconSize: [25, 41],
-//   iconAnchor: [12, 41],
-// });
-// L.Marker.prototype.options.icon = DefaultIcon;
-
-// function debounce<T extends (...args: any[]) => void>(fn: T, wait = 300) {
-//   let t: NodeJS.Timeout;
-//   return (...args: Parameters<T>) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// }
-
-// export default function SearchMapWithSave({
-//   initialLat,
-//   initialLng,
-//   onSaveLocation,
-// }: Props) {
-//   const navigate = useNavigate();
-//   const [query, setQuery] = useState("");
-//   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-//   const [mapCenter, setMapCenter] = useState<LatLngExpression>(
-//     initialLat && initialLng ? [initialLat, initialLng] : DefaultCenter
-//   );
-//   const [markerPos, setMarkerPos] = useState<LatLngExpression | null>(
-//     initialLat && initialLng ? [initialLat, initialLng] : null
-//   );
-//   const [address, setAddress] = useState("");
-//   const [city, setCity] = useState("");
-//   const [loading, setLoading] = useState(false);
-
-//   // Custom hook to animate map zoom when mapCenter changes
-//   function AutoZoom({ position }: { position: LatLngExpression | null }) {
-//     const map = useMap();
-//     useEffect(() => {
-//       if (position) {
-//         map.setView(position, 15, { animate: true });
-//       }
-//     }, [position, map]);
-//     return null;
-//   }
-
-//   // Get setLocationWithCoordinates from context
-//   const { setLocationWithCoordinates } = useLocation();
-
-
-//   const fetchSuggestions = useCallback(
-//     debounce(async (q: string) => {
-//       if (!q.trim()) return setSuggestions([]);
-//       setLoading(true);
-//       const url = new URL("https://nominatim.openstreetmap.org/search");
-//       url.searchParams.set("q", q);
-//       url.searchParams.set("format", "json");
-//       url.searchParams.set("addressdetails", "1");
-//       url.searchParams.set("limit", "6");
-//       const res = await fetch(url.toString(), {
-//         headers: { "User-Agent": "CarRentalApp/1.0" },
-//       });
-//       const data = (await res.json()) as Suggestion[];
-//       setSuggestions(data);
-//       setLoading(false);
-//     }, 300),
-//     []
-//   );
-
-//   useEffect(() => {
-//     fetchSuggestions(query);
-//   }, [query, fetchSuggestions]);
-
-//   const handleSelect = (s: Suggestion) => {
-//     const lat = Number(s.lat);
-//     const lon = Number(s.lon);
-//     const pos: LatLngExpression = [lat, lon];
-//     setMarkerPos(pos);
-//     setMapCenter(pos); // This will trigger AutoZoom
-//     setQuery(s.display_name);
-//     setAddress(s.display_name);
-//     setCity(s.address?.city || s.address?.state || s.address?.country || "");
-//     setSuggestions([]);
-//   };
-
-//   const reverseGeocode = async (lat: number, lon: number) => {
-//     const url = new URL("https://nominatim.openstreetmap.org/reverse");
-//     url.searchParams.set("lat", String(lat));
-//     url.searchParams.set("lon", String(lon));
-//     url.searchParams.set("format", "json");
-//     url.searchParams.set("addressdetails", "1");
-//     const res = await fetch(url.toString());
-//     const data = await res.json();
-//     const addr = data.display_name;
-//     setAddress(addr);
-//     setCity(data.address?.city || data.address?.state || data.address?.country || "");
-//   };
-
-//   const handleUseCurrent = () => {
-//     if (!navigator.geolocation) return alert("Geolocation not supported");
-//     setLoading(true);
-//     navigator.geolocation.getCurrentPosition(
-//       async (pos) => {
-//         const lat = pos.coords.latitude;
-//         const lon = pos.coords.longitude;
-//         setMarkerPos([lat, lon]);
-//         setMapCenter([lat, lon]);
-
-//         // Reverse geocode to get address and update search bar
-//         try {
-//           const url = new URL("https://nominatim.openstreetmap.org/reverse");
-//           url.searchParams.set("lat", String(lat));
-//           url.searchParams.set("lon", String(lon));
-//           url.searchParams.set("format", "json");
-//           url.searchParams.set("addressdetails", "1");
-//           const res = await fetch(url.toString(), {
-//             headers: { "User-Agent": "CarRentalApp/1.0" },
-//           });
-//           const data = await res.json();
-//           const addr = data.display_name;
-
-//           // Update all states including the search query
-//           setAddress(addr);
-//           setQuery(addr); // This will display the location in the search bar
-//           setCity(data.address?.city || data.address?.state || data.address?.country || "");
-//           setSuggestions([]); // Clear any existing suggestions
-//         } catch (error) {
-//           console.error("Reverse geocoding failed:", error);
-//           // Fallback to just coordinates if reverse geocoding fails
-//           setQuery(`${lat.toFixed(6)}, ${lon.toFixed(6)}`);
-//         } finally {
-//           setLoading(false);
-//         }
-//       },
-//       (err) => {
-//         alert(err.message);
-//         setLoading(false);
-//       },
-//       { enableHighAccuracy: true }
-//     );
-//   };
-
-//   const handleSave = () => {
-//     if (!markerPos || !city) {
-//       alert("Please select a valid location first.");
-//       return;
-//     }
-//     const [lat, lon] = markerPos as [number, number];
-//     // Save location with coordinates to context
-//     setLocationWithCoordinates(city, { latitude: lat, longitude: lon }, "India");
-//     onSaveLocation?.(city, lat, lon);
-//     // Optionally show a toast or notification here
-//     navigate("/rental", { replace: true }); // Go to home/navbar page and close this page
-//   };
-
-//   const onMarkerDragEnd = (e: L.DragEndEvent) => {
-//     const pos = e.target.getLatLng();
-//     setMarkerPos([pos.lat, pos.lng]);
-//     reverseGeocode(pos.lat, pos.lng);
-//   };
-
-//   function MapEvents() {
-//     useMapEvents({
-//       click(e) {
-//         setMarkerPos([e.latlng.lat, e.latlng.lng]);
-//         reverseGeocode(e.latlng.lat, e.latlng.lng);
-//       },
-//     });
-//     return null;
-//   }
-
-//   return (
-//     <div className="flex flex-col md:flex-row items-start gap-10 p-4 ml-10">
-//       {/* Left: Map */}
-//       <div
-//         className="border rounded-lg overflow-hidden shadow"
-//         style={{ width: 50, height: 50, minWidth: 700, minHeight: 500 }}
-//       >
-//         <MapContainer
-//           center={mapCenter}
-//           zoom={14}
-//           scrollWheelZoom
-//           style={{ width: 50, height: 50, minWidth: 700, minHeight: 500 }}
-//         >
-//           <TileLayer
-//             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-//             attribution='© OpenStreetMap'
-//           />
-//           <MapEvents />
-//           <AutoZoom position={mapCenter} />
-//           {markerPos && (
-//             <Marker
-//               position={markerPos}
-//               draggable
-//               eventHandlers={{ dragend: onMarkerDragEnd }}
-//             >
-//               <Popup>{address || "Selected location"}</Popup>
-//             </Marker>
-//           )}
-//         </MapContainer>
-//       </div>
-
-//       {/* Right: Search & controls */}
-//       <div className="w-full md:w-1/3 space-y-4">
-//         <div>
-//           <label className="block text-sm font-medium text-gray-700 mb-1">
-//             Search Location
-//           </label>
-//           <input
-//             type="text"
-//             value={query}
-//             onChange={(e) => setQuery(e.target.value)}
-//             placeholder="Enter place, city, or address"
-//             className="w-full border rounded-md px-3 py-2 focus:ring focus:ring-blue-300"
-//           />
-//           {loading && <p className="text-gray-500 text-sm mt-1">Searching…</p>}
-//           {suggestions.length > 0 && (
-//             <ul className="border rounded-md mt-1 max-h-48 overflow-auto bg-white shadow z-50">
-//               {suggestions.map((s, i) => (
-//                 <li
-//                   key={i}
-//                   onClick={() => handleSelect(s)}
-//                   className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-//                 >
-//                   {s.display_name}
-//                 </li>
-//               ))}
-//             </ul>
-
-//           )}
-//         </div>
-
-//         <button
-//           onClick={handleUseCurrent}
-
-//         >
-//           <img src={location} alt="Use Current Location" className="w-10 h-10" />
-
-//         </button>
-
-//         <button
-//           onClick={handleSave}
-//           className="w-full bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white py-2 rounded hover:bg-blue-700 transition"
-//         >
-//           Save
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-
 import React, { useEffect, useRef, useState } from "react";
-
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "../store/location.context";
 import locationIcon from "../assets/icons/Location.png";
@@ -302,7 +22,7 @@ export default function SearchMapWithSave({ initialLat, initialLng, onSaveLocati
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
-  const [googleMaps, setGoogleMaps] = useState<any>(null); // <--- KEY FIX
+  const [googleMaps, setGoogleMaps] = useState<any>(null);
 
   const defaultLocation = {
     lat: initialLat || 17.4894387,
@@ -311,13 +31,11 @@ export default function SearchMapWithSave({ initialLat, initialLng, onSaveLocati
 
   /* ---------------------------- LOAD GOOGLE MAPS FIRST ---------------------------- */
   useEffect(() => {
-    // Check if already loaded
     if (window.google?.maps) {
       setGoogleMaps(window.google);
       return;
     }
 
-    // Check if script already exists
     const existingScript = document.getElementById("google-maps-script");
     if (existingScript) {
       existingScript.addEventListener('load', () => {
@@ -326,7 +44,6 @@ export default function SearchMapWithSave({ initialLat, initialLng, onSaveLocati
       return;
     }
 
-    // Create and load the script
     const script = document.createElement("script");
     script.id = "google-maps-script";
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
@@ -338,9 +55,9 @@ export default function SearchMapWithSave({ initialLat, initialLng, onSaveLocati
     document.head.appendChild(script);
   }, []);
 
-  /* ------------------------------ INITIALIZE MAP ONLY AFTER GOOGLE LOADS ------------------------------ */
+  /* ------------------------------ INITIALIZE MAP ------------------------------ */
   useEffect(() => {
-    if (!googleMaps) return; // <-- prevents running before google is ready
+    if (!googleMaps) return;
 
     const map = new googleMaps.maps.Map(document.getElementById("map") as HTMLElement, {
       center: defaultLocation,
@@ -398,7 +115,7 @@ export default function SearchMapWithSave({ initialLat, initialLng, onSaveLocati
       reverseGeocode(lat, lng);
     });
 
-  }, [googleMaps]); // <--- runs ONLY when google is loaded
+  }, [googleMaps]);
 
   /* ----------------------------- REVERSE GEOCODE ----------------------------- */
   const reverseGeocode = (lat: number, lng: number) => {
@@ -468,38 +185,61 @@ export default function SearchMapWithSave({ initialLat, initialLng, onSaveLocati
 
   /* ----------------------------- RENDER ----------------------------- */
   return (
-    <div className="flex flex-col md:flex-row p-4 gap-10 ml-10">
+    <div className="flex flex-col lg:flex-row p-4 sm:p-6 gap-4 sm:gap-6 lg:gap-10 lg:ml-10 max-w-7xl mx-auto">
 
-      <div className="border rounded-lg shadow" style={{ width: 700, height: 500 }}>
-        <div id="map" style={{ width: "100%", height: "100%" }} />
+      {/* Map Container */}
+      <div className="w-full lg:w-2/3 border rounded-lg shadow overflow-hidden">
+        <div
+          id="map"
+          className="w-full h-[300px] sm:h-[400px] lg:h-[500px]"
+        />
       </div>
 
-      <div className="w-full md:w-1/3 space-y-4">
+      {/* Controls Container */}
+      <div className="w-full lg:w-1/3 space-y-4">
 
-        <label className="text-sm font-medium text-gray-700">Search Location</label>
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full border px-3 py-2 rounded"
-          placeholder="Search city or address"
-        />
+        {/* Search Input */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Search Location
+          </label>
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            placeholder="Search city or address"
+          />
+        </div>
 
-        <button onClick={handleUseCurrent}>
-          <img src={locationIcon} alt="Use Current Location" className="w-10 h-10" />
+        {/* Current Location Display */}
+        {address && (
+          <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <p className="text-xs text-gray-500 mb-1">Selected Location:</p>
+            <p className="text-sm text-gray-700 line-clamp-2">{address}</p>
+            {city && (
+              <p className="text-sm font-medium text-gray-900 mt-1">City: {city}</p>
+            )}
+          </div>
+        )}
+
+        {/* Use Current Location Button */}
+        <button
+          onClick={handleUseCurrent}
+          className="flex items-center gap-2 w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <img src={locationIcon} alt="Location" className="w-5 h-5" />
+          <span className="text-sm font-medium text-gray-700">Use Current Location</span>
         </button>
 
+        {/* Save Button */}
         <button
           onClick={handleSave}
-          className="w-full bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white py-2 rounded"
+          className="w-full bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity shadow-md"
         >
-          Save
+          Save Location
         </button>
       </div>
     </div>
   );
 }
-
-
-
-

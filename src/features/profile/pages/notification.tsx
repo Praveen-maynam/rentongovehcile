@@ -1,4 +1,3 @@
-
 // import React, { useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { useNotificationStore, Notification } from "../../../store/notification.store";
@@ -601,7 +600,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Star,
 } from "lucide-react";
 
 // ⏱️ EXPIRY TIME: 2 minutes
@@ -867,6 +865,15 @@ const Notifications: React.FC = () => {
     );
   };
 
+  // ✅ CHECK IF NOTIFICATION IS BOOKING COMPLETED (show feedback button)
+  const isBookingCompleted = (notification: any): boolean => {
+    return (
+      notification.type === 'ride_completed' ||
+      notification.bookingStatus === 'Completed' ||
+      (notification.type === 'Booking' && notification.title?.includes('Booking Completed'))
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pb-20">
       {/* Header */}
@@ -961,6 +968,18 @@ const Notifications: React.FC = () => {
               const StatusIcon = statusBadge?.icon;
               const loading = actionLoading[notification.id];
               const vehicleName = getVehicleName(notification);
+
+              // 🔍 DEBUG: Log notification details
+              const isCompleted = isBookingCompleted(notification);
+              console.log('📋 Notification Debug:', {
+                id: notification.id,
+                title: notification.title,
+                type: notification.type,
+                bookingStatus: notification.bookingStatus,
+                isCompleted,
+                feedbackGiven: notification.feedbackGiven,
+                shouldShowButton: isCompleted && !notification.feedbackGiven
+              });
 
               // ============================================
               // SPECIAL CARD FOR NEW BOOKING REQUESTS (YES/NO BUTTONS)
@@ -1138,23 +1157,14 @@ const Notifications: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* ✅ STATIC FEEDBACK BUTTON - SHOWS ON EVERY CARD */}
-                  {!notification.feedbackGiven ? (
+                  {/* ✅ FEEDBACK BUTTON - ONLY FOR BOOKING COMPLETED CARDS */}
+                  {isBookingCompleted(notification) && !notification.feedbackGiven && (
                     <button
                       onClick={() => handleFeedbackClick(notification)}
-                      className="w-full mb-3 px-6 py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-3 group"
+                      className="w-full mb-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-base rounded-lg hover:from-blue-700 hover:to-blue-500 transition-all shadow-md"
                     >
-                      <Star className="w-5 h-5 fill-white group-hover:rotate-12 transition-transform" />
-                      <span className="text-base">Give Feedback & Review</span>
-                      <Star className="w-5 h-5 fill-white group-hover:-rotate-12 transition-transform" />
+                      Give Feedback
                     </button>
-                  ) : (
-                    <div className="mb-3 px-4 py-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                      <span className="text-sm font-semibold text-green-700">
-                        Feedback Submitted ✓
-                      </span>
-                    </div>
                   )}
 
                   {/* Booking Details */}

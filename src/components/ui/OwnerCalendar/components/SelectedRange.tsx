@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { BlockedRecord } from '../types';
+import { TimeInput24hr } from './TimeInput24hr Component';
 
 interface SelectedRangeProps {
     selectedStart: Date | null;
@@ -41,24 +42,16 @@ export const SelectedRange: React.FC<SelectedRangeProps> = ({
                 <p className="font-semibold">{formatDisplay(selectedStart)} → {formatDisplay(selectedEnd)}</p>
 
                 <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                    <div className="flex-1">
-                        <label className="text-xs text-gray-500 block mb-1">Start Time</label>
-                        <input
-                            type="time"
-                            value={startTime}
-                            onChange={(e) => setStartTime(e.target.value)}
-                            className="w-full p-2 border rounded-lg text-sm"
-                        />
-                    </div>
-                    <div className="flex-1">
-                        <label className="text-xs text-gray-500 block mb-1">End Time</label>
-                        <input
-                            type="time"
-                            value={endTime}
-                            onChange={(e) => setEndTime(e.target.value)}
-                            className="w-full p-2 border rounded-lg text-sm"
-                        />
-                    </div>
+                    <TimeInput24hr
+                        value={startTime}
+                        onChange={setStartTime}
+                        label="Start Time"
+                    />
+                    <TimeInput24hr
+                        value={endTime}
+                        onChange={setEndTime}
+                        label="End Time"
+                    />
                 </div>
 
                 {selectedRecord && (
