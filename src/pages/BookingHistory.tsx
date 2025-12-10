@@ -8,7 +8,7 @@ import Location from "../assets/icons/Location.png";
 import seats from "../assets/icons/seats.jpeg";
 import AClogo from "../assets/icons/ac.png";
 import BikeCC from "../assets/icons/BikeCC.png";
-import { Loader2, MessageCircle, Phone, AlertCircle } from "lucide-react";
+import { Loader2, MessageCircle, Phone, AlertCircle, MapPin, Navigation } from "lucide-react";
 
 interface VehicleData {
   _id: string;
@@ -42,8 +42,26 @@ interface VehicleData {
   pickupCity?: string;
   pickupCityState?: string;
   pickupArea?: string;
+  pickupLatitude?: string;
+  pickupLongitude?: string;
   latitude?: string;
   longitude?: string;
+}
+
+interface Booking {
+  _id?: string;
+  bookingId?: string;
+  userId?: string;
+  status?: string;
+  vehicleName?: string;
+  price?: number;
+  pickupAddress?: string;
+  dropAddress?: string;
+  pickupLat?: number;
+  pickupLng?: number;
+  dropLat?: number;
+  dropLng?: number;
+  distance?: string;
 }
 
 const BookingDetail: React.FC = () => {
@@ -56,6 +74,9 @@ const BookingDetail: React.FC = () => {
   const [error, setError] = useState("");
   const [currentImage, setCurrentImage] = useState(0);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [calculatedDistance, setCalculatedDistance] = useState<string | null>(null);
+  const [distanceLoading, setDistanceLoading] = useState(false);
+  const [customerLocation, setCustomerLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const passedVehicleData = location.state?.vehicleData;
   const passedBooking = location.state?.booking;
@@ -69,7 +90,83 @@ const BookingDetail: React.FC = () => {
 
   const isConfirmed = passedBooking?.status?.toLowerCase() === "confirmed";
 
-  // Auto-open chat if coming from booking history
+  // Calculate distance using Haversine formula
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance;
+  };
+
+  // Get customer's current location and calculate distance
+  useEffect(() => {
+    if (vehicleData && isConfirmed) {
+      const vehicleLat = parseFloat(vehicleData.latitude || vehicleData.pickupLatitude || "0");
+      const vehicleLng = parseFloat(vehicleData.longitude || vehicleData.pickupLongitude || "0");
+
+      if (vehicleLat && vehicleLng) {
+        setDistanceLoading(true);
+        
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const customerLat = position.coords.latitude;
+              const customerLng = position.coords.longitude;
+              
+              setCustomerLocation({ lat: customerLat, lng: customerLng });
+              
+              const distance = calculateDistance(customerLat, customerLng, vehicleLat, vehicleLng);
+              
+              if (distance < 1) {
+                setCalculatedDistance(`${Math.round(distance * 1000)} m`);
+              } else {
+                setCalculatedDistance(`${distance.toFixed(1)} km`);
+              }
+              
+              setDistanceLoading(false);
+              
+              console.log("📍 Distance calculated:", {
+                customerLat,
+                customerLng,
+                vehicleLat,
+                vehicleLng,
+                distance: distance.toFixed(2) + " km"
+              });
+            },
+            (error) => {
+              console.error("❌ Location error:", error);
+              setDistanceLoading(false);
+              setCalculatedDistance(null);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+            }
+          );
+        } else {
+          console.warn("⚠️ Geolocation not supported");
+          setDistanceLoading(false);
+        }
+      }
+    }
+  }, [vehicleData, isConfirmed]);
+
+  useEffect(() => {
+    console.log("🔍 Booking Detail Debug:", {
+      passedBooking,
+      isConfirmed,
+      vehicleData,
+      calculatedDistance
+    });
+  }, [passedBooking, isConfirmed, vehicleData, calculatedDistance]);
+
   useEffect(() => {
     if (openContact && passedBooking) {
       setIsChatOpen(true);
@@ -129,18 +226,12 @@ const BookingDetail: React.FC = () => {
     loadVehicleData();
   }, [vehicleId, vehicleType, passedVehicleData]);
 
-  const handleConfirmBooking = () => {
-    if (!isConfirmed) return;
-    if (vehicleData?.contactNumber) {
-      window.location.href = `tel:${vehicleData.contactNumber}`;
-    } else {
-      alert("Contact number not available");
-    }
-  };
-
   const handleChatClick = () => {
-    if (!isConfirmed) return;
-    console.log("💬 Opening chat...");
+    if (!isConfirmed) {
+      console.warn("⚠️ Chat blocked - booking not confirmed");
+      alert("Chat is only available for confirmed bookings");
+      return;
+    }
     setIsChatOpen(true);
   };
 
@@ -201,8 +292,6 @@ const BookingDetail: React.FC = () => {
     ? vehicleData.CarName || vehicleData.carName || passedBooking?.vehicleName || "Unknown Vehicle"
     : vehicleData.bikeName || passedBooking?.vehicleName || "Unknown Bike";
 
-  const displayModel = isCar ? vehicleData.CarModel || "N/A" : vehicleData.bikeModel || "N/A";
-
   const displayPrice = isCar
     ? vehicleData.RentPerHour || passedBooking?.price || 0
     : vehicleData.pricePerKm || passedBooking?.price || 0;
@@ -211,10 +300,9 @@ const BookingDetail: React.FC = () => {
 
   const currentUserId = localStorage.getItem('userId') || 'temp-user-' + Date.now();
   const vehicleOwnerId = vehicleData.userId || vehicleData.ownerId || vehicleData.contactNumber || 'temp-owner-' + Date.now();
-  const bookingCustomerId = passedBooking?.userId || currentUserId;
   const chatBookingId = passedBooking?._id || passedBooking?.bookingId || vehicleId || 'temp-booking-' + Date.now();
 
-  const enabledButtonClass = "flex-1 flex items-center justify-center gap-2 sm:gap-3 text-white font-semibold text-[16px] sm:text-[18px] transition-all duration-200 hover:opacity-90 rounded-full bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] py-3 sm:py-0";
+  const enabledButtonClass = "flex-1 flex items-center justify-center gap-2 sm:gap-3 text-white font-semibold text-[16px] sm:text-[18px] transition-all duration-200 hover:opacity-90 rounded-full bg-gradient-to-r from-[#0A0747] to-[#4EC8FF] py-3 sm:py-0 cursor-pointer";
   const disabledButtonClass = "flex-1 flex items-center justify-center gap-2 sm:gap-3 text-gray-400 font-semibold text-[16px] sm:text-[18px] rounded-full bg-gray-200 cursor-not-allowed py-3 sm:py-0";
 
   return (
@@ -229,7 +317,6 @@ const BookingDetail: React.FC = () => {
               className="w-full h-full object-cover transition-all duration-500 rounded-[10px]"
             />
 
-            {/* Previous Button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -239,48 +326,31 @@ const BookingDetail: React.FC = () => {
               type="button"
               aria-label="Previous image"
             >
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800 pointer-events-none"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth={3}
-              >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
 
-            {/* Next Button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setCurrentImage((prev) =>
-                  prev === carouselImages.length - 1 ? 0 : prev + 1
-                );
+                setCurrentImage((prev) => prev === carouselImages.length - 1 ? 0 : prev + 1);
               }}
               className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white hover:bg-gray-100 rounded-full flex items-center justify-center shadow-2xl z-20 transition-all cursor-pointer border border-gray-200"
               type="button"
               aria-label="Next image"
             >
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800 pointer-events-none"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth={3}
-              >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
 
-            {/* Dots */}
             <div className="absolute bottom-3 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1.5">
               {carouselImages.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentImage(idx)}
-                  className={`h-2 rounded-full transition-all ${idx === currentImage ? "bg-[#0066FF] w-6" : "bg-gray-700 w-2"
-                    }`}
+                  className={`h-2 rounded-full transition-all ${idx === currentImage ? "bg-[#0066FF] w-6" : "bg-gray-700 w-2"}`}
                 />
               ))}
             </div>
@@ -375,6 +445,90 @@ const BookingDetail: React.FC = () => {
               </p>
             </div>
           )}
+             
+          {/* Vehicle Pickup Location & Distance - Only for Confirmed Bookings */}
+          {passedBooking?.status && passedBooking.status.toLowerCase() === "confirmed" && (
+            <div className="p-5 bg-gradient-to-br from-blue-50 to-white rounded-xl mb-4">
+              {/* Distance Display */}
+              {(calculatedDistance || distanceLoading) && (
+                <div className="mb-4 p-4 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                        {distanceLoading ? (
+                          <Loader2 className="text-white animate-spin" size={18} />
+                        ) : (
+                          <Navigation className="text-white" size={18} />
+                        )}
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700">Distance from You</span>
+                    </div>
+                    <span className="text-2xl font-bold text-blue-600">
+                      {distanceLoading ? "..." : calculatedDistance}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Vehicle Pickup Location */}
+              <div className="mb-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <MapPin className="text-white" size={16} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Vehicle Pickup Location
+                    </p>
+                    <p className="text-sm text-gray-900 font-medium">
+                      {vehicleData.pickupArea && vehicleData.pickupCity 
+                        ? `${vehicleData.pickupArea}, ${vehicleData.pickupCity}${vehicleData.pickupCityState ? ', ' + vehicleData.pickupCityState : ''}`
+                        : vehicleData.pickupCity || vehicleData.pickupArea || "Location not specified"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Google Maps Button */}
+              <button
+                onClick={() => {
+                  const lat = vehicleData.latitude;
+                  const lng = vehicleData.longitude;
+                  
+                  if (lat && lng) {
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+                    window.open(mapsUrl, "_blank");
+                  } else {
+                    const searchQuery = encodeURIComponent(
+                      `${vehicleData.pickupArea || ''} ${vehicleData.pickupCity || ''} ${vehicleData.pickupCityState || ''}`.trim()
+                    );
+                    if (searchQuery) {
+                      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${searchQuery}`;
+                      window.open(mapsUrl, "_blank");
+                    } else {
+                      alert("Vehicle location is not available");
+                    }
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-white transition-all duration-200 bg-blue-600 hover:bg-blue-700 hover:shadow-lg active:scale-98 cursor-pointer"
+              >
+                <Navigation size={18} />
+                <span>Open Location in Google Maps</span>
+              </button>
+            </div>
+          )}
+
+          {/* Action Button for Non-Confirmed */}
+          {(!passedBooking?.status || passedBooking.status.toLowerCase() !== "confirmed") && passedBooking && (
+            <div className="mb-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-xl transition-all duration-200"
+              >
+                Back to Bookings
+              </button>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 sm:gap-4 h-[50px] sm:h-[56px]">
@@ -388,54 +542,24 @@ const BookingDetail: React.FC = () => {
               <MessageCircle size={20} className="sm:w-6 sm:h-6" strokeWidth={2} />
               <span>Chat</span>
             </button>
-{/* 
-            <button
-              onClick={handleConfirmBooking}
-              disabled={!isConfirmed}
-              className={isConfirmed ? enabledButtonClass : disabledButtonClass}
-              style={{ fontFamily: 'Inter, sans-serif' }}
-              title={!isConfirmed ? "Call is available only for confirmed bookings" : ""}
-            >
-              <Phone size={20} className="sm:w-6 sm:h-6" strokeWidth={2} />
-              <span>Call</span>
-            </button> */}
           </div>
 
           <PopupChat
             isOpen={isChatOpen}
-            onClose={() => {
-              console.log("❌ Closing chat...");
-              setIsChatOpen(false);
-            }}
-
-            // ✅ Customer View
+            onClose={() => setIsChatOpen(false)}
             pageRole="customerView"
-
-            // ✅ Current user (customer)
             currentUserId={currentUserId}
             currentUserName={localStorage.getItem('userName') || 'You'}
-
-            // ✅ Owner info (from vehicle data)
             ownerId={vehicleOwnerId}
             ownerName={vehicleData.contactName || "Vehicle Owner"}
             ownerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${vehicleData.contactName || "Owner"}`}
-
-            // ✅ Customer info (current user)
             customerId={currentUserId}
             customerName={localStorage.getItem('userName') || 'You'}
             customerAvatar={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localStorage.getItem('userName') || 'You'}`}
-
-            // ✅ Booking ID
             bookingId={chatBookingId}
-
-            // ✅ Vehicle ID
             vehicleId={vehicleData._id}
-
-            // ✅ API URL
             apiUrl={apiService.chat.apiUrl}
             socketUrl={SOCKET_URL}
-
-            // ✅ Real-time enabled
             useRealtime={true}
           />
         </div>

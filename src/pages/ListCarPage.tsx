@@ -206,18 +206,6 @@ const ListCarPage = () => {
   }, [formData.CarBrand]);
 
   const transmissionOptions = ["Manual", "Automatic", "AMT", "CVT", "DCT", "iMT"];
-  const states = carData.states;
-  const [availableCities, setAvailableCities] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (formData.pickupCityState) {
-      const cities = carData.cities[formData.pickupCityState as keyof typeof carData.cities] || [];
-      setAvailableCities(cities);
-      setFormData(prev => ({ ...prev, pickupCity: "" }));
-    } else {
-      setAvailableCities([]);
-    }
-  }, [formData.pickupCityState]);
 
   const typeableFields = [
     { name: "CarBrand", label: "Car Brand", options: carData?.carBrands || [], placeholder: "Type brand name..." },
@@ -240,12 +228,9 @@ const ListCarPage = () => {
     { name: "contactNumber", label: "Contact Number", placeholder: "9876543210", pattern: "[0-9]{10}" },
   ];
 
-  const addressDropdownFields = [
-    { name: "pickupCityState", label: "State", options: states, placeholder: "Type state..." },
-    { name: "pickupCity", label: "City", options: availableCities, placeholder: "Type city...", disabled: !formData.pickupCityState },
-  ];
-
   const addressFields = [
+    { name: "pickupCityState", label: "State", placeholder: "Enter state" },
+    { name: "pickupCity", label: "City", placeholder: "Enter city" },
     { name: "pickupArea", label: "Street/Area", placeholder: "Street name or area" },
     { name: "pickupCityPinCode", label: "Zip/Pincode", placeholder: "500001" },
     { name: "pickupCityCountry", label: "Country", placeholder: "India", fullWidth: true },
@@ -641,36 +626,6 @@ const ListCarPage = () => {
                 <input type="number" name="DepositAmount" value={formData.DepositAmount} onChange={handleInputChange} placeholder="10,000" min={0} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
             )}
-
-            <div className="border-b pb-2 pt-4">
-              <h2 className="text-lg font-semibold text-gray-800">Vehicle Pickup Address</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {addressDropdownFields.map((field) => (
-                <div key={field.name} data-error={!!fieldErrors[field.name]}>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} <span className="text-red-500">*</span>
-                  </label>
-                  <div className={fieldErrors[field.name] ? "ring-2 ring-red-500 rounded-lg" : ""}>
-                    <TypeableDropdown
-                      options={field.options}
-                      value={formData[field.name as keyof typeof formData] as string}
-                      onChange={(value) => {
-                        handleTypeableChange(field.name, value);
-                        setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
-                      }}
-                      placeholder={field.placeholder}
-                      disabled={field.disabled}
-                      required={true}
-                    />
-                  </div>
-                  {fieldErrors[field.name] && (
-                    <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
-                  )}
-                </div>
-              ))}
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {addressFields.map((field) => (

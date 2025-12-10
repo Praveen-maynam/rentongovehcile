@@ -204,28 +204,6 @@ const ListBikePage = () => {
 
   const fuelTypes = bikeDataJSON.fuelTypes;
   const transmissionOptions = bikeDataJSON.transmissionTypes;
-  const states = bikeDataJSON.states;
-  const [availableCities, setAvailableCities] = useState<string[]>([]);
-  useEffect(() => {
-    if (formData.bikeBrand) {
-      const models = bikeDataJSON.bikeModels[formData.bikeBrand as keyof typeof bikeDataJSON.bikeModels] || [];
-      setAvailableModels(models);
-      setFormData(prev => ({ ...prev, bikeModel: "" }));
-    } else {
-      setAvailableModels([]);
-    }
-  }, [formData.bikeBrand]);
-
-  useEffect(() => {
-    if (formData.pickupCityState) {
-      const cities = bikeDataJSON.cities[formData.pickupCityState as keyof typeof bikeDataJSON.cities] || [];
-      setAvailableCities(cities);
-      // Reset city when state changes
-      setFormData(prev => ({ ...prev, pickupCity: "" }));
-    } else {
-      setAvailableCities([]);
-    }
-  }, [formData.pickupCityState]);
 
   const typeableFields = [
     { name: "bikeBrand", label: "Bike Brand", options: bikeBrands, placeholder: "Type brand name..." },
@@ -248,12 +226,9 @@ const ListBikePage = () => {
     { name: "contactNumber", label: "Contact Number", placeholder: "9876543210", pattern: "[0-9]{10}" },
   ];
 
-  const addressDropdownFields = [
-    { name: "pickupCityState", label: "State", options: states, placeholder: "Type state..." },
-    { name: "pickupCity", label: "City", options: availableCities, placeholder: "Type city...", disabled: !formData.pickupCityState },
-  ];
-
   const addressFields = [
+    { name: "pickupCityState", label: "State", placeholder: "Enter state" },
+    { name: "pickupCity", label: "City", placeholder: "Enter city" },
     { name: "pickupArea", label: "Street/Area", placeholder: "Street name or area" },
     { name: "pickupCityPinCode", label: "Zip/Pincode", placeholder: "500001" },
     { name: "pickupCityCountry", label: "Country", placeholder: "India", fullWidth: true },
@@ -660,33 +635,6 @@ const ListBikePage = () => {
             {/* Address */}
             <div className="border-b pb-2 pt-4">
               <h2 className="text-lg font-semibold text-gray-800">Vehicle Pickup Address</h2>
-            </div>
-
-            {/* State and City Dropdowns */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {addressDropdownFields.map((field) => (
-                <div key={field.name} data-error={!!fieldErrors[field.name]}>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {field.label} <span className="text-red-500">*</span>
-                  </label>
-                  <div className={fieldErrors[field.name] ? "ring-2 ring-red-500 rounded-lg" : ""}>
-                    <TypeableDropdown
-                      options={field.options}
-                      value={formData[field.name as keyof typeof formData] as string}
-                      onChange={(value) => {
-                        handleTypeableChange(field.name, value);
-                        setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
-                      }}
-                      placeholder={field.placeholder}
-                      disabled={field.disabled}
-                      required={true}
-                    />
-                  </div>
-                  {fieldErrors[field.name] && (
-                    <span className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</span>
-                  )}
-                </div>
-              ))}
             </div>
 
             {/* Address Text Fields */}

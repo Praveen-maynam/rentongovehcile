@@ -55,14 +55,9 @@ interface BookingData {
   contactNumber?: string;
   createdAt?: string;
 }
-
-// ============================================================================
-// 🔥 NEW BOOKING API SERVICE
-// ============================================================================
+ 
 const bookingAPIService = {
-  /**
-   * Create a customer booking
-   */
+
   createCustomerBooking: async (payload: any) => {
     try {
       console.log("📤 Creating customer booking:", payload);
