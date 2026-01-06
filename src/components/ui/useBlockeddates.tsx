@@ -46,7 +46,7 @@ export const useBlockedDates = (
       console.log("📤 Request Body:", Object.fromEntries(body));
 
       const res = await fetch(
-        "http://3.110.122.127:3000/createNotAvailability",
+        "https://api.rentongovehicle.com/createNotAvailability",
         { method: "POST", headers, body }
       );
 
@@ -87,7 +87,7 @@ export const useBlockedDates = (
       body.append("isNotAvailable", "true");
 
       const res = await fetch(
-        `http://3.110.122.127:3000/updateNotAvailability/${slotId}`,
+        `https://api.rentongovehicle.com/updateNotAvailability/${slotId}`,
         { method: "PUT", headers, body }
       );
 
@@ -113,7 +113,7 @@ export const useBlockedDates = (
 
       const urlencoded = new URLSearchParams();
       const res = await fetch(
-        `http://3.110.122.127:3000/deleteNotAvailability/${slotId}`,
+        `https://api.rentongovehicle.com/deleteNotAvailability/${slotId}`,
         { method: "DELETE", body: urlencoded }
       );
 

@@ -1,5 +1,5 @@
 
-export const API_BASE = "http://3.110.122.127:3000";
+export const API_BASE = "https://api.rentongovehicle.com";
 
 export const ownerAvailabilityAPI = {
     getVehicleAvailability: async (vehicleId: string, vechileType: string, startDate: string, endDate: string) => {

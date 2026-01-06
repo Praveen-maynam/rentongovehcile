@@ -9,7 +9,7 @@ type Props = {
   onSaveLocation?: (city: string, lat: number, lng: number) => void;
 };
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyA6myHzS10YXdcazAFalmXvDkrYCp5cLc8";
+const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "AIzaSyA6myHzS10YXdcazAFalmXvDkrYCp5cLc8";
 
 export default function SearchMapWithSave({ initialLat, initialLng, onSaveLocation }: Props) {
   const navigate = useNavigate();

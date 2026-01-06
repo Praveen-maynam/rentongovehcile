@@ -91,7 +91,7 @@ export const BookingProvider: React.FC<{ children: any }> = ({ children }) => {
   // REAL-TIME SOCKET SETUP
   // ----------------------------
   useEffect(() => {
-    socketRef.current = io("http://3.110.122.127:3000", {
+    socketRef.current = io("https://api.rentongovehicle.com", {
       transports: ["websocket"],
       auth: { token: authToken },
     });
@@ -124,7 +124,7 @@ export const BookingProvider: React.FC<{ children: any }> = ({ children }) => {
   const acceptBooking = async (bookingId: string) => {
     try {
       await fetch(
-        `http://3.110.122.127:3000/confirmBooking/${bookingId}/conform`,
+        `https://api.rentongovehicle.com/confirmBooking/${bookingId}/conform`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${authToken}` },
@@ -147,7 +147,7 @@ export const BookingProvider: React.FC<{ children: any }> = ({ children }) => {
   // --------------------------
   const rejectBooking = async (bookingId: string) => {
     try {
-      await fetch(`http://3.110.122.127:3000/deleteBooking/${bookingId}`, {
+      await fetch(`https://api.rentongovehicle.com/deleteBooking/${bookingId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${authToken}` },
       });

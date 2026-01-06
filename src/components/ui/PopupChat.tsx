@@ -128,6 +128,8 @@ const PopupChat: React.FC<PopupChatProps> = ({
           reconnection: true,
           reconnectionAttempts: 5,
           reconnectionDelay: 1000,
+          auth: { userId: currentUserId },
+          
         });
 
         socketRef.current = socket;
@@ -338,9 +340,8 @@ const PopupChat: React.FC<PopupChatProps> = ({
 
       {/* Chat Window */}
       <div
-        className={`fixed right-6 bottom-6 bg-white rounded-2xl shadow-2xl z-50 flex flex-col transition-all duration-300 ${isMinimized ? "h-16" : "h-[600px]"
-          }`}
-        style={{ width: "400px" }}
+        className={`fixed right-6 bottom-6 bg-white rounded-2xl shadow-2xl z-50 flex flex-col transition-all duration-300 ${isMinimized ? "h-16" : "h-[70vh] sm:h-[75vh] md:h-[600px] lg:h-[500px] xl:h-[400px]"}`}
+        style={{ width: "95vw", maxWidth: 400, minWidth: 280 }}
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white rounded-t-2xl">
@@ -409,7 +410,7 @@ const PopupChat: React.FC<PopupChatProps> = ({
                 messages.map((msg) => {
                   const mine = isMyMessage(msg);
                   return (
-                    <div
+                    <div 
                       key={msg._id}
                       className={`flex ${mine ? "justify-end" : "justify-start"}`}
                     >

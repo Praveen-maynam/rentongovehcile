@@ -467,7 +467,7 @@ const FilterCard: React.FC<FilterCardProps> = ({
           <input
             type="range"
             min={1}
-            max={50}
+            max={70}
             value={filters.distance}
             onChange={(e) =>
               handleFilterChange("distance", Number(e.target.value))

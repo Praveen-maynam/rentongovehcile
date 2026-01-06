@@ -106,7 +106,7 @@
 //   redirect: "follow",
 // };
 
-//         const url = `http://3.110.122.127:3000/getAverageRating?vechileType=${vehicleType}&vechileId=${vehicleId}`;
+//         const url = `https://api.rentongovehicle.com/getAverageRating?vechileType=${vehicleType}&vechileId=${vehicleId}`;
 //         console.log("➡️ Average Rating API:", url);
 
 //         const response = await fetch(url, requestOptions);
@@ -159,7 +159,7 @@
 //         console.log("➡️ Review ID:", reviewId);
 
 //         const response = await fetch(
-//           `http://3.110.122.127:3000/getReviewById/${reviewId}`,
+//           `https://api.rentongovehicle.com/getReviewById/${reviewId}`,
 //           {
 //             method: "GET",
 //             redirect: "follow",
@@ -244,9 +244,9 @@
 
 //       console.log("📤 Sending feedback to API...");
 //       console.log("➡️ Payload:", Object.fromEntries(urlencoded.entries()));
-//       console.log("➡️ API Endpoint: http://3.110.122.127:3000/addReview");
+//       console.log("➡️ API Endpoint: https://api.rentongovehicle.com/addReview");
 
-//       const response = await fetch("http://3.110.122.127:3000/addReview", {
+//       const response = await fetch("https://api.rentongovehicle.com/addReview", {
 //         method: "POST",
 //         headers: myHeaders,
 //         body: urlencoded,
@@ -470,7 +470,7 @@
 // //     const fetchUserProfile = async () => {
 // //       try {
 // //         const userId = localStorage.getItem("userId") || "6901dcf9fc4e029e07c5f54e";
-// //         const response = await fetch(`http://3.110.122.127:3000/getUserProfile/${userId}`);
+// //         const response = await fetch(`https://api.rentongovehicle.com/getUserProfile/${userId}`);
 // //         if (response.ok) {
 // //           const data = await response.json();
 // //           setUserName(data.name || data.userName || "User");
@@ -487,7 +487,7 @@
 // //     const fetchAverageRating = async () => {
 // //       try {
 // //         setAvgLoading(true);
-// //         const url = `http://3.110.122.127:3000/getAverageRating?vechileType=${vehicleType}&vechileId=${vehicleId}`;
+// //         const url = `https://api.rentongovehicle.com/getAverageRating?vechileType=${vehicleType}&vechileId=${vehicleId}`;
 // //         const response = await fetch(url);
 
 // //         if (response.ok) {
@@ -513,7 +513,7 @@
 // //       if (!reviewId) return;
 
 // //       try {
-// //         const response = await fetch(`http://3.110.122.127:3000/getReviewById/${reviewId}`);
+// //         const response = await fetch(`https://api.rentongovehicle.com/getReviewById/${reviewId}`);
 
 // //         if (response.ok) {
 // //           const result = await response.json();
@@ -578,7 +578,7 @@
 // //         formdata.append("reviewText", feedback);
 // //         formdata.append("rating", rating.toString());
 
-// //         const response = await fetch(`http://3.110.122.127:3000/updateReview/${reviewId}`, {
+// //         const response = await fetch(`https://api.rentongovehicle.com/updateReview/${reviewId}`, {
 // //           method: "PUT",
 // //           body: formdata,
 // //         });
@@ -612,7 +612,7 @@
 // //         urlencoded.append("review", feedback);
 // //         urlencoded.append("rating", rating.toString());
 
-// //         const response = await fetch("http://3.110.122.127:3000/addReview", {
+// //         const response = await fetch("https://api.rentongovehicle.com/addReview", {
 // //           method: "POST",
 // //           headers: myHeaders,
 // //           body: urlencoded,
@@ -891,7 +891,7 @@
 // //       try {
 // //         setLoading(true);
 // //         const response = await fetch(
-// //           `http://3.110.122.127:3000/getReviews?vechileType=${vehicleType}&vechileId=${vehicleId}`
+// //           `https://api.rentongovehicle.com/getReviews?vechileType=${vehicleType}&vechileId=${vehicleId}`
 // //         );
 
 // //         if (response.ok) {
@@ -1599,7 +1599,7 @@ const Feedback = () => {
         setAvgLoading(true);
         console.log("🔍 Fetching average rating for:", vehicleId);
 
-        const url = `http://3.110.122.127:3000/getAverageRating?vechileType=${vehicleType}&vechileId=${vehicleId}`;
+        const url = `https://api.rentongovehicle.com/getAverageRating?vechileType=${vehicleType}&vechileId=${vehicleId}`;
 
         const response = await fetch(url, {
           method: "GET",
@@ -1646,7 +1646,7 @@ const Feedback = () => {
         console.log("🔍 Checking for existing review for booking:", bookingId);
 
         const response = await fetch(
-          `http://3.110.122.127:3000/getReviewByBookingId/${bookingId}`,
+          `https://api.rentongovehicle.com/getReviewByBookingId/${bookingId}`,
           { method: "GET" }
         );
 
@@ -1706,7 +1706,7 @@ const Feedback = () => {
 
       console.log("📤 Payload:", Object.fromEntries(urlencoded.entries()));
 
-      const response = await fetch("http://3.110.122.127:3000/addReview", {
+      const response = await fetch("https://api.rentongovehicle.com/addReview", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: urlencoded,

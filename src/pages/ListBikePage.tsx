@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, useMapEvents } from "react-leaflet";
 import { MapPin, Navigation, Loader, Plus, X, ChevronDown } from "lucide-react";
 import bikeDataJSON from "./data/bikeData.json";
-
+import { GoogleMap, LoadScript,Marker } from '@react-google-maps/api';
 import apiService from "../services/api.service";
 
 // Typeable Dropdown Component
@@ -14,7 +14,7 @@ interface TypeableDropdownProps {
   disabled?: boolean;
   required?: boolean;
 }
-
+const GOOGLE_MAPS_API_KEY = 'AIzaSyA6myHzS10YXdcazAFalmXvDkrYCp5cLc8';
 const TypeableDropdown: React.FC<TypeableDropdownProps> = ({
   options,
   value,
@@ -171,7 +171,8 @@ const ListBikePage = () => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([17.4889, 78.4603]);
   const [markerPos, setMarkerPos] = useState<[number, number] | null>(null);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
-
+const bikeNumberRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{1,4}$/i;
+  const [bikeNumberError, setBikeNumberError] = useState("");
   const getUserId = () => {
     const storedUserId = localStorage.getItem('userId');
     if (storedUserId && storedUserId.length === 24 && /^[a-f0-9]{24}$/i.test(storedUserId)) {
@@ -207,7 +208,7 @@ const ListBikePage = () => {
 
   const typeableFields = [
     { name: "bikeBrand", label: "Bike Brand", options: bikeBrands, placeholder: "Type brand name..." },
-    { name: "bikeModel", label: "Bike Model", options: availableModels, placeholder: "Type model name...", disabled: !formData.bikeBrand },
+    { name: "bikeModel", label: "Bike Model", options: bikeBrands, placeholder: "Type model name...", disabled: !formData.bikeBrand },
     { name: "bikeYear", label: "Manufacturing Year", options: years, placeholder: "Type year..." },
 
     { name: "fuel", label: "Fuel Type", options: fuelTypes, placeholder: "Type fuel type..." },
@@ -248,7 +249,7 @@ const ListBikePage = () => {
   }, [formData.latitude, formData.longitude]);
 
   useEffect(() => {
-    const timeout = setTimeout(async () => {
+    const fetchCoords = async () => {
       const address = {
         pickupArea: formData.pickupArea, pickupCity: formData.pickupCity,
         pickupCityState: formData.pickupCityState, pickupCityPinCode: formData.pickupCityPinCode,
@@ -259,14 +260,24 @@ const ListBikePage = () => {
         setFormData((prev) => ({ ...prev, latitude: coords.latitude, longitude: coords.longitude }));
         setLocationError("");
       }
-    }, 1000);
-    return () => clearTimeout(timeout);
+    };
+    fetchCoords();
   }, [formData.pickupArea, formData.pickupCity, formData.pickupCityState, formData.pickupCityPinCode, formData.pickupCityCountry]);
 
   const handleInputChange = (e: any) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
+   const handleBikeNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.toUpperCase();
+      setFormData((prev) => ({ ...prev, bikeNumber: value }));
+      if (!bikeNumberRegex.test(value)) {
+        setBikeNumberError("Invalid format, e.g., AP12AB1234");
+      } else {
+        setBikeNumberError("");
+      }
+    };
+
 
   const handleTypeableChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -346,7 +357,12 @@ const ListBikePage = () => {
 
     if (!formData.fuel) errors.fuel = "Fuel type is required";
     if (!formData.transmission) errors.transmission = "Transmission type is required";
-    if (!formData.bikeNumber) errors.bikeNumber = "Bike number is required";
+    if (!formData.bikeNumber) {
+      errors.bikeNumber = "Bike number is required";
+    } else if (!bikeNumberRegex.test(formData.bikeNumber.toUpperCase())) {
+      errors.bikeNumber = "Invalid format, e.g., AP12AB1234";
+    }
+   
     if (!formData.bikeEngine) errors.bikeEngine = "Engine capacity is required";
     if (!formData.kmDriven) errors.kmDriven = "KM driven is required";
     if (!formData.pricePerKm || parseFloat(formData.pricePerKm) <= 0) {
@@ -372,6 +388,17 @@ const ListBikePage = () => {
     const hasAtLeastOnePhoto = formData.photoFront || formData.photoBack || formData.photoLeft || formData.photoRight || formData.photoInterior;
     if (!hasAtLeastOnePhoto) {
       errors.photoFront = "At least one photo is required";
+    }
+
+    // Checkbox required validation
+    if (!formData.aadharCard) {
+      errors.aadharCard = "Aadhar Card is required";
+    }
+    if (!formData.drivingLicense) {
+      errors.drivingLicense = "Driving License is required";
+    }
+    if (!formData.depositVehicle) {
+      errors.depositVehicle = "Deposit Vehicle is required";
     }
 
     // Set errors and return if any
@@ -491,7 +518,11 @@ const ListBikePage = () => {
                     name={field.name}
                     value={formData[field.name as keyof typeof formData] as string}
                     onChange={(e) => {
-                      handleInputChange(e);
+                      if (field.name === "bikeNumber") {
+                        handleBikeNumberChange(e);
+                      } else {
+                        handleInputChange(e);
+                      }
                       setFieldErrors((prev) => ({ ...prev, [field.name]: "" }));
                     }}
                     placeholder={field.placeholder}
@@ -619,10 +650,15 @@ const ListBikePage = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {checkboxes.map((cb) => (
-                <label key={cb.name} className="flex items-center cursor-pointer">
-                  <input type="checkbox" name={cb.name} checked={formData[cb.name as keyof typeof formData] as boolean} onChange={handleInputChange} className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
-                  <span className="ml-3 text-sm text-gray-700">{cb.label}</span>
-                </label>
+                <div key={cb.name} className="flex flex-col">
+                  <label className="flex items-center cursor-pointer">
+                    <input type="checkbox" name={cb.name} checked={formData[cb.name as keyof typeof formData] as boolean} onChange={handleInputChange} className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
+                    <span className="ml-3 text-sm text-gray-700">{cb.label}</span>
+                  </label>
+                  {fieldErrors[cb.name] && (
+                    <span className="text-red-500 text-xs mt-1">{fieldErrors[cb.name]}</span>
+                  )}
+                </div>
               ))}
             </div>
             {formData.depositVehicle && (
@@ -662,7 +698,7 @@ const ListBikePage = () => {
                 </div>
               ))}
             </div>
-            <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+           <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-blue-600" />
@@ -699,9 +735,15 @@ const ListBikePage = () => {
                   {locationError}
                 </div>
               )}
-
-
-
+              
+              {/* {formData.latitude && formData.longitude && (
+                <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Coordinates:</span> {parseFloat(formData.latitude).toFixed(6)}, {parseFloat(formData.longitude).toFixed(6)}
+                  </p>
+                </div>
+              )}
+               */}
               {showMap && (
                 <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">
                   <iframe
@@ -736,30 +778,41 @@ const ListBikePage = () => {
 
       {/* Map Modal */}
       {mapOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-5xl h-[80vh] bg-white rounded-lg overflow-hidden shadow-lg flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Select Location on Map</h3>
-                <p className="text-sm text-gray-600 mt-1">Click anywhere on the map to set your location</p>
-              </div>
-              <button
-                onClick={() => setMapOpen(false)}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition text-sm font-medium"
-              >
-                Close
-              </button>
-            </div>
-            <div className="flex-1">
-              <MapContainer center={mapCenter} zoom={14} style={{ height: "100%", width: "100%" }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <MapClickHandler onClick={onMapClick} />
-                {markerPos && <Marker position={markerPos} />}
-              </MapContainer>
-            </div>
-          </div>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="w-full max-w-5xl h-[80vh] bg-white rounded-lg overflow-hidden shadow-lg flex flex-col">
+      <div className="flex items-center justify-between p-4 border-b bg-gray-50">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Select Location on Map</h3>
+          <p className="text-sm text-gray-600 mt-1">Click anywhere on the map to set your location</p>
         </div>
-      )}
+        <button
+          onClick={() => setMapOpen(false)}
+          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition text-sm font-medium"
+        >
+          Close
+        </button>
+      </div>
+      <div className="flex-1">
+        <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
+          <GoogleMap
+            center={{ lat: mapCenter[0], lng: mapCenter[1] }}
+            zoom={14}
+            mapContainerStyle={{ height: "100%", width: "100%" }}
+            onClick={(e) => {
+              if (e.latLng) {
+                onMapClick(e.latLng.lat(), e.latLng.lng());
+              }
+            }}
+          >
+            {markerPos && (
+              <Marker position={{ lat: markerPos[0], lng: markerPos[1] }} />
+            )}
+          </GoogleMap>
+        </LoadScript>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Success Modal */}
       {showSuccessModal && (

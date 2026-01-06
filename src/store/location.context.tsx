@@ -28,7 +28,7 @@ const DEFAULT_COORDINATES: Coordinates = {
 
 export const LocationProvider: React.FC<LocationProviderProps> = ({ children }) => {
   const [currentCity, setCurrentCity] = useState<string>(() => {
-    return localStorage.getItem('currentCity') || 'Kakinada';
+    return localStorage.getItem('currentCity') || 'location';
   });
   const [currentCountry, setCurrentCountry] = useState<string>(() => {
     return localStorage.getItem('currentCountry') || 'India';

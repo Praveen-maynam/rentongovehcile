@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 // ✅ Export API_BASE_URL so it can be used in components
-export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://3.110.122.127:3000';
-export const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://3.110.122.127:3000';
+export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://api.rentongovehicle.com';
+export const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'https://api.rentongovehicle.com';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -101,9 +101,9 @@ export const carAPI = {
     return apiClient.delete(`/deleteCar/${carId}`);
   },
 
-  getNearbyCars: async (latitude: number, longitude: number) => {
+  getNearbyCars: async (latitude: number, longitude: number, range?: number) => {
     return apiClient.get('/getNearbyCars', {
-      params: { latitude, longitude },
+      params: { latitude, longitude, range: range || 10 },
     });
   },
 
@@ -160,7 +160,7 @@ export const bikeAPI = {
 
   getNearbyBikes: async (latitude: number, longitude: number, range?: number) => {
     return apiClient.get('/getNearbyBikes', {
-      params: { latitude, longitude, range: range || 5 },
+      params: { latitude, longitude, range: range || 10 },
     });
   },
 

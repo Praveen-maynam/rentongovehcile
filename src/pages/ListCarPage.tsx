@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, useMapEvents } from "react-leaflet";
 import { MapPin, Navigation, Loader, Plus, X, ChevronDown } from "lucide-react";
 import apiService from "../services/api.service";
 import carData from "./data/carData.json";
-
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 interface TypeableDropdownProps {
   options: string[];
   value: string;
@@ -11,7 +11,8 @@ interface TypeableDropdownProps {
   placeholder: string;
   disabled?: boolean;
   required?: boolean;
-}
+} 
+const GOOGLE_MAPS_API_KEY = 'AIzaSyA6myHzS10YXdcazAFalmXvDkrYCp5cLc8';
 
 const TypeableDropdown: React.FC<TypeableDropdownProps> = ({
   options,
@@ -29,6 +30,7 @@ const TypeableDropdown: React.FC<TypeableDropdownProps> = ({
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(inputValue.toLowerCase())
   );
+  
 
   useEffect(() => {
     setInputValue(value);
@@ -387,6 +389,17 @@ const ListCarPage = () => {
       errors.photoFront = "At least one photo is required";
     }
 
+    // Checkbox required validation
+    if (!formData.AadharCardRequired) {
+      errors.AadharCardRequired = "Aadhar Card is required";
+    }
+    if (!formData.drivingLicenseRequired) {
+      errors.drivingLicenseRequired = "Driving License is required";
+    }
+    if (!formData.DepositVehicle) {
+      errors.DepositVehicle = "Deposit Vehicle is required";
+    }
+
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) {
       const firstErrorField = document.querySelector('[data-error="true"]');
@@ -613,10 +626,15 @@ const ListCarPage = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {checkboxes.map((cb) => (
-                <label key={cb.name} className="flex items-center cursor-pointer">
-                  <input type="checkbox" name={cb.name} checked={formData[cb.name as keyof typeof formData] as boolean} onChange={handleInputChange} className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
-                  <span className="ml-3 text-sm text-gray-700">{cb.label}</span>
-                </label>
+                <div key={cb.name} className="flex flex-col">
+                  <label className="flex items-center cursor-pointer">
+                    <input type="checkbox" name={cb.name} checked={formData[cb.name as keyof typeof formData] as boolean} onChange={handleInputChange} className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
+                    <span className="ml-3 text-sm text-gray-700">{cb.label}</span>
+                  </label>
+                  {fieldErrors[cb.name] && (
+                    <span className="text-red-500 text-xs mt-1">{fieldErrors[cb.name]}</span>
+                  )}
+                </div>
               ))}
             </div>
 
@@ -651,7 +669,8 @@ const ListCarPage = () => {
                 </div>
               ))}
             </div>
-            <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+            
+           <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-blue-600" />
@@ -688,6 +707,15 @@ const ListCarPage = () => {
                   {locationError}
                 </div>
               )}
+{/*               
+              {formData.pickupLatitude && formData.pickupLongitude && (
+                <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Coordinates:</span> {parseFloat(formData.pickupLatitude).toFixed(6)}, {parseFloat(formData.pickupLongitude).toFixed(6)}
+                  </p>
+                </div>
+              )} */}
+              
               {showMap && (
                 <div className="mt-4 border border-gray-300 rounded-lg overflow-hidden">
                   <iframe
@@ -720,31 +748,42 @@ const ListCarPage = () => {
         </div>
       </div>
 
-      {mapOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-5xl h-[80vh] bg-white rounded-lg overflow-hidden shadow-lg flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Select Location on Map</h3>
-                <p className="text-sm text-gray-600 mt-1">Click anywhere on the map to set your location</p>
-              </div>
-              <button
-                onClick={() => setMapOpen(false)}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition text-sm font-medium"
-              >
-                Close
-              </button>
-            </div>
-            <div className="flex-1">
-              <MapContainer center={mapCenter} zoom={14} style={{ height: "100%", width: "100%" }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <MapClickHandler onClick={onMapClick} />
-                {markerPos && <Marker position={markerPos} />}
-              </MapContainer>
-            </div>
-          </div>
+    {mapOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="w-full max-w-5xl h-[80vh] bg-white rounded-lg overflow-hidden shadow-lg flex flex-col">
+      <div className="flex items-center justify-between p-4 border-b bg-gray-50">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Select Location on Map</h3>
+          <p className="text-sm text-gray-600 mt-1">Click anywhere on the map to set your location</p>
         </div>
-      )}
+        <button
+          onClick={() => setMapOpen(false)}
+          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition text-sm font-medium"
+        >
+          Close
+        </button>
+      </div>
+      <div className="flex-1">
+        <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
+          <GoogleMap
+            center={{ lat: mapCenter[0], lng: mapCenter[1] }}
+            zoom={14}
+            mapContainerStyle={{ height: "100%", width: "100%" }}
+            onClick={(e) => {
+              if (e.latLng) {
+                onMapClick(e.latLng.lat(), e.latLng.lng());
+              }
+            }}
+          >
+            {markerPos && (
+              <Marker position={{ lat: markerPos[0], lng: markerPos[1] }} />
+            )}
+          </GoogleMap>
+        </LoadScript>
+      </div>
+    </div>
+  </div>
+)}
 
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/40">

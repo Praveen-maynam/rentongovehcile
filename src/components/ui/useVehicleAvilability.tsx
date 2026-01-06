@@ -17,7 +17,7 @@ export const useVehicleAvailability = (
       console.log("🚗 Vehicle ID:", VechileId);
       console.log("🏷️ Vehicle Type:", vehicleType);
 
-      const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${VechileId}`;
+      const url = `https://api.rentongovehicle.com/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${VechileId}`;
       const res = await fetch(url);
       const data = await res.json();
 

@@ -115,7 +115,7 @@
 //       console.log("🚗 Vehicle ID:", VechileId);
 //       console.log("🏷️ Vehicle Type:", vehicleType);
 
-//       const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${VechileId}`;
+//       const url = `https://api.rentongovehicle.com/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${VechileId}`;
 
 //       const res = await fetch(url);
 //       const data = await res.json();
@@ -313,7 +313,7 @@
 //       console.log("📤 Request Body:", Object.fromEntries(body));
 
 //       const res = await fetch(
-//         "http://3.110.122.127:3000/createNotAvailability",
+//         "https://api.rentongovehicle.com/createNotAvailability",
 //         { method: "POST", headers, body }
 //       );
 
@@ -362,7 +362,7 @@
 //       body.append("isNotAvailable", "true");
 
 //       const res = await fetch(
-//         `http://3.110.122.127:3000/updateNotAvailability/${slotId}`,
+//         `https://api.rentongovehicle.com/updateNotAvailability/${slotId}`,
 //         { method: "PUT", headers, body }
 //       );
 
@@ -394,7 +394,7 @@
 //       const urlencoded = new URLSearchParams();
 
 //       const res = await fetch(
-//         `http://3.110.122.127:3000/deleteNotAvailability/${slotId}`,
+//         `https://api.rentongovehicle.com/deleteNotAvailability/${slotId}`,
 //         {
 //           method: "DELETE",
 //           body: urlencoded,
@@ -1623,7 +1623,7 @@ const VehicleAvailabilityCalendar: React.FC<VehicleAvailabilityCalendarProps> = 
       console.log("🚗 Vehicle ID:", VechileId);
       console.log("🏷️ Vehicle Type:", vehicleType);
 
-      const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${VechileId}`;
+      const url = `https://api.rentongovehicle.com/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${VechileId}`;
 
       const res = await fetch(url);
       const data = await res.json();
@@ -1821,7 +1821,7 @@ const VehicleAvailabilityCalendar: React.FC<VehicleAvailabilityCalendarProps> = 
       console.log("📤 Request Body:", Object.fromEntries(body));
 
       const res = await fetch(
-        "http://3.110.122.127:3000/createNotAvailability",
+        "https://api.rentongovehicle.com/createNotAvailability",
         { method: "POST", headers, body }
       );
 
@@ -1870,7 +1870,7 @@ const VehicleAvailabilityCalendar: React.FC<VehicleAvailabilityCalendarProps> = 
       body.append("isNotAvailable", "true");
 
       const res = await fetch(
-        `http://3.110.122.127:3000/updateNotAvailability/${slotId}`,
+        `https://api.rentongovehicle.com/updateNotAvailability/${slotId}`,
         { method: "PUT", headers, body }
       );
 
@@ -1902,7 +1902,7 @@ const VehicleAvailabilityCalendar: React.FC<VehicleAvailabilityCalendarProps> = 
       const urlencoded = new URLSearchParams();
 
       const res = await fetch(
-        `http://3.110.122.127:3000/deleteNotAvailability/${slotId}`,
+        `https://api.rentongovehicle.com/deleteNotAvailability/${slotId}`,
         {
           method: "DELETE",
           body: urlencoded,

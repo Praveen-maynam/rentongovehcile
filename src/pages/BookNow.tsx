@@ -86,7 +86,7 @@ const bookingAPIService = {
       urlencoded.append("totalDays", payload.totalDay || "0");
       urlencoded.append("totalPrice", payload.totalPrice || "0");
 
-      const response = await fetch('http://3.110.122.127:3000/Bookings', {
+      const response = await fetch('https://api.rentongovehicle.com/Bookings', {
         method: 'POST',
         headers: myHeaders,
         body: urlencoded
@@ -125,7 +125,7 @@ const bookingAPIService = {
       urlencoded.append("bikeImages", "");
       urlencoded.append("isCustomerBooking", "true"); // 🔥 Mark as customer booking
 
-      const response = await fetch('http://3.110.122.127:3000/createNotAvailability', {
+      const response = await fetch('https://api.rentongovehicle.com/createNotAvailability', {
         method: 'POST',
         headers: myHeaders,
         body: urlencoded
@@ -149,7 +149,7 @@ const bookingAPIService = {
     try {
       console.log(`📡 Fetching all bookings for ${vehicleType} ID: ${vehicleId}`);
 
-      const url = `http://3.110.122.127:3000/getBookings?vehicleId=${vehicleId}&vehicleType=${vehicleType}`;
+      const url = `https://api.rentongovehicle.com/getBookings?vehicleId=${vehicleId}&vehicleType=${vehicleType}`;
 
       const response = await fetch(url);
       const data = await response.json();
@@ -170,7 +170,7 @@ const bookingAPIService = {
     try {
       console.log(`📡 Fetching availability for ${vehicleType} ID: ${vehicleId}`);
 
-      const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
+      const url = `https://api.rentongovehicle.com/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
 
       const response = await fetch(url);
       const data = await response.json();
@@ -316,7 +316,7 @@ const BookNow: React.FC = () => {
           console.log("📡 Polling booking status...");
 
           // 🔥 REAL API CALL to check booking status from backend
-          const response = await fetch(`http://3.110.122.127:3000/getBookingById/${bookingId}`);
+          const response = await fetch(`https://api.rentongovehicle.com/getBookingById/${bookingId}`);
 
           if (!response.ok) {
             console.log("⚠️ Booking status API returned:", response.status);
@@ -701,11 +701,11 @@ const BookNow: React.FC = () => {
     const normalizedVehicleType = vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1).toLowerCase();
 
     console.log("🚗 Vehicle Type:", normalizedVehicleType);
-    console.log("🌐 API URL:", `http://3.110.122.127:3000/getReviews?vechileType=${normalizedVehicleType}&VechileId=${vehicleId}`);
+    console.log("🌐 API URL:", `https://api.rentongovehicle.com/getReviews?vechileType=${normalizedVehicleType}&VechileId=${vehicleId}`);
 
     try {
       // 🔥 PRODUCTION API CALL with dynamic parameters
-      const apiUrl = `http://3.110.122.127:3000/getReviews?vechileType=${normalizedVehicleType}&VechileId=${vehicleId}`;
+      const apiUrl = `https://api.rentongovehicle.com/getReviews?vechileType=${normalizedVehicleType}&VechileId=${vehicleId}`;
       const response = await fetch(apiUrl);
 
       if (!response.ok) {

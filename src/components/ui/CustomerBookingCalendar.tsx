@@ -13,7 +13,7 @@ const bookingAPI = {
       console.log("🚗 Vehicle ID:", vehicleId);
       console.log("🏷️ Vehicle Type:", vehicleType);
 
-      const url = `http://3.110.122.127:3000/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
+      const url = `https://api.rentongovehicle.com/getVehicleAvailability?vechileType=${vehicleType}&VechileId=${vehicleId}`;
       const response = await fetch(url);
       const data = await response.json();
 
@@ -99,7 +99,7 @@ const bookingAPI = {
 
       console.log("📤 Request Body:", Object.fromEntries(urlencoded));
 
-      const response = await fetch('http://3.110.122.127:3000/createNotAvailability', {
+      const response = await fetch('https://api.rentongovehicle.com/createNotAvailability', {
         method: 'POST',
         headers: myHeaders,
         body: urlencoded

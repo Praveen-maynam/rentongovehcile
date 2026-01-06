@@ -51,10 +51,11 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit, filters, searchText, o
         setError("");
 
         const { latitude, longitude } = coordinates;
+        const distanceToUse = filters?.distance || 10;
 
-        console.log(`Fetching bikes for ${currentCity}:`, latitude, longitude);
+        console.log(`🏍️ Fetching bikes for ${currentCity} with distance:`, distanceToUse);
 
-        const response = await apiService.bike.getNearbyBikes(latitude, longitude, range);
+        const response = await apiService.bike.getNearbyBikes(latitude, longitude, distanceToUse);
         const responseData = response.data || response;
         const bikesArray = Array.isArray(responseData)
           ? responseData
@@ -84,6 +85,7 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit, filters, searchText, o
           totalReviews: bike.totalReviews || 0,
         }));
         setVehicles(formattedBikes);
+        console.log("🏍️ Fetched", formattedBikes.length, "bikes");
       } catch (err: any) {
         console.error("Error fetching nearby bikes:", err);
         setError(err.message || "Failed to fetch nearby bikes. Please try again.");
@@ -92,7 +94,7 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit, filters, searchText, o
       }
     };
     fetchNearbyBikes();
-  }, [coordinates, currentCity, range]);
+  }, [coordinates, currentCity, range, filters?.distance]);
 
   const filteredBikes = React.useMemo(() => {
     let filtered = vehicles;
@@ -123,6 +125,20 @@ const NearbyBikes: React.FC<NearbyBikesProps> = ({ limit, filters, searchText, o
         filtered = filtered.filter(
           bike => bike.bikeName.toLowerCase().includes(bikeNameLower)
         );
+      }
+
+      // Distance filtering
+      const distance = filters.distance || 0;
+      if (distance && distance > 0) {
+        console.log("📍 Filtering bikes by distance:", distance, "km");
+        filtered = filtered.filter(
+          bike => {
+            const bikeDistance = parseFloat(String(bike.distance || 0));
+            const isWithinDistance = bikeDistance <= distance;
+            return isWithinDistance;
+          }
+        );
+        console.log("📍 After distance filter:", filtered.length, "bikes within", distance, "km");
       }
     }
 

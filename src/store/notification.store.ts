@@ -551,7 +551,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     // ✅ Listen for ride completed (ONLY THIS GETS FEEDBACK)
     notificationSocket.on('ride-completed', (data: any) => {
       console.log('🔔 Ride completed notification received:', data);
-
+ 
       const vehicleName =
         data.vehicleName ||
         data.VehicleName ||
@@ -564,7 +564,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         data.model ||
         data.Model ||
         'the vehicle';
-
+          
       get().addNotification({
         type: 'ride_completed', // ✅ CRITICAL: This type triggers feedback button
         title: 'Ride Completed!',
@@ -625,4 +625,4 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       set({ socketConnected: false });
     }
   },
-}));
+}));     

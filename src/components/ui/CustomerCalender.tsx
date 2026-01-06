@@ -29,7 +29,7 @@ interface CustomerCalendarProps {
   onBookingComplete?: (booking: any) => void;
 }
 
-const API_BASE = "http://3.110.122.127:3000";
+const API_BASE = "https://api.rentongovehicle.com";
 
 export default function CustomerCalendar({
   isOpen,

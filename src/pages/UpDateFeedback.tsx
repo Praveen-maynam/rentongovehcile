@@ -146,7 +146,7 @@ const UpDateFeedback: React.FC = () => {
 
       // TODO: ADD YOUR API CALL HERE
       // Example:
-      // const response = await fetch('http://3.110.122.127:3000/createReview', {
+      // const response = await fetch('https://api.rentongovehicle.com/createReview', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({
@@ -227,7 +227,7 @@ const UpDateFeedback: React.FC = () => {
       // urlencoded.append("rating", rating.toString());
       //
       // const response = await fetch(
-      //   `http://3.110.122.127:3000/updateReview/${reviewId}`,
+      //   `https://api.rentongovehicle.com/updateReview/${reviewId}`,
       //   {
       //     method: "PUT",
       //     headers: myHeaders,

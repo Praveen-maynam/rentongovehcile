@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import apiService from "../services/api.service";
 import { useLocation } from "../store/location.context";
 import VehicleCard from "../components/ui/VehicleCard";
@@ -39,7 +38,6 @@ interface NearbyCarsProps {
 }
 
 const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters, searchText, onResultsChange }) => {
-  const navigate = useNavigate();
   const { coordinates, currentCity } = useLocation();
 
   const [vehicles, setVehicles] = useState<Car[]>([]);
@@ -54,8 +52,11 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters, searchText, onR
         setError("");
 
         const { latitude, longitude } = coordinates;
+        const distanceToUse = filters?.distance || 10;
 
-        const response = await apiService.car.getNearbyCars(latitude, longitude);
+        console.log("🚗 Fetching nearby cars with distance:", distanceToUse);
+
+        const response = await apiService.car.getNearbyCars(latitude, longitude, distanceToUse);
         const responseData = response.data || response;
         const carsArray = Array.isArray(responseData)
           ? responseData
@@ -86,6 +87,7 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters, searchText, onR
           totalReviews: car.totalReviews || 0,
         }));
         setVehicles(formattedCars);
+        console.log("🚗 Fetched", formattedCars.length, "cars");
       } catch (err: any) {
         console.error("Error fetching nearby cars:", err);
         setError(err.message || "Failed to fetch nearby cars.");
@@ -94,7 +96,7 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters, searchText, onR
       }
     };
     fetchNearbyCars();
-  }, [coordinates, currentCity, range]);
+  }, [coordinates, currentCity, range, filters?.distance]);
 
   const filteredCars = React.useMemo(() => {
     let filtered = vehicles;
@@ -137,6 +139,20 @@ const NearbyCars: React.FC<NearbyCarsProps> = ({ limit, filters, searchText, onR
         filtered = filtered.filter(
           car => car.CarName.toLowerCase().includes(carNameLower)
         );
+      }
+
+      // Distance filtering
+      const distance = filters.distance || 0;
+      if (distance && distance > 0) {
+        console.log("📍 Filtering by distance:", distance, "km");
+        filtered = filtered.filter(
+          car => {
+            const carDistance = parseFloat(String(car.distance || 0));
+            const isWithinDistance = carDistance <= distance;
+            return isWithinDistance;
+          }
+        );
+        console.log("📍 After distance filter:", filtered.length, "cars within", distance, "km");
       }
     }
 
